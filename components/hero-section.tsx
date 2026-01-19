@@ -73,28 +73,33 @@ export function HeroSection() {
           {/* Left Content */}
           <div className="text-white">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-balance leading-tight">
-              Hàng hóa bị tạm giữ tại cảng?
+              Hàng hóa xuất khẩu gặp khó khăn về pháp lý?
             </h1>
             <h2 className="text-2xl md:text-3xl font-bold mb-6 text-yellow-400 drop-shadow-lg">
-              Chúng tôi giải quyết ngay cho bạn
+              Chuyên gia Regulatory Affairs hỗ trợ toàn diện
             </h2>
             <p className="text-lg md:text-xl mb-8 text-white/90 leading-relaxed">
-              Theo quy định của FDA, GACC và MFDS Hàn Quốc, hàng hóa nhập khẩu thiếu giấy tờ hợp lệ sẽ bị tạm giữ, tiêu
-              hủy hoặc trả về ngay. Vexim Global cung cấp dịch vụ tư vấn pháp lý xuất nhập khẩu chuyên nghiệp, giúp
-              doanh nghiệp tuân thủ quy định quốc tế và giảm thiểu rủi ro pháp lý.
+              Theo quy định của FDA (21 CFR), GACC (Decree 248/249), và MFDS Korea (Food Sanitation Act), hàng hóa thiếu
+              chứng từ tuân thủ sẽ bị giữ tại cảng, tiêu hủy hoặc tái xuất. Vexim Global - với đội ngũ chuyên gia pháp lý
+              thương mại quốc tế - cung cấp giải pháp tuân thủ toàn diện, giúp doanh nghiệp Việt Nam tiếp cận thị trường
+              toàn cầu an toàn và hiệu quả.
             </p>
             <ul className="space-y-3 mb-8">
               <li className="flex items-center gap-3">
                 <Shield className="w-6 h-6 text-accent flex-shrink-0" />
-                <span className="text-white/90">Tuân thủ 100% quy định FDA, GACC, MFDS theo đúng luật định</span>
+                <span className="text-white/90">
+                  Tư vấn tuân thủ FDA, GACC, MFDS theo tiêu chuẩn ngành quốc tế
+                </span>
               </li>
               <li className="flex items-center gap-3">
                 <FileCheck className="w-6 h-6 text-accent flex-shrink-0" />
-                <span className="text-white/90">Hồ sơ pháp lý chính xác, hạn chế tối đa rủi ro bị từ chối</span>
+                <span className="text-white/90">
+                  Hồ sơ pháp lý được kiểm tra kỹ lưỡng, tối ưu tỷ lệ chấp thuận
+                </span>
               </li>
               <li className="flex items-center gap-3">
                 <Lock className="w-6 h-6 text-accent flex-shrink-0" />
-                <span className="text-white/90">Cam kết bảo mật thông tin theo quy định bảo vệ dữ liệu</span>
+                <span className="text-white/90">Bảo mật thông tin theo chuẩn ISO 27001 và GDPR/PDPA</span>
               </li>
             </ul>
             <Button

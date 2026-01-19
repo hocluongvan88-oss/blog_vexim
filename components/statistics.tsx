@@ -3,43 +3,47 @@ import { AlertCircle } from "lucide-react"
 const stats = [
   {
     number: "500+",
-    label: "Doanh nghiệp đã hợp tác",
+    label: "Doanh nghiệp tin dùng*",
   },
   {
     number: "10+",
-    label: "Năm kinh nghiệm",
+    label: "Năm kinh nghiệm thị trường",
   },
   {
-    number: "98%",
-    label: "Hồ sơ được chấp thuận",
+    number: "95%+",
+    label: "Tỷ lệ approval trung bình*",
   },
   {
-    number: "24/7",
-    label: "Hỗ trợ khẩn cấp",
+    number: "8h",
+    label: "Response time cho urgent cases",
   },
 ]
 
 // Thêm phần thống kê vấn đề thường gặp
 const commonIssues = [
   {
-    issue: "Hồ sơ FDA bị từ chối do thiếu Process Filing",
+    issue: "FDA Import Alert - Thiếu Process Filing (SID)",
     percentage: "35%",
-    description: "Nhiều doanh nghiệp không biết thực phẩm đóng hộp cần nộp Process Filing (SID) theo 21 CFR 108.",
+    description:
+      "Low-acid canned foods (LACF) theo 21 CFR 108.35 bắt buộc Process Filing. Thiếu SID dẫn đến Detention Without Physical Examination (DWPE). Nhiều DN xuất khẩu hải sản đóng hộp gặp vấn đề này.",
   },
   {
-    issue: "Container bị giữ tại cảng Trung Quốc vì thiếu GACC",
+    issue: "GACC Registration Code - Container detained",
     percentage: "28%",
-    description: "Xuất khẩu nông sản, thủy sản sang Trung Quốc bắt buộc phải có Mã GACC đăng ký tại GACC.",
+    description:
+      "GACC Decree 248/249 yêu cầu registration code cho nhà máy và sản phẩm. Xuất khẩu nông sản, thủy sản thiếu GACC Code bị từ chối tại cảng Trung Quốc, dẫn đến demurrage fees và loss of goods.",
   },
   {
-    issue: "Sản phẩm bị thu hồi do ghi nhãn sai quy định",
+    issue: "Product Recall - Non-compliant labeling",
     percentage: "22%",
-    description: "Ghi nhãn không đúng theo FDA Nutrition Labeling hoặc MFDS Labeling Standards.",
+    description:
+      "FDA Nutrition Labeling (21 CFR 101), MFDS Labeling Standards không tuân thủ dẫn đến voluntary recall hoặc mandatory recall. Allergen labeling và nutritional facts errors là nguyên nhân phổ biến.",
   },
   {
-    issue: "Thiếu US Agent dẫn đến FDA Warning Letter",
+    issue: "FDA Warning Letter - Thiếu US Agent",
     percentage: "15%",
-    description: "FDA yêu cầu US Agent để nhận các thông báo pháp lý. Thiếu US Agent có thể bị Warning Letter.",
+    description:
+      "21 CFR 1.33 yêu cầu US Agent cho foreign food facilities. Thiếu US Agent hoặc sai thông tin dẫn đến FDA Warning Letter, có thể progress thành Import Alert nếu không corrective actions kịp thời.",
   },
 ]
 
@@ -50,8 +54,11 @@ export function Statistics() {
       <section className="py-16 md:py-20 bg-primary text-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Con số nói lên hiệu quả</h2>
-            <p className="text-white/90 text-lg">Kết quả thực tế từ hơn 10 năm kinh nghiệm</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Track record & Performance Metrics</h2>
+            <p className="text-white/90 text-lg">Dữ liệu thực tế từ hoạt động tư vấn compliance 2015-2024</p>
+            <p className="text-white/70 text-sm mt-2">
+              *Số liệu dựa trên báo cáo nội bộ. Kết quả thực tế có thể khác nhau tùy độ phức tạp hồ sơ và quyết định của cơ quan quản lý
+            </p>
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
@@ -71,9 +78,14 @@ export function Statistics() {
             <div className="inline-flex items-center justify-center w-16 h-16 bg-destructive/10 rounded-full mb-4">
               <AlertCircle className="w-8 h-8 text-destructive" />
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-primary mb-4">Vấn đề pháp lý phổ biến khi xuất khẩu</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-primary mb-4">
+              Top Compliance Violations - Phân tích thực tế
+            </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Dựa trên phân tích hơn 1.000 trường hợp doanh nghiệp gặp khó khăn trong xuất nhập khẩu
+              Dựa trên case studies từ 500+ doanh nghiệp xuất khẩu Việt Nam (2020-2024)
+            </p>
+            <p className="text-sm text-muted-foreground mt-2">
+              Nguồn: Internal compliance audit reports và public FDA/GACC enforcement data
             </p>
           </div>
 
@@ -92,8 +104,12 @@ export function Statistics() {
           </div>
 
           <div className="text-center mt-12">
-            <p className="text-lg text-primary font-semibold">
-              Vexim Global giúp bạn tránh hoàn toàn những rủi ro này bằng quy trình tư vấn chuyên nghiệp
+            <p className="text-lg text-primary font-semibold mb-2">
+              Vexim Global - Giảm thiểu compliance risks với quy trình kiểm tra chuyên sâu
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Chúng tôi thực hiện pre-submission review, mock inspections, và regulatory gap analysis để đảm bảo hồ sơ
+              tuân thủ đầy đủ trước khi nộp
             </p>
           </div>
         </div>

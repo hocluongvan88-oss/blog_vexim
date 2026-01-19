@@ -1,25 +1,47 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { motion } from "framer-motion"
+import { useEffect, useState, useRef } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Mail, Phone, CheckCircle2, TrendingUp, Award, Clock } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { motion } from "framer-motion"
-import { useRef } from "react"
 
 export default function BlogSidebar() {
   const [email, setEmail] = useState("")
   const [phone, setPhone] = useState("")
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
-  const containerRef = useRef(null)
-  const y1 = 0
-  const y2 = 0
-  const y3 = 0
+  const [y1, setY1] = useState(0)
+  const [y2, setY2] = useState(0)
+  const [y3, setY3] = useState(0)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const card1Ref = useRef<HTMLDivElement>(null)
+  const card2Ref = useRef<HTMLDivElement>(null)
+  const card3Ref = useRef<HTMLDivElement>(null)
+  
+  // Parallax scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY
+      
+      if (card1Ref.current) {
+        card1Ref.current.style.transform = `translateY(${scrollY * 0.1}px)`
+      }
+      if (card2Ref.current) {
+        card2Ref.current.style.transform = `translateY(${scrollY * 0.2}px)`
+      }
+      if (card3Ref.current) {
+        card3Ref.current.style.transform = `translateY(${scrollY * 0.3}px)`
+      }
+    }
+    
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -40,11 +62,9 @@ export default function BlogSidebar() {
   }
 
   return (
-    <aside className="h-full">
-      {/* Wrapper group for sticky behavior - ensures all 3 cards stay together */}
-      <div className="sticky top-24 space-y-6">
-        
-        {/* CTA Card */}
+    <aside className="space-y-6">
+      {/* CTA Card */}
+      <div ref={card1Ref} style={{ transition: "transform 0s ease-out" }}>
         <Card className="p-6 bg-gradient-to-br from-primary to-primary/90 text-white">
           <div className="flex items-center gap-2 mb-4">
             <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center">
@@ -73,7 +93,7 @@ export default function BlogSidebar() {
                     placeholder="email@company.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10 bg-white border-0 text-black"
+                    className="pl-10 bg-white border-0"
                     required
                   />
                 </div>
@@ -91,7 +111,7 @@ export default function BlogSidebar() {
                     placeholder="0912 345 678"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="pl-10 bg-white border-0 text-black"
+                    className="pl-10 bg-white border-0"
                     required
                   />
                 </div>
@@ -99,7 +119,7 @@ export default function BlogSidebar() {
 
               <Button
                 type="submit"
-                className="w-full bg-red-600 hover:bg-red-700 text-white font-bold shadow-lg transition-all"
+                className="w-full bg-accent hover:bg-accent/90 text-white font-semibold"
                 disabled={loading}
               >
                 {loading ? "Đang gửi..." : "Đăng ký tư vấn miễn phí"}
@@ -115,8 +135,10 @@ export default function BlogSidebar() {
             </div>
           )}
         </Card>
+      </div>
 
-        {/* Stats Card */}
+      {/* Stats Card */}
+      <div ref={card2Ref} style={{ transition: "transform 0s ease-out" }}>
         <Card className="p-6">
           <h4 className="font-bold text-lg mb-4 text-primary">Tại sao chọn Vexim Global?</h4>
 
@@ -152,18 +174,19 @@ export default function BlogSidebar() {
             </div>
           </div>
         </Card>
+      </div>
 
-        {/* Services Quick Links */}
+      {/* Services Quick Links */}
+      <div ref={card3Ref} style={{ transition: "transform 0s ease-out" }}>
         <Card className="p-6">
           <h4 className="font-bold text-lg mb-4 text-primary">Dịch vụ nổi bật</h4>
 
           <div className="space-y-3">
             {[
-              "Đăng ký FDA thực phẩm, mỹ phẩm, dược phẩm",
-              "Đại lý chính thức tại Hoa Kỳ, không qua trung gian",
-              "Tư vấn đăng ký GACC Trung Quốc",
-              "Tư vấn chứng nhận MFDS Hàn Quốc",
-              "Nền tảng truy xuất nguồn gốc FSMA204",
+              "Đăng ký FDA thực phẩm",
+              "Cấp mã GACC Trung Quốc",
+              "Chứng nhận MFDS Hàn Quốc",
+              "Xử lý hàng bị giữ tại cảng",
             ].map((service, idx) => (
               <a
                 key={idx}
@@ -176,7 +199,6 @@ export default function BlogSidebar() {
             ))}
           </div>
         </Card>
-
       </div>
     </aside>
   )

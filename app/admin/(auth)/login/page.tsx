@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-import { useEffect } from "react"
 
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
@@ -19,17 +18,6 @@ export default function AdminLoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
-
-  // Khởi tạo Supabase client khi component mount để đảm bảo session persistence
-  useEffect(() => {
-    const supabase = createClient()
-    // Just initialize client to set up listeners
-    supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" && session) {
-        console.log("[v0] Session established:", session.user.email)
-      }
-    })
-  }, [])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -60,7 +48,6 @@ export default function AdminLoginPage() {
         }
 
         // Đăng nhập thành công, chuyển đến admin dashboard
-        await new Promise((resolve) => setTimeout(resolve, 500)) // Đợi cookies được set
         router.push("/admin")
         router.refresh()
       }

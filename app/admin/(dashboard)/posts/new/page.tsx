@@ -284,6 +284,7 @@ export default function NewPostPage() {
             <RichTextEditor
               value={content}
               onChange={setContent}
+              placeholder="Nhập nội dung bài viết... Sử dụng các nút trên thanh công cụ để định dạng văn bản."
             />
           </Card>
         </div>

@@ -6,45 +6,45 @@ import { ArrowRight } from "lucide-react"
 const services = [
   {
     image: "/fda-food-safety-inspection-laboratory-professional.jpg",
-    title: "Đăng ký FDA",
+    title: "Đăng ký FDA Registration",
     description:
-      "Hàng hóa thực phẩm, mỹ phẩm nhập khẩu Mỹ bắt buộc phải có FDA Registration. Thiếu FDA có thể bị tạm giữ hoặc trả hàng. Chúng tôi xử lý hồ sơ đúng quy chuẩn FDA trong 5-10 ngày.",
+      "Theo 21 CFR Part 1, thực phẩm và mỹ phẩm nhập khẩu Mỹ bắt buộc FDA Food Facility Registration. Thiếu registration dẫn đến Import Alert, tạm giữ tại cảng. Chúng tôi xử lý hồ sơ tuân thủ FDA cMajor và Minor Violations, đảm bảo compliance với FSMA, FSVP.",
     link: "/services/fda",
   },
   {
     image: "/china-customs-port-container-shipping-trade.jpg",
-    title: "Tư vấn Mã GACC",
+    title: "Tư vấn Mã GACC (Registration Code)",
     description:
-      "Xuất khẩu nông sản, thủy sản sang Trung Quốc bắt buộc phải có Mã GACC theo quy định của Tổng cục Hải quan Trung Quốc. Không có GACC, lô hàng chắc chắn bị từ chối nhập khẩu.",
+      "GACC Decree 248/249 (2021) quy định bắt buộc mã đăng ký cho xuất khẩu nông sản, thủy sản sang Trung Quốc. Thiếu GACC Code, container bị từ chối nhập cảng. Chúng tôi hỗ trợ registration với GACC và e-CIQ system theo yêu cầu mới nhất.",
     link: "/services/gacc",
   },
   {
     image: "/korean-cosmetics-health-products-laboratory-qualit.jpg",
-    title: "Giấy phép MFDS - Hàn Quốc",
+    title: "Giấy phép MFDS Korea",
     description:
-      "Theo Luật An toàn Thực phẩm và Y tế Hàn Quốc, mỹ phẩm và thực phẩm chức năng cần Giấy phép MFDS. Chúng tôi hỗ trợ hồ sơ đúng quy định Bộ Y tế Hàn Quốc.",
+      "Food Sanitation Act và Cosmetics Act (Hàn Quốc) yêu cầu Import Notification cho thực phẩm, CPNP registration cho mỹ phẩm. Chúng tôi tư vấn đầy đủ hồ sơ tuân thủ Ministry of Food and Drug Safety (MFDS), bao gồm labeling standards và safety assessment.",
     link: "/services/mfds",
   },
   {
     image: "/us-customs-broker-agent-import-export-documentatio.jpg",
-    title: "Dịch vụ Agent Hoa Kỳ",
+    title: "US Agent Services (FDA Compliance)",
     description:
-      "FDA yêu cầu mọi doanh nghiệp nước ngoài phải có US Agent tại Mỹ để nhận thông báo pháp lý. Chúng tôi đóng vai trò đại diện hợp pháp của bạn theo quy định FDA 21 CFR.",
+      "FDA 21 CFR 1.33 bắt buộc foreign facilities phải có US Agent làm đại diện pháp lý tại Mỹ. US Agent là communication liaison nhận FDA Warning Letters, Import Alerts. Chúng tôi cung cấp registered US Agent service với full regulatory support.",
     link: "/services/us-agent",
   },
   {
     image: "/ai-technology-blockchain-supply-chain-digital-trac.jpg",
-    title: "Nền tảng truy xuất nguồn gốc AI",
+    title: "Traceability Platform (FSMA 204 Compliance)",
     description:
-      "Hệ thống truy xuất nguồn gốc giúp doanh nghiệp tuân thủ yêu cầu ghi nhãn và minh bạch nguồn gốc theo quy định EU, Mỹ, Trung Quốc. Tích hợp blockchain bảo vệ dữ liệu không thể thay đổi.",
+      "FDA FSMA Rule 204 (hiệu lực 1/2026) yêu cầu traceability records cho high-risk foods. Nền tảng blockchain-based của chúng tôi giúp doanh nghiệp comply với FDA traceability requirements, EU Regulation 178/2002, và China Food Safety Law. Đảm bảo data integrity và audit trail.",
     link: "/services/ai-traceability",
-    badge: "Giải pháp công nghệ",
+    badge: "FSMA 204 Ready",
   },
   {
     image: "/international-trade-export-logistics-cargo-shippin.jpg",
-    title: "Ủy thác xuất khẩu",
+    title: "Ủy thác xuất khẩu (Export Agency)",
     description:
-      "Theo Nghị định 69/2018/NĐ-CP, doanh nghiệp có thể ủy thác xuất khẩu cho đơn vị có Giấy phép kinh doanh xuất nhập khẩu. Vexim Global đảm bảo tuân thủ đầy đủ quy trình pháp lý.",
+      "Nghị định 69/2018/NĐ-CP cho phép doanh nghiệp không có giấy phép xuất nhập khẩu ủy thác cho đơn vị được cấp phép. Vexim Global đảm bảo tuân thủ Customs Law, VAT regulations, và export documentation requirements theo quy định Hải quan Việt Nam.",
     link: "/services/export-delegation",
   },
 ]
@@ -55,10 +55,10 @@ export function ServicesGrid() {
       <div className="container mx-auto px-4">
         <div className="text-center mb-12 md:mb-16">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-primary mb-4 text-balance">
-            Chúng tôi giải quyết vấn đề gì cho bạn?
+            Dịch vụ Regulatory Affairs & Compliance
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            Không chỉ làm giấy tờ - chúng tôi giúp bạn tránh rủi ro và tăng cơ hội thành công
+            Giải pháp tuân thủ pháp lý toàn diện cho doanh nghiệp xuất khẩu Việt Nam
           </p>
         </div>
 

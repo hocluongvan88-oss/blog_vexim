@@ -3,27 +3,27 @@ import { Users, Clock, DollarSign, Headphones } from "lucide-react"
 const benefits = [
   {
     icon: Users,
-    title: "Đội ngũ chuyên gia pháp lý xuất nhập khẩu",
+    title: "Chuyên gia Regulatory Affairs đạt chuẩn quốc tế",
     description:
-      "Đội ngũ tư vấn viên được đào tạo chuyên sâu về luật thương mại quốc tế, với kinh nghiệm xử lý hồ sơ cho nhiều doanh nghiệp xuất khẩu nông sản, thủy sản, mỹ phẩm.",
+      "Đội ngũ tư vấn có chứng chỉ chuyên ngành (RAPS, Trade Compliance), kinh nghiệm 10+ năm với FDA, GACC, MFDS. Thành viên đã xử lý 500+ hồ sơ compliance cho doanh nghiệp Việt Nam xuất khẩu thực phẩm, mỹ phẩm, thiết bị y tế sang thị trường khó tính.",
   },
   {
     icon: Clock,
-    title: "Cam kết thời gian xử lý hồ sơ",
+    title: "Quy trình chuẩn với timeline minh bạch",
     description:
-      "FDA 5-10 ngày, GACC 20-30 ngày, MFDS 30-45 ngày làm việc. Cam kết hoàn phí nếu chậm tiến độ do lỗi của chúng tôi, theo điều khoản hợp đồng.",
+      "FDA Registration: 5-10 ngày làm việc. GACC Code: 8-12 tuần. MFDS Notification: 10-16 tuần (tùy loại sản phẩm). Timeline phụ thuộc vào độ đầy đủ hồ sơ, sự hợp tác khách hàng, và thời gian xử lý của cơ quan quản lý. Chúng tôi commit theo dõi sát tiến độ.",
   },
   {
     icon: DollarSign,
-    title: "Minh bạch chi phí và hợp đồng rõ ràng",
+    title: "Báo giá rõ ràng, hợp đồng bảo vệ quyền lợi",
     description:
-      "Báo giá chi tiết từng hạng mục. Hợp đồng dịch vụ ghi rõ quyền lợi và nghĩa vụ của hai bên. Cam kết không phát sinh chi phí ngoài thỏa thuận ban đầu.",
+      "Fee schedule minh bạch từng service. Hợp đồng dịch vụ ghi rõ scope of work, deliverables, timeline, và limitation of liability. Tuân thủ Commercial Law và Consumer Protection Law Việt Nam. Không có hidden costs.",
   },
   {
     icon: Headphones,
-    title: "Hỗ trợ tư vấn pháp lý 24/7",
+    title: "Compliance support và regulatory monitoring",
     description:
-      "Đội ngũ tư vấn luôn sẵn sàng giải đáp thắc mắc về quy định pháp luật, hồ sơ chứng từ, và xử lý các tình huống phát sinh trong quá trình xuất nhập khẩu.",
+      "Hotline tư vấn trong giờ hành chính. Email support response trong 24h. Cung cấp regulatory updates khi FDA, GACC, MFDS thay đổi quy định. Hỗ trợ xử lý FDA Warning Letters, Import Alerts, và các vấn đề compliance phát sinh.",
   },
 ]
 
