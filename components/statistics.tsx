@@ -2,20 +2,18 @@ import { AlertCircle } from "lucide-react"
 
 const stats = [
   {
-    number: "500+",
-    label: "Doanh nghiệp tin dùng*",
+    number: "200+",
+    label: "Doanh nghiệp đã hợp tác",
+  },
+{ number: "100%", 
+label: "Hồ sơ số hóa & truy xuất" },
+  {
+    number: "90%+",
+    label: "Khách hàng hài lòng*",
   },
   {
-    number: "10+",
-    label: "Năm kinh nghiệm thị trường",
-  },
-  {
-    number: "95%+",
-    label: "Tỷ lệ approval trung bình*",
-  },
-  {
-    number: "8h",
-    label: "Response time cho urgent cases",
+    number: "24/7",
+    label: "Hotline hỗ trợ",
   },
 ]
 
@@ -54,10 +52,10 @@ export function Statistics() {
       <section className="py-16 md:py-20 bg-primary text-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Track record & Performance Metrics</h2>
-            <p className="text-white/90 text-lg">Dữ liệu thực tế từ hoạt động tư vấn compliance 2015-2024</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Con số nói lên sự tận tâm</h2>
+            <p className="text-white/90 text-lg">Kết quả thực tế đồng hành cùng doanh nghiệp Việt</p>
             <p className="text-white/70 text-sm mt-2">
-              *Số liệu dựa trên báo cáo nội bộ. Kết quả thực tế có thể khác nhau tùy độ phức tạp hồ sơ và quyết định của cơ quan quản lý
+              *Dựa trên khảo sát phản hồi khách hàng. Mỗi hồ sơ khác nhau, kết quả phụ thuộc nhiều yếu tố
             </p>
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">

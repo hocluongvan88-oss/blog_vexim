@@ -6,7 +6,6 @@ import { WorkflowSection } from "@/components/workflow-section"
 import { Statistics } from "@/components/statistics"
 import { FAQSection } from "@/components/faq-section"
 import { NewsPreview } from "@/components/news-preview"
-import { LegalDisclaimer } from "@/components/legal-disclaimer"
 import { Footer } from "@/components/footer"
 import { BackToTop } from "@/components/back-to-top"
 
@@ -21,7 +20,6 @@ export default function Home() {
       <Statistics />
       <FAQSection />
       <NewsPreview />
-      <LegalDisclaimer />
       <Footer />
       <BackToTop />
     </main>

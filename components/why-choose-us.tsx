@@ -3,27 +3,27 @@ import { Users, Clock, DollarSign, Headphones } from "lucide-react"
 const benefits = [
   {
     icon: Users,
-    title: "Chuyên gia Regulatory Affairs đạt chuẩn quốc tế",
+    title: "Hiểu rõ quy định từng thị trường",
     description:
-      "Đội ngũ tư vấn có chứng chỉ chuyên ngành (RAPS, Trade Compliance), kinh nghiệm 10+ năm với FDA, GACC, MFDS. Thành viên đã xử lý 500+ hồ sơ compliance cho doanh nghiệp Việt Nam xuất khẩu thực phẩm, mỹ phẩm, thiết bị y tế sang thị trường khó tính.",
+      "Chúng tôi chuyên nghiên cứu luật xuất nhập khẩu Mỹ, Trung Quốc, Hàn Quốc. Theo dõi sát những thay đổi mới nhất của FDA, GACC, MFDS để tư vấn chính xác cho doanh nghiệp Việt. Đội ngũ trẻ, nhiệt huyết, sẵn sàng học hỏi để phục vụ tốt nhất.",
   },
   {
     icon: Clock,
-    title: "Quy trình chuẩn với timeline minh bạch",
+    title: "Thời gian và quy trình rõ ràng",
     description:
-      "FDA Registration: 5-10 ngày làm việc. GACC Code: 8-12 tuần. MFDS Notification: 10-16 tuần (tùy loại sản phẩm). Timeline phụ thuộc vào độ đầy đủ hồ sơ, sự hợp tác khách hàng, và thời gian xử lý của cơ quan quản lý. Chúng tôi commit theo dõi sát tiến độ.",
+      "FDA Registration: 5-10 ngày làm việc. GACC Code: 8-12 tuần. MFDS: 10-16 tuần (tùy sản phẩm). Thời gian phụ thuộc vào độ đầy đủ hồ sơ của bạn và tốc độ xử lý của cơ quan. Chúng tôi theo dõi sát từng bước, báo cáo tiến độ thường xuyên.",
   },
   {
     icon: DollarSign,
-    title: "Báo giá rõ ràng, hợp đồng bảo vệ quyền lợi",
+    title: "Minh bạch chi phí ngay từ đầu",
     description:
-      "Fee schedule minh bạch từng service. Hợp đồng dịch vụ ghi rõ scope of work, deliverables, timeline, và limitation of liability. Tuân thủ Commercial Law và Consumer Protection Law Việt Nam. Không có hidden costs.",
+      "Báo giá chi tiết từng hạng mục, không phát sinh thêm. Hợp đồng ghi rõ công việc cụ thể, thời gian hoàn thành, và quyền lợi của hai bên. Tuân thủ đầy đủ Luật Thương mại và Luật Bảo vệ Quyền lợi Người tiêu dùng.",
   },
   {
     icon: Headphones,
-    title: "Compliance support và regulatory monitoring",
+    title: "Cập nhật liên tục, hỗ trợ tận tâm",
     description:
-      "Hotline tư vấn trong giờ hành chính. Email support response trong 24h. Cung cấp regulatory updates khi FDA, GACC, MFDS thay đổi quy định. Hỗ trợ xử lý FDA Warning Letters, Import Alerts, và các vấn đề compliance phát sinh.",
+      "Luật của FDA, GACC, MFDS thay đổi thường xuyên. Chúng tôi theo dõi cập nhật mỗi ngày để thông báo cho khách hàng kịp thời. Hỗ trợ tư vấn qua hotline, email, Zalo trong giờ hành chính. Đội ngũ luôn sẵn sàng giải đáp thắc mắc.",
   },
 ]
 
