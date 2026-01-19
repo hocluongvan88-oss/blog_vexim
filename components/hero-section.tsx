@@ -42,7 +42,7 @@ export function HeroSection() {
       const data = await response.json()
 
       if (response.ok) {
-        setSubmitMessage("✓ Cảm ơn bạn! Chúng tôi sẽ liên hệ trong vòng 24h.")
+        setSubmitMessage("✓ Bạn đã đăng ký thành công! Chúng tôi sẽ liên hệ trong vòng 24h.")
         setFormData({ name: "", phone: "", email: "", service: "", product: "", description: "", honeypot: "" })
       } else {
         setSubmitMessage(`✗ ${data.error || "Có lỗi xảy ra. Vui lòng thử lại."}`)
@@ -84,27 +84,33 @@ export function HeroSection() {
               Vexim Global hiểu rõ quy định từng thị trường, cập nhật thay đổi liên tục, 
               giúp doanh nghiệp Việt Nam làm hồ sơ đúng, nhanh, tránh rủi ro.
             </p>
-            <ul className="space-y-3 mb-8">
+            <ul className="space-y-4 mb-8">
               <li className="flex items-center gap-3">
-                <Shield className="w-6 h-6 text-accent flex-shrink-0" />
+                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
+                  <Shield className="w-5 h-5 text-white" />
+                </div>
                 <span className="text-white/90">
                   Hiểu rõ quy định FDA, GACC, MFDS - Cập nhật thay đổi mới nhất
                 </span>
               </li>
               <li className="flex items-center gap-3">
-                <FileCheck className="w-6 h-6 text-accent flex-shrink-0" />
+                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
+                  <FileCheck className="w-5 h-5 text-white" />
+                </div>
                 <span className="text-white/90">
                   Kiểm tra hồ sơ kỹ lưỡng trước khi nộp, giảm thiểu rủi ro từ chối
                 </span>
               </li>
               <li className="flex items-center gap-3">
-                <Lock className="w-6 h-6 text-accent flex-shrink-0" />
+                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
+                  <Lock className="w-5 h-5 text-white" />
+                </div>
                 <span className="text-white/90">Công nghệ bảo mật thông tin, hỗ trợ 24/7 khi cần</span>
               </li>
             </ul>
             <Button
               size="lg"
-              className="bg-accent text-accent-foreground hover:bg-accent/90"
+              className="bg-red-600 text-white hover:bg-red-700 shadow-lg"
               onClick={() => setIsDialogOpen(true)}
             >
               Tư vấn miễn phí
