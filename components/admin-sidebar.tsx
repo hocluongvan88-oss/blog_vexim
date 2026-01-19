@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { LayoutDashboard, FileText, PlusCircle, Settings, Globe, LogOut, User, Newspaper } from "lucide-react"
+import { LayoutDashboard, FileText, PlusCircle, Settings, Globe, LogOut, User, Newspaper, BarChart3 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { createClient } from "@/lib/supabase/client"
@@ -26,6 +26,11 @@ export function AdminSidebar({ adminUser }: AdminSidebarProps) {
       title: "Tổng quan",
       href: "/admin",
       icon: LayoutDashboard,
+    },
+    {
+      title: "Analytics",
+      href: "/admin/analytics",
+      icon: BarChart3,
     },
     {
       title: "Tất cả bài viết",

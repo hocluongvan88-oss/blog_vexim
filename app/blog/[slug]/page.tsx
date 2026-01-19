@@ -10,6 +10,7 @@ import { notFound } from "next/navigation"
 import { BlogShareButtons } from "@/components/blog-share-buttons"
 import { RelatedPosts } from "@/components/related-posts"
 import BlogSidebar from "@/components/blog-sidebar"
+import { ViewTracker } from "@/components/view-tracker"
 
 export const revalidate = 60
 
@@ -145,6 +146,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
+      <ViewTracker postId={post.id} />
       <Header />
       <BlogShareButtons />
       <main className="min-h-screen pt-20 md:pt-24">
