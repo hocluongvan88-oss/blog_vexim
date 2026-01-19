@@ -8,9 +8,20 @@ import { ConsultationDialog } from "@/components/consultation-dialog"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Mã GACC (Trung Quốc) - Vexim Global",
+  title: "Mã GACC (Trung Quốc)",
   description:
     "Dịch vụ đăng ký mã số GACC để xuất khẩu hàng hóa vào Trung Quốc. Kinh nghiệm phong phú, tỷ lệ thành công cao.",
+  keywords: ["GACC", "mã GACC", "đăng ký GACC", "xuất khẩu Trung Quốc", "GACC code", "GACC registration"],
+  alternates: {
+    canonical: "/services/gacc",
+  },
+  openGraph: {
+    title: "Mã GACC (Trung Quốc) - Vexim Global",
+    description:
+      "Dịch vụ đăng ký mã số GACC để xuất khẩu hàng hóa vào Trung Quốc. Kinh nghiệm phong phú, tỷ lệ thành công cao.",
+    url: "/services/gacc",
+    type: "website",
+  },
 }
 
 export default function GACCPage() {

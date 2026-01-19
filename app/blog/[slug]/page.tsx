@@ -38,20 +38,47 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   if (!post) {
     return {
-      title: "Bài viết không tồn tại | Vexim Global",
+      title: "Bài viết không tồn tại",
+      robots: {
+        index: false,
+        follow: false,
+      },
     }
   }
 
   return {
-    title: post.meta_title || `${post.title} | Vexim Global`,
+    title: post.meta_title || post.title,
     description: post.meta_description || post.excerpt,
+    keywords: post.tags || [post.category],
+    authors: [{ name: "Vexim Global" }],
+    alternates: {
+      canonical: `/blog/${post.slug}`,
+    },
     openGraph: {
       title: post.meta_title || post.title,
       description: post.meta_description || post.excerpt,
-      images: post.featured_image ? [post.featured_image] : [],
+      url: `/blog/${post.slug}`,
+      images: post.featured_image
+        ? [
+            {
+              url: post.featured_image,
+              width: 1200,
+              height: 630,
+              alt: post.title,
+            },
+          ]
+        : [],
       type: "article",
       publishedTime: post.published_at,
+      modifiedTime: post.updated_at || post.published_at,
       authors: ["Vexim Global"],
+      section: post.category,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.meta_title || post.title,
+      description: post.meta_description || post.excerpt,
+      images: post.featured_image ? [post.featured_image] : [],
     },
   }
 }

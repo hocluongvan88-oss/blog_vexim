@@ -6,6 +6,32 @@ import { Card, CardContent } from "@/components/ui/card"
 import { CheckCircle2, AlertCircle, Clock, FileText, Shield, Globe } from "lucide-react"
 import ConsultationDialog from "@/components/consultation-dialog"
 import Image from "next/image"
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Đăng ký MFDS (Hàn Quốc)",
+  description:
+    "Chứng nhận thực phẩm, mỹ phẩm, thiết bị y tế hợp pháp tại Hàn Quốc. Vexim Global đồng hành cùng doanh nghiệp Việt chinh phục thị trường Hàn Quốc.",
+  keywords: [
+    "đăng ký MFDS",
+    "MFDS Korea",
+    "xuất khẩu Hàn Quốc",
+    "MFDS thực phẩm",
+    "MFDS mỹ phẩm",
+    "Health Functional Food",
+    "Korean market",
+  ],
+  alternates: {
+    canonical: "/services/mfds",
+  },
+  openGraph: {
+    title: "Đăng ký MFDS (Hàn Quốc) - Vexim Global",
+    description:
+      "Chứng nhận thực phẩm, mỹ phẩm, thiết bị y tế hợp pháp tại Hàn Quốc. Vexim Global đồng hành cùng doanh nghiệp Việt chinh phục thị trường Hàn Quốc.",
+    url: "/services/mfds",
+    type: "website",
+  },
+}
 
 export default function MFDSPage() {
   return (

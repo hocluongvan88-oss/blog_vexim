@@ -13,10 +13,69 @@ const beVietnamPro = Be_Vietnam_Pro({
 })
 
 export const metadata: Metadata = {
-  title: "Vexim Global - Giải Pháp Xuất Nhập Khẩu Toàn Cầu",
+  metadataBase: new URL("https://vexim.vn"),
+  title: {
+    default: "Vexim Global - Giải Pháp Xuất Nhập Khẩu Toàn Cầu",
+    template: "%s | Vexim Global",
+  },
   description:
     "Chuyên gia tư vấn pháp lý xuất nhập khẩu hàng đầu Việt Nam. Dịch vụ đăng ký FDA, GACC, MFDS, CE và giấy phép xuất khẩu quốc tế.",
-  generator: "v0.app",
+  keywords: [
+    "xuất nhập khẩu",
+    "FDA",
+    "GACC",
+    "MFDS",
+    "tư vấn xuất khẩu",
+    "đăng ký xuất khẩu",
+    "giấy phép xuất khẩu",
+    "xuất khẩu thực phẩm",
+    "US Agent",
+    "truy xuất nguồn gốc",
+  ],
+  authors: [{ name: "Vexim Global" }],
+  creator: "Vexim Global",
+  publisher: "Vexim Global",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  openGraph: {
+    type: "website",
+    locale: "vi_VN",
+    url: "https://vexim.vn",
+    siteName: "Vexim Global",
+    title: "Vexim Global - Giải Pháp Xuất Nhập Khẩu Toàn Cầu",
+    description:
+      "Chuyên gia tư vấn pháp lý xuất nhập khẩu hàng đầu Việt Nam. Dịch vụ đăng ký FDA, GACC, MFDS, CE và giấy phép xuất khẩu quốc tế.",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Vexim Global",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Vexim Global - Giải Pháp Xuất Nhập Khẩu Toàn Cầu",
+    description:
+      "Chuyên gia tư vấn pháp lý xuất nhập khẩu hàng đầu Việt Nam. Dịch vụ đăng ký FDA, GACC, MFDS, CE và giấy phép xuất khẩu quốc tế.",
+    images: ["/og-image.jpg"],
+  },
+  verification: {
+    google: "your-google-verification-code",
+  },
+  alternates: {
+    canonical: "https://vexim.vn",
+  },
   icons: {
     icon: [
       {
@@ -34,6 +93,7 @@ export const metadata: Metadata = {
     ],
     apple: "/apple-icon.png",
   },
+    generator: 'v0.app'
 }
 
 export default function RootLayout({

@@ -8,9 +8,28 @@ import { ConsultationDialog } from "@/components/consultation-dialog"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Đăng ký FDA (Mỹ) - Vexim Global",
+  title: "Đăng ký FDA (Mỹ)",
   description:
     "Dịch vụ tư vấn và đăng ký FDA cho thực phẩm, mỹ phẩm, thiết bị y tế xuất khẩu sang Hoa Kỳ. Quy trình chuyên nghiệp, đảm bảo tuân thủ.",
+  keywords: [
+    "đăng ký FDA",
+    "FDA registration",
+    "xuất khẩu Mỹ",
+    "FDA thực phẩm",
+    "FDA mỹ phẩm",
+    "FDA thiết bị y tế",
+    "tư vấn FDA",
+  ],
+  alternates: {
+    canonical: "/services/fda",
+  },
+  openGraph: {
+    title: "Đăng ký FDA (Mỹ) - Vexim Global",
+    description:
+      "Dịch vụ tư vấn và đăng ký FDA cho thực phẩm, mỹ phẩm, thiết bị y tế xuất khẩu sang Hoa Kỳ. Quy trình chuyên nghiệp, đảm bảo tuân thủ.",
+    url: "/services/fda",
+    type: "website",
+  },
 }
 
 export default function FDAPage() {

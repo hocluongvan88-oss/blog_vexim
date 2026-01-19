@@ -6,6 +6,32 @@ import { Card, CardContent } from "@/components/ui/card"
 import { CheckCircle2, AlertTriangle, Shield, FileText, Clock, UserCheck } from "lucide-react"
 import ConsultationDialog from "@/components/consultation-dialog"
 import Image from "next/image"
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Dịch vụ US Agent - Đại diện pháp lý tại Mỹ",
+  description:
+    "Làm đại diện pháp lý (US Agent) cho doanh nghiệp Việt Nam xuất khẩu thực phẩm, mỹ phẩm, thiết bị y tế sang Hoa Kỳ. Bắt buộc theo FDA, đảm bảo 24/7.",
+  keywords: [
+    "US Agent",
+    "FDA Agent",
+    "đại diện FDA",
+    "US Agent service",
+    "FDA representative",
+    "xuất khẩu Mỹ",
+    "FDA compliance",
+  ],
+  alternates: {
+    canonical: "/services/us-agent",
+  },
+  openGraph: {
+    title: "Dịch vụ US Agent - Đại diện pháp lý tại Mỹ - Vexim Global",
+    description:
+      "Làm đại diện pháp lý (US Agent) cho doanh nghiệp Việt Nam xuất khẩu thực phẩm, mỹ phẩm, thiết bị y tế sang Hoa Kỳ. Bắt buộc theo FDA, đảm bảo 24/7.",
+    url: "/services/us-agent",
+    type: "website",
+  },
+}
 
 export default function USAgentPage() {
   return (

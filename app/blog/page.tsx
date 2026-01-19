@@ -9,8 +9,25 @@ import Link from "next/link"
 import { BlogSearch } from "@/components/blog-search"
 
 export const metadata = {
-  title: "Blog - Kiến thức xuất nhập khẩu | Vexim Global",
+  title: "Blog - Kiến thức xuất nhập khẩu",
   description: "Cập nhật tin tức, kiến thức pháp lý và hướng dẫn về xuất nhập khẩu quốc tế từ chuyên gia Vexim Global.",
+  keywords: [
+    "blog xuất nhập khẩu",
+    "kiến thức xuất khẩu",
+    "tin tức thương mại",
+    "hướng dẫn FDA",
+    "hướng dẫn GACC",
+    "pháp lý xuất khẩu",
+  ],
+  alternates: {
+    canonical: "/blog",
+  },
+  openGraph: {
+    title: "Blog - Kiến thức xuất nhập khẩu | Vexim Global",
+    description: "Cập nhật tin tức, kiến thức pháp lý và hướng dẫn về xuất nhập khẩu quốc tế từ chuyên gia Vexim Global.",
+    url: "/blog",
+    type: "website",
+  },
 }
 
 export const revalidate = 60 // Revalidate mỗi 60 giây
