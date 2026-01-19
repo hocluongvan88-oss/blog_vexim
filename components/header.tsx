@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Menu, X, Shield } from "lucide-react"
+import { Menu, X } from "lucide-react"
 import { ConsultationDialog } from "@/components/consultation-dialog"
 import Link from "next/link"
 import { BlogSearch } from "@/components/blog-search"
+import { ProfileMenu } from "@/components/profile-menu"
+import { Shield } from "lucide-react" // Declare the Shield variable
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -58,24 +60,17 @@ export function Header() {
               <Link href="/#contact" className="text-foreground hover:text-primary transition-colors font-medium">
                 Liên hệ
               </Link>
-              <Link
-                href="/admin/login"
-                className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"
-                title="Quản trị viên"
-              >
-                <Shield className="w-4 h-4" />
-                <span className="text-sm">Admin</span>
-              </Link>
             </nav>
 
-            {/* CTA Button */}
-            <div className="hidden md:block">
+            {/* CTA Button and Profile Menu */}
+            <div className="hidden md:flex items-center gap-4">
               <Button
                 onClick={() => setIsDialogOpen(true)}
                 className="bg-accent text-accent-foreground hover:bg-accent/90"
               >
                 Yêu cầu tư vấn
               </Button>
+              <ProfileMenu />
             </div>
 
             {/* Mobile Menu Button */}
@@ -123,14 +118,6 @@ export function Header() {
                 >
                   Liên hệ
                 </Link>
-                <Link
-                  href="/admin/login"
-                  className="text-left text-muted-foreground hover:text-primary transition-colors flex items-center gap-2"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <Shield className="w-4 h-4" />
-                  <span>Admin</span>
-                </Link>
                 <Button
                   onClick={() => {
                     setIsDialogOpen(true)
@@ -140,6 +127,9 @@ export function Header() {
                 >
                   Yêu cầu tư vấn
                 </Button>
+                <div className="pt-2 border-t">
+                  <ProfileMenu />
+                </div>
               </div>
             </nav>
           )}
