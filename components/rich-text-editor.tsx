@@ -2,7 +2,8 @@
 
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Bold, Italic, LinkIcon, ImageIcon, Heading2, Heading3, List, ListOrdered } from "lucide-react"
+import { Bold, Italic, LinkIcon, Heading2, Heading3, List, ListOrdered, AlignLeft, AlignCenter, AlignRight } from "lucide-react"
+import { ImageInsertDialog } from "./image-insert-dialog"
 
 interface RichTextEditorProps {
   value: string
@@ -54,10 +55,20 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
     }
   }
 
-  const insertImage = () => {
-    const url = prompt("Nhập URL hình ảnh:")
-    if (url) {
-      executeCommand("insertImage", url)
+  const insertImageHTML = (html: string) => {
+    if (editorRef.current) {
+      const selection = window.getSelection()
+      if (selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0)
+        const tempDiv = document.createElement("div")
+        tempDiv.innerHTML = html
+        const fragment = document.createDocumentFragment()
+        while (tempDiv.firstChild) {
+          fragment.appendChild(tempDiv.firstChild)
+        }
+        range.insertNode(fragment)
+        selection.collapseToEnd()
+      }
       handleInput()
     }
   }
@@ -123,12 +134,47 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
           <ListOrdered className="w-4 h-4" />
         </Button>
         <div className="w-px bg-border mx-1" />
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            executeCommand("justifyLeft")
+            handleInput()
+          }}
+          title="Căn trái"
+        >
+          <AlignLeft className="w-4 h-4" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            executeCommand("justifyCenter")
+            handleInput()
+          }}
+          title="Căn giữa"
+        >
+          <AlignCenter className="w-4 h-4" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            executeCommand("justifyRight")
+            handleInput()
+          }}
+          title="Căn phải"
+        >
+          <AlignRight className="w-4 h-4" />
+        </Button>
+        <div className="w-px bg-border mx-1" />
         <Button type="button" variant="ghost" size="sm" onClick={insertLink} title="Chèn liên kết">
           <LinkIcon className="w-4 h-4" />
         </Button>
-        <Button type="button" variant="ghost" size="sm" onClick={insertImage} title="Chèn hình ảnh">
-          <ImageIcon className="w-4 h-4" />
-        </Button>
+        <ImageInsertDialog onInsert={insertImageHTML} />
       </div>
 
       {/* Editor Area */}
