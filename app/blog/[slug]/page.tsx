@@ -181,9 +181,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                     xuất nhập khẩu
                   </p>
                   <ConsultationDialog>
-                    <Button size="lg" className="bg-accent hover:bg-accent/90 text-white">
-                      Liên hệ tư vấn miễn phí
-                    </Button>
+                    <Button size="lg" className="bg-red-600 hover:bg-red-700 text-white border-none">
+  Liên hệ tư vấn miễn phí
+</Button>
                   </ConsultationDialog>
                 </div>
 
