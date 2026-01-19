@@ -58,12 +58,12 @@ export async function POST(request: Request) {
     }
 
     const transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST || "smtp.zoho.com",
-      port: Number.parseInt(process.env.EMAIL_PORT || "587"),
+      host: process.env.MAIL_HOST || "smtp.zoho.com",
+      port: Number.parseInt(process.env.MAIL_PORT || "587"),
       secure: false, // false cho port 587 (STARTTLS)
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        user: process.env.MAIL_USERNAME,
+        pass: process.env.MAIL_PASSWORD,
       },
       tls: {
         rejectUnauthorized: false, // Allow self-signed certificates if needed
@@ -84,7 +84,7 @@ export async function POST(request: Request) {
 
     // Email 1: Gửi cho khách hàng (xác nhận)
     await transporter.sendMail({
-      from: `"Vexim Global" <${process.env.EMAIL_USER}>`, // Use EMAIL_USER
+      from: `"${process.env.MAIL_FROM_NAME || "Vexim Global"}" <${process.env.MAIL_FROM_ADDRESS || process.env.MAIL_USERNAME}>`,
       to: email,
       subject: "Xác nhận đăng ký tư vấn - Vexim Global",
       html: `
@@ -140,8 +140,8 @@ export async function POST(request: Request) {
 
     // Email 2: Gửi cho admin (thông báo lead mới)
     await transporter.sendMail({
-      from: `"Vexim Website" <${process.env.EMAIL_USER}>`, // Use EMAIL_USER
-      to: process.env.ADMIN_EMAIL || process.env.EMAIL_USER, // Use EMAIL_USER
+      from: `"Vexim Website" <${process.env.MAIL_FROM_ADDRESS || process.env.MAIL_USERNAME}>`,
+      to: process.env.ADMIN_EMAIL || process.env.MAIL_USERNAME,
       subject: `🔔 Khách hàng mới đăng ký: ${name}`,
       html: `
         <!DOCTYPE html>
