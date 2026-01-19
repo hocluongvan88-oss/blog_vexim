@@ -1,9 +1,8 @@
 "use client"
 
 import type React from "react"
-
-import { useState, useRef } from "react"
-import { motion, useScroll, useTransform } from "framer-motion"
+import { motion } from "framer-motion"
+import { useEffect, useState, useRef } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -16,14 +15,33 @@ export default function BlogSidebar() {
   const [phone, setPhone] = useState("")
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [y1, setY1] = useState(0)
+  const [y2, setY2] = useState(0)
+  const [y3, setY3] = useState(0)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const card1Ref = useRef<HTMLDivElement>(null)
+  const card2Ref = useRef<HTMLDivElement>(null)
+  const card3Ref = useRef<HTMLDivElement>(null)
   
-  const containerRef = useRef<HTMLElement>(null)
-  const { scrollY } = useScroll()
-  
-  // Parallax animations for each card
-  const y1 = useTransform(scrollY, [0, 500], [0, 50])
-  const y2 = useTransform(scrollY, [0, 500], [0, 100])
-  const y3 = useTransform(scrollY, [0, 500], [0, 150])
+  // Parallax scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY
+      
+      if (card1Ref.current) {
+        card1Ref.current.style.transform = `translateY(${scrollY * 0.1}px)`
+      }
+      if (card2Ref.current) {
+        card2Ref.current.style.transform = `translateY(${scrollY * 0.2}px)`
+      }
+      if (card3Ref.current) {
+        card3Ref.current.style.transform = `translateY(${scrollY * 0.3}px)`
+      }
+    }
+    
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -44,9 +62,9 @@ export default function BlogSidebar() {
   }
 
   return (
-    <aside ref={containerRef} className="space-y-6">
+    <aside className="space-y-6">
       {/* CTA Card */}
-      <motion.div style={{ y: y1 }}>
+      <div ref={card1Ref} style={{ transition: "transform 0s ease-out" }}>
         <Card className="p-6 bg-gradient-to-br from-primary to-primary/90 text-white">
           <div className="flex items-center gap-2 mb-4">
             <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center">
@@ -117,10 +135,10 @@ export default function BlogSidebar() {
             </div>
           )}
         </Card>
-      </motion.div>
+      </div>
 
       {/* Stats Card */}
-      <motion.div style={{ y: y2 }}>
+      <div ref={card2Ref} style={{ transition: "transform 0s ease-out" }}>
         <Card className="p-6">
           <h4 className="font-bold text-lg mb-4 text-primary">Tại sao chọn Vexim Global?</h4>
 
@@ -156,10 +174,10 @@ export default function BlogSidebar() {
             </div>
           </div>
         </Card>
-      </motion.div>
+      </div>
 
       {/* Services Quick Links */}
-      <motion.div style={{ y: y3 }}>
+      <div ref={card3Ref} style={{ transition: "transform 0s ease-out" }}>
         <Card className="p-6">
           <h4 className="font-bold text-lg mb-4 text-primary">Dịch vụ nổi bật</h4>
 
@@ -181,7 +199,7 @@ export default function BlogSidebar() {
             ))}
           </div>
         </Card>
-      </motion.div>
+      </div>
     </aside>
   )
 }
