@@ -57,17 +57,32 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Số điện thoại không hợp lệ." }, { status: 400 })
     }
 
+    // Debug logging
+    console.log("[v0] Email config check:", {
+      host: process.env.MAIL_HOST,
+      port: process.env.MAIL_PORT,
+      user: process.env.MAIL_USERNAME ? "***set***" : "MISSING",
+      pass: process.env.MAIL_PASSWORD ? "***set***" : "MISSING",
+    })
+
+    // Kiểm tra credentials
+    if (!process.env.MAIL_USERNAME || !process.env.MAIL_PASSWORD) {
+      console.error("[v0] Missing email credentials!")
+      return NextResponse.json({ error: "Cấu hình email chưa đầy đủ. Vui lòng liên hệ hotline." }, { status: 500 })
+    }
+
     const transporter = nodemailer.createTransport({
       host: process.env.MAIL_HOST || "smtp.zoho.com",
       port: Number.parseInt(process.env.MAIL_PORT || "587"),
-      secure: false, // false cho port 587 (STARTTLS)
+      secure: false,
       auth: {
         user: process.env.MAIL_USERNAME,
         pass: process.env.MAIL_PASSWORD,
       },
       tls: {
-        rejectUnauthorized: false, // Allow self-signed certificates if needed
+        rejectUnauthorized: false,
       },
+      debug: true, // Enable debug output
     })
 
     // Map service code sang tên dịch vụ
