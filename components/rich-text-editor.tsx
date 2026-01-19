@@ -56,20 +56,55 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
   }
 
   const insertImageHTML = (html: string) => {
+    console.log("[v0] Inserting image HTML:", html)
     if (editorRef.current) {
+      // Focus the editor first
+      editorRef.current.focus()
+      
       const selection = window.getSelection()
       if (selection && selection.rangeCount > 0) {
         const range = selection.getRangeAt(0)
+        
+        // Create a temporary div to parse the HTML
         const tempDiv = document.createElement("div")
         tempDiv.innerHTML = html
+        
+        // Insert the content
         const fragment = document.createDocumentFragment()
-        while (tempDiv.firstChild) {
-          fragment.appendChild(tempDiv.firstChild)
+        let node: Node | null
+        while ((node = tempDiv.firstChild)) {
+          fragment.appendChild(node)
         }
+        
+        range.deleteContents()
         range.insertNode(fragment)
-        selection.collapseToEnd()
+        
+        // Move cursor after inserted content
+        range.collapse(false)
+        selection.removeAllRanges()
+        selection.addRange(range)
+        
+        // Add a line break after the image
+        const br = document.createElement("br")
+        range.insertNode(br)
+        range.setStartAfter(br)
+        range.collapse(true)
+        selection.removeAllRanges()
+        selection.addRange(range)
+      } else {
+        // If no selection, append to the end
+        const tempDiv = document.createElement("div")
+        tempDiv.innerHTML = html
+        editorRef.current.appendChild(tempDiv.firstChild!)
+        const br = document.createElement("br")
+        editorRef.current.appendChild(br)
       }
+      
+      // Trigger the onChange event
       handleInput()
+      console.log("[v0] Image inserted successfully")
+    } else {
+      console.error("[v0] Editor ref is null")
     }
   }
 
