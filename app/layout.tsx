@@ -4,6 +4,7 @@ import { Be_Vietnam_Pro } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import { ZaloChatButton } from "@/components/zalo-chat-button"
+import { ChatWidget } from "@/components/chat-widget"
 
 const beVietnamPro = Be_Vietnam_Pro({
   subsets: ["vietnamese", "latin"],
@@ -93,7 +94,6 @@ export const metadata: Metadata = {
     ],
     apple: "/apple-icon.png",
   },
-    generator: 'v0.app'
 }
 
 export default function RootLayout({
@@ -105,6 +105,7 @@ export default function RootLayout({
     <html lang="vi">
       <body className={`${beVietnamPro.variable} font-sans antialiased`}>
         {children}
+        <ChatWidget />
         <ZaloChatButton />
         <Analytics />
       </body>
