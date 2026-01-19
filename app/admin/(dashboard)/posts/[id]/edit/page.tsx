@@ -26,6 +26,7 @@ import {
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
+import { ImageUploader } from "@/components/image-uploader"
 
 export default function EditPostPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
@@ -251,52 +252,31 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
                 <p className="text-sm text-muted-foreground mt-1">{excerpt.length}/200 ký tự</p>
               </div>
 
-              {/* Category and Featured Image */}
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="category" className="text-base font-medium">
-                    Danh mục <span className="text-destructive">*</span>
-                  </Label>
-                  <Select value={category} onValueChange={setCategory}>
-                    <SelectTrigger className="mt-2">
-                      <SelectValue placeholder="Chọn danh mục..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="FDA">FDA (Mỹ)</SelectItem>
-                      <SelectItem value="GACC">GACC (Trung Quốc)</SelectItem>
-                      <SelectItem value="MFDS">MFDS (Hàn Quốc)</SelectItem>
-                      <SelectItem value="Dịch vụ Agent Hoa Kỳ">Dịch vụ Agent Hoa Kỳ</SelectItem>
-                      <SelectItem value="Truy xuất nguồn gốc">Truy xuất nguồn gốc</SelectItem>
-                      <SelectItem value="Ủy thác xuất nhập khẩu">Ủy thác XNK</SelectItem>
-                      <SelectItem value="Tin tức thị trường">Tin tức thị trường</SelectItem>
-                      <SelectItem value="Xuất nhập khẩu">Xuất nhập khẩu</SelectItem>
-                      <SelectItem value="Kiến thức pháp lý">Kiến thức pháp lý</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="imageUrl" className="text-base font-medium">
-                    Ảnh bìa (URL)
-                  </Label>
-                  <Input
-                    id="imageUrl"
-                    placeholder="https://..."
-                    value={featuredImage}
-                    onChange={(e) => {
-                      setFeaturedImage(e.target.value)
-                      setPreviewImage(e.target.value)
-                    }}
-                    className="mt-2"
-                  />
-                </div>
+              {/* Category */}
+              <div>
+                <Label htmlFor="category" className="text-base font-medium">
+                  Danh mục <span className="text-destructive">*</span>
+                </Label>
+                <Select value={category} onValueChange={setCategory}>
+                  <SelectTrigger className="mt-2">
+                    <SelectValue placeholder="Chọn danh mục..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="FDA">FDA (Mỹ)</SelectItem>
+                    <SelectItem value="GACC">GACC (Trung Quốc)</SelectItem>
+                    <SelectItem value="MFDS">MFDS (Hàn Quốc)</SelectItem>
+                    <SelectItem value="Dịch vụ Agent Hoa Kỳ">Dịch vụ Agent Hoa Kỳ</SelectItem>
+                    <SelectItem value="Truy xuất nguồn gốc">Truy xuất nguồn gốc</SelectItem>
+                    <SelectItem value="Ủy thác xuất nhập khẩu">Ủy thác XNK</SelectItem>
+                    <SelectItem value="Tin tức thị trường">Tin tức thị trường</SelectItem>
+                    <SelectItem value="Xuất nhập khẩu">Xuất nhập khẩu</SelectItem>
+                    <SelectItem value="Kiến thức pháp lý">Kiến thức pháp lý</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
-              {previewImage && (
-                <div className="aspect-video max-w-md overflow-hidden rounded-lg border">
-                  <img src={previewImage || "/placeholder.svg"} alt="Preview" className="w-full h-full object-cover" />
-                </div>
-              )}
+              {/* Featured Image */}
+              <ImageUploader value={featuredImage} onChange={setFeaturedImage} onPreviewChange={setPreviewImage} />
             </div>
           </Card>
 
