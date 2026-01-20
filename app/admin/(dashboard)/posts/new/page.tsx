@@ -70,11 +70,7 @@ export default function NewPostPage() {
   }
 
   const handleSubmit = async (status: "draft" | "published") => {
-    console.log("[v0] handleSubmit called with status:", status)
-    console.log("[v0] Form data:", { title, category, excerpt, blocksCount: blocks.length })
-    
     if (!title || !category || !excerpt || blocks.length === 0) {
-      console.log("[v0] Validation failed")
       toast({
         title: "Thiếu thông tin",
         description: "Vui lòng điền đầy đủ các trường bắt buộc và thêm nội dung",
@@ -83,7 +79,6 @@ export default function NewPostPage() {
       return
     }
 
-    console.log("[v0] Starting submission...")
     setIsLoading(true)
 
     try {
@@ -247,10 +242,7 @@ export default function NewPostPage() {
             <h3 className="text-lg font-bold text-primary mb-4">Hành động</h3>
             <div className="flex flex-col gap-3">
               <Button 
-                onClick={() => {
-                  console.log("[v0] Save draft button clicked")
-                  handleSubmit("draft")
-                }} 
+                onClick={() => handleSubmit("draft")} 
                 variant="outline" 
                 disabled={isLoading} 
                 className="w-full"
@@ -261,13 +253,10 @@ export default function NewPostPage() {
               </Button>
 
               <Button
-                onClick={() => {
-                  console.log("[v0] Preview button clicked")
-                  alert("Tính năng xem trước đang phát triển")
-                }}
+                onClick={() => alert("Tính năng xem trước đang phát triển")}
                 variant="outline"
-                disabled={isLoading}
-                className="w-full"
+                disabled
+                className="w-full opacity-50 cursor-not-allowed"
                 type="button"
               >
                 <Eye className="w-4 h-4 mr-2" />
@@ -275,10 +264,7 @@ export default function NewPostPage() {
               </Button>
 
               <Button
-                onClick={() => {
-                  console.log("[v0] Publish button clicked")
-                  handleSubmit("published")
-                }}
+                onClick={() => handleSubmit("published")}
                 className="bg-accent hover:bg-accent/90 w-full"
                 disabled={isLoading}
                 type="button"

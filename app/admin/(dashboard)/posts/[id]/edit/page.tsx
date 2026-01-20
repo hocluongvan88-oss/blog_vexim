@@ -319,8 +319,8 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
               <Button
                 onClick={() => alert("Tính năng xem trước đang phát triển")}
                 variant="outline"
-                disabled={isLoading}
-                className="w-full"
+                disabled
+                className="w-full opacity-50 cursor-not-allowed"
               >
                 <Eye className="w-4 h-4 mr-2" />
                 Xem trước

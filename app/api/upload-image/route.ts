@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server"
+import { put } from "@vercel/blob"
+import { type NextRequest, NextResponse } from "next/server"
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData()
     const file = formData.get("file") as File
@@ -14,25 +15,32 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "File must be an image" }, { status: 400 })
     }
 
-    // Validate file size (5MB max)
-    if (file.size > 5 * 1024 * 1024) {
-      return NextResponse.json({ error: "File size must be less than 5MB" }, { status: 400 })
+    // Validate file size (10MB max for Blob)
+    const maxSize = 10 * 1024 * 1024
+    if (file.size > maxSize) {
+      return NextResponse.json({ error: "File size must be less than 10MB" }, { status: 400 })
     }
 
-    // Convert file to base64 for simple storage
-    const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
-    const base64 = buffer.toString("base64")
-    const dataUrl = `data:${file.type};base64,${base64}`
+    // Upload to Vercel Blob Storage with unique filename
+    const timestamp = Date.now()
+    const filename = `${timestamp}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
+    
+    const blob = await put(filename, file, {
+      access: "public",
+      addRandomSuffix: false,
+    })
 
-    // For now, return the data URL (you can later integrate with Vercel Blob or Supabase Storage)
     return NextResponse.json({
-      url: dataUrl,
-      pathname: file.name,
+      url: blob.url,
+      pathname: blob.pathname,
       contentType: file.type,
+      size: file.size,
     })
   } catch (error) {
     console.error("Upload error:", error)
-    return NextResponse.json({ error: "Upload failed" }, { status: 500 })
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Upload failed" },
+      { status: 500 }
+    )
   }
 }
