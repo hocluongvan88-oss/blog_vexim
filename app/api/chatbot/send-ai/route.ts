@@ -42,6 +42,14 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Check if conversation is handed over to agent
+    const { data: activeHandover } = await supabase
+      .from("conversation_handovers")
+      .select("id, agent_name")
+      .eq("conversation_id", convId)
+      .eq("status", "active")
+      .single()
+
     // Lưu tin nhắn của customer
     const { error: msgError } = await supabase.from("chat_messages").insert({
       conversation_id: convId,
@@ -50,6 +58,21 @@ export async function POST(request: NextRequest) {
     })
 
     if (msgError) throw msgError
+
+    // If handed over, don't generate AI response
+    if (activeHandover) {
+      console.log("[v0] Conversation handed over to agent:", activeHandover.agent_name)
+      return NextResponse.json({
+        status: "handed_over",
+        message: `Cuộc trò chuyện này đang được xử lý bởi ${activeHandover.agent_name}. Vui lòng đợi phản hồi.`,
+        response: {
+          conversation_id: convId,
+          message_text: `Cuộc trò chuyện này đang được xử lý bởi chuyên viên. Chúng tôi sẽ phản hồi bạn sớm nhất có thể.`,
+          timestamp: new Date().toISOString(),
+          handed_over: true,
+        },
+      })
+    }
 
     // Load conversation history (last 10 messages)
     const { data: historyData } = await supabase

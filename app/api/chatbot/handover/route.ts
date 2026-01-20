@@ -28,6 +28,9 @@ export async function POST(request: NextRequest) {
         .from("conversation_handovers")
         .insert({
           conversation_id: conversationId,
+          from_type: "bot",
+          to_type: "agent",
+          reason: "Admin manually took over conversation",
           agent_id: user.id,
           agent_name: user.email?.split("@")[0] || "Agent",
           status: "active",

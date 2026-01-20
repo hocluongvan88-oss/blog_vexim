@@ -1,16 +1,10 @@
 import type React from "react"
+import type { Metadata } from "next"
 import { Be_Vietnam_Pro } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
-import dynamic from "next/dynamic"
-import { Metadata } from "next"
-
-const ChatWidget = dynamic(() => import("@/components/chat-widget").then(mod => ({ default: mod.ChatWidget })), {
-  ssr: false,
-})
-const ZaloChatButton = dynamic(() => import("@/components/zalo-chat-button").then(mod => ({ default: mod.ZaloChatButton })), {
-  ssr: false,
-})
+import { ClientWidgets } from "@/components/client-widgets"
+import { ChatWidget } from "@/components/chat-widget" // Declare the ChatWidget variable
 
 const beVietnamPro = Be_Vietnam_Pro({
   subsets: ["vietnamese", "latin"],
@@ -112,7 +106,7 @@ export default function RootLayout({
     <html lang="vi">
       <body className={`${beVietnamPro.variable} font-sans antialiased`}>
         {children}
-        <ChatWidget />
+        <ClientWidgets />
         <Analytics />
       </body>
     </html>

@@ -153,17 +153,17 @@ export function ChatWidget() {
       const data = await response.json()
       console.log("[v0] Response from chatbot:", data)
 
-      if (data.status === "ok" && data.response) {
+      if ((data.status === "ok" || data.status === "handed_over") && data.response) {
         // Lưu conversation ID
         if (data.response.conversation_id && !conversationId) {
           setConversationId(data.response.conversation_id)
           localStorage.setItem("vexim_conversation_id", data.response.conversation_id)
         }
 
-        // Thêm phản hồi từ bot
+        // Thêm phản hồi từ bot hoặc thông báo handed over
         const botMessage: Message = {
           id: data.response.message_id || `bot_${Date.now()}`,
-          sender_type: "bot",
+          sender_type: data.response.handed_over ? "agent" : "bot",
           message_text: data.response.message_text,
           created_at: data.response.timestamp || new Date().toISOString(),
         }

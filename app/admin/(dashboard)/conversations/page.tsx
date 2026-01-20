@@ -33,8 +33,13 @@ interface Conversation {
   created_at: string
   updated_at: string
   message_count?: number
-  handover_mode?: string
+  handover_mode?: string | null
   ai_confidence?: number
+  metadata?: {
+    handed_over?: boolean
+    agent_name?: string
+    [key: string]: any
+  }
 }
 
 interface ChatMessage {
@@ -45,22 +50,6 @@ interface ChatMessage {
   created_at: string
   ai_model?: string
   ai_confidence?: number
-}
-
-const loadMessages = async (conversationId: string) => {
-  const supabase = createClient()
-  const { data: msgs, error } = await supabase
-    .from("chat_messages")
-    .select("*")
-    .eq("conversation_id", conversationId)
-    .order("created_at", { ascending: true })
-
-  if (error) {
-    console.error("[v0] Error loading messages:", error)
-    return
-  }
-
-  return msgs as ChatMessage[]
 }
 
 export default function ConversationsPage() {
@@ -78,6 +67,48 @@ export default function ConversationsPage() {
     active: 0,
     today: 0,
   })
+  const [hasMoreMessages, setHasMoreMessages] = useState(false)
+  const [messageOffset, setMessageOffset] = useState(0)
+  const MESSAGE_PAGE_SIZE = 50
+
+  const loadMessages = async (conversationId: string, offset = 0, append = false) => {
+    setLoadingMessages(true)
+    try {
+      const supabase = createClient()
+      
+      // Load messages in descending order, then reverse
+      const { data, error, count } = await supabase
+        .from("chat_messages")
+        .select("*", { count: "exact" })
+        .eq("conversation_id", conversationId)
+        .order("created_at", { ascending: false })
+        .range(offset, offset + MESSAGE_PAGE_SIZE - 1)
+
+      if (error) throw error
+      
+      const reversedData = (data || []).reverse()
+      
+      if (append) {
+        setMessages(prev => [...reversedData, ...prev])
+      } else {
+        setMessages(reversedData)
+        setMessageOffset(MESSAGE_PAGE_SIZE)
+      }
+      
+      setHasMoreMessages((count || 0) > offset + MESSAGE_PAGE_SIZE)
+    } catch (error) {
+      console.error("[v0] Error loading messages:", error)
+      toast.error("Không thể tải tin nhắn")
+    } finally {
+      setLoadingMessages(false)
+    }
+  }
+
+  const loadMoreMessages = async () => {
+    if (!selectedConv || !hasMoreMessages) return
+    await loadMessages(selectedConv.id, messageOffset, true)
+    setMessageOffset(prev => prev + MESSAGE_PAGE_SIZE)
+  }
 
   useEffect(() => {
     loadConversations()
@@ -85,7 +116,7 @@ export default function ConversationsPage() {
 
   useEffect(() => {
     if (selectedConv) {
-      loadMessages(selectedConv.id).then(setMessages)
+      loadMessages(selectedConv.id)
       // Subscribe to new messages
       const supabase = createClient()
       const channel = supabase
@@ -127,7 +158,7 @@ export default function ConversationsPage() {
 
       if (error) throw error
 
-      // Tính số tin nhắn cho mỗi conversation
+      // Tính số tin nhắn và kiểm tra handover status cho mỗi conversation
       const convsWithCount = await Promise.all(
         (convs || []).map(async (conv) => {
           const { count } = await supabase
@@ -135,7 +166,24 @@ export default function ConversationsPage() {
             .select("*", { count: "exact", head: true })
             .eq("conversation_id", conv.id)
 
-          return { ...conv, message_count: count || 0 }
+          // Kiểm tra xem conversation có đang được handover không
+          const { data: activeHandover } = await supabase
+            .from("conversation_handovers")
+            .select("status, agent_name")
+            .eq("conversation_id", conv.id)
+            .eq("status", "active")
+            .single()
+
+          return { 
+            ...conv, 
+            message_count: count || 0,
+            handover_mode: activeHandover ? "manual" : null,
+            metadata: {
+              ...(conv.metadata || {}),
+              handed_over: !!activeHandover,
+              agent_name: activeHandover?.agent_name
+            }
+          }
         })
       )
 
@@ -154,27 +202,6 @@ export default function ConversationsPage() {
       console.error("[v0] Error loading conversations:", error)
     } finally {
       setLoading(false)
-    }
-  }
-
-  const loadMessages = async (conversationId: string) => {
-    setLoadingMessages(true)
-    try {
-      const supabase = createClient()
-      
-      const { data, error } = await supabase
-        .from("chat_messages")
-        .select("*")
-        .eq("conversation_id", conversationId)
-        .order("created_at", { ascending: true })
-
-      if (error) throw error
-      setMessages(data || [])
-    } catch (error) {
-      console.error("[v0] Error loading messages:", error)
-      toast.error("Không thể tải tin nhắn")
-    } finally {
-      setLoadingMessages(false)
     }
   }
 
@@ -224,26 +251,88 @@ export default function ConversationsPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          conversation_id: selectedConv.id,
-          from_type: "bot",
-          to_type: "agent",
-          reason: "Admin manually took over conversation",
+          conversationId: selectedConv.id,
+          action: "takeover",
         }),
       })
 
-      if (!response.ok) throw new Error("Failed to take over")
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to take over")
+      }
 
+      const result = await response.json()
+      console.log("[v0] Takeover result:", result)
+      
       toast.success("Đã chuyển sang chế độ admin")
       
-      // Refresh conversation
-      const updated = { ...selectedConv, handover_mode: "manual" }
+      // Refresh conversation - reload from server
+      await loadConversations()
+      
+      // Update local state
+      const updated = { 
+        ...selectedConv, 
+        handover_mode: "manual",
+        metadata: {
+          ...(selectedConv.metadata || {}),
+          handed_over: true,
+        }
+      }
       setSelectedConv(updated)
-      setConversations(prevConvs => 
-        prevConvs.map(c => c.id === updated.id ? updated : c)
-      )
+      
+      // Reload messages to show handover
+      loadMessages(selectedConv.id)
     } catch (error) {
       console.error("[v0] Error taking over:", error)
-      toast.error("Không thể chuyển cuộc trò chuyện")
+      toast.error(`Không thể chuyển cuộc trò chuyện: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    } finally {
+      setTakingOver(false)
+    }
+  }
+
+  const handleRelease = async () => {
+    if (!selectedConv || takingOver) return
+
+    setTakingOver(true)
+    try {
+      const response = await fetch("/api/chatbot/handover", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          conversationId: selectedConv.id,
+          action: "release",
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to release")
+      }
+
+      const result = await response.json()
+      console.log("[v0] Release result:", result)
+      
+      toast.success("Đã trả lại cho AI")
+      
+      // Refresh conversation - reload from server to get updated data
+      await loadConversations()
+      
+      // Update local state
+      const updated = { 
+        ...selectedConv, 
+        handover_mode: null,
+        metadata: {
+          ...(selectedConv.metadata || {}),
+          handed_over: false,
+        }
+      }
+      setSelectedConv(updated)
+      
+      // Reload messages
+      loadMessages(selectedConv.id)
+    } catch (error) {
+      console.error("[v0] Error releasing:", error)
+      toast.error(`Không thể trả lại cuộc trò chuyện: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setTakingOver(false)
     }
@@ -252,6 +341,8 @@ export default function ConversationsPage() {
   const handleSelectConversation = (conv: Conversation) => {
     setSelectedConv(conv)
     setMessages([])
+    setMessageOffset(0)
+    setHasMoreMessages(false)
   }
 
   const getChannelBadge = (channel: string) => {
@@ -318,7 +409,7 @@ export default function ConversationsPage() {
 
           {loading ? (
             <div className="text-center py-8 text-muted-foreground">Đang tải...</div>
-          ) : conversations.length === 0 ? (
+          ) : !conversations || conversations.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <MessageCircle className="h-12 w-12 mx-auto mb-3 opacity-50" />
               <p className="text-sm">Chưa có hội thoại nào</p>
@@ -359,11 +450,11 @@ export default function ConversationsPage() {
                       })}</span>
                     </div>
 
-                    {conv.handover_mode && (
-                      <Badge className="mt-2 text-xs bg-amber-100 text-amber-700">
-                        Admin mode
-                      </Badge>
-                    )}
+                  {conv.handover_mode === "manual" && (
+                    <Badge className="mt-2 text-xs bg-amber-100 text-amber-700">
+                      Admin mode
+                    </Badge>
+                  )}
                   </Card>
                 ))}
               </div>
@@ -405,7 +496,16 @@ export default function ConversationsPage() {
                     </div>
                   </div>
                   
-                  {!selectedConv.handover_mode && (
+                  {selectedConv.handover_mode === "manual" ? (
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={handleRelease}
+                      disabled={takingOver}
+                    >
+                      {takingOver ? "Đang xử lý..." : "Trả lại AI"}
+                    </Button>
+                  ) : (
                     <Button 
                       size="sm" 
                       onClick={handleTakeOver}
@@ -418,82 +518,91 @@ export default function ConversationsPage() {
               </div>
 
               {/* Messages */}
-              <ScrollArea className="flex-1 p-4 h-[calc(100vh-500px)]">
-                {loadingMessages ? (
-                  <div className="text-center py-8 text-muted-foreground">Đang tải tin nhắn...</div>
-                ) : messages.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <MessageCircle className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                    <p>Chưa có tin nhắn nào</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {messages.map((msg) => (
-                      <div
-                        key={msg.id}
-                        className={cn(
-                          "flex gap-3",
-                          msg.sender_type === "customer" ? "justify-start" : "justify-end"
-                        )}
-                      >
-                        {msg.sender_type === "customer" && (
-                          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                            <UserIcon className="h-4 w-4 text-blue-600" />
-                          </div>
-                        )}
-                        
+              <div className="flex-1 overflow-hidden">
+                <ScrollArea className="h-[500px] p-4">
+                  {loadingMessages && messages.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">Đang tải tin nhắn...</div>
+                  ) : messages.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <MessageCircle className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                      <p>Chưa có tin nhắn nào</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-1.5">
+                      {hasMoreMessages && (
+                        <div className="text-center pb-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={loadMoreMessages}
+                            disabled={loadingMessages}
+                          >
+                            {loadingMessages ? "Đang tải..." : "Tải tin nhắn cũ hơn"}
+                          </Button>
+                        </div>
+                      )}
+                      {messages.map((msg) => (
                         <div
+                          key={msg.id}
                           className={cn(
-                            "max-w-[70%] rounded-lg px-4 py-2 shadow-sm",
-                            msg.sender_type === "customer"
-                              ? "bg-blue-50 text-gray-900"
-                              : msg.sender_type === "bot"
-                              ? "bg-gray-100 text-gray-900"
-                              : "bg-primary text-white"
+                            "flex gap-2 items-start",
+                            msg.sender_type === "customer" ? "justify-start" : "justify-end"
                           )}
                         >
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-xs font-semibold">
-                              {msg.sender_type === "customer" 
-                                ? "Khách hàng" 
+                          {msg.sender_type === "customer" && (
+                            <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                              <UserIcon className="h-3 w-3 text-blue-600" />
+                            </div>
+                          )}
+                          
+                          <div
+                            className={cn(
+                              "max-w-[70%] rounded-lg px-3 py-1.5 shadow-sm",
+                              msg.sender_type === "customer"
+                                ? "bg-blue-50 text-gray-900"
                                 : msg.sender_type === "bot"
-                                ? "AI Bot"
-                                : "Admin"}
-                            </span>
-                            {msg.sender_type === "bot" && msg.ai_model && (
-                              <span className="text-xs opacity-70">({msg.ai_model})</span>
+                                ? "bg-gray-100 text-gray-900"
+                                : "bg-primary text-white"
                             )}
+                          >
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-[10px] font-semibold">
+                                {msg.sender_type === "customer" 
+                                  ? "Khách hàng" 
+                                  : msg.sender_type === "bot"
+                                  ? "AI Bot"
+                                  : "Admin"}
+                              </span>
+                              <span className="text-[10px] opacity-60">
+                                {new Date(msg.created_at).toLocaleString("vi-VN", {
+                                  hour: "2-digit",
+                                  minute: "2-digit"
+                                })}
+                              </span>
+                              {msg.ai_confidence !== undefined && (
+                                <span className="text-[10px] opacity-60">Confidence: {(msg.ai_confidence * 100).toFixed(0)}%</span>
+                              )}
+                            </div>
+                            <p className="text-sm whitespace-pre-wrap break-words mt-0.5">{msg.message_text}</p>
                           </div>
-                          <p className="text-sm whitespace-pre-wrap break-words">{msg.message_text}</p>
-                          <div className="flex items-center justify-between mt-2 text-xs opacity-70">
-                            <span>
-                              {new Date(msg.created_at).toLocaleString("vi-VN", {
-                                hour: "2-digit",
-                                minute: "2-digit"
-                              })}
-                            </span>
-                            {msg.ai_confidence !== undefined && (
-                              <span>Confidence: {(msg.ai_confidence * 100).toFixed(0)}%</span>
-                            )}
-                          </div>
-                        </div>
 
-                        {msg.sender_type === "bot" && (
-                          <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
-                            <Bot className="h-4 w-4 text-purple-600" />
-                          </div>
-                        )}
-                        {msg.sender_type === "agent" && (
-                          <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                            <UserIcon className="h-4 w-4 text-green-600" />
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                    <div ref={messagesEndRef} />
-                  </div>
-                )}
-              </ScrollArea>
+                          {msg.sender_type === "bot" && (
+                            <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+                              <Bot className="h-3 w-3 text-purple-600" />
+                            </div>
+                          )}
+                          {msg.sender_type === "agent" && (
+                            <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                              <UserIcon className="h-3 w-3 text-green-600" />
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                      <div ref={messagesEndRef} />
+                    </div>
+                  )}
+                </ScrollArea>
+              </div>
 
               {/* Input */}
               <div className="p-4 border-t">
@@ -515,13 +624,13 @@ export default function ConversationsPage() {
               </div>
             </>
           ) : (
-            <div className="flex items-center justify-center h-full text-muted-foreground">
-              <div className="text-center">
-                <MessageCircle className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                <p>Chọn một cuộc hội thoại để xem chi tiết</p>
+              <div className="flex items-center justify-center h-full text-muted-foreground">
+                <div className="text-center">
+                  <MessageCircle className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                  <p>Chọn một cuộc hội thoại để xem chi tiết</p>
+                </div>
               </div>
-            </div>
-          )}
+            )}
         </Card>
       </div>
     </div>
