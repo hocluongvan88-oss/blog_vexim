@@ -9,12 +9,12 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Eye, Save, Send, Loader2 } from "lucide-react"
+import { Bold, Italic, Heading2, Heading3, LinkIcon, ImageIcon, Eye, Save, Send, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { RichTextEditor } from "@/components/rich-text-editor"
 import { SEOChecker } from "@/components/seo-checker"
 import { ImageUploader } from "@/components/image-uploader"
 import { AIWritingAssistant } from "@/components/admin/ai-writing-assistant"
-import { RichTextEditor } from "@/components/rich-text-editor"
 
 export default function NewPostPage() {
   const router = useRouter()
@@ -30,7 +30,7 @@ export default function NewPostPage() {
   const [featuredImage, setFeaturedImage] = useState("")
   const [previewImage, setPreviewImage] = useState<string | null>(null)
   const [selectedText, setSelectedText] = useState("")
-  const [blocks, setBlocks] = useState<Block[]>([])
+  const [blocks, setBlocks] = useState([]) // Declare blocks state
 
   // Track text selection for AI assistant
   const handleTextSelection = () => {
@@ -41,20 +41,25 @@ export default function NewPostPage() {
     }
   }
 
-  // Apply AI suggestion - replace selected text or append to content
+  // Apply AI suggestion (replace selected text)
   const handleApplyAISuggestion = (newText: string) => {
-    if (selectedText && content.includes(selectedText)) {
-      // Replace selected text
-      setContent(content.replace(selectedText, newText))
-      setSelectedText("")
-    } else {
-      // Append to content if no selection
-      setContent(content + "\n\n" + newText)
+    const textarea = document.querySelector('textarea[name="content"]') as HTMLTextAreaElement
+    if (!textarea) {
+      toast({
+        title: "Áp dụng thành công",
+        description: "Văn bản đã được tạo. Vui lòng paste vào trình soạn thảo.",
+      })
+      return
     }
-    
+
+    const start = textarea.selectionStart
+    const end = textarea.selectionEnd
+    const newContent = content.substring(0, start) + newText + content.substring(end)
+    setContent(newContent)
+
     toast({
-      title: "Đã áp dụng",
-      description: "Nội dung AI đã được thêm vào bài viết",
+      title: "Áp dụng thành công",
+      description: "Văn bản đã được chèn vào nội dung",
     })
   }
 
@@ -67,13 +72,51 @@ export default function NewPostPage() {
     })
   }
 
+  const insertFormatting = (format: string) => {
+    const textarea = document.querySelector('textarea[name="content"]') as HTMLTextAreaElement
+    if (!textarea) return
+
+    const start = textarea.selectionStart
+    const end = textarea.selectionEnd
+    const selectedText = content.substring(start, end)
+    let newText = content
+
+    switch (format) {
+      case "bold":
+        newText = content.substring(0, start) + `<strong>${selectedText}</strong>` + content.substring(end)
+        break
+      case "italic":
+        newText = content.substring(0, start) + `<em>${selectedText}</em>` + content.substring(end)
+        break
+      case "h2":
+        newText = content.substring(0, start) + `<h2>${selectedText}</h2>` + content.substring(end)
+        break
+      case "h3":
+        newText = content.substring(0, start) + `<h3>${selectedText}</h3>` + content.substring(end)
+        break
+      case "link":
+        const url = prompt("Nhập URL:")
+        if (url) {
+          newText = content.substring(0, start) + `<a href="${url}">${selectedText}</a>` + content.substring(end)
+        }
+        break
+      case "image":
+        const imgUrl = prompt("Nhập URL hình ảnh:")
+        if (imgUrl) {
+          newText =
+            content.substring(0, start) + `<img src="${imgUrl}" alt="${selectedText}" />` + content.substring(end)
+        }
+        break
+    }
+
+    setContent(newText)
+  }
+
   const handleSubmit = async (status: "draft" | "published") => {
-    console.log("[v0] Submitting post:", { title, category, excerpt, contentLength: content.length, status })
-    
     if (!title || !category || !excerpt || !content) {
       toast({
         title: "Thiếu thông tin",
-        description: "Vui lòng điền đầy đủ các trường bắt buộc và thêm nội dung",
+        description: "Vui lòng điền đầy đủ các trường bắt buộc",
         variant: "destructive",
       })
       return
@@ -96,8 +139,6 @@ export default function NewPostPage() {
           status,
         }),
       })
-      
-      console.log("[v0] API response status:", response.status)
 
       const data = await response.json()
 
@@ -128,7 +169,8 @@ export default function NewPostPage() {
   }
 
   const getTextContent = () => {
-    return blocks.map(block => block.content).join("\n");
+    // Implement getTextContent logic here
+    return content
   }
 
   return (
@@ -146,6 +188,7 @@ export default function NewPostPage() {
             <h2 className="text-xl font-bold text-primary mb-4">Thông tin cơ bản</h2>
 
             <div className="space-y-4">
+              {/* Title */}
               <div>
                 <Label htmlFor="title" className="text-base font-medium">
                   Tiêu đề bài viết <span className="text-destructive">*</span>
@@ -159,6 +202,7 @@ export default function NewPostPage() {
                 />
               </div>
 
+              {/* Excerpt */}
               <div>
                 <Label htmlFor="excerpt" className="text-base font-medium">
                   Mô tả ngắn <span className="text-destructive">*</span>
@@ -177,6 +221,7 @@ export default function NewPostPage() {
                 <p className="text-sm text-muted-foreground mt-1">{excerpt.length}/200 ký tự</p>
               </div>
 
+              {/* Category */}
               <div>
                 <Label htmlFor="category" className="text-base font-medium">
                   Danh mục <span className="text-destructive">*</span>
@@ -199,6 +244,7 @@ export default function NewPostPage() {
                 </Select>
               </div>
 
+              {/* Featured Image */}
               <ImageUploader value={featuredImage} onChange={setFeaturedImage} onPreviewChange={setPreviewImage} />
             </div>
           </Card>
@@ -206,13 +252,60 @@ export default function NewPostPage() {
           {/* Rich Text Editor */}
           <Card className="p-6">
             <h2 className="text-xl font-bold text-primary mb-4">Nội dung bài viết</h2>
-            <p className="text-sm text-muted-foreground mb-4">
-              Nhập nội dung bài viết. Hỗ trợ HTML và Markdown.
-            </p>
+
+            {/* Toolbar */}
+            <div className="flex flex-wrap gap-2 p-3 bg-secondary/50 rounded-lg mb-4 border">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => insertFormatting("bold")}
+                title="In đậm (Ctrl+B)"
+              >
+                <Bold className="w-4 h-4" />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => insertFormatting("italic")}
+                title="In nghiêng (Ctrl+I)"
+              >
+                <Italic className="w-4 h-4" />
+              </Button>
+              <div className="w-px bg-border mx-1" />
+              <Button type="button" variant="ghost" size="sm" onClick={() => insertFormatting("h2")} title="Tiêu đề H2">
+                <Heading2 className="w-4 h-4" />
+              </Button>
+              <Button type="button" variant="ghost" size="sm" onClick={() => insertFormatting("h3")} title="Tiêu đề H3">
+                <Heading3 className="w-4 h-4" />
+              </Button>
+              <div className="w-px bg-border mx-1" />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => insertFormatting("link")}
+                title="Chèn liên kết"
+              >
+                <LinkIcon className="w-4 h-4" />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => insertFormatting("image")}
+                title="Chèn hình ảnh"
+              >
+                <ImageIcon className="w-4 h-4" />
+              </Button>
+            </div>
+
+            {/* Content Editor */}
             <RichTextEditor
               value={content}
               onChange={setContent}
-              placeholder="Nhập nội dung bài viết... Sử dụng các định dạng HTML hoặc Markdown để định dạng văn bản."
+              placeholder="Nhập nội dung bài viết... Sử dụng các nút trên thanh công cụ để định dạng văn bản."
             />
           </Card>
         </div>
