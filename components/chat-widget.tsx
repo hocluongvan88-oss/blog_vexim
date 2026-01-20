@@ -86,6 +86,7 @@ export function ChatWidget() {
   const [customerId, setCustomerId] = useState("")
   const [conversationId, setConversationId] = useState("")
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   // Tạo customer ID duy nhất
   useEffect(() => {
@@ -108,6 +109,15 @@ export function ChatWidget() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])
+
+  // Auto-focus input khi mở chat hoặc khi không minimize
+  useEffect(() => {
+    if (isOpen && !isMinimized) {
+      setTimeout(() => {
+        inputRef.current?.focus()
+      }, 100)
+    }
+  }, [isOpen, isMinimized])
 
   // Load lịch sử chat
   const loadHistory = async (convId: string) => {
@@ -182,6 +192,10 @@ export function ChatWidget() {
       setMessages((prev) => [...prev, errorMessage])
     } finally {
       setIsLoading(false)
+      // Auto-focus input sau khi gửi tin nhắn
+      setTimeout(() => {
+        inputRef.current?.focus()
+      }, 100)
     }
   }
 
@@ -316,6 +330,7 @@ export function ChatWidget() {
               <div className="border-t bg-white p-4 rounded-b-lg">
                 <div className="flex gap-2">
                   <Input
+                    ref={inputRef}
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
