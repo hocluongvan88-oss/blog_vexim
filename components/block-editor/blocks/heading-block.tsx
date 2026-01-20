@@ -1,5 +1,7 @@
 "use client"
 
+import React from "react"
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import type { HeadingData } from "../types"
 import { JSX } from "react"
@@ -7,9 +9,11 @@ import { JSX } from "react"
 interface HeadingBlockProps {
   data: HeadingData
   onChange: (data: Partial<HeadingData>) => void
+  onEnter?: () => void
+  onBackspace?: () => void
 }
 
-export function HeadingBlock({ data, onChange }: HeadingBlockProps) {
+export function HeadingBlock({ data, onChange, onEnter, onBackspace }: HeadingBlockProps) {
   const { level = 2, text = "", align = "left" } = data
 
   const HeadingTag = `h${level}` as keyof JSX.IntrinsicElements
@@ -19,6 +23,26 @@ export function HeadingBlock({ data, onChange }: HeadingBlockProps) {
     center: "text-center",
     right: "text-right",
   }[align]
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLHeadingElement>) => {
+    // Enter key - create new paragraph block below
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault()
+      const currentText = e.currentTarget.textContent || ""
+      onChange({ text: currentText })
+      onEnter?.()
+    }
+
+    // Backspace on empty block - delete this block
+    if (e.key === "Backspace" && !e.currentTarget.textContent?.trim()) {
+      e.preventDefault()
+      onBackspace?.()
+    }
+  }
+
+  const handleInput = (e: React.FormEvent<HTMLHeadingElement>) => {
+    onChange({ text: e.currentTarget.textContent || "" })
+  }
 
   return (
     <div className="space-y-2">
@@ -37,6 +61,8 @@ export function HeadingBlock({ data, onChange }: HeadingBlockProps) {
         contentEditable
         suppressContentEditableWarning
         className={`${alignClass} ${level === 2 ? "text-3xl" : "text-2xl"} font-bold text-primary outline-none`}
+        onKeyDown={handleKeyDown}
+        onInput={handleInput}
         onBlur={(e) => onChange({ text: e.currentTarget.textContent || "" })}
         dangerouslySetInnerHTML={{ __html: text || "Nhập tiêu đề..." }}
       />

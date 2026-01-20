@@ -13,6 +13,7 @@ import {
   Newspaper,
   BarChart3,
   MessageCircle,
+  Brain,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -47,6 +48,11 @@ export function AdminSidebar({ adminUser }: AdminSidebarProps) {
       title: "Hội thoại Chat",
       href: "/admin/conversations",
       icon: MessageCircle,
+    },
+    {
+      title: "Kho Tri Thức AI",
+      href: "/admin/knowledge-base",
+      icon: Brain,
     },
     {
       title: "Tất cả bài viết",
