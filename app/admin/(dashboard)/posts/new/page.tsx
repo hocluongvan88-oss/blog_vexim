@@ -9,11 +9,18 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Bold, Italic, LinkIcon, ImageIcon, Heading2, Heading3, Eye, Save, Send, Loader2 } from "lucide-react"
+import { Eye, Save, Send, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import { RichTextEditor } from "@/components/rich-text-editor"
+import { BlockEditor } from "@/components/block-editor/block-editor"
 import { SEOChecker } from "@/components/seo-checker"
 import { ImageUploader } from "@/components/image-uploader"
+import type { Block } from "@/components/block-editor/types"
+import { Bold, Italic, Heading2, Heading3, LinkIcon, ImageIcon, RichTextEditor } from "@/components/icons"
+
+function insertFormatting(format: string) {
+  // Implementation for inserting formatting
+  console.log(`Inserting ${format} formatting`)
+}
 
 export default function NewPostPage() {
   const router = useRouter()
@@ -23,17 +30,29 @@ export default function NewPostPage() {
   const [title, setTitle] = useState("")
   const [category, setCategory] = useState("")
   const [excerpt, setExcerpt] = useState("")
-  const [content, setContent] = useState("")
+  const [blocks, setBlocks] = useState<Block[]>([])
   const [metaTitle, setMetaTitle] = useState("")
   const [metaDescription, setMetaDescription] = useState("")
   const [featuredImage, setFeaturedImage] = useState("")
   const [previewImage, setPreviewImage] = useState<string | null>(null)
+  const [content, setContent] = useState("") // Declare content variable
+
+  // Generate text content from blocks for SEO checker
+  const getTextContent = () => {
+    return blocks
+      .map((block) => {
+        if (block.type === "heading" || block.type === "paragraph") return block.data.text
+        if (block.type === "quote") return block.data.text
+        return ""
+      })
+      .join(" ")
+  }
 
   const handleSubmit = async (status: "draft" | "published") => {
-    if (!title || !category || !excerpt || !content) {
+    if (!title || !category || !excerpt || blocks.length === 0) {
       toast({
         title: "Thiếu thông tin",
-        description: "Vui lòng điền đầy đủ các trường bắt buộc",
+        description: "Vui lòng điền đầy đủ các trường bắt buộc và thêm nội dung",
         variant: "destructive",
       })
       return
@@ -42,6 +61,9 @@ export default function NewPostPage() {
     setIsLoading(true)
 
     try {
+      // Serialize blocks to JSON string for storage
+      const contentJSON = JSON.stringify(blocks)
+
       const response = await fetch("/api/posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -49,7 +71,7 @@ export default function NewPostPage() {
           title,
           category,
           excerpt,
-          content,
+          content: contentJSON, // Store as JSON
           featured_image: featuredImage,
           meta_title: metaTitle || title,
           meta_description: metaDescription || excerpt,
@@ -85,57 +107,7 @@ export default function NewPostPage() {
     }
   }
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setPreviewImage(reader.result as string)
-        setFeaturedImage(URL.createObjectURL(file))
-      }
-      reader.readAsDataURL(file)
-    }
-  }
 
-  const insertFormatting = (format: string) => {
-    const textarea = document.querySelector('textarea[name="content"]') as HTMLTextAreaElement
-    if (!textarea) return
-
-    const start = textarea.selectionStart
-    const end = textarea.selectionEnd
-    const selectedText = content.substring(start, end)
-    let newText = content
-
-    switch (format) {
-      case "bold":
-        newText = content.substring(0, start) + `<strong>${selectedText}</strong>` + content.substring(end)
-        break
-      case "italic":
-        newText = content.substring(0, start) + `<em>${selectedText}</em>` + content.substring(end)
-        break
-      case "h2":
-        newText = content.substring(0, start) + `<h2>${selectedText}</h2>` + content.substring(end)
-        break
-      case "h3":
-        newText = content.substring(0, start) + `<h3>${selectedText}</h3>` + content.substring(end)
-        break
-      case "link":
-        const url = prompt("Nhập URL:")
-        if (url) {
-          newText = content.substring(0, start) + `<a href="${url}">${selectedText}</a>` + content.substring(end)
-        }
-        break
-      case "image":
-        const imgUrl = prompt("Nhập URL hình ảnh:")
-        if (imgUrl) {
-          newText =
-            content.substring(0, start) + `<img src="${imgUrl}" alt="${selectedText}" />` + content.substring(end)
-        }
-        break
-    }
-
-    setContent(newText)
-  }
 
   return (
     <div className="p-8">
@@ -209,62 +181,13 @@ export default function NewPostPage() {
             </div>
           </Card>
 
-          {/* Rich Text Editor */}
+          {/* Block Editor */}
           <Card className="p-6">
             <h2 className="text-xl font-bold text-primary mb-4">Nội dung bài viết</h2>
-
-            <div className="flex flex-wrap gap-2 p-3 bg-secondary/50 rounded-lg mb-4 border">
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => insertFormatting("bold")}
-                title="In đậm (Ctrl+B)"
-              >
-                <Bold className="w-4 h-4" />
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => insertFormatting("italic")}
-                title="In nghiêng (Ctrl+I)"
-              >
-                <Italic className="w-4 h-4" />
-              </Button>
-              <div className="w-px bg-border mx-1" />
-              <Button type="button" variant="ghost" size="sm" onClick={() => insertFormatting("h2")} title="Tiêu đề H2">
-                <Heading2 className="w-4 h-4" />
-              </Button>
-              <Button type="button" variant="ghost" size="sm" onClick={() => insertFormatting("h3")} title="Tiêu đề H3">
-                <Heading3 className="w-4 h-4" />
-              </Button>
-              <div className="w-px bg-border mx-1" />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => insertFormatting("link")}
-                title="Chèn liên kết"
-              >
-                <LinkIcon className="w-4 h-4" />
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => insertFormatting("image")}
-                title="Chèn hình ảnh"
-              >
-                <ImageIcon className="w-4 h-4" />
-              </Button>
-            </div>
-
-            <RichTextEditor
-              value={content}
-              onChange={setContent}
-              placeholder="Nhập nội dung bài viết... Sử dụng các nút trên thanh công cụ để định dạng văn bản."
-            />
+            <p className="text-sm text-muted-foreground mb-4">
+              Sử dụng hệ thống khối để xây dựng nội dung. Mỗi khối có thể được căn chỉnh và sắp xếp độc lập.
+            </p>
+            <BlockEditor value={blocks} onChange={setBlocks} />
           </Card>
         </div>
 
@@ -276,7 +199,7 @@ export default function NewPostPage() {
             <SEOChecker
               title={title}
               excerpt={excerpt}
-              content={content}
+              content={getTextContent()}
               metaTitle={metaTitle}
               metaDescription={metaDescription}
               featuredImage={featuredImage}

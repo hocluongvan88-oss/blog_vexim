@@ -2,11 +2,13 @@ import { AlertCircle } from "lucide-react"
 
 const stats = [
   {
-    number: "200+",
+    number: "100+",
     label: "Doanh nghiệp đã hợp tác",
   },
-{ number: "100%", 
-label: "Hồ sơ số hóa & truy xuất" },
+  {
+    number: "2+",
+    label: "Năm hoạt động",
+  },
   {
     number: "90%+",
     label: "Khách hàng hài lòng*",
@@ -53,7 +55,7 @@ export function Statistics() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Con số nói lên sự tận tâm</h2>
-            <p className="text-white/90 text-lg">Kết quả thực tế đồng hành cùng doanh nghiệp Việt</p>
+            <p className="text-white/90 text-lg">Kết quả thực tế từ 2 năm đồng hành cùng doanh nghiệp Việt</p>
             <p className="text-white/70 text-sm mt-2">
               *Dựa trên khảo sát phản hồi khách hàng. Mỗi hồ sơ khác nhau, kết quả phụ thuộc nhiều yếu tố
             </p>

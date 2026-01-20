@@ -1,0 +1,212 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { Button } from "@/components/ui/button"
+import { Plus, GripVertical } from "lucide-react"
+import { BlockToolbar } from "./block-toolbar"
+import { HeadingBlock } from "./blocks/heading-block"
+import { ParagraphBlock } from "./blocks/paragraph-block"
+import { ImageBlock } from "./blocks/image-block"
+import { QuoteBlock } from "./blocks/quote-block"
+import { TableBlock } from "./blocks/table-block"
+import type { Block, BlockType } from "./types"
+
+interface BlockEditorProps {
+  value: Block[]
+  onChange: (blocks: Block[]) => void
+}
+
+export function BlockEditor({ value, onChange }: BlockEditorProps) {
+  const [blocks, setBlocks] = useState<Block[]>(value || [])
+  const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null)
+  const [showBlockMenu, setShowBlockMenu] = useState(false)
+  const [insertPosition, setInsertPosition] = useState<number>(0)
+
+  useEffect(() => {
+    onChange(blocks)
+  }, [blocks, onChange])
+
+  const addBlock = (type: BlockType, position: number) => {
+    const newBlock: Block = {
+      id: `block_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      type,
+      data: getDefaultBlockData(type),
+    }
+
+    const newBlocks = [...blocks]
+    newBlocks.splice(position, 0, newBlock)
+    setBlocks(newBlocks)
+    setShowBlockMenu(false)
+    setSelectedBlockId(newBlock.id)
+  }
+
+  const getDefaultBlockData = (type: BlockType): any => {
+    switch (type) {
+      case "heading":
+        return { level: 2, text: "", align: "left" }
+      case "paragraph":
+        return { text: "", align: "justify" }
+      case "image":
+        return { url: "", caption: "", align: "center", width: "100%" }
+      case "quote":
+        return { text: "", author: "", align: "left" }
+      case "table":
+        return { rows: 2, cols: 2, content: [["", ""], ["", ""]], align: "left" }
+      default:
+        return {}
+    }
+  }
+
+  const updateBlock = (id: string, data: any) => {
+    setBlocks(blocks.map((block) => (block.id === id ? { ...block, data: { ...block.data, ...data } } : block)))
+  }
+
+  const deleteBlock = (id: string) => {
+    setBlocks(blocks.filter((block) => block.id !== id))
+    setSelectedBlockId(null)
+  }
+
+  const moveBlock = (id: string, direction: "up" | "down") => {
+    const index = blocks.findIndex((block) => block.id === id)
+    if (index === -1) return
+
+    const newIndex = direction === "up" ? index - 1 : index + 1
+    if (newIndex < 0 || newIndex >= blocks.length) return
+
+    const newBlocks = [...blocks]
+    const [movedBlock] = newBlocks.splice(index, 1)
+    newBlocks.splice(newIndex, 0, movedBlock)
+    setBlocks(newBlocks)
+  }
+
+  const renderBlock = (block: Block, index: number) => {
+    const isSelected = selectedBlockId === block.id
+
+    return (
+      <div
+        key={block.id}
+        className={`group relative ${isSelected ? "ring-2 ring-primary rounded-lg" : ""}`}
+        onClick={() => setSelectedBlockId(block.id)}
+      >
+        {/* Block Controls */}
+        <div className="absolute -left-10 top-2 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 w-6 p-0 cursor-grab"
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            <GripVertical className="w-4 h-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 w-6 p-0"
+            onClick={(e) => {
+              e.stopPropagation()
+              setInsertPosition(index + 1)
+              setShowBlockMenu(true)
+            }}
+          >
+            <Plus className="w-4 h-4" />
+          </Button>
+        </div>
+
+        {/* Block Toolbar */}
+        {isSelected && (
+          <BlockToolbar
+            block={block}
+            onUpdate={(data) => updateBlock(block.id, data)}
+            onDelete={() => deleteBlock(block.id)}
+            onMoveUp={() => moveBlock(block.id, "up")}
+            onMoveDown={() => moveBlock(block.id, "down")}
+          />
+        )}
+
+        {/* Block Content */}
+        <div className="py-2">
+          {block.type === "heading" && (
+            <HeadingBlock data={block.data} onChange={(data) => updateBlock(block.id, data)} />
+          )}
+          {block.type === "paragraph" && (
+            <ParagraphBlock data={block.data} onChange={(data) => updateBlock(block.id, data)} />
+          )}
+          {block.type === "image" && <ImageBlock data={block.data} onChange={(data) => updateBlock(block.id, data)} />}
+          {block.type === "quote" && <QuoteBlock data={block.data} onChange={(data) => updateBlock(block.id, data)} />}
+          {block.type === "table" && <TableBlock data={block.data} onChange={(data) => updateBlock(block.id, data)} />}
+        </div>
+
+        {/* Insert Block Button Below */}
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity py-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full bg-transparent"
+            onClick={(e) => {
+              e.stopPropagation()
+              setInsertPosition(index + 1)
+              setShowBlockMenu(true)
+            }}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Thêm khối
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="border rounded-lg p-6 bg-white min-h-[600px]" onClick={() => setSelectedBlockId(null)}>
+      {/* Empty State */}
+      {blocks.length === 0 && (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground mb-4">Bắt đầu viết bài bằng cách thêm khối đầu tiên</p>
+          <Button
+            onClick={() => {
+              setInsertPosition(0)
+              setShowBlockMenu(true)
+            }}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Thêm khối
+          </Button>
+        </div>
+      )}
+
+      {/* Blocks */}
+      <div className="space-y-4 pl-10">{blocks.map((block, index) => renderBlock(block, index))}</div>
+
+      {/* Block Menu */}
+      {showBlockMenu && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowBlockMenu(false)}>
+          <div className="bg-white rounded-lg p-6 w-[500px]" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-bold mb-4">Chọn loại khối</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <Button variant="outline" className="h-20 flex-col bg-transparent" onClick={() => addBlock("heading", insertPosition)}>
+                <span className="text-2xl font-bold mb-1">H</span>
+                <span className="text-xs">Tiêu đề</span>
+              </Button>
+              <Button variant="outline" className="h-20 flex-col bg-transparent" onClick={() => addBlock("paragraph", insertPosition)}>
+                <span className="text-lg mb-1">¶</span>
+                <span className="text-xs">Đoạn văn</span>
+              </Button>
+              <Button variant="outline" className="h-20 flex-col bg-transparent" onClick={() => addBlock("image", insertPosition)}>
+                <span className="text-lg mb-1">🖼️</span>
+                <span className="text-xs">Hình ảnh</span>
+              </Button>
+              <Button variant="outline" className="h-20 flex-col bg-transparent" onClick={() => addBlock("quote", insertPosition)}>
+                <span className="text-lg mb-1">"</span>
+                <span className="text-xs">Trích dẫn</span>
+              </Button>
+              <Button variant="outline" className="h-20 flex-col bg-transparent" onClick={() => addBlock("table", insertPosition)}>
+                <span className="text-lg mb-1">⊞</span>
+                <span className="text-xs">Bảng</span>
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}

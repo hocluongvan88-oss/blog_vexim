@@ -50,7 +50,7 @@ export function ChatWidget() {
   // Load lịch sử chat
   const loadHistory = async (convId: string) => {
     try {
-      const response = await fetch(`https://chatbot-six-wheat.vercel.app/api/webhook/website?conversation_id=${convId}`)
+      const response = await fetch(`/api/chatbot/history?conversation_id=${convId}`)
       const data = await response.json()
       if (data.status === "ok" && data.messages) {
         setMessages(data.messages)
@@ -76,22 +76,20 @@ export function ChatWidget() {
     setIsLoading(true)
 
     try {
-      const response = await fetch("https://chatbot-six-wheat.vercel.app/api/webhook/website", {
+      const response = await fetch("/api/chatbot/send", {
         method: "POST",
         headers: { 
-          "Content-Type": "application/json",
-          "Origin": "https://www.veximglobal.com"
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
           customer_id: customerId,
           customer_name: "Khách hàng",
-          message_text: inputMessage,
-          channel: "website",
-          website_url: "https://www.veximglobal.com"
+          message_text: inputMessage
         }),
       })
 
       const data = await response.json()
+      console.log("[v0] Response from chatbot:", data)
 
       if (data.status === "ok" && data.response) {
         // Lưu conversation ID
