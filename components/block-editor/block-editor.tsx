@@ -1,5 +1,7 @@
 "use client"
 
+import React from "react"
+
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Plus, GripVertical } from "lucide-react"
@@ -123,6 +125,30 @@ export function BlockEditor({ value, onChange }: BlockEditorProps) {
     setBlocks(newBlocks)
   }
 
+  const handleDragStart = (e: React.DragEvent, blockId: string) => {
+    e.dataTransfer.effectAllowed = "move"
+    e.dataTransfer.setData("text/plain", blockId)
+    setSelectedBlockId(blockId)
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = "move"
+  }
+
+  const handleDrop = (e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault()
+    const draggedBlockId = e.dataTransfer.getData("text/plain")
+    const draggedIndex = blocks.findIndex((b) => b.id === draggedBlockId)
+    
+    if (draggedIndex === -1 || draggedIndex === targetIndex) return
+
+    const newBlocks = [...blocks]
+    const [draggedBlock] = newBlocks.splice(draggedIndex, 1)
+    newBlocks.splice(targetIndex, 0, draggedBlock)
+    setBlocks(newBlocks)
+  }
+
   const renderBlock = (block: Block, index: number) => {
     const isSelected = selectedBlockId === block.id
 
@@ -132,17 +158,25 @@ export function BlockEditor({ value, onChange }: BlockEditorProps) {
         data-block-id={block.id}
         className={`group relative ${isSelected ? "ring-2 ring-primary rounded-lg" : ""}`}
         onClick={() => setSelectedBlockId(block.id)}
+        onDragOver={handleDragOver}
+        onDrop={(e) => handleDrop(e, index)}
       >
         {/* Block Controls */}
         <div className="absolute -left-10 top-2 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-6 w-6 p-0 cursor-grab"
-            onMouseDown={(e) => e.stopPropagation()}
+          <div
+            draggable
+            onDragStart={(e) => handleDragStart(e, block.id)}
+            className="cursor-grab active:cursor-grabbing"
           >
-            <GripVertical className="w-4 h-4" />
-          </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 w-6 p-0 cursor-grab"
+              onMouseDown={(e) => e.stopPropagation()}
+            >
+              <GripVertical className="w-4 h-4" />
+            </Button>
+          </div>
           <Button
             variant="ghost"
             size="sm"
