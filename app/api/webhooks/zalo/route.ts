@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createServerClient } from "@/lib/supabase/server"
-import { AIService } from "@/lib/ai-service"
+import { createClient } from "@/lib/supabase/server"
+import { generateAIResponse, loadAIConfig } from "@/lib/ai-service"
 
 // Zalo Webhook Handler
 // Docs: https://developers.zalo.me/docs/official-account/api
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
       const userId = sender?.id || ""
 
       // Get or create conversation
-      const supabase = await createServerClient()
+      const supabase = await createClient()
       let conversation = await getOrCreateConversation(userId, "zalo", supabase)
 
       // Check if conversation is handed over to agent
@@ -39,40 +39,60 @@ export async function POST(request: NextRequest) {
 
       if (handover) {
         // Forward to agent (store message, agent will respond via admin panel)
-        await supabase.from("messages").insert({
+        await supabase.from("chat_messages").insert({
           conversation_id: conversation.id,
-          sender_type: "user",
-          message: userMessage,
-          platform: "zalo",
+          sender_type: "customer",
+          message_text: userMessage,
         })
 
         // Notify agent (can use websocket or push notification here)
         return NextResponse.json({ success: true, mode: "agent" })
       }
 
-      // AI handles the message
-      const aiService = new AIService()
-      const aiResponse = await aiService.generateResponse(
+      // Load conversation history
+      const { data: historyData } = await supabase
+        .from("chat_messages")
+        .select("sender_type, message_text")
+        .eq("conversation_id", conversation.id)
+        .order("created_at", { ascending: false })
+        .limit(10)
+
+      const conversationHistory =
+        historyData
+          ?.reverse()
+          .map((msg) => ({
+            role: msg.sender_type === "customer" ? "user" : "assistant",
+            content: msg.message_text,
+          })) || []
+
+      // Load AI config
+      const aiConfig = await loadAIConfig(supabase)
+
+      // Generate AI response
+      const aiResponse = await generateAIResponse(
         userMessage,
-        conversation.id
+        conversationHistory,
+        aiConfig,
+        supabase,
+        true
       )
 
       // Send response back to Zalo
-      await sendZaloMessage(userId, aiResponse)
+      await sendZaloMessage(userId, aiResponse.message)
 
       // Store messages
-      await supabase.from("messages").insert([
+      await supabase.from("chat_messages").insert([
         {
           conversation_id: conversation.id,
-          sender_type: "user",
-          message: userMessage,
-          platform: "zalo",
+          sender_type: "customer",
+          message_text: userMessage,
         },
         {
           conversation_id: conversation.id,
           sender_type: "bot",
-          message: aiResponse,
-          platform: "zalo",
+          message_text: aiResponse.message,
+          ai_model: aiConfig.model,
+          ai_confidence: aiResponse.confidence,
         },
       ])
 

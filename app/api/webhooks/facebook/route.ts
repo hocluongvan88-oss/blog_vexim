@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createServerClient } from "@/lib/supabase/server"
-import { AIService } from "@/lib/ai-service"
+import { createClient } from "@/lib/supabase/server"
+import { generateAIResponse, loadAIConfig } from "@/lib/ai-service"
 
 // Facebook Messenger Webhook Handler
 // Docs: https://developers.facebook.com/docs/messenger-platform/webhooks
@@ -57,7 +57,7 @@ async function handleMessage(event: any) {
 
   if (!message) return
 
-  const supabase = await createServerClient()
+  const supabase = await createClient()
 
   // Get or create conversation
   let conversation = await getOrCreateConversation(senderId, "facebook", supabase)
@@ -72,35 +72,58 @@ async function handleMessage(event: any) {
 
   if (handover) {
     // Store message for agent
-    await supabase.from("messages").insert({
+    await supabase.from("chat_messages").insert({
       conversation_id: conversation.id,
-      sender_type: "user",
-      message,
-      platform: "facebook",
+      sender_type: "customer",
+      message_text: message,
     })
     return
   }
 
-  // AI handles message
-  const aiService = new AIService()
-  const aiResponse = await aiService.generateResponse(message, conversation.id)
+  // Load conversation history
+  const { data: historyData } = await supabase
+    .from("chat_messages")
+    .select("sender_type, message_text")
+    .eq("conversation_id", conversation.id)
+    .order("created_at", { ascending: false })
+    .limit(10)
+
+  const conversationHistory =
+    historyData
+      ?.reverse()
+      .map((msg) => ({
+        role: msg.sender_type === "customer" ? "user" : "assistant",
+        content: msg.message_text,
+      })) || []
+
+  // Load AI config
+  const aiConfig = await loadAIConfig(supabase)
+
+  // Generate AI response
+  const aiResponse = await generateAIResponse(
+    message,
+    conversationHistory,
+    aiConfig,
+    supabase,
+    true
+  )
 
   // Send response to Facebook
-  await sendFacebookMessage(senderId, aiResponse)
+  await sendFacebookMessage(senderId, aiResponse.message)
 
   // Store messages
-  await supabase.from("messages").insert([
+  await supabase.from("chat_messages").insert([
     {
       conversation_id: conversation.id,
-      sender_type: "user",
-      message,
-      platform: "facebook",
+      sender_type: "customer",
+      message_text: message,
     },
     {
       conversation_id: conversation.id,
       sender_type: "bot",
-      message: aiResponse,
-      platform: "facebook",
+      message_text: aiResponse.message,
+      ai_model: aiConfig.model,
+      ai_confidence: aiResponse.confidence,
     },
   ])
 }
