@@ -25,13 +25,13 @@ Hệ thống cho phép import tự động các file markdown (.md) từ thư m�
 - Chia nhỏ content thành chunks với overlap để AI hiểu context tốt hơn
 
 **Cách chạy:**
-```bash
+\`\`\`bash
 # Cần có env variables:
 # - NEXT_PUBLIC_SUPABASE_URL
 # - SUPABASE_SERVICE_ROLE_KEY
 
 npx tsx scripts/import-knowledge-base.ts
-```
+\`\`\`
 
 ### 2. API Endpoint (`/api/knowledge-base/import-files`)
 
@@ -41,10 +41,10 @@ npx tsx scripts/import-knowledge-base.ts
 - Trả về summary: success/skipped/errors count
 
 **Usage:**
-```bash
+\`\`\`bash
 curl -X POST http://localhost:3000/api/knowledge-base/import-files \
   -H "Authorization: Bearer <admin-token>"
-```
+\`\`\`
 
 ### 3. Admin UI Button
 
@@ -60,7 +60,7 @@ curl -X POST http://localhost:3000/api/knowledge-base/import-files \
 ## 🔧 Quy Trình Import
 
 ### Bước 1: Clean Markdown
-```typescript
+\`\`\`typescript
 // Loại bỏ các ký tự markdown nhưng giữ nội dung
 - Heading markers (###)
 - Bold/Italic (**)
@@ -68,20 +68,20 @@ curl -X POST http://localhost:3000/api/knowledge-base/import-files \
 - Code blocks ```
 - List markers (-, *)
 - Tables
-```
+\`\`\`
 
 ### Bước 2: Metadata Mapping
-```typescript
+\`\`\`typescript
 {
   title: "Fda Correct Knowledge" → "FDA Correct Knowledge",
   category: "fda-*" → "Pháp lý Hoa Kỳ",
   tags: ["FDA", "đăng ký", "prior notice", ...],
   source_url: "file://fda-correct-knowledge.md"
 }
-```
+\`\`\`
 
 ### Bước 3: Chunking với Overlap
-```typescript
+\`\`\`typescript
 // Chia theo đoạn văn (paragraph)
 chunkSize = 3 paragraphs
 overlap = 1 paragraph
@@ -90,12 +90,12 @@ overlap = 1 paragraph
 Chunk 1: P1 + P2 + P3
 Chunk 2: P3 + P4 + P5  (overlap P3)
 Chunk 3: P5 + P6 + P7  (overlap P5)
-```
+\`\`\`
 
 **Lợi ích overlap:** AI có context xung quanh khi search, không bị mất thông tin giữa các chunks.
 
 ### Bước 4: Insert vào Database
-```sql
+\`\`\`sql
 -- Insert document
 INSERT INTO knowledge_documents (title, content, category, tags, ...)
 
@@ -104,7 +104,7 @@ INSERT INTO knowledge_chunks (document_id, chunk_text, chunk_index, ...)
 
 -- Update status
 UPDATE knowledge_documents SET status = 'active'
-```
+\`\`\`
 
 ---
 
@@ -114,10 +114,10 @@ UPDATE knowledge_documents SET status = 'active'
 
 **Hiện tại:** **Full-Text Search (FTS)** của PostgreSQL
 
-```sql
+\`\`\`sql
 CREATE INDEX idx_knowledge_chunks_chunk_text_fts  
   ON knowledge_chunks USING gin(to_tsvector('english', chunk_text));
-```
+\`\`\`
 
 **Đặc điểm:**
 - ✅ Keyword search thông minh (stemming, ranking)
@@ -168,15 +168,15 @@ Cần thêm:
 4. Chờ import xong (hiện toast với summary)
 
 ### Option 2: Chạy Script Trực Tiếp
-```bash
+\`\`\`bash
 cd /path/to/project
 npx tsx scripts/import-knowledge-base.ts
-```
+\`\`\`
 
 ### Option 3: Qua API
-```bash
+\`\`\`bash
 curl -X POST http://localhost:3000/api/knowledge-base/import-files
-```
+\`\`\`
 
 ---
 
@@ -193,7 +193,7 @@ curl -X POST http://localhost:3000/api/knowledge-base/import-files
 
 Để nâng cấp lên vector search:
 
-```typescript
+\`\`\`typescript
 // 1. Thêm column vector
 ALTER TABLE knowledge_chunks 
   ADD COLUMN embedding vector(1536);
@@ -215,7 +215,7 @@ const results = await supabase.rpc('match_chunks', {
   match_threshold: 0.7,
   match_count: 5
 })
-```
+\`\`\`
 
 ---
 

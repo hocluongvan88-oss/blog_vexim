@@ -20,7 +20,7 @@ Hệ thống Web Push Notifications đã được tích hợp hoàn chỉnh vớ
 
 ## Files đã tạo
 
-```
+\`\`\`
 /public/
   ├── sw.js                                    # Service Worker
   ├── manifest.json                            # PWA Manifest
@@ -43,37 +43,37 @@ Hệ thống Web Push Notifications đã được tích hợp hoàn chỉnh vớ
 
 /lib/
   └── notification-service.tsx                # Service đã update
-```
+\`\`\`
 
 ## Cách sử dụng
 
 ### 1. Cài đặt package
 
-```bash
+\`\`\`bash
 npm install web-push
 # hoặc
 yarn add web-push
 # hoặc
 pnpm add web-push
-```
+\`\`\`
 
 ### 2. Tạo VAPID Keys (Bắt buộc cho production)
 
-```bash
+\`\`\`bash
 npx web-push generate-vapid-keys
-```
+\`\`\`
 
 Output sẽ như sau:
-```
+\`\`\`
 Public Key: BEl62iUYgUivxIkv69yViEuiBIa-Ib37J8xYjNBM...
 Private Key: UzQbzQLV3rPf7cT8Qh6s1WKmJN9FGBdX2YP0vLkCnHI
-```
+\`\`\`
 
 ### 3. Thêm Environment Variables
 
 Thêm vào `.env.local`:
 
-```env
+\`\`\`env
 # Web Push Notifications
 NEXT_PUBLIC_VAPID_PUBLIC_KEY=BEl62iUYgUivxIkv69yViEuiBIa-Ib37J8xYjNBM...
 VAPID_PRIVATE_KEY=UzQbzQLV3rPf7cT8Qh6s1WKmJN9FGBdX2YP0vLkCnHI
@@ -87,16 +87,16 @@ RESEND_API_KEY=re_xxxxxxxxxxxxx
 
 # Site URL
 NEXT_PUBLIC_SITE_URL=https://vexim.vn
-```
+\`\`\`
 
 ### 4. Chạy SQL Script
 
 Chạy script để tạo bảng `push_subscriptions`:
 
-```sql
+\`\`\`sql
 -- Trong Supabase SQL Editor hoặc từ v0
 \i scripts/014_create_push_subscriptions.sql
-```
+\`\`\`
 
 ### 5. Bật thông báo trong Admin Settings
 
@@ -129,7 +129,7 @@ Chạy script để tạo bảng `push_subscriptions`:
 
 ### Service Worker Flow:
 
-```
+\`\`\`
 Browser                Service Worker           Server
    |                         |                      |
    |-- Register SW ----------|                      |
@@ -142,7 +142,7 @@ Browser                Service Worker           Server
    |                         |                      |
    |-- Click Notification -->|                      |
    |<-- Open/Focus Tab ------|                      |
-```
+\`\`\`
 
 ## Test thông báo
 
@@ -176,12 +176,12 @@ Browser                Service Worker           Server
    - Đảm bảo site được cho phép gửi notifications
 
 3. **Kiểm tra Service Worker**:
-   ```javascript
+   \`\`\`javascript
    // Trong browser console
    navigator.serviceWorker.getRegistrations().then(regs => {
      console.log('Service Workers:', regs)
    })
-   ```
+   \`\`\`
 
 4. **Kiểm tra VAPID keys**:
    - Đảm bảo PUBLIC và PRIVATE key khớp nhau

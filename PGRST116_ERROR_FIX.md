@@ -4,14 +4,14 @@
 
 **PGRST116** là lỗi từ Supabase khi bạn sử dụng `.single()` nhưng query không tìm thấy row nào (0 rows).
 
-```
+\`\`\`
 {
   code: "PGRST116",
   details: "The result contains 0 rows",
   hint: null,
   message: "Cannot coerce the result to a single JSON object"
 }
-```
+\`\`\`
 
 ## Nguyên nhân
 
@@ -24,16 +24,16 @@
 ### 1. Thay `.single()` bằng `.maybeSingle()`
 
 **❌ Trước (gây lỗi):**
-```typescript
+\`\`\`typescript
 const { data } = await supabase
   .from("ai_config")
   .select("value")
   .eq("key", "rag_enabled")
   .single() // ❌ Throw error nếu không có row
-```
+\`\`\`
 
 **✅ Sau (an toàn):**
-```typescript
+\`\`\`typescript
 const { data, error } = await supabase
   .from("ai_config")
   .select("value")
@@ -46,12 +46,12 @@ if (error) {
 }
 
 const value = data?.value || defaultValue
-```
+\`\`\`
 
 ### 2. Xử lý error code PGRST116
 
 **Cách 2 (nếu vẫn muốn dùng `.single()`):**
-```typescript
+\`\`\`typescript
 const { data, error } = await supabase
   .from("conversations")
   .select("id")
@@ -64,20 +64,20 @@ if (error && error.code !== "PGRST116") {
 }
 
 // data sẽ là null nếu không tìm thấy
-```
+\`\`\`
 
 ### 3. Sử dụng upsert thay vì update
 
 **❌ Update (fail nếu row không tồn tại):**
-```typescript
+\`\`\`typescript
 await supabase
   .from("ai_config")
   .update({ value: newValue })
   .eq("key", "admin_notification_emails")
-```
+\`\`\`
 
 **✅ Upsert (tạo mới nếu chưa có):**
-```typescript
+\`\`\`typescript
 await supabase
   .from("ai_config")
   .upsert(
@@ -87,7 +87,7 @@ await supabase
     },
     { onConflict: "key" }
   )
-```
+\`\`\`
 
 ## Các file đã được fix
 
@@ -101,28 +101,28 @@ await supabase
 
 ### 1. Chạy migrations đầy đủ
 
-```bash
+\`\`\`bash
 # Chạy tất cả SQL scripts theo thứ tự
 scripts/001_create_posts_table.sql
 scripts/002_create_admin_user.sql
 scripts/007_create_chat_system.sql
 scripts/008_create_ai_knowledge_base.sql
 # ... và các script khác
-```
+\`\`\`
 
 ### 2. Tạo admin user đầu tiên
 
 Vào Supabase SQL Editor và chạy:
-```sql
+\`\`\`sql
 -- Tạo admin user
 INSERT INTO admin_users (email, name, role)
 VALUES ('your-email@example.com', 'Admin', 'admin')
 ON CONFLICT (email) DO NOTHING;
-```
+\`\`\`
 
 ### 3. Khởi tạo AI config mặc định
 
-```sql
+\`\`\`sql
 -- RAG setting
 INSERT INTO ai_config (key, value)
 VALUES ('rag_enabled', 'false')
@@ -132,7 +132,7 @@ ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
 INSERT INTO ai_config (key, value)
 VALUES ('admin_notification_emails', '[]'::jsonb)
 ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
-```
+\`\`\`
 
 ## Best Practices
 
@@ -151,7 +151,7 @@ ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
 
 ### Defensive coding
 
-```typescript
+\`\`\`typescript
 // ✅ Always handle both error and null data
 const { data, error } = await supabase
   .from("table")
@@ -170,7 +170,7 @@ if (!data) {
 }
 
 return data
-```
+\`\`\`
 
 ## Checklist khi gặp lỗi PGRST116
 

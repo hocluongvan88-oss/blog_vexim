@@ -28,14 +28,14 @@
 - Message ngắn gọn: "Dạ, Vexim có hỗ trợ dịch vụ này ạ! Để tư vấn cụ thể..."
 
 **Rule mới: SI-01-HIGH**
-```typescript
+\`\`\`typescript
 const directDoQuestions = [
   /(bạn|bên|công ty).*(có làm|làm được|làm)/i,
   /ý.*là.*(có làm|làm được|làm không)/i,
   /(em|anh|mình|các bạn).*(làm.*không|có làm)/i,
 ]
 // => HANDOFF_TO_ADMIN với urgency: "high"
-```
+\`\`\`
 
 ### 3. ✅ "Kết nối giúp anh" → AI nói lan man
 
@@ -50,7 +50,7 @@ const directDoQuestions = [
 - Message: "Dạ, Vexim có hỗ trợ... Anh/chị để lại số điện thoại..."
 
 **Rule mới: SI-02-IMMEDIATE**
-```typescript
+\`\`\`typescript
 const immediateHandoffPatterns = [
   /(kết nối|liên hệ|gọi).*(cho|giúp|tôi|mình|em|anh)/i,
   /(có|được|đồng ý|ok|oke|okê).*(em|anh|nhé|ạ)$/i,
@@ -58,7 +58,7 @@ const immediateHandoffPatterns = [
   /muốn (làm|thuê|nhờ).*ngay/i,
 ]
 // => HANDOFF_TO_ADMIN với urgency: "high"
-```
+\`\`\`
 
 ### 4. ✅ Thông báo cho admin
 
@@ -73,13 +73,13 @@ const immediateHandoffPatterns = [
 ### 5. ✅ AI System Prompt được cải thiện
 
 **Thêm vào system prompt:**
-```
+\`\`\`
 Nguyên tắc trả lời:
 - Ngắn gọn, súc tích (không quá 5 câu)
 - Khi khách hỏi "bạn có làm không": Trả lời NGAY "Vexim có làm dịch vụ này ạ"
 - KHÔNG giải thích vai trò AI, KHÔNG lặp lại câu hỏi khách
 - Chủ động hỏi thông tin để qualify lead (sản phẩm, thị trường, công ty)
-```
+\`\`\`
 
 ## Các Rule đã cải thiện
 
@@ -97,18 +97,18 @@ Nguyên tắc trả lời:
 ### Message Templates
 
 **High urgency handoff:**
-```
+\`\`\`
 Dạ, Vexim có hỗ trợ dịch vụ này ạ!
 
 Để tư vấn cụ thể cho trường hợp của anh/chị, em xin phép kết nối với chuyên viên. 
 
 Anh/chị để lại số điện thoại, chuyên viên sẽ liên hệ tư vấn chi tiết ngay ạ.
-```
+\`\`\`
 
 **Standard handoff:**
-```
+\`\`\`
 Cảm ơn anh/chị. Để tư vấn chính xác nhất, em đang chuyển cho chuyên viên của Vexim xử lý. Chuyên viên sẽ phản hồi trong thời gian sớm nhất ạ.
-```
+\`\`\`
 
 ## Test Cases
 
