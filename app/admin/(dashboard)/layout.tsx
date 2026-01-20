@@ -27,10 +27,15 @@ export default async function AdminLayout({
   }
 
   // Check if user is an admin
-  const { data: adminUser } = await supabase.from("admin_users").select("*").eq("email", user.email).single()
+  const { data: adminUser, error: adminError } = await supabase
+    .from("admin_users")
+    .select("*")
+    .eq("email", user.email)
+    .maybeSingle()
 
-  if (!adminUser) {
+  if (adminError || !adminUser) {
     // User is not an admin, sign them out and redirect
+    console.error("[v0] Admin check error:", adminError)
     await supabase.auth.signOut()
     redirect("/admin/login")
   }

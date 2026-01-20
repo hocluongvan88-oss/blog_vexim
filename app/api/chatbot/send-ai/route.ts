@@ -16,13 +16,17 @@ export async function POST(request: NextRequest) {
     // Tìm hoặc tạo conversation
     let convId = conversation_id
     if (!convId) {
-      const { data: existingConv } = await supabase
+      const { data: existingConv, error: searchError } = await supabase
         .from("conversations")
         .select("id")
         .eq("customer_id", customer_id)
         .eq("channel", "website")
         .eq("status", "active")
-        .single()
+        .maybeSingle()
+
+      if (searchError) {
+        console.error("[v0] Error searching conversation:", searchError)
+      }
 
       if (existingConv) {
         convId = existingConv.id
@@ -50,7 +54,7 @@ export async function POST(request: NextRequest) {
       .select("id, agent_name")
       .eq("conversation_id", convId)
       .eq("status", "active")
-      .single()
+      .maybeSingle()
 
     // Lưu tin nhắn của customer
     const { error: msgError } = await supabase.from("chat_messages").insert({
@@ -100,7 +104,7 @@ export async function POST(request: NextRequest) {
       .from("ai_config")
       .select("value")
       .eq("key", "rag_enabled")
-      .single()
+      .maybeSingle()
 
     const ragEnabled = ragConfig?.value === true
 

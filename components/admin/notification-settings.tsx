@@ -26,14 +26,18 @@ export function NotificationSettings() {
         .from("ai_config")
         .select("value")
         .eq("key", "admin_notification_emails")
-        .single()
+        .maybeSingle()
 
-      if (error) throw error
+      if (error) {
+        console.error("[v0] Error loading notification settings:", error)
+        throw error
+      }
 
       setEmails((data?.value as string[]) || [])
     } catch (error) {
       console.error("[v0] Error loading notification settings:", error)
-      toast.error("Không thể tải cấu hình thông báo")
+      // Don't show error toast if config doesn't exist yet
+      // toast.error("Không thể tải cấu hình thông báo")
     } finally {
       setLoading(false)
     }
@@ -66,10 +70,19 @@ export function NotificationSettings() {
     setSaving(true)
     try {
       const supabase = createClient()
+      
+      // Try to upsert instead of update (handles case where row doesn't exist)
       const { error } = await supabase
         .from("ai_config")
-        .update({ value: emails })
-        .eq("key", "admin_notification_emails")
+        .upsert(
+          { 
+            key: "admin_notification_emails", 
+            value: emails 
+          },
+          { 
+            onConflict: "key" 
+          }
+        )
 
       if (error) throw error
 

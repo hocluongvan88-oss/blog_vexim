@@ -22,9 +22,9 @@ export async function POST(request: NextRequest) {
         .eq("customer_id", customer_id)
         .eq("channel", "website")
         .eq("status", "active")
-        .single()
+        .maybeSingle()
 
-      if (searchError && searchError.code !== "PGRST116") {
+      if (searchError) {
         console.error("[v0] Error searching conversation:", searchError)
       }
 
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
       .from("ai_config")
       .select("value")
       .eq("key", "rag_enabled")
-      .single()
+      .maybeSingle()
 
     const ragEnabled = ragConfig?.value === true
 

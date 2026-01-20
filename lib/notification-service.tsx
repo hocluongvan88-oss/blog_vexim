@@ -63,13 +63,18 @@ export async function sendEmailNotification(payload: NotificationPayload) {
     // Get admin emails from settings
     const supabase = await createClient()
     
-    const { data: emailConfig } = await supabase
+    const { data: emailConfig, error } = await supabase
       .from("ai_config")
       .select("value")
       .eq("key", "admin_notification_emails")
-      .single()
+      .maybeSingle()
 
-    const adminEmails = emailConfig?.value as string[] || []
+    if (error) {
+      console.error("[v0] Error fetching email config:", error)
+      return
+    }
+
+    const adminEmails = (emailConfig?.value as string[]) || []
     
     if (adminEmails.length === 0) {
       console.log("[v0] No admin emails configured for notifications")
