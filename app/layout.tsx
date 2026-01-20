@@ -1,10 +1,16 @@
 import type React from "react"
-import type { Metadata } from "next"
 import { Be_Vietnam_Pro } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
-import { ChatWidget } from "@/components/chat-widget"
-import { ZaloChatButton } from "@/components/zalo-chat-button"
+import dynamic from "next/dynamic"
+import { Metadata } from "next"
+
+const ChatWidget = dynamic(() => import("@/components/chat-widget").then(mod => ({ default: mod.ChatWidget })), {
+  ssr: false,
+})
+const ZaloChatButton = dynamic(() => import("@/components/zalo-chat-button").then(mod => ({ default: mod.ZaloChatButton })), {
+  ssr: false,
+})
 
 const beVietnamPro = Be_Vietnam_Pro({
   subsets: ["vietnamese", "latin"],
@@ -94,7 +100,7 @@ export const metadata: Metadata = {
     ],
     apple: "/apple-icon.png",
   },
-    generator: 'v0.app'
+  generator: 'v0.app'
 }
 
 export default function RootLayout({

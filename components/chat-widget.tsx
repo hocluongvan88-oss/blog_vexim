@@ -8,6 +8,68 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 
+// Simple markdown parser for chatbot messages
+function parseMarkdown(text: string): React.ReactNode {
+  const lines = text.split('\n')
+  const elements: React.ReactNode[] = []
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]
+    
+    // Bold text: **text** or __text__
+    let processedLine = line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    processedLine = processedLine.replace(/__(.+?)__/g, '<strong>$1</strong>')
+    
+    // Italic: *text* or _text_ (but not ** or __)
+    processedLine = processedLine.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '<em>$1</em>')
+    processedLine = processedLine.replace(/(?<!_)_(?!_)(.+?)(?<!_)_(?!_)/g, '<em>$1</em>')
+    
+    // List items: * item or - item
+    if (line.trim().match(/^[\*\-]\s+/)) {
+      const content = line.trim().replace(/^[\*\-]\s+/, '')
+      let processedContent = content.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      processedContent = processedContent.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '<em>$1</em>')
+      elements.push(
+        <li key={i} className="ml-4 mb-1" dangerouslySetInnerHTML={{ __html: processedContent }} />
+      )
+      continue
+    }
+    
+    // Numbered list: 1. item
+    if (line.trim().match(/^\d+\.\s+/)) {
+      const content = line.trim().replace(/^\d+\.\s+/, '')
+      let processedContent = content.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      processedContent = processedContent.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '<em>$1</em>')
+      elements.push(
+        <li key={i} className="ml-4 mb-1 list-decimal" dangerouslySetInnerHTML={{ __html: processedContent }} />
+      )
+      continue
+    }
+    
+    // Links: [text](url)
+    processedLine = processedLine.replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">$1</a>')
+    
+    // Empty lines
+    if (line.trim() === '') {
+      elements.push(<br key={i} />)
+      continue
+    }
+    
+    // Regular paragraphs
+    if (processedLine.includes('<')) {
+      elements.push(
+        <p key={i} className="mb-2" dangerouslySetInnerHTML={{ __html: processedLine }} />
+      )
+    } else {
+      elements.push(
+        <p key={i} className="mb-2">{processedLine}</p>
+      )
+    }
+  }
+  
+  return <div className="space-y-1">{elements}</div>
+}
+
 interface Message {
   id: string
   sender_type: "customer" | "bot"
@@ -212,7 +274,13 @@ export function ChatWidget() {
                           : "bg-white text-gray-800 rounded-bl-none"
                       )}
                     >
-                      <p className="whitespace-pre-wrap break-words">{msg.message_text}</p>
+                      <div className="break-words">
+                        {msg.sender_type === "bot" ? (
+                          parseMarkdown(msg.message_text)
+                        ) : (
+                          <p className="whitespace-pre-wrap">{msg.message_text}</p>
+                        )}
+                      </div>
                       <span className="text-xs opacity-70 mt-1 block">
                         {new Date(msg.created_at).toLocaleTimeString("vi-VN", {
                           hour: "2-digit",
