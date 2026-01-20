@@ -85,6 +85,8 @@ export function ChatWidget() {
   const [isLoading, setIsLoading] = useState(false)
   const [customerId, setCustomerId] = useState("")
   const [conversationId, setConversationId] = useState("")
+  const [streamingMessage, setStreamingMessage] = useState("")
+  const [isStreaming, setIsStreaming] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -105,9 +107,19 @@ export function ChatWidget() {
     }
   }, [])
 
-  // Auto scroll to bottom
+  // KHÔNG tự động scroll - để user tự kéo xuống
+  // Auto scroll chỉ khi user đang ở gần cuối (trong vòng 100px từ đáy)
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+    const messageContainer = messagesEndRef.current?.parentElement
+    if (!messageContainer) return
+    
+    const isNearBottom = 
+      messageContainer.scrollHeight - messageContainer.scrollTop - messageContainer.clientHeight < 100
+    
+    // Chỉ scroll nếu user đang ở gần cuối
+    if (isNearBottom) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+    }
   }, [messages])
 
   // Auto-focus input khi mở chat hoặc khi không minimize
@@ -170,14 +182,51 @@ export function ChatWidget() {
           localStorage.setItem("vexim_conversation_id", data.response.conversation_id)
         }
 
-        // Thêm phản hồi từ bot hoặc thông báo handed over
-        const botMessage: Message = {
-          id: data.response.message_id || `bot_${Date.now()}`,
-          sender_type: data.response.handed_over ? "agent" : "bot",
-          message_text: data.response.message_text,
-          created_at: data.response.timestamp || new Date().toISOString(),
+        const fullMessage = data.response.message_text
+        const messageId = data.response.message_id || `bot_${Date.now()}`
+        const senderType = data.response.handed_over ? "agent" : "bot"
+        const timestamp = data.response.timestamp || new Date().toISOString()
+
+        // Hiển thị typing effect
+        setIsStreaming(true)
+        setStreamingMessage("")
+        
+        // Thêm message tạm với nội dung rỗng
+        const tempBotMessage: Message = {
+          id: messageId,
+          sender_type: senderType,
+          message_text: "",
+          created_at: timestamp,
         }
-        setMessages((prev) => [...prev, botMessage])
+        setMessages((prev) => [...prev, tempBotMessage])
+
+        // Typing effect: hiển thị từng ký tự
+        let currentIndex = 0
+        const typingSpeed = 15 // ms per character (càng nhỏ càng nhanh)
+        
+        const typingInterval = setInterval(() => {
+          if (currentIndex < fullMessage.length) {
+            const nextChar = fullMessage[currentIndex]
+            setStreamingMessage((prev) => prev + nextChar)
+            
+            // Cập nhật message trong list
+            setMessages((prev) => {
+              const updated = [...prev]
+              const lastMsg = updated[updated.length - 1]
+              if (lastMsg && lastMsg.id === messageId) {
+                lastMsg.message_text = fullMessage.substring(0, currentIndex + 1)
+              }
+              return updated
+            })
+            
+            currentIndex++
+          } else {
+            // Hoàn thành typing
+            clearInterval(typingInterval)
+            setIsStreaming(false)
+            setStreamingMessage("")
+          }
+        }, typingSpeed)
       } else {
         throw new Error(data.error || "Lỗi không xác định")
       }
