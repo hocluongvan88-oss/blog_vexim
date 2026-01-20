@@ -1,6 +1,7 @@
 import type React from "react"
 import type { Metadata } from "next"
 import { AdminSidebar } from "@/components/admin-sidebar"
+import { MobileAdminHeader } from "@/components/admin/mobile-admin-header"
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 
@@ -34,10 +35,39 @@ export default async function AdminLayout({
     redirect("/admin/login")
   }
 
+  // Get pending conversations count
+  const { data: handoverConvs } = await supabase
+    .from("conversations")
+    .select("id")
+    .eq("handover_mode", "manual")
+
+  let pendingCount = 0
+  if (handoverConvs) {
+    for (const conv of handoverConvs) {
+      const { count } = await supabase
+        .from("chat_messages")
+        .select("*", { count: "exact", head: true })
+        .eq("conversation_id", conv.id)
+        .eq("sender_type", "agent")
+      
+      if (count === 0) {
+        pendingCount++
+      }
+    }
+  }
+
   return (
-    <div className="flex min-h-screen bg-secondary/30">
-      <AdminSidebar adminUser={adminUser} />
-      <main className="flex-1">{children}</main>
+    <div className="min-h-screen bg-secondary/30">
+      {/* Mobile Header */}
+      <MobileAdminHeader adminUser={adminUser} pendingCount={pendingCount} />
+      
+      {/* Desktop Sidebar + Content */}
+      <div className="flex">
+        <div className="hidden lg:block">
+          <AdminSidebar adminUser={adminUser} />
+        </div>
+        <main className="flex-1 w-full">{children}</main>
+      </div>
     </div>
   )
 }

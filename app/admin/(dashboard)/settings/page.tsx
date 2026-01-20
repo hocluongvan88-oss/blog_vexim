@@ -8,9 +8,11 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Settings, Save, RefreshCw, Brain, Shield, Zap } from "lucide-react"
+import { Settings, Save, RefreshCw, Brain, Shield, Zap, Bell } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
+import { NotificationSettings } from "@/components/admin/notification-settings"
+import { PushNotificationSettings } from "@/components/admin/push-notification-settings"
 
 interface AIConfig {
   model: string
@@ -142,7 +144,7 @@ Lưu ý:
       </div>
 
       <Tabs defaultValue="ai" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="ai" className="gap-2">
             <Brain className="h-4 w-4" />
             Cấu hình AI
@@ -150,6 +152,10 @@ Lưu ý:
           <TabsTrigger value="handover" className="gap-2">
             <Shield className="h-4 w-4" />
             Điều kiện handover
+          </TabsTrigger>
+          <TabsTrigger value="notifications" className="gap-2">
+            <Bell className="h-4 w-4" />
+            Thông báo
           </TabsTrigger>
           <TabsTrigger value="general" className="gap-2">
             <Settings className="h-4 w-4" />
@@ -301,6 +307,11 @@ Lưu ý:
               </p>
             </div>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="notifications" className="space-y-6">
+          <PushNotificationSettings />
+          <NotificationSettings />
         </TabsContent>
 
         <TabsContent value="general" className="space-y-6">

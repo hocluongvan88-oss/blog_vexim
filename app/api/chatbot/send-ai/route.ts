@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { generateAIResponse, loadAIConfig } from "@/lib/ai-service"
+import { evaluateRules, getContactRequestMessage, type MessageContext } from "@/lib/rule-engine"
+import { notifyAdminNewHandover } from "@/lib/notification-service"
 
 export async function POST(request: NextRequest) {
   try {
@@ -102,7 +104,128 @@ export async function POST(request: NextRequest) {
 
     const ragEnabled = ragConfig?.value === true
 
-    // Generate AI response với RAG
+    // Evaluate rules first to determine action
+    const ruleContext: MessageContext = {
+      message: message_text,
+      conversationHistory: conversationHistory.map(m => m.content),
+      hasFile: false, // TODO: Add file detection
+      customerInfo: {
+        companyName: customer_name,
+      }
+    }
+
+    const ruleResult = evaluateRules(ruleContext)
+    console.log("[v0] Rule evaluation result:", ruleResult)
+
+    // Handle HANDOFF_TO_ADMIN action
+    if (ruleResult.action === "HANDOFF_TO_ADMIN") {
+      // Create handover immediately
+      await supabase.from("conversation_handovers").insert({
+        conversation_id: convId,
+        from_type: "bot",
+        to_type: "agent",
+        reason: ruleResult.reason,
+        status: "active",
+      })
+
+      // Update conversation with tags
+      await supabase
+        .from("conversations")
+        .update({
+          handover_mode: "manual",
+          metadata: {
+            service_tag: ruleResult.tags.service_tag,
+            reason: ruleResult.tags.reason,
+            urgency: ruleResult.tags.urgency,
+            rule_id: ruleResult.ruleId,
+          }
+        })
+        .eq("id", convId)
+
+      // Save bot message explaining handover
+      const handoverMessage = "Cảm ơn anh/chị. Để tư vấn chính xác nhất, em đang chuyển cho chuyên viên của Vexim xử lý. Chuyên viên sẽ phản hồi trong thời gian sớm nhất ạ."
+      
+      const { data: botMessage } = await supabase
+        .from("chat_messages")
+        .insert({
+          conversation_id: convId,
+          sender_type: "bot",
+          message_text: handoverMessage,
+          ai_model: aiConfig.model,
+          ai_confidence: 1.0,
+        })
+        .select("id, created_at")
+        .single()
+
+      // Send notification to admin
+      await notifyAdminNewHandover({
+        conversationId: convId,
+        customerName: customer_name,
+        message: message_text,
+        urgency: ruleResult.tags.urgency as "high" | "medium" | "low",
+        serviceTag: ruleResult.tags.service_tag,
+        reason: ruleResult.tags.reason,
+      })
+
+      return NextResponse.json({
+        status: "handoff",
+        action: "HANDOFF_TO_ADMIN",
+        response: {
+          conversation_id: convId,
+          message_id: botMessage?.id,
+          message_text: handoverMessage,
+          timestamp: botMessage?.created_at || new Date().toISOString(),
+          handoff: true,
+          tags: ruleResult.tags,
+        },
+      })
+    }
+
+    // Handle ASK_CONTACT action
+    if (ruleResult.action === "ASK_CONTACT") {
+      const contactMessage = getContactRequestMessage()
+      
+      const { data: botMessage } = await supabase
+        .from("chat_messages")
+        .insert({
+          conversation_id: convId,
+          sender_type: "bot",
+          message_text: contactMessage,
+          ai_model: aiConfig.model,
+          ai_confidence: 0.9,
+        })
+        .select("id, created_at")
+        .single()
+
+      // Update conversation with tags
+      await supabase
+        .from("conversations")
+        .update({
+          metadata: {
+            service_tag: ruleResult.tags.service_tag,
+            reason: ruleResult.tags.reason,
+            urgency: ruleResult.tags.urgency,
+            rule_id: ruleResult.ruleId,
+            ask_contact: true,
+          }
+        })
+        .eq("id", convId)
+
+      return NextResponse.json({
+        status: "ask_contact",
+        action: "ASK_CONTACT",
+        response: {
+          conversation_id: convId,
+          message_id: botMessage?.id,
+          message_text: contactMessage,
+          timestamp: botMessage?.created_at || new Date().toISOString(),
+          show_contact_form: true,
+          tags: ruleResult.tags,
+        },
+      })
+    }
+
+    // Default: AI_CONTINUE - Generate AI response với RAG
     const aiResponse = await generateAIResponse(
       message_text,
       conversationHistory,
@@ -110,6 +233,34 @@ export async function POST(request: NextRequest) {
       supabase,
       ragEnabled
     )
+
+    // Update AI confidence in rule context and re-evaluate if needed
+    ruleContext.aiConfidence = aiResponse.confidence
+    const confidenceCheck = evaluateRules(ruleContext)
+    
+    // If confidence is too low after generation, handoff
+    if (confidenceCheck.action === "HANDOFF_TO_ADMIN") {
+      await supabase.from("conversation_handovers").insert({
+        conversation_id: convId,
+        from_type: "bot",
+        to_type: "agent",
+        reason: "AI confidence too low after generation",
+        status: "active",
+      })
+
+      await supabase
+        .from("conversations")
+        .update({
+          handover_mode: "manual",
+          metadata: {
+            service_tag: ruleResult.tags.service_tag,
+            reason: "data",
+            urgency: "medium",
+            rule_id: "AI-01",
+          }
+        })
+        .eq("id", convId)
+    }
 
     // Lưu tin nhắn từ AI
     const { data: botMessage, error: botMsgError } = await supabase

@@ -38,17 +38,17 @@ Trong WordPress Admin:
 
 Trong terminal v0, chạy lệnh:
 
-```bash
+\`\`\`bash
 npm run import:wordpress
-```
+\`\`\`
 
 Hoặc nếu bạn muốn test với một file cụ thể, sửa mảng `xmlFiles` trong file `scripts/import-wordpress-posts.ts`:
 
-```typescript
+\`\`\`typescript
 const xmlFiles = [
   "user_read_only_context/text_attachments/your-export-file.xml",
 ]
-```
+\`\`\`
 
 ## Quá trình xử lý
 
@@ -70,11 +70,11 @@ Script sẽ tự động:
 
 Sau khi chạy xong, bạn sẽ thấy:
 
-```
+\`\`\`
 [v0] Import completed!
 [v0] Imported: 25 posts
 [v0] Skipped: 10 items
-```
+\`\`\`
 
 ## Cấu trúc dữ liệu import
 
@@ -124,4 +124,4 @@ Nếu cần hỗ trợ, kiểm tra:
 - Console logs trong terminal
 - Supabase dashboard → Table Editor → posts
 - Row Level Security policies có thể chặn insert
-```
+\`\`\`

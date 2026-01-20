@@ -66,9 +66,13 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (docError) {
-      console.error("Error inserting document:", docError)
+      console.error("[v0] Error inserting document:", docError)
       return NextResponse.json(
-        { error: "Failed to create document" },
+        { 
+          error: "Failed to create document",
+          details: docError.message,
+          code: docError.code 
+        },
         { status: 500 }
       )
     }

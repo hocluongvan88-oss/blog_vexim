@@ -16,9 +16,10 @@ import {
   Brain,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { createClient } from "@/lib/supabase/client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 interface AdminSidebarProps {
   adminUser: {
@@ -32,6 +33,46 @@ export function AdminSidebar({ adminUser }: AdminSidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const [pendingCount, setPendingCount] = useState(0)
+
+  useEffect(() => {
+    const loadPendingCount = async () => {
+      const supabase = createClient()
+      
+      // Get conversations with handover_mode = 'manual'
+      const { data: handoverConvs } = await supabase
+        .from("conversations")
+        .select("id")
+        .eq("handover_mode", "manual")
+
+      if (!handoverConvs) {
+        setPendingCount(0)
+        return
+      }
+
+      // Check which ones have no agent messages yet
+      let pending = 0
+      for (const conv of handoverConvs) {
+        const { count } = await supabase
+          .from("chat_messages")
+          .select("*", { count: "exact", head: true })
+          .eq("conversation_id", conv.id)
+          .eq("sender_type", "agent")
+        
+        if (count === 0) {
+          pending++
+        }
+      }
+
+      setPendingCount(pending)
+    }
+
+    loadPendingCount()
+    
+    // Refresh every 30 seconds
+    const interval = setInterval(loadPendingCount, 30000)
+    return () => clearInterval(interval)
+  }, [])
 
   const menuItems = [
     {
@@ -92,7 +133,7 @@ export function AdminSidebar({ adminUser }: AdminSidebarProps) {
   }
 
   return (
-    <aside className="w-64 bg-white border-r min-h-screen flex flex-col">
+    <aside className="w-64 bg-white border-r min-h-screen flex flex-col sticky top-0">
       {/* Logo */}
       <div className="p-6 border-b">
         <Link href="/" className="flex items-center gap-2">
@@ -123,7 +164,12 @@ export function AdminSidebar({ adminUser }: AdminSidebarProps) {
                   )}
                 >
                   <item.icon className="w-5 h-5" />
-                  <span>{item.title}</span>
+                  <span className="flex-1">{item.title}</span>
+                  {item.href === "/admin/conversations" && pendingCount > 0 && (
+                    <Badge className="bg-orange-500 text-white px-2 py-0.5 text-xs">
+                      {pendingCount}
+                    </Badge>
+                  )}
                 </Link>
               </li>
             )

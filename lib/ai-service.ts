@@ -233,14 +233,8 @@ export async function generateAIResponse(
     // Phân tích intent và confidence
     const analysis = analyzeIntent(message, aiMessage)
 
-    // Nếu AI không tự tin, gợi ý chuyển sang agent
-    let finalMessage = aiMessage
-    if (analysis.shouldHandover) {
-      finalMessage += `\n\n💡 Để được tư vấn chi tiết hơn, bạn có thể yêu cầu kết nối với chuyên gia của chúng tôi.`
-    }
-
     return {
-      message: finalMessage,
+      message: aiMessage,
       confidence: analysis.confidence,
       sources: knowledgeChunks.map((c) => c.document_title),
       shouldHandover: analysis.shouldHandover,

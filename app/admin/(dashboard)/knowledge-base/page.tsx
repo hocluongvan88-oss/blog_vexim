@@ -104,7 +104,8 @@ export default function KnowledgeBasePage() {
         loadDocuments()
       } else {
         const error = await res.json()
-        toast.error(error.message || "Có lỗi xảy ra")
+        console.error("[v0] Upload error:", error)
+        toast.error(error.details || error.error || "Có lỗi xảy ra")
       }
     } catch (error) {
       toast.error("Không thể tải lên tài liệu")
