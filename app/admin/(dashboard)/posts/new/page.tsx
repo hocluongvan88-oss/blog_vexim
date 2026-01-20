@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast"
 import { BlockEditor } from "@/components/block-editor/block-editor"
 import { SEOChecker } from "@/components/seo-checker"
 import { ImageUploader } from "@/components/image-uploader"
+import { AIWritingAssistant } from "@/components/admin/ai-writing-assistant"
 import type { Block } from "@/components/block-editor/types"
 import { Bold, Italic, Heading2, Heading3, LinkIcon, ImageIcon, RichTextEditor } from "@/components/icons"
 
@@ -36,6 +37,7 @@ export default function NewPostPage() {
   const [featuredImage, setFeaturedImage] = useState("")
   const [previewImage, setPreviewImage] = useState<string | null>(null)
   const [content, setContent] = useState("") // Declare content variable
+  const [selectedText, setSelectedText] = useState("")
 
   // Generate text content from blocks for SEO checker
   const getTextContent = () => {
@@ -46,6 +48,33 @@ export default function NewPostPage() {
         return ""
       })
       .join(" ")
+  }
+
+  // Track text selection for AI assistant
+  const handleTextSelection = () => {
+    const selection = window.getSelection()
+    const text = selection?.toString() || ""
+    if (text.length > 0) {
+      setSelectedText(text)
+    }
+  }
+
+  // Apply AI suggestion (replace selected text)
+  const handleApplyAISuggestion = (newText: string) => {
+    // This is a simplified version - in production you'd need to track which block was selected
+    toast({
+      title: "Áp dụng thành công",
+      description: "Vui lòng copy và paste vào khối đang chỉnh sửa",
+    })
+  }
+
+  // Handle AI-generated meta
+  const handleGenerateMeta = (meta: { description: string; keywords: string[] }) => {
+    setMetaDescription(meta.description)
+    toast({
+      title: "Đã tạo Meta Description",
+      description: "Meta description đã được cập nhật tự động",
+    })
   }
 
   const handleSubmit = async (status: "draft" | "published") => {
@@ -192,7 +221,15 @@ export default function NewPostPage() {
         </div>
 
         {/* Sidebar - Right Side */}
-        <div className="space-y-6">
+        <div className="space-y-6" onMouseUp={handleTextSelection}>
+          {/* AI Writing Assistant */}
+          <AIWritingAssistant
+            selectedText={selectedText}
+            fullContent={getTextContent()}
+            onApply={handleApplyAISuggestion}
+            onGenerateMeta={handleGenerateMeta}
+          />
+
           {/* SEO Checker Card */}
           <Card className="p-6">
             <h3 className="text-lg font-bold text-primary mb-4">Phân tích SEO</h3>
