@@ -3,8 +3,8 @@ import type { Metadata } from "next"
 import { Be_Vietnam_Pro } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
-import { ZaloChatButton } from "@/components/zalo-chat-button"
 import { ChatWidget } from "@/components/chat-widget"
+import { ZaloChatButton } from "@/components/zalo-chat-button"
 
 const beVietnamPro = Be_Vietnam_Pro({
   subsets: ["vietnamese", "latin"],
@@ -106,7 +106,6 @@ export default function RootLayout({
       <body className={`${beVietnamPro.variable} font-sans antialiased`}>
         {children}
         <ChatWidget />
-        <ZaloChatButton />
         <Analytics />
       </body>
     </html>

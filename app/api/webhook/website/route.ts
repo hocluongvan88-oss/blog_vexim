@@ -8,17 +8,49 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams
     const conversationId = searchParams.get("conversation_id")
+    const customerId = searchParams.get("customer_id")
 
-    if (!conversationId) {
-      return NextResponse.json({ error: "Missing conversation_id" }, { status: 400 })
+    if (!conversationId && !customerId) {
+      return NextResponse.json(
+        { error: "Missing required parameter: conversation_id or customer_id" },
+        { status: 400 }
+      )
     }
 
     const supabase = await createClient()
 
-    // Lấy lịch sử tin nhắn
+    // Nếu có customer_id, lấy conversation của customer đó
+    if (customerId) {
+      const { data: conversation } = await supabase
+        .from("conversations")
+        .select("id")
+        .eq("customer_id", customerId)
+        .eq("channel", "website")
+        .single()
+
+      if (!conversation) {
+        return NextResponse.json({ status: "ok", messages: [] })
+      }
+
+      // Lấy tin nhắn
+      const { data: messages, error } = await supabase
+        .from("chat_messages")
+        .select("id, sender_type, message_text, created_at")
+        .eq("conversation_id", conversation.id)
+        .order("created_at", { ascending: true })
+
+      if (error) {
+        console.error("[v0] Error fetching messages:", error)
+        return NextResponse.json({ error: "Failed to fetch messages" }, { status: 500 })
+      }
+
+      return NextResponse.json({ status: "ok", messages })
+    }
+
+    // Nếu có conversation_id
     const { data: messages, error } = await supabase
       .from("chat_messages")
-      .select("*")
+      .select("id, sender_type, message_text, created_at")
       .eq("conversation_id", conversationId)
       .order("created_at", { ascending: true })
 
@@ -27,7 +59,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Failed to fetch messages" }, { status: 500 })
     }
 
-    return NextResponse.json({ messages })
+    return NextResponse.json({ status: "ok", messages })
   } catch (error) {
     console.error("[v0] GET /api/webhook/website error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
