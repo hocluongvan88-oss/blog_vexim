@@ -107,20 +107,23 @@ export function ChatWidget() {
     }
   }, [])
 
-  // KHÔNG tự động scroll - để user tự kéo xuống
-  // Auto scroll chỉ khi user đang ở gần cuối (trong vòng 100px từ đáy)
+  // KHÔNG tự động scroll khi đang typing - để user đọc thoải mái
+  // Chỉ scroll khi HOÀN THÀNH typing VÀ user đang ở cuối
   useEffect(() => {
+    // Nếu đang streaming (typing), KHÔNG scroll
+    if (isStreaming) return
+    
     const messageContainer = messagesEndRef.current?.parentElement
     if (!messageContainer) return
     
     const isNearBottom = 
       messageContainer.scrollHeight - messageContainer.scrollTop - messageContainer.clientHeight < 100
     
-    // Chỉ scroll nếu user đang ở gần cuối
+    // Chỉ scroll nếu user đang ở gần cuối VÀ đã typing xong
     if (isNearBottom) {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
     }
-  }, [messages])
+  }, [messages, isStreaming])
 
   // Auto-focus input khi mở chat hoặc khi không minimize
   useEffect(() => {
