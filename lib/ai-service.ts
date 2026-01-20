@@ -1,8 +1,20 @@
 import Groq from "groq-sdk"
 
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-})
+// Initialize Groq client
+let groq: Groq | null = null
+
+try {
+  if (!process.env.GROQ_API_KEY) {
+    console.error("[v0] GROQ_API_KEY is not set in environment variables")
+  } else {
+    groq = new Groq({
+      apiKey: process.env.GROQ_API_KEY,
+    })
+    console.log("[v0] Groq client initialized successfully")
+  }
+} catch (error) {
+  console.error("[v0] Error initializing Groq client:", error)
+}
 
 export interface AIConfig {
   model: string
@@ -178,6 +190,11 @@ export async function generateAIResponse(
   ragEnabled: boolean = true
 ): Promise<AIResponse> {
   try {
+    // Check if Groq is initialized
+    if (!groq) {
+      throw new Error("Groq client is not initialized. Please check GROQ_API_KEY environment variable.")
+    }
+
     let knowledgeChunks: KnowledgeChunk[] = []
     let context = ""
 
@@ -200,6 +217,8 @@ export async function generateAIResponse(
       },
     ]
 
+    console.log("[v0] Calling Groq API with model:", config.model)
+
     // Gọi Groq API
     const completion = await groq.chat.completions.create({
       model: config.model,
@@ -209,6 +228,7 @@ export async function generateAIResponse(
     })
 
     const aiMessage = completion.choices[0]?.message?.content || ""
+    console.log("[v0] Received AI response:", aiMessage.substring(0, 100))
 
     // Phân tích intent và confidence
     const analysis = analyzeIntent(message, aiMessage)
