@@ -1,4 +1,3 @@
-import { put } from "@vercel/blob"
 import { NextResponse } from "next/server"
 
 export async function POST(request: Request) {
@@ -20,15 +19,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "File size must be less than 5MB" }, { status: 400 })
     }
 
-    // Upload to Vercel Blob
-    const blob = await put(file.name, file, {
-      access: "public",
-    })
+    // Convert file to base64 for simple storage
+    const bytes = await file.arrayBuffer()
+    const buffer = Buffer.from(bytes)
+    const base64 = buffer.toString("base64")
+    const dataUrl = `data:${file.type};base64,${base64}`
 
+    // For now, return the data URL (you can later integrate with Vercel Blob or Supabase Storage)
     return NextResponse.json({
-      url: blob.url,
-      pathname: blob.pathname,
-      contentType: blob.contentType,
+      url: dataUrl,
+      pathname: file.name,
+      contentType: file.type,
     })
   } catch (error) {
     console.error("Upload error:", error)
