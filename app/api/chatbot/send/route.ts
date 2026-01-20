@@ -10,11 +10,13 @@ export async function POST(request: NextRequest) {
     console.log("[v0] Processing chatbot message:", { customer_id, message_text })
 
     const supabase = await createClient()
+    console.log("[v0] Supabase client created successfully")
 
     // Tìm hoặc tạo conversation
     let convId = conversation_id
     if (!convId) {
-      const { data: existingConv } = await supabase
+      console.log("[v0] Looking for existing conversation for customer:", customer_id)
+      const { data: existingConv, error: searchError } = await supabase
         .from("conversations")
         .select("id")
         .eq("customer_id", customer_id)
@@ -22,9 +24,15 @@ export async function POST(request: NextRequest) {
         .eq("status", "active")
         .single()
 
+      if (searchError && searchError.code !== "PGRST116") {
+        console.error("[v0] Error searching conversation:", searchError)
+      }
+
       if (existingConv) {
         convId = existingConv.id
+        console.log("[v0] Found existing conversation:", convId)
       } else {
+        console.log("[v0] Creating new conversation for customer:", customer_id)
         const { data: newConv, error: convError } = await supabase
           .from("conversations")
           .insert({
@@ -42,6 +50,7 @@ export async function POST(request: NextRequest) {
           throw convError
         }
         convId = newConv.id
+        console.log("[v0] Created new conversation:", convId)
       }
     }
 
