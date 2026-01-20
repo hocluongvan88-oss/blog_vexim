@@ -3,11 +3,11 @@ import { NextResponse } from "next/server"
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient()
-    const conversationId = params.id
+    const { id: conversationId } = await params
 
     console.log("[v0] DELETE conversation request for ID:", conversationId)
 

@@ -11,17 +11,10 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Eye, Save, Send, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import { BlockEditor } from "@/components/block-editor/block-editor"
 import { SEOChecker } from "@/components/seo-checker"
 import { ImageUploader } from "@/components/image-uploader"
 import { AIWritingAssistant } from "@/components/admin/ai-writing-assistant"
-import type { Block } from "@/components/block-editor/types"
-import { Bold, Italic, Heading2, Heading3, LinkIcon, ImageIcon, RichTextEditor } from "@/components/icons"
-
-function insertFormatting(format: string) {
-  // Implementation for inserting formatting
-  console.log(`Inserting ${format} formatting`)
-}
+import { RichTextEditor } from "@/components/rich-text-editor"
 
 export default function NewPostPage() {
   const router = useRouter()
@@ -31,24 +24,13 @@ export default function NewPostPage() {
   const [title, setTitle] = useState("")
   const [category, setCategory] = useState("")
   const [excerpt, setExcerpt] = useState("")
-  const [blocks, setBlocks] = useState<Block[]>([])
+  const [content, setContent] = useState("")
   const [metaTitle, setMetaTitle] = useState("")
   const [metaDescription, setMetaDescription] = useState("")
   const [featuredImage, setFeaturedImage] = useState("")
   const [previewImage, setPreviewImage] = useState<string | null>(null)
-  const [content, setContent] = useState("") // Declare content variable
   const [selectedText, setSelectedText] = useState("")
-
-  // Generate text content from blocks for SEO checker
-  const getTextContent = () => {
-    return blocks
-      .map((block) => {
-        if (block.type === "heading" || block.type === "paragraph") return block.data.text
-        if (block.type === "quote") return block.data.text
-        return ""
-      })
-      .join(" ")
-  }
+  const [blocks, setBlocks] = useState<Block[]>([])
 
   // Track text selection for AI assistant
   const handleTextSelection = () => {
@@ -59,12 +41,20 @@ export default function NewPostPage() {
     }
   }
 
-  // Apply AI suggestion (replace selected text)
+  // Apply AI suggestion - replace selected text or append to content
   const handleApplyAISuggestion = (newText: string) => {
-    // This is a simplified version - in production you'd need to track which block was selected
+    if (selectedText && content.includes(selectedText)) {
+      // Replace selected text
+      setContent(content.replace(selectedText, newText))
+      setSelectedText("")
+    } else {
+      // Append to content if no selection
+      setContent(content + "\n\n" + newText)
+    }
+    
     toast({
-      title: "Áp dụng thành công",
-      description: "Vui lòng copy và paste vào khối đang chỉnh sửa",
+      title: "Đã áp dụng",
+      description: "Nội dung AI đã được thêm vào bài viết",
     })
   }
 
@@ -78,7 +68,9 @@ export default function NewPostPage() {
   }
 
   const handleSubmit = async (status: "draft" | "published") => {
-    if (!title || !category || !excerpt || blocks.length === 0) {
+    console.log("[v0] Submitting post:", { title, category, excerpt, contentLength: content.length, status })
+    
+    if (!title || !category || !excerpt || !content) {
       toast({
         title: "Thiếu thông tin",
         description: "Vui lòng điền đầy đủ các trường bắt buộc và thêm nội dung",
@@ -90,9 +82,6 @@ export default function NewPostPage() {
     setIsLoading(true)
 
     try {
-      // Serialize blocks to JSON string for storage
-      const contentJSON = JSON.stringify(blocks)
-
       const response = await fetch("/api/posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -100,13 +89,15 @@ export default function NewPostPage() {
           title,
           category,
           excerpt,
-          content: contentJSON, // Store as JSON
+          content,
           featured_image: featuredImage,
           meta_title: metaTitle || title,
           meta_description: metaDescription || excerpt,
           status,
         }),
       })
+      
+      console.log("[v0] API response status:", response.status)
 
       const data = await response.json()
 
@@ -136,7 +127,9 @@ export default function NewPostPage() {
     }
   }
 
-
+  const getTextContent = () => {
+    return blocks.map(block => block.content).join("\n");
+  }
 
   return (
     <div className="p-8">
@@ -210,13 +203,17 @@ export default function NewPostPage() {
             </div>
           </Card>
 
-          {/* Block Editor */}
+          {/* Rich Text Editor */}
           <Card className="p-6">
             <h2 className="text-xl font-bold text-primary mb-4">Nội dung bài viết</h2>
             <p className="text-sm text-muted-foreground mb-4">
-              Sử dụng hệ thống khối để xây dựng nội dung. Mỗi khối có thể được căn chỉnh và sắp xếp độc lập.
+              Nhập nội dung bài viết. Hỗ trợ HTML và Markdown.
             </p>
-            <BlockEditor value={blocks} onChange={setBlocks} />
+            <RichTextEditor
+              value={content}
+              onChange={setContent}
+              placeholder="Nhập nội dung bài viết... Sử dụng các định dạng HTML hoặc Markdown để định dạng văn bản."
+            />
           </Card>
         </div>
 
@@ -225,7 +222,7 @@ export default function NewPostPage() {
           {/* AI Writing Assistant */}
           <AIWritingAssistant
             selectedText={selectedText}
-            fullContent={getTextContent()}
+            fullContent={content}
             onApply={handleApplyAISuggestion}
             onGenerateMeta={handleGenerateMeta}
           />
@@ -236,7 +233,7 @@ export default function NewPostPage() {
             <SEOChecker
               title={title}
               excerpt={excerpt}
-              content={getTextContent()}
+              content={content}
               metaTitle={metaTitle}
               metaDescription={metaDescription}
               featuredImage={featuredImage}
