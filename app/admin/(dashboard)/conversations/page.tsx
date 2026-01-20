@@ -176,12 +176,16 @@ export default function ConversationsPage() {
             .eq("conversation_id", conv.id)
 
           // Kiểm tra xem conversation có đang được handover không
-          const { data: activeHandover } = await supabase
+          const { data: activeHandover, error: handoverError } = await supabase
             .from("conversation_handovers")
             .select("status, agent_name")
             .eq("conversation_id", conv.id)
             .eq("status", "active")
-            .single()
+            .maybeSingle()
+
+          if (handoverError) {
+            console.error("[v0] Error checking handover:", handoverError)
+          }
 
           return { 
             ...conv, 
