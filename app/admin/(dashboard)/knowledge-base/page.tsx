@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { BookOpen, Upload, FileText, Link2, Loader2, Trash2, RefreshCw, Brain, Download } from "lucide-react"
+import { BookOpen, Upload, FileText, Link2, Loader2, Trash2, RefreshCw, Brain, Download, Pencil } from "lucide-react"
 import { toast } from "sonner"
 
 interface KnowledgeDocument {
@@ -31,6 +31,7 @@ export default function KnowledgeBasePage() {
   const [uploading, setUploading] = useState(false)
   const [importing, setImporting] = useState(false)
   const [open, setOpen] = useState(false)
+  const [editingDoc, setEditingDoc] = useState<KnowledgeDocument | null>(null)
 
   // Form states
   const [sourceType, setSourceType] = useState<"text" | "url" | "file">("text")
@@ -121,6 +122,51 @@ export default function KnowledgeBasePage() {
     setUrl("")
     setFile(null)
     setSourceType("text")
+    setEditingDoc(null)
+  }
+
+  const handleEdit = (doc: KnowledgeDocument) => {
+    setEditingDoc(doc)
+    setTitle(doc.title)
+    setContent(doc.content)
+    setSourceType(doc.source_type)
+    if (doc.source_url) {
+      setUrl(doc.source_url)
+    }
+    setOpen(true)
+  }
+
+  const handleUpdate = async () => {
+    if (!editingDoc) return
+    if (!title) {
+      toast.error("Vui lòng nhập tiêu đề")
+      return
+    }
+
+    setUploading(true)
+    try {
+      const res = await fetch(`/api/knowledge-base/documents/${editingDoc.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          content: sourceType === "text" ? content : editingDoc.content,
+        }),
+      })
+
+      if (res.ok) {
+        toast.success("Đã cập nhật tài liệu")
+        setOpen(false)
+        resetForm()
+        loadDocuments()
+      } else {
+        toast.error("Không thể cập nhật")
+      }
+    } catch (error) {
+      toast.error("Có lỗi xảy ra")
+    } finally {
+      setUploading(false)
+    }
   }
 
   const handleDelete = async (id: string) => {
@@ -187,39 +233,46 @@ export default function KnowledgeBasePage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 p-4 lg:space-y-6 lg:p-6">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Kho Tri Thức AI</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl lg:text-3xl font-bold">Kho Tri Thức AI</h1>
+          <p className="text-sm lg:text-base text-muted-foreground">
             Quản lý tài liệu để AI học và trả lời câu hỏi của khách hàng
           </p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 w-full lg:w-auto">
           <Button 
             variant="outline"
             onClick={handleImportFiles}
             disabled={importing}
+            className="flex-1 lg:flex-none text-xs lg:text-sm bg-transparent"
           >
             {importing ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Đang import...
+                <Loader2 className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4 animate-spin" />
+                <span className="hidden lg:inline">Đang import...</span>
+                <span className="lg:hidden">Import...</span>
               </>
             ) : (
               <>
-                <Download className="mr-2 h-4 w-4" />
-                Import Files
+                <Download className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4" />
+                <span className="hidden lg:inline">Import Files</span>
+                <span className="lg:hidden">Import</span>
               </>
             )}
           </Button>
           
-          <Dialog open={open} onOpenChange={setOpen}>
+          <Dialog open={open} onOpenChange={(isOpen) => {
+            setOpen(isOpen)
+            if (!isOpen) resetForm()
+          }}>
             <DialogTrigger asChild>
-              <Button>
-                <Upload className="mr-2 h-4 w-4" />
-                Thêm Tài Liệu
+              <Button className="flex-1 lg:flex-none text-xs lg:text-sm">
+                <Upload className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4" />
+                <span className="hidden lg:inline">Thêm Tài Liệu</span>
+                <span className="lg:hidden">Thêm</span>
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
@@ -299,16 +352,20 @@ export default function KnowledgeBasePage() {
                   </div>
                 )}
 
-                <Button onClick={handleUpload} disabled={uploading} className="w-full">
+                <Button 
+                  onClick={editingDoc ? handleUpdate : handleUpload} 
+                  disabled={uploading} 
+                  className="w-full"
+                >
                   {uploading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Đang tải lên...
+                      {editingDoc ? "Đang cập nhật..." : "Đang tải lên..."}
                     </>
                   ) : (
                     <>
-                      <Upload className="mr-2 h-4 w-4" />
-                      Tải Lên
+                      {editingDoc ? <Pencil className="mr-2 h-4 w-4" /> : <Upload className="mr-2 h-4 w-4" />}
+                      {editingDoc ? "Cập Nhật" : "Tải Lên"}
                     </>
                   )}
                 </Button>
@@ -320,11 +377,11 @@ export default function KnowledgeBasePage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Brain className="h-5 w-5" />
+          <CardTitle className="flex items-center gap-2 text-lg lg:text-xl">
+            <Brain className="h-4 w-4 lg:h-5 lg:w-5" />
             Danh Sách Tài Liệu
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-xs lg:text-sm">
             {documents.length} tài liệu đã được nạp vào hệ thống
           </CardDescription>
         </CardHeader>
@@ -336,71 +393,100 @@ export default function KnowledgeBasePage() {
           ) : documents.length === 0 ? (
             <div className="text-center py-12">
               <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">Chưa có tài liệu nào</p>
+              <p className="text-muted-foreground text-sm">Chưa có tài liệu nào</p>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Tiêu Đề</TableHead>
-                  <TableHead>Nguồn</TableHead>
-                  <TableHead>Trạng Thái</TableHead>
-                  <TableHead>Chunks</TableHead>
-                  <TableHead>Ngày Tạo</TableHead>
-                  <TableHead className="text-right">Hành Động</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {documents.map((doc) => (
-                  <TableRow key={doc.id}>
-                    <TableCell className="font-medium">{doc.title}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">
-                        {doc.source_type === "text" && "Văn bản"}
-                        {doc.source_type === "url" && "URL"}
-                        {doc.source_type === "file" && "File"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {doc.status === "processing" && (
-                        <Badge variant="secondary">
-                          <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-                          Đang xử lý
-                        </Badge>
-                      )}
-                      {doc.status === "active" && (
-                        <Badge variant="default">Hoạt động</Badge>
-                      )}
-                      {doc.status === "error" && (
-                        <Badge variant="destructive">Lỗi</Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>{doc.chunks_count}</TableCell>
-                    <TableCell>
-                      {new Date(doc.created_at).toLocaleDateString("vi-VN")}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleReprocess(doc.id)}
-                        >
-                          <RefreshCw className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDelete(doc.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
+            <div className="overflow-x-auto -mx-4 lg:mx-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="min-w-[150px]">Tiêu Đề</TableHead>
+                    <TableHead className="hidden md:table-cell">Nguồn</TableHead>
+                    <TableHead className="hidden lg:table-cell">Trạng Thái</TableHead>
+                    <TableHead className="hidden lg:table-cell">Chunks</TableHead>
+                    <TableHead className="hidden md:table-cell">Ngày Tạo</TableHead>
+                    <TableHead className="text-right">Hành Động</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {documents.map((doc) => (
+                    <TableRow key={doc.id}>
+                      <TableCell className="font-medium text-sm lg:text-base">
+                        <div>
+                          <div className="truncate max-w-[200px] lg:max-w-none">{doc.title}</div>
+                          <div className="flex gap-2 mt-1 md:hidden">
+                            <Badge variant="outline" className="text-xs">
+                              {doc.source_type === "text" && "Văn bản"}
+                              {doc.source_type === "url" && "URL"}
+                              {doc.source_type === "file" && "File"}
+                            </Badge>
+                            {doc.status === "active" && (
+                              <Badge variant="default" className="text-xs">Hoạt động</Badge>
+                            )}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        <Badge variant="outline" className="text-xs">
+                          {doc.source_type === "text" && "Văn bản"}
+                          {doc.source_type === "url" && "URL"}
+                          {doc.source_type === "file" && "File"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="hidden lg:table-cell">
+                        {doc.status === "processing" && (
+                          <Badge variant="secondary" className="text-xs">
+                            <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                            Đang xử lý
+                          </Badge>
+                        )}
+                        {doc.status === "active" && (
+                          <Badge variant="default" className="text-xs">Hoạt động</Badge>
+                        )}
+                        {doc.status === "error" && (
+                          <Badge variant="destructive" className="text-xs">Lỗi</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="hidden lg:table-cell text-sm">{doc.chunks_count}</TableCell>
+                      <TableCell className="hidden md:table-cell text-sm">
+                        {new Date(doc.created_at).toLocaleDateString("vi-VN")}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 bg-transparent"
+                            onClick={() => handleEdit(doc)}
+                            title="Chỉnh sửa"
+                          >
+                            <Pencil className="h-3 w-3 lg:h-4 lg:w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 bg-transparent"
+                            onClick={() => handleReprocess(doc.id)}
+                            title="Xử lý lại"
+                          >
+                            <RefreshCw className="h-3 w-3 lg:h-4 lg:w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 bg-transparent hover:bg-destructive hover:text-destructive-foreground"
+                            onClick={() => handleDelete(doc.id)}
+                            title="Xóa"
+                          >
+                            <Trash2 className="h-3 w-3 lg:h-4 lg:w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>

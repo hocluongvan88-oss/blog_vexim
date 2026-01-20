@@ -1,5 +1,7 @@
 "use client"
 
+import React from "react"
+
 import { useEffect, useState, useRef } from "react"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -18,7 +20,8 @@ import {
   AlertCircle,
   CheckCircle,
   XCircle,
-  ArrowLeft
+  ArrowLeft,
+  Trash2
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { cn } from "@/lib/utils"
@@ -176,16 +179,20 @@ export default function ConversationsPage() {
             .eq("conversation_id", conv.id)
 
           // Kiểm tra xem conversation có đang được handover không
-          const { data: activeHandover, error: handoverError } = await supabase
+          // Lấy record mới nhất nếu có nhiều active handovers (edge case)
+          const { data: handoverResults, error: handoverError } = await supabase
             .from("conversation_handovers")
             .select("status, agent_name")
             .eq("conversation_id", conv.id)
             .eq("status", "active")
-            .maybeSingle()
+            .order("created_at", { ascending: false })
+            .limit(1)
 
           if (handoverError) {
             console.error("[v0] Error checking handover:", handoverError)
           }
+
+          const activeHandover = handoverResults?.[0] || null
 
           return { 
             ...conv, 
@@ -324,11 +331,11 @@ export default function ConversationsPage() {
   }
 
   const handleRelease = async () => {
-    if (!selectedConv || takingOver) return
+    if (!selectedConv) return
 
     setTakingOver(true)
     try {
-      const response = await fetch("/api/chatbot/handover", {
+      const res = await fetch("/api/chatbot/handover", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -337,37 +344,50 @@ export default function ConversationsPage() {
         }),
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || "Failed to release")
+      if (res.ok) {
+        toast.success("Đã trả lại AI xử lý")
+        loadConversations()
+        setSelectedConv(null)
+      } else {
+        toast.error("Không thể trả lại AI")
       }
-
-      const result = await response.json()
-      console.log("[v0] Release result:", result)
-      
-      toast.success("Đã trả lại cho AI")
-      
-      // Refresh conversation - reload from server to get updated data
-      await loadConversations()
-      
-      // Update local state
-      const updated = { 
-        ...selectedConv, 
-        handover_mode: null,
-        metadata: {
-          ...(selectedConv.metadata || {}),
-          handed_over: false,
-        }
-      }
-      setSelectedConv(updated)
-      
-      // Reload messages
-      loadMessages(selectedConv.id)
     } catch (error) {
-      console.error("[v0] Error releasing:", error)
-      toast.error(`Không thể trả lại cuộc trò chuyện: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      toast.error("Có lỗi xảy ra")
     } finally {
       setTakingOver(false)
+    }
+  }
+
+  const handleDeleteConversation = async (convId: string, event?: React.MouseEvent) => {
+    // Prevent triggering conversation selection
+    if (event) {
+      event.stopPropagation()
+    }
+
+    if (!confirm("Bạn có chắc muốn xóa hội thoại này? Hành động không thể hoàn tác.")) {
+      return
+    }
+
+    try {
+      const res = await fetch(`/api/conversations/${convId}`, {
+        method: "DELETE",
+      })
+
+      if (res.ok) {
+        toast.success("Đã xóa hội thoại")
+        
+        // Clear selection if deleted conversation was selected
+        if (selectedConv?.id === convId) {
+          setSelectedConv(null)
+        }
+        
+        loadConversations()
+      } else {
+        toast.error("Không thể xóa hội thoại")
+      }
+    } catch (error) {
+      console.error("[v0] Error deleting conversation:", error)
+      toast.error("Có lỗi xảy ra")
     }
   }
 
@@ -466,7 +486,7 @@ export default function ConversationsPage() {
                   <Card
                     key={conv.id}
                     className={cn(
-                      "p-3 cursor-pointer hover:shadow-md transition-shadow",
+                      "p-3 cursor-pointer hover:shadow-md transition-shadow relative group",
                       selectedConv?.id === conv.id && "border-primary border-2",
                       conv.handover_mode === "manual" && "border-l-4 border-l-orange-500 bg-orange-50/30"
                     )}
@@ -479,6 +499,14 @@ export default function ConversationsPage() {
                       <Badge className={cn("text-xs", getChannelBadge(conv.channel))}>
                         {conv.channel}
                       </Badge>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity bg-transparent hover:bg-destructive hover:text-destructive-foreground"
+                        onClick={(e) => handleDeleteConversation(conv.id, e)}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
                     </div>
 
                     <p className="text-xs text-muted-foreground mb-2 line-clamp-1">
@@ -496,11 +524,11 @@ export default function ConversationsPage() {
                       })}</span>
                     </div>
 
-                  {conv.handover_mode === "manual" && (
-                    <Badge className="mt-2 text-xs bg-amber-100 text-amber-700">
-                      Admin mode
-                    </Badge>
-                  )}
+                    {conv.handover_mode === "manual" && (
+                      <Badge className="mt-2 text-xs bg-amber-100 text-amber-700">
+                        Admin mode
+                      </Badge>
+                    )}
                   </Card>
                 ))}
               </div>
