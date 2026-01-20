@@ -39,16 +39,12 @@ export function ParagraphBlock({ data, onChange, onEnter, onBackspace, onPasteSp
       const currentText = e.currentTarget.textContent || ""
       onChange({ text: currentText })
       onEnter?.()
-      return
     }
 
     // Backspace on empty block - delete this block
-    if (e.key === "Backspace") {
-      const currentText = e.currentTarget.textContent?.trim() || ""
-      if (!currentText) {
-        e.preventDefault()
-        onBackspace?.()
-      }
+    if (e.key === "Backspace" && !e.currentTarget.textContent?.trim()) {
+      e.preventDefault()
+      onBackspace?.()
     }
   }
 
@@ -57,26 +53,14 @@ export function ParagraphBlock({ data, onChange, onEnter, onBackspace, onPasteSp
     const pastedText = e.clipboardData.getData("text/plain")
     
     // Split by newlines
-    const lines = pastedText.split(/\r?\n/)
-    const nonEmptyLines = lines.filter((line) => line.trim())
+    const lines = pastedText.split(/\r?\n/).filter((line) => line.trim())
     
-    if (nonEmptyLines.length > 1 && onPasteSplit) {
+    if (lines.length > 1 && onPasteSplit) {
       // Multiple lines - create multiple blocks
-      onPasteSplit(nonEmptyLines)
+      onPasteSplit(lines)
     } else {
-      // Single line - insert as normal text
-      const selection = window.getSelection()
-      if (selection && selection.rangeCount > 0) {
-        const range = selection.getRangeAt(0)
-        range.deleteContents()
-        const textNode = document.createTextNode(pastedText)
-        range.insertNode(textNode)
-        range.setStartAfter(textNode)
-        range.setEndAfter(textNode)
-        selection.removeAllRanges()
-        selection.addRange(range)
-      }
-      onChange({ text: e.currentTarget.textContent || "" })
+      // Single line - insert as normal
+      document.execCommand("insertText", false, pastedText)
     }
   }
 

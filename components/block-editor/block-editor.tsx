@@ -17,11 +17,19 @@ interface BlockEditorProps {
 }
 
 export function BlockEditor({ value, onChange }: BlockEditorProps) {
-  const [blocks, setBlocks] = useState<Block[]>(value || [])
+  // Always ensure at least one block exists
+  const initialBlocks = value && value.length > 0 ? value : [{
+    id: `block_${Date.now()}_initial`,
+    type: "paragraph" as BlockType,
+    data: { text: "", align: "justify" },
+  }]
+  
+  const [blocks, setBlocks] = useState<Block[]>(initialBlocks)
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null)
   const [showBlockMenu, setShowBlockMenu] = useState(false)
   const [insertPosition, setInsertPosition] = useState<number>(0)
 
+  // Sync blocks to parent
   useEffect(() => {
     onChange(blocks)
   }, [blocks, onChange])
@@ -38,6 +46,14 @@ export function BlockEditor({ value, onChange }: BlockEditorProps) {
     setBlocks(newBlocks)
     setShowBlockMenu(false)
     setSelectedBlockId(newBlock.id)
+
+    // Focus the new block after it's rendered
+    setTimeout(() => {
+      const newBlockElement = document.querySelector(`[data-block-id="${newBlock.id}"] [contenteditable]`) as HTMLElement
+      if (newBlockElement) {
+        newBlockElement.focus()
+      }
+    }, 50)
   }
 
   const getDefaultBlockData = (type: BlockType): any => {
@@ -62,8 +78,36 @@ export function BlockEditor({ value, onChange }: BlockEditorProps) {
   }
 
   const deleteBlock = (id: string) => {
-    setBlocks(blocks.filter((block) => block.id !== id))
+    // Prevent deleting the last block - instead clear its content
+    if (blocks.length === 1) {
+      updateBlock(id, { text: "" })
+      // Focus the block
+      setTimeout(() => {
+        const blockElement = document.querySelector(`[data-block-id="${id}"] [contenteditable]`) as HTMLElement
+        if (blockElement) {
+          blockElement.focus()
+        }
+      }, 50)
+      return
+    }
+    
+    // Find the index to focus next
+    const index = blocks.findIndex((block) => block.id === id)
+    const filtered = blocks.filter((block) => block.id !== id)
+    setBlocks(filtered)
     setSelectedBlockId(null)
+    
+    // Focus the previous block if possible, otherwise the next one
+    setTimeout(() => {
+      const targetIndex = Math.max(0, index - 1)
+      const targetBlock = filtered[targetIndex]
+      if (targetBlock) {
+        const blockElement = document.querySelector(`[data-block-id="${targetBlock.id}"] [contenteditable]`) as HTMLElement
+        if (blockElement) {
+          blockElement.focus()
+        }
+      }
+    }, 50)
   }
 
   const moveBlock = (id: string, direction: "up" | "down") => {
@@ -85,6 +129,7 @@ export function BlockEditor({ value, onChange }: BlockEditorProps) {
     return (
       <div
         key={block.id}
+        data-block-id={block.id}
         className={`group relative ${isSelected ? "ring-2 ring-primary rounded-lg" : ""}`}
         onClick={() => setSelectedBlockId(block.id)}
       >
@@ -126,10 +171,36 @@ export function BlockEditor({ value, onChange }: BlockEditorProps) {
         {/* Block Content */}
         <div className="py-2">
           {block.type === "heading" && (
-            <HeadingBlock data={block.data} onChange={(data) => updateBlock(block.id, data)} />
+            <HeadingBlock
+              data={block.data}
+              onChange={(data) => updateBlock(block.id, data)}
+              onEnter={() => addBlock("paragraph", index + 1)}
+              onBackspace={() => deleteBlock(block.id)}
+            />
           )}
           {block.type === "paragraph" && (
-            <ParagraphBlock data={block.data} onChange={(data) => updateBlock(block.id, data)} />
+            <ParagraphBlock
+              data={block.data}
+              onChange={(data) => updateBlock(block.id, data)}
+              onEnter={() => addBlock("paragraph", index + 1)}
+              onBackspace={() => deleteBlock(block.id)}
+              onPasteSplit={(lines) => {
+                // Update current block with first line
+                updateBlock(block.id, { text: lines[0] })
+                
+                // Create and populate new blocks for remaining lines
+                const newBlocks = [...blocks]
+                lines.slice(1).forEach((line, i) => {
+                  const newBlock: Block = {
+                    id: `block_paste_${Date.now()}_${i}`,
+                    type: "paragraph",
+                    data: { text: line, align: "justify" },
+                  }
+                  newBlocks.splice(index + 1 + i, 0, newBlock)
+                })
+                setBlocks(newBlocks)
+              }}
+            />
           )}
           {block.type === "image" && <ImageBlock data={block.data} onChange={(data) => updateBlock(block.id, data)} />}
           {block.type === "quote" && <QuoteBlock data={block.data} onChange={(data) => updateBlock(block.id, data)} />}
@@ -158,23 +229,7 @@ export function BlockEditor({ value, onChange }: BlockEditorProps) {
 
   return (
     <div className="border rounded-lg p-6 bg-white min-h-[600px]" onClick={() => setSelectedBlockId(null)}>
-      {/* Empty State */}
-      {blocks.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground mb-4">Bắt đầu viết bài bằng cách thêm khối đầu tiên</p>
-          <Button
-            onClick={() => {
-              setInsertPosition(0)
-              setShowBlockMenu(true)
-            }}
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Thêm khối
-          </Button>
-        </div>
-      )}
-
-      {/* Blocks */}
+      {/* Blocks - Always render since we always have at least one block */}
       <div className="space-y-4 pl-10">{blocks.map((block, index) => renderBlock(block, index))}</div>
 
       {/* Block Menu */}
