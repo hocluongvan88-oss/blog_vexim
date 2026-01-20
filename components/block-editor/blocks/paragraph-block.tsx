@@ -17,7 +17,7 @@ export function ParagraphBlock({ data, onChange, onEnter, onBackspace, onPasteSp
   const { text = "", align = "justify" } = data
   const editorRef = useRef<HTMLParagraphElement>(null)
   const isComposingRef = useRef(false)
-  const isUpdatingRef = useRef(false) // Declare the variable here
+  const lastTextRef = useRef(text)
 
   const alignClass = {
     left: "text-left",
@@ -26,12 +26,43 @@ export function ParagraphBlock({ data, onChange, onEnter, onBackspace, onPasteSp
     justify: "text-justify md:text-justify",
   }[align]
 
-  // Only update content from props if element is not focused
+  // Initialize content on mount
   useEffect(() => {
-    if (editorRef.current && document.activeElement !== editorRef.current) {
-      const currentText = editorRef.current.textContent || ""
-      if (currentText !== text) {
-        editorRef.current.textContent = text
+    if (editorRef.current && editorRef.current.textContent === "") {
+      editorRef.current.textContent = text
+      lastTextRef.current = text
+    }
+  }, [])
+
+  // Only update content from props if it changed externally (not from user input)
+  useEffect(() => {
+    if (text !== lastTextRef.current && editorRef.current) {
+      const selection = window.getSelection()
+      const isEditorFocused = document.activeElement === editorRef.current
+      
+      // Save cursor position if focused
+      let savedRange: Range | null = null
+      if (isEditorFocused && selection && selection.rangeCount > 0) {
+        savedRange = selection.getRangeAt(0).cloneRange()
+      }
+
+      // Update content
+      editorRef.current.textContent = text
+      lastTextRef.current = text
+
+      // Restore cursor position if was focused
+      if (savedRange && isEditorFocused && selection) {
+        try {
+          selection.removeAllRanges()
+          selection.addRange(savedRange)
+        } catch (e) {
+          // If range is invalid, place cursor at end
+          const range = document.createRange()
+          range.selectNodeContents(editorRef.current)
+          range.collapse(false)
+          selection.removeAllRanges()
+          selection.addRange(range)
+        }
       }
     }
   }, [text])
@@ -85,7 +116,9 @@ export function ParagraphBlock({ data, onChange, onEnter, onBackspace, onPasteSp
   }
 
   const handleInput = (e: React.FormEvent<HTMLParagraphElement>) => {
-    onChange({ text: e.currentTarget.textContent || "" })
+    const newText = e.currentTarget.textContent || ""
+    lastTextRef.current = newText
+    onChange({ text: newText })
   }
 
   const handleCompositionStart = () => {
@@ -94,7 +127,9 @@ export function ParagraphBlock({ data, onChange, onEnter, onBackspace, onPasteSp
 
   const handleCompositionEnd = (e: React.CompositionEvent<HTMLParagraphElement>) => {
     isComposingRef.current = false
-    onChange({ text: e.currentTarget.textContent || "" })
+    const newText = e.currentTarget.textContent || ""
+    lastTextRef.current = newText
+    onChange({ text: newText })
   }
 
   return (
@@ -109,9 +144,11 @@ export function ParagraphBlock({ data, onChange, onEnter, onBackspace, onPasteSp
       onInput={handleInput}
       onCompositionStart={handleCompositionStart}
       onCompositionEnd={handleCompositionEnd}
-      onBlur={(e) => onChange({ text: e.currentTarget.textContent || "" })}
-    >
-      {text}
-    </p>
+      onBlur={(e) => {
+        const newText = e.currentTarget.textContent || ""
+        lastTextRef.current = newText
+        onChange({ text: newText })
+      }}
+    />
   )
 }
