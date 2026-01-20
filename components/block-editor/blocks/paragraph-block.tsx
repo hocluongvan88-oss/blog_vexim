@@ -16,7 +16,8 @@ interface ParagraphBlockProps {
 export function ParagraphBlock({ data, onChange, onEnter, onBackspace, onPasteSplit }: ParagraphBlockProps) {
   const { text = "", align = "justify" } = data
   const editorRef = useRef<HTMLParagraphElement>(null)
-  const isUpdatingRef = useRef(false)
+  const isComposingRef = useRef(false)
+  const isUpdatingRef = useRef(false) // Declare the variable here
 
   const alignClass = {
     left: "text-left",
@@ -25,54 +26,31 @@ export function ParagraphBlock({ data, onChange, onEnter, onBackspace, onPasteSp
     justify: "text-justify md:text-justify",
   }[align]
 
-  // Update content only if it changed externally (not from user input)
+  // Only update content from props if element is not focused
   useEffect(() => {
-    if (editorRef.current && !isUpdatingRef.current) {
+    if (editorRef.current && document.activeElement !== editorRef.current) {
       const currentText = editorRef.current.textContent || ""
       if (currentText !== text) {
-        // Save cursor position
-        const selection = window.getSelection()
-        let cursorPosition = 0
-        if (selection && selection.rangeCount > 0) {
-          const range = selection.getRangeAt(0)
-          cursorPosition = range.startOffset
-        }
-
-        // Update content
         editorRef.current.textContent = text
-        
-        // Restore cursor position
-        if (selection && editorRef.current.firstChild) {
-          const newRange = document.createRange()
-          const textNode = editorRef.current.firstChild
-          const maxOffset = (textNode.textContent || "").length
-          newRange.setStart(textNode, Math.min(cursorPosition, maxOffset))
-          newRange.collapse(true)
-          selection.removeAllRanges()
-          selection.addRange(newRange)
-        }
       }
     }
-    isUpdatingRef.current = false
   }, [text])
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLParagraphElement>) => {
     // Enter key - create new paragraph block below
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey && !isComposingRef.current) {
       e.preventDefault()
       const currentText = e.currentTarget.textContent || ""
-      isUpdatingRef.current = true
       onChange({ text: currentText })
       onEnter?.()
       return
     }
 
     // Backspace on empty block - delete this block
-    if (e.key === "Backspace") {
+    if (e.key === "Backspace" && !isComposingRef.current) {
       const currentText = e.currentTarget.textContent?.trim() || ""
       if (!currentText) {
         e.preventDefault()
-        isUpdatingRef.current = true
         onBackspace?.()
       }
     }
@@ -88,7 +66,6 @@ export function ParagraphBlock({ data, onChange, onEnter, onBackspace, onPasteSp
     
     if (nonEmptyLines.length > 1 && onPasteSplit) {
       // Multiple lines - create multiple blocks
-      isUpdatingRef.current = true
       onPasteSplit(nonEmptyLines)
     } else {
       // Single line - insert as normal text
@@ -103,13 +80,20 @@ export function ParagraphBlock({ data, onChange, onEnter, onBackspace, onPasteSp
         selection.removeAllRanges()
         selection.addRange(range)
       }
-      isUpdatingRef.current = true
       onChange({ text: e.currentTarget.textContent || "" })
     }
   }
 
   const handleInput = (e: React.FormEvent<HTMLParagraphElement>) => {
-    isUpdatingRef.current = true
+    onChange({ text: e.currentTarget.textContent || "" })
+  }
+
+  const handleCompositionStart = () => {
+    isComposingRef.current = true
+  }
+
+  const handleCompositionEnd = (e: React.CompositionEvent<HTMLParagraphElement>) => {
+    isComposingRef.current = false
     onChange({ text: e.currentTarget.textContent || "" })
   }
 
@@ -123,10 +107,9 @@ export function ParagraphBlock({ data, onChange, onEnter, onBackspace, onPasteSp
       onKeyDown={handleKeyDown}
       onPaste={handlePaste}
       onInput={handleInput}
-      onBlur={(e) => {
-        isUpdatingRef.current = true
-        onChange({ text: e.currentTarget.textContent || "" })
-      }}
+      onCompositionStart={handleCompositionStart}
+      onCompositionEnd={handleCompositionEnd}
+      onBlur={(e) => onChange({ text: e.currentTarget.textContent || "" })}
     >
       {text}
     </p>

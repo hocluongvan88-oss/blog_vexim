@@ -1,7 +1,8 @@
 "use client"
 
-import React from "react"
+import { useRef } from "react"
 
+import React from "react"
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Plus, GripVertical } from "lucide-react"
@@ -19,9 +20,9 @@ interface BlockEditorProps {
 }
 
 export function BlockEditor({ value, onChange }: BlockEditorProps) {
-  // Always ensure at least one block exists
+  // Always ensure at least one block exists - use static ID to avoid hydration mismatch
   const initialBlocks = value && value.length > 0 ? value : [{
-    id: `block_${Date.now()}_initial`,
+    id: "block_initial_default",
     type: "paragraph" as BlockType,
     data: { text: "", align: "justify" },
   }]
@@ -30,6 +31,7 @@ export function BlockEditor({ value, onChange }: BlockEditorProps) {
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null)
   const [showBlockMenu, setShowBlockMenu] = useState(false)
   const [insertPosition, setInsertPosition] = useState<number>(0)
+  const blockCounterRef = useRef(0)
 
   // Sync blocks to parent
   useEffect(() => {
@@ -37,8 +39,9 @@ export function BlockEditor({ value, onChange }: BlockEditorProps) {
   }, [blocks, onChange])
 
   const addBlock = (type: BlockType, position: number) => {
+    blockCounterRef.current += 1
     const newBlock: Block = {
-      id: `block_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `block_${blockCounterRef.current}_${Math.random().toString(36).substr(2, 9)}`,
       type,
       data: getDefaultBlockData(type),
     }
@@ -225,8 +228,9 @@ export function BlockEditor({ value, onChange }: BlockEditorProps) {
                 // Create and populate new blocks for remaining lines
                 const newBlocks = [...blocks]
                 lines.slice(1).forEach((line, i) => {
+                  blockCounterRef.current += 1
                   const newBlock: Block = {
-                    id: `block_paste_${Date.now()}_${i}`,
+                    id: `block_${blockCounterRef.current}_paste`,
                     type: "paragraph",
                     data: { text: line, align: "justify" },
                   }
