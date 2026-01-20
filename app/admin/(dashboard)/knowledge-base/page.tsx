@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { BookOpen, Upload, FileText, Link2, Loader2, Trash2, RefreshCw, Brain } from "lucide-react"
+import { BookOpen, Upload, FileText, Link2, Loader2, Trash2, RefreshCw, Brain, Download } from "lucide-react"
 import { toast } from "sonner"
 
 interface KnowledgeDocument {
@@ -29,6 +29,7 @@ export default function KnowledgeBasePage() {
   const [documents, setDocuments] = useState<KnowledgeDocument[]>([])
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
+  const [importing, setImporting] = useState(false)
   const [open, setOpen] = useState(false)
 
   // Form states
@@ -158,6 +159,33 @@ export default function KnowledgeBasePage() {
     }
   }
 
+  const handleImportFiles = async () => {
+    if (!confirm("Import tất cả file .md từ thư mục /knowledge/? Các file đã tồn tại sẽ bị bỏ qua.")) return
+
+    setImporting(true)
+    try {
+      const res = await fetch("/api/knowledge-base/import-files", {
+        method: "POST",
+      })
+
+      if (res.ok) {
+        const result = await res.json()
+        const { summary } = result
+        
+        toast.success(
+          `Import hoàn tất! Thành công: ${summary.success}, Bỏ qua: ${summary.skipped}, Lỗi: ${summary.errors}`
+        )
+        loadDocuments()
+      } else {
+        toast.error("Import thất bại")
+      }
+    } catch (error) {
+      toast.error("Có lỗi xảy ra")
+    } finally {
+      setImporting(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -168,106 +196,126 @@ export default function KnowledgeBasePage() {
           </p>
         </div>
 
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Upload className="mr-2 h-4 w-4" />
-              Thêm Tài Liệu
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Thêm Tài Liệu Mới</DialogTitle>
-              <DialogDescription>
-                Tải lên tài liệu để AI học và trả lời câu hỏi
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="space-y-4">
-              <div>
-                <Label>Loại Nguồn</Label>
-                <Tabs value={sourceType} onValueChange={(v) => setSourceType(v as any)}>
-                  <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="text">
-                      <FileText className="mr-2 h-4 w-4" />
-                      Văn Bản
-                    </TabsTrigger>
-                    <TabsTrigger value="url">
-                      <Link2 className="mr-2 h-4 w-4" />
-                      URL
-                    </TabsTrigger>
-                    <TabsTrigger value="file">
-                      <Upload className="mr-2 h-4 w-4" />
-                      File
-                    </TabsTrigger>
-                  </TabsList>
-                </Tabs>
-              </div>
-
-              <div>
-                <Label htmlFor="title">Tiêu Đề</Label>
-                <Input
-                  id="title"
-                  placeholder="Ví dụ: Quy trình đăng ký FDA"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                />
-              </div>
-
-              {sourceType === "text" && (
-                <div>
-                  <Label htmlFor="content">Nội Dung</Label>
-                  <Textarea
-                    id="content"
-                    placeholder="Nhập nội dung tài liệu..."
-                    className="min-h-[200px]"
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                  />
-                </div>
-              )}
-
-              {sourceType === "url" && (
-                <div>
-                  <Label htmlFor="url">URL</Label>
-                  <Input
-                    id="url"
-                    type="url"
-                    placeholder="https://example.com/tai-lieu"
-                    value={url}
-                    onChange={(e) => setUrl(e.target.value)}
-                  />
-                </div>
-              )}
-
-              {sourceType === "file" && (
-                <div>
-                  <Label htmlFor="file">File (PDF, DOCX, TXT)</Label>
-                  <Input
-                    id="file"
-                    type="file"
-                    accept=".pdf,.docx,.txt"
-                    onChange={(e) => setFile(e.target.files?.[0] || null)}
-                  />
-                </div>
-              )}
-
-              <Button onClick={handleUpload} disabled={uploading} className="w-full">
-                {uploading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Đang tải lên...
-                  </>
-                ) : (
-                  <>
-                    <Upload className="mr-2 h-4 w-4" />
-                    Tải Lên
-                  </>
-                )}
+        <div className="flex gap-2">
+          <Button 
+            variant="outline"
+            onClick={handleImportFiles}
+            disabled={importing}
+          >
+            {importing ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Đang import...
+              </>
+            ) : (
+              <>
+                <Download className="mr-2 h-4 w-4" />
+                Import Files
+              </>
+            )}
+          </Button>
+          
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Upload className="mr-2 h-4 w-4" />
+                Thêm Tài Liệu
               </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Thêm Tài Liệu Mới</DialogTitle>
+                <DialogDescription>
+                  Tải lên tài liệu để AI học và trả lời câu hỏi
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4">
+                <div>
+                  <Label>Loại Nguồn</Label>
+                  <Tabs value={sourceType} onValueChange={(v) => setSourceType(v as any)}>
+                    <TabsList className="grid w-full grid-cols-3">
+                      <TabsTrigger value="text">
+                        <FileText className="mr-2 h-4 w-4" />
+                        Văn Bản
+                      </TabsTrigger>
+                      <TabsTrigger value="url">
+                        <Link2 className="mr-2 h-4 w-4" />
+                        URL
+                      </TabsTrigger>
+                      <TabsTrigger value="file">
+                        <Upload className="mr-2 h-4 w-4" />
+                        File
+                      </TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                </div>
+
+                <div>
+                  <Label htmlFor="title">Tiêu Đề</Label>
+                  <Input
+                    id="title"
+                    placeholder="Ví dụ: Quy trình đăng ký FDA"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                  />
+                </div>
+
+                {sourceType === "text" && (
+                  <div>
+                    <Label htmlFor="content">Nội Dung</Label>
+                    <Textarea
+                      id="content"
+                      placeholder="Nhập nội dung tài liệu..."
+                      className="min-h-[200px]"
+                      value={content}
+                      onChange={(e) => setContent(e.target.value)}
+                    />
+                  </div>
+                )}
+
+                {sourceType === "url" && (
+                  <div>
+                    <Label htmlFor="url">URL</Label>
+                    <Input
+                      id="url"
+                      type="url"
+                      placeholder="https://example.com/tai-lieu"
+                      value={url}
+                      onChange={(e) => setUrl(e.target.value)}
+                    />
+                  </div>
+                )}
+
+                {sourceType === "file" && (
+                  <div>
+                    <Label htmlFor="file">File (PDF, DOCX, TXT)</Label>
+                    <Input
+                      id="file"
+                      type="file"
+                      accept=".pdf,.docx,.txt"
+                      onChange={(e) => setFile(e.target.files?.[0] || null)}
+                    />
+                  </div>
+                )}
+
+                <Button onClick={handleUpload} disabled={uploading} className="w-full">
+                  {uploading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Đang tải lên...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="mr-2 h-4 w-4" />
+                      Tải Lên
+                    </>
+                  )}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       <Card>

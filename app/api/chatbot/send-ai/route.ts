@@ -187,7 +187,7 @@ export async function POST(request: NextRequest) {
 
     // Handle ASK_CONTACT action
     if (ruleResult.action === "ASK_CONTACT") {
-      const contactMessage = getContactRequestMessage()
+      const contactMessage = getContactRequestMessage(ruleResult.ruleId)
       
       const { data: botMessage } = await supabase
         .from("chat_messages")

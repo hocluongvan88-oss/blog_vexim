@@ -111,13 +111,44 @@ function checkComplianceRisk(message: string): RuleResult | null {
   return null
 }
 
-// 2. SALES INTENT RULES (SI) - Should ask contact
+// 2. SALES INTENT RULES (SI) - Should ask contact or handoff
 function checkSalesIntent(message: string): RuleResult | null {
   const lowerMsg = message.toLowerCase()
 
-  // SI-01: Service inquiry
+  // SI-01: Direct "do you do this" questions - HIGH SALES INTENT
+  const directDoQuestions = [
+    /(bạn|bên|công ty).*(có làm|làm được|làm)/i,
+    /ý.*là.*(có làm|làm được|làm không)/i,
+    /(em|anh|mình|các bạn).*(làm.*không|có làm)/i,
+  ]
+  if (directDoQuestions.some((p) => p.test(message))) {
+    return {
+      action: "HANDOFF_TO_ADMIN",
+      reason: "Direct service capability question - very high sales intent",
+      ruleId: "SI-01-HIGH",
+      tags: { reason: "sales", urgency: "high" },
+    }
+  }
+
+  // SI-02: "Connect me" / "I want to start" - IMMEDIATE HANDOFF
+  const immediateHandoffPatterns = [
+    /(kết nối|liên hệ|gọi).*(cho|giúp|tôi|mình|em|anh)/i,
+    /(có|được|đồng ý|ok|oke|okê).*(em|anh|nhé|ạ)$/i,
+    /^(có|được|ok|oke|okê|đồng ý|đc)$/i,
+    /muốn (làm|thuê|nhờ).*ngay/i,
+  ]
+  if (immediateHandoffPatterns.some((p) => p.test(message))) {
+    return {
+      action: "HANDOFF_TO_ADMIN",
+      reason: "Customer ready to engage - immediate handoff required",
+      ruleId: "SI-02-IMMEDIATE",
+      tags: { reason: "sales", urgency: "high" },
+    }
+  }
+
+  // SI-03: Service inquiry
   const servicePatterns = [
-    /(bên|công ty).*(em|anh).*(có làm|cung cấp|hỗ trợ)/i,
+    /(bên|công ty).*(em|anh).*(cung cấp|hỗ trợ)/i,
     /dịch vụ.*(gì|nào)/i,
     /(các|những) dịch vụ/i,
   ]
@@ -125,27 +156,27 @@ function checkSalesIntent(message: string): RuleResult | null {
     return {
       action: "ASK_CONTACT",
       reason: "Service inquiry",
-      ruleId: "SI-01",
+      ruleId: "SI-03",
       tags: { reason: "sales", urgency: "medium" },
     }
   }
 
-  // SI-02: Want to proceed
+  // SI-04: Want to proceed
   const proceedPatterns = [
     /muốn (làm|triển khai|bắt đầu)/i,
-    /cần (thuê|nhờ|làm) luôn/i,
+    /cần (thuê|nhờ) luôn/i,
     /(start|proceed|begin)/i,
   ]
   if (proceedPatterns.some((p) => p.test(message))) {
     return {
       action: "ASK_CONTACT",
       reason: "Ready to proceed",
-      ruleId: "SI-02",
+      ruleId: "SI-04",
       tags: { reason: "sales", urgency: "high" },
     }
   }
 
-  // SI-03: Timeline questions
+  // SI-05: Timeline questions
   const timelinePatterns = [
     /bao lâu.*(xong|hoàn thành|được)/i,
     /mất.*bao nhiêu thời gian/i,
@@ -155,12 +186,12 @@ function checkSalesIntent(message: string): RuleResult | null {
     return {
       action: "ASK_CONTACT",
       reason: "Timeline inquiry",
-      ruleId: "SI-03",
+      ruleId: "SI-05",
       tags: { reason: "sales", urgency: "medium" },
     }
   }
 
-  // SI-04: Comparison questions
+  // SI-06: Comparison questions
   const comparisonPatterns = [
     /(bên|công ty).*(em|anh).*khác gì/i,
     /so với.*đơn vị khác/i,
@@ -170,7 +201,7 @@ function checkSalesIntent(message: string): RuleResult | null {
     return {
       action: "ASK_CONTACT",
       reason: "Comparison inquiry",
-      ruleId: "SI-04",
+      ruleId: "SI-06",
       tags: { reason: "sales", urgency: "low" },
     }
   }
@@ -332,7 +363,17 @@ export function evaluateRules(context: MessageContext): RuleResult {
 }
 
 // Get appropriate response message for ASK_CONTACT action
-export function getContactRequestMessage(): string {
+export function getContactRequestMessage(ruleId?: string): string {
+  // High urgency - more direct
+  if (ruleId?.includes("HIGH") || ruleId?.includes("IMMEDIATE")) {
+    return `Dạ, Vexim có hỗ trợ dịch vụ này ạ!
+
+Để tư vấn cụ thể cho trường hợp của anh/chị, em xin phép kết nối với chuyên viên. 
+
+Anh/chì để lại số điện thoại, chuyên viên sẽ liên hệ tư vấn chi tiết ngay ạ.`
+  }
+
+  // Standard contact request
   return `Trường hợp này em cần chuyên viên của Vexim kiểm tra kỹ hơn để tư vấn chính xác cho anh/chị.
 
 Nếu anh/chị tiện, mình có thể để lại số điện thoại, em sẽ nhờ chuyên viên liên hệ hỗ trợ trực tiếp ạ.`
