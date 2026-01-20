@@ -316,14 +316,32 @@ export default function KnowledgeBasePage() {
 
                 {sourceType === "text" && (
                   <div>
-                    <Label htmlFor="content">Nội Dung</Label>
+                    <div className="flex items-center justify-between mb-2">
+                      <Label htmlFor="content">Nội Dung</Label>
+                      <span className={`text-xs ${content.length > 50000 ? 'text-destructive font-semibold' : 'text-muted-foreground'}`}>
+                        {content.length.toLocaleString()} ký tự
+                        {content.length > 50000 && ' - Quá dài! Nên chia nhỏ tài liệu'}
+                      </span>
+                    </div>
                     <Textarea
                       id="content"
                       placeholder="Nhập nội dung tài liệu..."
-                      className="min-h-[200px]"
+                      className="resize-none overflow-y-auto"
+                      style={{ 
+                        height: '400px', 
+                        minHeight: '400px', 
+                        maxHeight: '400px',
+                        fieldSizing: 'initial'
+                      }}
                       value={content}
                       onChange={(e) => setContent(e.target.value)}
                     />
+                    {content.length > 30000 && (
+                      <p className="text-xs text-orange-600 dark:text-orange-400 mt-2">
+                        Cảnh báo: Tài liệu dài hơn 30,000 ký tự có thể xử lý chậm. 
+                        {content.length > 50000 && ' Khuyến nghị chia thành nhiều tài liệu nhỏ hơn.'}
+                      </p>
+                    )}
                   </div>
                 )}
 
@@ -342,13 +360,21 @@ export default function KnowledgeBasePage() {
 
                 {sourceType === "file" && (
                   <div>
-                    <Label htmlFor="file">File (PDF, DOCX, TXT)</Label>
+                    <Label htmlFor="file">File</Label>
+                    <p className="text-xs text-muted-foreground mb-2">
+                      Hỗ trợ: PDF, Word (DOC/DOCX), Text (TXT), Markdown (MD), RTF
+                    </p>
                     <Input
                       id="file"
                       type="file"
-                      accept=".pdf,.docx,.txt"
+                      accept=".pdf,.doc,.docx,.txt,.md,.rtf"
                       onChange={(e) => setFile(e.target.files?.[0] || null)}
                     />
+                    {file && (
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Đã chọn: {file.name} ({(file.size / 1024).toFixed(2)} KB)
+                      </p>
+                    )}
                   </div>
                 )}
 

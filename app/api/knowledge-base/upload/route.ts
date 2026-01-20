@@ -47,9 +47,42 @@ export async function POST(request: NextRequest) {
       }
     } else if (sourceType === "file") {
       // Read file content
-      const fileContent = await file.text()
-      documentContent = fileContent
+      console.log("[v0] Processing file:", file.name, "Type:", file.type, "Size:", file.size)
+      
+      const fileExtension = file.name.split('.').pop()?.toLowerCase()
+      
+      // For text-based files, read directly
+      if (['.txt', '.md', '.rtf'].includes(`.${fileExtension}`)) {
+        const fileContent = await file.text()
+        documentContent = fileContent
+      } 
+      // For PDF, DOCX, DOC - we'll read as text for now
+      // TODO: Add proper PDF/DOCX parsing libraries for better extraction
+      else if (['.pdf', '.docx', '.doc'].includes(`.${fileExtension}`)) {
+        try {
+          const fileContent = await file.text()
+          documentContent = fileContent
+        } catch (error) {
+          console.error("[v0] Error reading binary file:", error)
+          return NextResponse.json(
+            { 
+              error: "Không thể đọc file này. Vui lòng chuyển đổi sang định dạng TXT hoặc MD.",
+              details: "Binary file reading requires additional processing"
+            },
+            { status: 400 }
+          )
+        }
+      }
+      else {
+        return NextResponse.json(
+          { error: `Định dạng file .${fileExtension} chưa được hỗ trợ` },
+          { status: 400 }
+        )
+      }
+      
       sourceUrl = file.name
+      
+      console.log("[v0] File processed, content length:", documentContent.length)
     }
 
     // Insert document
