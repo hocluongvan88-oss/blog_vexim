@@ -1,251 +1,250 @@
-import { generateObject, generateText } from "ai"
-import { z } from "zod"
-import * as cheerio from "cheerio"
+import { generateObject, generateText } from "ai";
+import { z } from "zod";
+import * as cheerio from "cheerio";
+import { createHash } from "crypto";
 
-// Schema cho tin tức từ FDA
-const fdaNewsSchema = z.object({
-  title: z.string(),
-  url: z.string(),
-  date: z.string(),
-  summary: z.string(),
-  relevance: z.enum(["high", "medium", "low"]),
-  categories: z.array(z.string()),
-})
+// SỬ DỤNG STEALTH PLUGIN ĐỂ BYPASS 412
+// Cần cài: npm install puppeteer puppeteer-extra puppeteer-extra-plugin-stealth
+import puppeteer from 'puppeteer-extra';
+import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 
-// Schema cho tin tức từ GACC
-const gaccNewsSchema = z.object({
-  title: z.string(),
-  url: z.string(),
-  date: z.string(),
-  summary: z.string(),
-  relevance: z.enum(["high", "medium", "low"]),
-  categories: z.array(z.string()),
-})
+// Kích hoạt Stealth
+puppeteer.use(StealthPlugin());
 
-export type NewsArticle = z.infer<typeof fdaNewsSchema>
-
-// Lọc tầng 1: Lọc theo từ khóa cơ bản
 const TIER1_KEYWORDS = [
-  "food",
-  "thực phẩm",
-  "import",
-  "export",
-  "xuất khẩu",
-  "nhập khẩu",
-  "FDA",
-  "GACC",
-  "MFDS",
-  "regulation",
-  "quy định",
-  "policy",
-  "chính sách",
-  "inspection",
-  "kiểm tra",
-  "certificate",
-  "giấy chứng nhận",
-  "registration",
-  "đăng ký",
-  "compliance",
-  "tuân thủ",
-  "seafood",
-  "hải sản",
-  "agricultural",
-  "nông sản",
-  "beverage",
-  "đồ uống",
-]
+  "food", "thực phẩm", "import", "export", "xuất khẩu", "nhập khẩu",
+  "FDA", "GACC", "MFDS", "regulation", "quy định", "policy", "chính sách",
+  "inspection", "kiểm tra", "certificate", "giấy chứng nhận", "registration",
+  "đăng ký", "compliance", "seafood", "hải sản", "agricultural", "nông sản",
+  "beverage", "đồ uống", "labeling", "nhãn dán", "additive", "phụ gia"
+];
 
-// Lọc tầng 2: Prompt chi tiết cho AI
-const TIER2_ANALYSIS_PROMPT = `
-Phân tích bài viết tin tức này và xác định mức độ liên quan đến lĩnh vực xuất nhập khẩu thực phẩm:
-
-YÊU CẦU:
-1. Có liên quan đến xuất khẩu/nhập khẩu thực phẩm sang Mỹ, Trung Quốc, Hàn Quốc?
-2. Có đề cập đến quy định FDA, GACC, MFDS?
-3. Có cập nhật về chính sách, luật pháp mới?
-4. Có liên quan đến giấy tờ pháp lý (Process Filing, GACC Registration, US Agent, FSVP)?
-5. Có đề cập đến thực phẩm (hải sản, nông sản, đồ uống, thực phẩm chế biến)?
-
-Đánh giá:
-- HIGH: Trực tiếp liên quan đến chính sách/quy định xuất nhập khẩu thực phẩm
-- MEDIUM: Có đề cập gián tiếp hoặc ảnh hưởng đến ngành
-- LOW: Ít liên quan hoặc chỉ đề cập chung chung
-
-Phân loại vào các danh mục: FDA Regulations, GACC Updates, Export Requirements, Import Compliance, Food Safety, Policy Changes, Documentation, Inspection Guidelines
-`
-
-// Lọc tầng 3: Kiểm tra chi tiết với structured output
 const TIER3_VALIDATION_SCHEMA = z.object({
   isRelevant: z.boolean(),
   relevanceScore: z.number().min(0).max(100),
   relevanceReason: z.string(),
   keyPoints: z.array(z.string()),
   affectedProducts: z.array(z.string()),
-  affectedCountries: z.array(z.string()),
-  requiresAction: z.boolean(),
-  actionDeadline: z.string().optional(),
-})
+  impactType: z.enum(["Chính sách mới", "Cảnh báo an toàn", "Thay đổi thủ tục", "Thông tin chung"]),
+  requiresConsultancy: z.boolean(),
+});
+
+export interface NewsArticle {
+  title: string;
+  url: string;
+  date: string;
+  summary: string;
+  relevance: "high" | "medium" | "low";
+  categories: string[];
+  contentHash: string;
+  source: "FDA" | "GACC";
+  aiAnalysis?: any;
+}
 
 export class NewsCrawler {
-  // Crawl FDA news
-  async crawlFDANews(): Promise<string[]> {
+  private userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36";
+
+  private generateContentHash(title: string, date: string, url: string): string {
+    return createHash("sha256").update(`${title}|${date}|${url}`).digest("hex");
+  }
+
+  async crawlFDANews(): Promise<NewsArticle[]> {
     try {
-      const response = await fetch("https://www.fda.gov/news-events/fda-newsroom/press-announcements")
-      const html = await response.text()
-      const $ = cheerio.load(html)
+      const response = await fetch("https://www.fda.gov/news-events/fda-newsroom/press-announcements", {
+        headers: { "User-Agent": this.userAgent }
+      });
+      const html = await response.text();
+      const $ = cheerio.load(html);
+      const results: NewsArticle[] = [];
 
-      const articles: string[] = []
-
-      // Extract articles from FDA website
-      $(".node--type-press-announcement").each((_, element) => {
-        const title = $(element).find("h2").text().trim()
-        const url = $(element).find("a").attr("href")
-        const date = $(element).find(".date-display-single").text().trim()
-        const summary = $(element).find(".field--name-body").text().trim()
-
-        if (title && url) {
-          articles.push(
-            JSON.stringify({
-              title,
-              url: `https://www.fda.gov${url}`,
-              date,
-              summary: summary.substring(0, 300),
-              source: "FDA",
-            }),
-          )
+      $(".node--type-press-announcement").each((_, el) => {
+        const title = $(el).find("h2").text().trim();
+        const path = $(el).find("a").attr("href");
+        const date = $(el).find(".date-display-single").text().trim();
+        
+        if (title && path) {
+          const url = `https://www.fda.gov${path}`;
+          results.push({
+            title,
+            url,
+            date,
+            summary: "",
+            relevance: "low",
+            categories: [],
+            contentHash: this.generateContentHash(title, date, url),
+            source: "FDA"
+          });
         }
-      })
-
-      return articles
+      });
+      return results;
     } catch (error) {
-      console.error("Error crawling FDA news:", error)
-      return []
+      console.error("Lỗi crawl FDA:", error);
+      return [];
     }
   }
 
-  // Crawl GACC news (Trung Quốc)
-  async crawlGACCNews(): Promise<string[]> {
+  async crawlGACCNews(): Promise<NewsArticle[]> {
+    const urls = [
+      "http://www.customs.gov.cn/customs/302249/302266/index.html",
+      "http://www.customs.gov.cn/customs/302249/2480148/index.html"
+    ];
+    
+    const results: NewsArticle[] = [];
+    let browser: any;
+
     try {
-      const response = await fetch("http://www.customs.gov.cn/customs/302249/2480148/index.html")
-      const html = await response.text()
-      const $ = cheerio.load(html)
+      console.log("[v0] Khởi tạo Stealth Browser để vượt tường lửa GACC...");
+      browser = await (puppeteer as any).launch({ 
+        headless: "new",
+        args: [
+          '--no-sandbox', 
+          '--disable-setuid-sandbox',
+          '--disable-blink-features=AutomationControlled', // Xóa dấu vết automation
+        ] 
+      });
 
-      const articles: string[] = []
+      const page = await browser.newPage();
+      
+      // Giả lập kích thước màn hình người dùng thật
+      await page.setViewport({ width: 1920, height: 1080 });
 
-      // Extract articles from GACC website
-      $(".article-list li").each((_, element) => {
-        const title = $(element).find("a").text().trim()
-        const url = $(element).find("a").attr("href")
-        const date = $(element).find(".date").text().trim()
+      for (const url of urls) {
+        try {
+          console.log(`[v0] Đang truy cập GACC (Stealth Mode): ${url}`);
+          
+          // Chờ ngẫu nhiên 1-3 giây trước khi load trang để tránh bị phát hiện pattern
+          await new Promise(r => setTimeout(r, Math.random() * 2000 + 1000));
 
-        if (title && url) {
-          articles.push(
-            JSON.stringify({
-              title,
-              url: url.startsWith("http") ? url : `http://www.customs.gov.cn${url}`,
-              date,
-              summary: "",
-              source: "GACC",
-            }),
-          )
+          await page.goto(url, { 
+            waitUntil: 'networkidle2', 
+            timeout: 60000 
+          });
+
+          // Lấy nội dung sau khi đã vượt qua JS Challenge
+          const html = await page.content();
+          const $ = cheerio.load(html);
+
+          const pageArticles: NewsArticle[] = [];
+          $(".article-list li, .conList_link li, .newsList li").each((_, el) => {
+            const a = $(el).find("a").first();
+            const title = a.text().trim();
+            const href = a.attr("href");
+            const date = $(el).find("span, .date").text().trim();
+
+            if (title && href && title.length > 5) {
+              const fullUrl = href.startsWith("http") ? href : `http://www.customs.gov.cn${href}`;
+              pageArticles.push({
+                title,
+                url: fullUrl,
+                date: date || new Date().toISOString().split('T')[0],
+                summary: "",
+                relevance: "low",
+                categories: [],
+                contentHash: this.generateContentHash(title, date, fullUrl),
+                source: "GACC"
+              });
+            }
+          });
+
+          console.log(`[v0] Thành công! Lấy được ${pageArticles.length} tin từ ${url}`);
+          results.push(...pageArticles);
+
+        } catch (err) {
+          console.error(`[v0] Giao diện GACC ${url} vẫn chặn hoặc timeout:`, err.message);
         }
-      })
-
-      return articles
+      }
     } catch (error) {
-      console.error("Error crawling GACC news:", error)
-      return []
+      console.error("Lỗi nghiêm trọng hệ thống Puppeteer Stealth:", error);
+    } finally {
+      if (browser) await browser.close();
     }
+    
+    return results;
   }
 
-  // Lọc tầng 1: Keyword filtering
-  tier1Filter(article: string): boolean {
-    const articleLower = article.toLowerCase()
-    return TIER1_KEYWORDS.some((keyword) => articleLower.includes(keyword.toLowerCase()))
-  }
+  // --- AI LAYERS ---
 
-  // Lọc tầng 2: AI analysis với generateText
-  async tier2Analysis(article: string): Promise<{ relevance: string; categories: string[] }> {
+  private async tier2Analysis(article: NewsArticle): Promise<{ relevance: "high"|"medium"|"low", categories: string[] }> {
     try {
       const { text } = await generateText({
         model: "openai/gpt-4o",
-        prompt: `${TIER2_ANALYSIS_PROMPT}\n\nBÀI VIẾT:\n${article}\n\nTrả về JSON format: {"relevance": "high|medium|low", "categories": ["category1", "category2"]}`,
-        maxOutputTokens: 500,
-      })
-
-      const result = JSON.parse(text)
-      return {
-        relevance: result.relevance || "low",
-        categories: result.categories || [],
-      }
-    } catch (error) {
-      console.error("Error in tier2 analysis:", error)
-      return { relevance: "low", categories: [] }
+        system: "Chuyên gia pháp lý Vexim Global. Phân loại tin GACC/FDA.",
+        prompt: `Phân tích: "${article.title}". Trả về JSON {"relevance": "high|medium|low", "categories": []}.`
+      });
+      return JSON.parse(text);
+    } catch {
+      return { relevance: "low", categories: [] };
     }
   }
 
-  // Lọc tầng 3: Structured validation với generateObject
-  async tier3Validation(article: string) {
+  private async tier3Validation(article: NewsArticle, fullContent: string) {
     try {
       const { object } = await generateObject({
         model: "openai/gpt-4o",
         schema: TIER3_VALIDATION_SCHEMA,
-        prompt: `
-Phân tích chi tiết bài viết tin tức này về xuất nhập khẩu thực phẩm:
-
-${article}
-
-Xác định:
-1. Có liên quan trực tiếp đến xuất nhập khẩu thực phẩm không?
-2. Điểm số mức độ liên quan (0-100)
-3. Lý do đánh giá
-4. Các điểm chính cần lưu ý
-5. Sản phẩm bị ảnh hưởng (hải sản, nông sản, đồ uống, etc.)
-6. Quốc gia bị ảnh hưởng (Mỹ, Trung Quốc, Hàn Quốc, Việt Nam)
-7. Có yêu cầu hành động gấp không?
-8. Deadline nếu có
-        `,
-      })
-
-      return object
-    } catch (error) {
-      console.error("Error in tier3 validation:", error)
-      return null
+        prompt: `Phân tích bài viết từ ${article.source}: ${fullContent.substring(0, 4000)}`
+      });
+      return object;
+    } catch {
+      return null;
     }
   }
 
-  // Process toàn bộ workflow
-  async processNewsArticle(articleJson: string): Promise<NewsArticle | null> {
-    const article = JSON.parse(articleJson)
+  // --- WORKFLOW ---
 
-    // Lớp 1: Keyword filter
-    if (!this.tier1Filter(articleJson)) {
-      console.log(`[Tier 1] Filtered out: ${article.title}`)
-      return null
-    }
+  async process() {
+    const rawArticles = [
+      ...(await this.crawlFDANews()),
+      ...(await this.crawlGACCNews())
+    ];
 
-    // Lớp 2: AI analysis
-    const tier2Result = await this.tier2Analysis(articleJson)
-    if (tier2Result.relevance === "low") {
-      console.log(`[Tier 2] Low relevance: ${article.title}`)
-      return null
-    }
+    const finalResults: NewsArticle[] = [];
 
-    // Lớp 3: Detailed validation
-    const tier3Result = await this.tier3Validation(articleJson)
-    if (!tier3Result || !tier3Result.isRelevant) {
-      console.log(`[Tier 3] Not relevant: ${article.title}`)
-      return null
-    }
+    for (const article of rawArticles) {
+      // Tier 1
+      const text = (article.title).toLowerCase();
+      if (!TIER1_KEYWORDS.some(kw => text.includes(kw.toLowerCase()))) continue;
 
-    // Nếu pass tất cả 3 lớp, return article
-    return {
-      title: article.title,
-      url: article.url,
-      date: article.date,
-      summary: tier3Result.keyPoints.join(". "),
-      relevance: tier2Result.relevance as "high" | "medium" | "low",
-      categories: tier2Result.categories,
+      // Tier 2
+      const t2 = await this.tier2Analysis(article);
+      if (t2.relevance === "low") continue;
+
+      // Tier 3
+      const content = await this.fetchFullContent(article.url, article.source);
+      const t3 = await this.tier3Validation(article, content);
+
+      if (t3?.isRelevant) {
+        finalResults.push({
+          ...article,
+          relevance: t2.relevance,
+          categories: t2.categories,
+          summary: t3.keyPoints.join(". "),
+          aiAnalysis: t3
+        });
+      }
     }
+    return finalResults;
+  }
+
+  private async fetchFullContent(url: string, source: string): Promise<string> {
+    if (source === "GACC") {
+      let browser;
+      try {
+        browser = await (puppeteer as any).launch({ headless: "new" });
+        const page = await browser.newPage();
+        await page.goto(url, { waitUntil: 'networkidle2', timeout: 45000 });
+        const html = await page.content();
+        await browser.close();
+        const $ = cheerio.load(html);
+        return $(".article-content, #content, .content").text().trim();
+      } catch {
+        if (browser) await browser.close();
+        return "";
+      }
+    }
+    // FDA fetch
+    const res = await fetch(url, { headers: { "User-Agent": this.userAgent } });
+    const html = await res.text();
+    return cheerio.load(html)("article").text().trim();
   }
 }
