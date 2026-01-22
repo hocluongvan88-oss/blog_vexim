@@ -10,13 +10,13 @@ import {
 } from "@/lib/email-templates"
 import type { FDAItem } from "@/types/fda"
 
-// Zoho SMTP Configuration
-const SMTP_HOST = process.env.SMTP_HOST || "smtp.zoho.com"
-const SMTP_PORT = Number.parseInt(process.env.SMTP_PORT || "465", 10)
-const SMTP_USER = process.env.SMTP_USER || "" // your-email@veximglobal.vn
-const SMTP_PASSWORD = process.env.SMTP_PASSWORD || "" // your Zoho password
-const FROM_EMAIL = process.env.FROM_EMAIL || "alerts@veximglobal.vn"
-const FROM_NAME = process.env.FROM_NAME || "FDA Tracker - Vexim Global"
+// Zoho SMTP Configuration - Using existing Vercel env variables
+const SMTP_HOST = process.env.MAIL_HOST || process.env.SMTP_HOST || "smtp.zoho.com"
+const SMTP_PORT = Number.parseInt(process.env.MAIL_PORT || process.env.SMTP_PORT || "587", 10)
+const SMTP_USER = process.env.MAIL_USERNAME || process.env.SMTP_USER || "" // your-email@veximglobal.com
+const SMTP_PASSWORD = process.env.MAIL_PASSWORD || process.env.SMTP_PASSWORD || "" // your Zoho password
+const FROM_EMAIL = process.env.MAIL_FROM_ADDRESS || process.env.FROM_EMAIL || "contact@veximglobal.com"
+const FROM_NAME = process.env.MAIL_FROM_NAME || process.env.FROM_NAME || "VEXIM GLOBAL"
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://vexim.vn"
 
 export class EmailServiceZoho {

@@ -5,14 +5,22 @@ export async function POST(request: Request) {
   try {
     const { to, subject, html, from } = await request.json()
 
-    // Create Zoho transporter
+    // Create Zoho transporter - Using existing Vercel env variables
+    const host = process.env.MAIL_HOST || process.env.SMTP_HOST || "smtp.zoho.com"
+    const port = Number.parseInt(process.env.MAIL_PORT || process.env.SMTP_PORT || "587", 10)
+    const user = process.env.MAIL_USERNAME || process.env.SMTP_USER
+    const pass = process.env.MAIL_PASSWORD || process.env.SMTP_PASSWORD
+    
+    // Port 587 uses TLS, port 465 uses SSL
+    const secure = port === 465
+    
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || "smtp.zoho.com",
-      port: Number.parseInt(process.env.SMTP_PORT || "465", 10),
-      secure: true, // true for 465, false for other ports
+      host,
+      port,
+      secure,
       auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASSWORD,
+        user,
+        pass,
       },
     })
 
