@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { createServerClient } from "@/lib/supabase-server"
 import type { FDACategory } from "@/types/fda"
+import nodemailer from "nodemailer"
 
 export async function POST(request: Request) {
   try {
@@ -65,9 +66,6 @@ export async function POST(request: Request) {
     try {
       console.log("[v0] Preparing to send verification email...")
       
-      // Import nodemailer
-      const nodemailer = await import("nodemailer")
-      
       // Validate SMTP credentials
       if (!process.env.MAIL_USERNAME || !process.env.MAIL_PASSWORD) {
         console.error("[v0] SMTP credentials missing!")
@@ -80,11 +78,11 @@ export async function POST(request: Request) {
         user: process.env.MAIL_USERNAME ? "***configured***" : "MISSING",
       })
       
-      // Create transporter
-      const transporter = nodemailer.default.createTransport({
+      // Create transporter (same as consultation form)
+      const transporter = nodemailer.createTransport({
         host: process.env.MAIL_HOST || "smtp.zoho.com",
         port: Number.parseInt(process.env.MAIL_PORT || "587"),
-        secure: false, // Use TLS
+        secure: false,
         auth: {
           user: process.env.MAIL_USERNAME,
           pass: process.env.MAIL_PASSWORD,
@@ -92,6 +90,7 @@ export async function POST(request: Request) {
         tls: {
           rejectUnauthorized: false,
         },
+        debug: true, // Enable debug output
       })
       
       const verificationLink = `${process.env.NEXT_PUBLIC_BASE_URL || "https://veximglobal.com"}/api/fda/verify?email=${encodeURIComponent(email)}&token=${verificationToken}`
