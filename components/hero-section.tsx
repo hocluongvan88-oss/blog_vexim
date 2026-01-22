@@ -73,7 +73,7 @@ export function HeroSection() {
           {/* Left Content */}
           <div className="text-white">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-balance leading-tight">
-              Đồng hành cùng doanh nghiệp?
+              Đồng hành cùng doanh nghiệp
             </h1>
             <h2 className="text-2xl md:text-3xl font-bold mb-6 text-yellow-400 drop-shadow-lg">
               Chinh phục những thị trường khó tính nhất
@@ -119,7 +119,7 @@ export function HeroSection() {
           <Card id="consultation-form" className="p-6 md:p-8 bg-white shadow-2xl">
             <h3 className="text-2xl font-bold text-primary mb-2">Tư vấn miễn phí - Nhận kết quả trong 24h</h3>
             <p className="text-muted-foreground mb-6">
-              <span className="text-accent font-semibold">Hãy để lại thông tin</span> chúng tôi sẽ liên hệ với bạn ngay!
+              <span className="text-accent font-semibold">Vui lòng gửi lại thông tin</span> chúng tôi sẽ liên hệ với bạn ngay!
             </p>
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Honeypot field ẩn */}
@@ -207,7 +207,7 @@ export function HeroSection() {
                 <Input
                   id="product"
                   type="text"
-                  placeholder="VD: Sữa tươi, Thực phẩm chức năng"
+                  placeholder="VD: Yến hũ, Hạt điều nhân"
                   value={formData.product}
                   onChange={(e) => setFormData({ ...formData, product: e.target.value })}
                   disabled={isSubmitting}
