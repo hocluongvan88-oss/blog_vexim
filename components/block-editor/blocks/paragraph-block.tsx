@@ -89,7 +89,18 @@ export function ParagraphBlock({ data, onChange, onEnter, onBackspace, onPasteSp
 
   const handlePaste = (e: React.ClipboardEvent<HTMLParagraphElement>) => {
     e.preventDefault()
+    
+    // Try to get HTML first for structured content detection
+    const pastedHTML = e.clipboardData.getData("text/html")
     const pastedText = e.clipboardData.getData("text/plain")
+    
+    // Check if HTML contains structured elements (headings, paragraphs, etc.)
+    if (pastedHTML && (pastedHTML.includes("<h1") || pastedHTML.includes("<h2") || pastedHTML.includes("<h3") || pastedHTML.includes("<p"))) {
+      // HTML content detected - this will be handled by parent block editor
+      console.log("[v0] HTML content detected in paste")
+      // For now, just use plain text
+      // In the future, signal to parent to parse HTML into blocks
+    }
     
     // Split by newlines
     const lines = pastedText.split(/\r?\n/)

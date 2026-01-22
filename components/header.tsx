@@ -2,10 +2,18 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Menu, X, Shield } from "lucide-react"
+import { Menu, X, User, ChevronDown, Shield } from "lucide-react"
 import { ConsultationDialog } from "@/components/consultation-dialog"
 import Link from "next/link"
 import { BlogSearch } from "@/components/blog-search"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -61,14 +69,34 @@ export function Header() {
               <Link href="/#contact" className="text-foreground hover:text-primary transition-colors font-medium">
                 Liên hệ
               </Link>
-              <Link
-                href="/admin/login"
-                className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"
-                title="Quản trị viên"
-              >
-                <Shield className="w-4 h-4" />
-                <span className="text-sm">Admin</span>
-              </Link>
+
+              {/* Profile Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-gray-100 transition-colors">
+                    <Avatar className="w-8 h-8">
+                      <AvatarFallback className="bg-emerald-600 text-white text-xs font-semibold">
+                        AD
+                      </AvatarFallback>
+                    </Avatar>
+                    <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/login" className="cursor-pointer">
+                      <User className="w-4 h-4 mr-2" />
+                      <span>Quản trị viên</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/login" className="cursor-pointer text-sm">
+                      <span>Đăng nhập Admin</span>
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </nav>
 
             {/* CTA Button */}
@@ -138,8 +166,8 @@ export function Header() {
                   className="text-left text-muted-foreground hover:text-primary transition-colors flex items-center gap-2"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  <Shield className="w-4 h-4" />
-                  <span>Admin</span>
+                  <User className="w-4 h-4" />
+                  <span>Quản trị viên</span>
                 </Link>
                 <Button
                   onClick={() => {

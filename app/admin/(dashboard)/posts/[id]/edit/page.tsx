@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
 import { ImageUploader } from "@/components/image-uploader"
 import { AIWritingAssistant } from "@/components/admin/ai-writing-assistant"
+import { HTMLPasteDialog } from "@/components/admin/html-paste-dialog"
 import type { Block } from "@/components/block-editor/types"
 
 export default function EditPostPage({ params }: { params: Promise<{ id: string }> }) {
@@ -121,6 +122,15 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
     toast({
       title: "Đã tạo Meta Description",
       description: "Meta description đã được cập nhật tự động",
+    })
+  }
+
+  // Handle HTML import
+  const handleHTMLImport = (newBlocks: Block[]) => {
+    setBlocks([...blocks, ...newBlocks])
+    toast({
+      title: "Import thành công",
+      description: `Đã thêm ${newBlocks.length} blocks từ HTML`,
     })
   }
 
@@ -276,10 +286,15 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
 
           {/* Block Editor */}
           <Card className="p-6">
-            <h2 className="text-xl font-bold text-primary mb-4">Nội dung bài viết</h2>
-            <p className="text-sm text-muted-foreground mb-4">
-              Sử dụng hệ thống khối để xây dựng nội dung. Mỗi khối có thể được căn chỉnh và sắp xếp độc lập.
-            </p>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-xl font-bold text-primary">Nội dung bài viết</h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Sử dụng hệ thống khối để xây dựng nội dung. Mỗi khối có thể được căn chỉnh và sắp xếp độc lập.
+                </p>
+              </div>
+              <HTMLPasteDialog onImport={handleHTMLImport} />
+            </div>
             <BlockEditor value={blocks} onChange={setBlocks} />
           </Card>
         </div>
