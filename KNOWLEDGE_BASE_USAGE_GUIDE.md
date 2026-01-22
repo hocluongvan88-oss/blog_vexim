@@ -245,7 +245,7 @@ Mỗi tài liệu được chia thành nhiều **chunks** (đoạn nhỏ) để 
 
 ## Ví Dụ Nội Dung Tài Liệu Chuẩn
 
-```markdown
+\`\`\`markdown
 # Nghị định 15/2018 - Đăng ký GACC
 
 ## 1. Giới thiệu
@@ -281,7 +281,7 @@ Nộp hồ sơ qua hệ thống online của GACC...
 - Hồ sơ phải có bản dịch tiếng Trung
 - Giấy tờ phải công chứng
 - Cơ sở phải đáp ứng tiêu chuẩn Trung Quốc
-```
+\`\`\`
 
 ---
 

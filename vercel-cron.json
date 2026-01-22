@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/fda/send-digest?frequency=daily",
+      "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/fda/send-digest?frequency=weekly",
+      "schedule": "0 8 * * 1"
+    }
+  ]
+}

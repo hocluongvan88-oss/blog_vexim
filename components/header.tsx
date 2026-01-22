@@ -49,6 +49,9 @@ export function Header() {
               <Link href="/#services" className="text-foreground hover:text-primary transition-colors font-medium">
                 Dịch vụ
               </Link>
+              <Link href="/fda-tracker" className="text-foreground hover:text-primary transition-colors font-medium">
+                FDA Tracker
+              </Link>
               <Link href="/#about" className="text-foreground hover:text-primary transition-colors font-medium">
                 Giới thiệu
               </Link>
@@ -101,6 +104,13 @@ export function Header() {
                   className="text-left text-foreground hover:text-primary transition-colors font-medium"
                 >
                   Dịch vụ
+                </Link>
+                <Link
+                  href="/fda-tracker"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="text-left text-foreground hover:text-primary transition-colors font-medium"
+                >
+                  FDA Tracker
                 </Link>
                 <Link
                   href="/#about"

@@ -21,9 +21,9 @@ AI Writing Assistant sử dụng Groq API để cung cấp các tính năng hỗ
 
 Thêm vào file `.env.local`:
 
-```env
+\`\`\`env
 GROQ_API_KEY=gsk_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-```
+\`\`\`
 
 ### Triển khai trên Vercel (Production)
 
