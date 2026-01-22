@@ -63,19 +63,26 @@ export async function POST(request: Request) {
     }
 
     // Send verification email (using Zoho SMTP directly)
+    console.log("[v0] === STARTING EMAIL SEND PROCESS ===")
+    console.log("[v0] Target email:", email)
+    console.log("[v0] Categories:", categories)
+    console.log("[v0] Frequency:", frequency)
+    
     try {
-      console.log("[v0] Preparing to send verification email...")
-      
       // Validate SMTP credentials
       if (!process.env.MAIL_USERNAME || !process.env.MAIL_PASSWORD) {
-        console.error("[v0] SMTP credentials missing!")
+        console.error("[v0] FATAL: SMTP credentials missing!")
+        console.error("[v0] MAIL_USERNAME:", process.env.MAIL_USERNAME ? "SET" : "NOT SET")
+        console.error("[v0] MAIL_PASSWORD:", process.env.MAIL_PASSWORD ? "SET" : "NOT SET")
         throw new Error("SMTP credentials not configured")
       }
       
-      console.log("[v0] SMTP Config:", {
+      console.log("[v0] SMTP credentials validated")
+      console.log("[v0] Creating transporter with config:", {
         host: process.env.MAIL_HOST || "smtp.zoho.com",
         port: process.env.MAIL_PORT || "587",
-        user: process.env.MAIL_USERNAME ? "***configured***" : "MISSING",
+        user: process.env.MAIL_USERNAME,
+        secure: false,
       })
       
       // Create transporter (same as consultation form)
@@ -90,14 +97,20 @@ export async function POST(request: Request) {
         tls: {
           rejectUnauthorized: false,
         },
-        debug: true, // Enable debug output
       })
+      
+      console.log("[v0] Transporter created, verifying connection...")
+      
+      // Verify SMTP connection
+      await transporter.verify()
+      console.log("[v0] SMTP connection verified successfully!")
       
       const verificationLink = `${process.env.NEXT_PUBLIC_BASE_URL || "https://veximglobal.com"}/api/fda/verify?email=${encodeURIComponent(email)}&token=${verificationToken}`
       const unsubscribeLink = `${process.env.NEXT_PUBLIC_BASE_URL || "https://veximglobal.com"}/api/fda/subscribe?email=${encodeURIComponent(email)}&token=${verificationToken}`
       
-      // Send verification email
-      const info = await transporter.sendMail({
+      console.log("[v0] Verification link:", verificationLink)
+      
+      const mailOptions = {
         from: `"${process.env.MAIL_FROM_NAME || "VEXIM GLOBAL"}" <${process.env.MAIL_FROM_ADDRESS || process.env.MAIL_USERNAME}>`,
         to: email,
         subject: "Xác nhận đăng ký cảnh báo FDA - Vexim Global",
@@ -109,7 +122,7 @@ export async function POST(request: Request) {
           </head>
           <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
             <div style="background: linear-gradient(135deg, #1e3a8a 0%, #065f46 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-              <h1 style="color: white; margin: 0; font-size: 28px;">🚨 FDA Alert Tracker</h1>
+              <h1 style="color: white; margin: 0; font-size: 28px;">FDA Alert Tracker</h1>
               <p style="color: #d1fae5; margin: 10px 0 0 0;">Vexim Global</p>
             </div>
             
@@ -126,7 +139,7 @@ export async function POST(request: Request) {
               
               <div style="text-align: center; margin: 30px 0;">
                 <a href="${verificationLink}" style="background: #10b981; color: white; padding: 14px 30px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">
-                  ✅ Xác nhận đăng ký
+                  Xác nhận đăng ký
                 </a>
               </div>
               
@@ -145,18 +158,33 @@ export async function POST(request: Request) {
           </body>
           </html>
         `,
-      })
+      }
       
-      console.log("[v0] ✅ Verification email sent successfully!")
+      console.log("[v0] Mail options prepared, sending email...")
+      console.log("[v0] From:", mailOptions.from)
+      console.log("[v0] To:", mailOptions.to)
+      console.log("[v0] Subject:", mailOptions.subject)
+      
+      // Send verification email
+      const info = await transporter.sendMail(mailOptions)
+      
+      console.log("[v0] === EMAIL SENT SUCCESSFULLY ===")
       console.log("[v0] Message ID:", info.messageId)
       console.log("[v0] Response:", info.response)
+      console.log("[v0] Accepted:", info.accepted)
+      console.log("[v0] Rejected:", info.rejected)
+      console.log("[v0] Pending:", info.pending)
     } catch (emailError) {
-      console.error("[v0] ❌ Email sending failed:", emailError)
-      if (emailError instanceof Error) {
-        console.error("[v0] Error details:", emailError.message)
-      }
+      console.error("[v0] === EMAIL SEND FAILED ===")
+      console.error("[v0] Error type:", emailError?.constructor?.name)
+      console.error("[v0] Error message:", emailError instanceof Error ? emailError.message : emailError)
+      console.error("[v0] Full error object:", emailError)
+      console.error("[v0] Stack trace:", emailError instanceof Error ? emailError.stack : "No stack trace")
       // Don't fail the subscription, just log the error
     }
+    
+    console.log("[v0] === EMAIL SEND PROCESS COMPLETED ===")
+
 
     return NextResponse.json({
       success: true,
