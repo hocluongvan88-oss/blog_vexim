@@ -196,6 +196,11 @@ export class EmailServiceZoho {
     html: string
   }): Promise<boolean> {
     try {
+      console.log("[v0] Starting email send process...")
+      console.log(`[v0] SMTP Config: host=${SMTP_HOST}, port=${SMTP_PORT}`)
+      console.log(`[v0] SMTP User configured: ${SMTP_USER ? "Yes" : "No"}`)
+      console.log(`[v0] SMTP Password configured: ${SMTP_PASSWORD ? "Yes (length: " + SMTP_PASSWORD.length + ")" : "No"}`)
+      
       // If SMTP credentials not set, log email instead (dev mode)
       if (!SMTP_USER || !SMTP_PASSWORD) {
         console.log("[v0] [DEV MODE] Email would be sent:")
@@ -206,8 +211,10 @@ export class EmailServiceZoho {
       }
 
       // Use nodemailer directly for server-side email sending
+      console.log("[v0] Importing nodemailer...")
       const nodemailer = await import("nodemailer")
 
+      console.log("[v0] Creating transporter...")
       const transporter = nodemailer.default.createTransport({
         host: SMTP_HOST,
         port: SMTP_PORT,
@@ -218,6 +225,7 @@ export class EmailServiceZoho {
         },
       })
 
+      console.log("[v0] Sending email...")
       const info = await transporter.sendMail({
         from: `"${FROM_NAME}" <${FROM_EMAIL}>`,
         to,
@@ -225,10 +233,16 @@ export class EmailServiceZoho {
         html,
       })
 
-      console.log(`[v0] Email sent successfully via Zoho SMTP: ${info.messageId}`)
+      console.log(`[v0] Email sent successfully via Zoho SMTP!`)
+      console.log(`[v0] Message ID: ${info.messageId}`)
+      console.log(`[v0] Response: ${info.response}`)
       return true
     } catch (error) {
       console.error("[v0] Error sending email via Zoho:", error)
+      if (error instanceof Error) {
+        console.error("[v0] Error message:", error.message)
+        console.error("[v0] Error stack:", error.stack)
+      }
       throw error
     }
   }

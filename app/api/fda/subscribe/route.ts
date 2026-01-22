@@ -62,12 +62,23 @@ export async function POST(request: Request) {
     }
 
     // Send verification email (using Zoho SMTP)
-    const { emailService } = await import("@/lib/email-service-zoho")
-    await emailService.sendVerificationEmail(email, verificationToken)
+    try {
+      const { emailService } = await import("@/lib/email-service-zoho")
+      const emailSent = await emailService.sendVerificationEmail(email, verificationToken)
+      
+      console.log(`[v0] Email service response:`, emailSent)
+      
+      if (!emailSent) {
+        console.error("[v0] Email service returned false")
+      }
+    } catch (emailError) {
+      console.error("[v0] Email sending failed:", emailError)
+      // Don't fail the subscription, just log the error
+    }
 
     return NextResponse.json({
       success: true,
-      message: "Subscription created successfully",
+      message: "Subscription created successfully. Please check your email to verify.",
     })
   } catch (error) {
     console.error("[v0] Subscription API error:", error)
