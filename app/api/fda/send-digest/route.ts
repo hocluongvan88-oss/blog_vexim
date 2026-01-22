@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { emailService } from "@/lib/email-service"
+import { emailService } from "@/lib/email-service-zoho"
 
 // This endpoint should be called by a cron job
 // Vercel Cron or external service like cron-job.org

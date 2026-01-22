@@ -168,7 +168,8 @@ export function FDATrackerDashboard() {
                         </div>
                         <h3 className="text-2xl font-bold text-slate-900 mb-2">Còn {lockedItemsCount} cảnh báo</h3>
                         <p className="text-slate-600 mb-6">
-                          Đăng ký email để nhận <strong> {totalCount} cảnh báo</strong> theo nhóm ngành hàng của bạn, ngôn ngữ đã được dịch sang tiếng Việt.
+                          Đăng ký email để nhận <strong>tất cả {totalCount} cảnh báo</strong> với tóm tắt tiếng Việt và
+                          thông báo tự động.
                         </p>
                         <Button
                           onClick={() => setShowSubscriptionDialog(true)}

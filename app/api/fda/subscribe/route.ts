@@ -61,8 +61,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Failed to create subscription" }, { status: 500 })
     }
 
-    // Send verification email
-    const { emailService } = await import("@/lib/email-service")
+    // Send verification email (using Zoho SMTP)
+    const { emailService } = await import("@/lib/email-service-zoho")
     await emailService.sendVerificationEmail(email, verificationToken)
 
     return NextResponse.json({
@@ -130,8 +130,8 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "Failed to unsubscribe" }, { status: 500 })
     }
 
-    // Send unsubscribe confirmation email
-    const { emailService } = await import("@/lib/email-service")
+    // Send unsubscribe confirmation email (using Zoho SMTP)
+    const { emailService } = await import("@/lib/email-service-zoho")
     await emailService.sendUnsubscribeConfirmation(email)
 
     return NextResponse.json({
