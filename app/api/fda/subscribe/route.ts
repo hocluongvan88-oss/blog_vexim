@@ -75,6 +75,14 @@ export async function POST(request: Request) {
     console.log("[v0] === DATABASE INSERT SUCCESS ===")
     console.log("[v0] Inserted record:", insertData)
 
+    // Debug logging (same as consultation form)
+    console.log("[v0] Email config check:", {
+      host: process.env.MAIL_HOST,
+      port: process.env.MAIL_PORT,
+      user: process.env.MAIL_USERNAME ? "***set***" : "MISSING",
+      pass: process.env.MAIL_PASSWORD ? "***set***" : "MISSING",
+    })
+    
     // Validate SMTP credentials (same as consultation form)
     if (!process.env.MAIL_USERNAME || !process.env.MAIL_PASSWORD) {
       console.error("[v0] Missing email credentials!")
@@ -93,6 +101,7 @@ export async function POST(request: Request) {
       tls: {
         rejectUnauthorized: false,
       },
+      debug: true, // Enable debug output (same as consultation form)
     })
 
     const verificationLink = `${process.env.NEXT_PUBLIC_BASE_URL || "https://veximglobal.com"}/api/fda/verify?email=${encodeURIComponent(email)}&token=${verificationToken}`
