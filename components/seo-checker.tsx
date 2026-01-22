@@ -37,10 +37,7 @@ export function SEOChecker({
   const [seoScore, setSeoScore] = useState<SEOScore>({ score: 0, issues: [] })
 
   useEffect(() => {
-    analyzeSEO()
-  }, [title, excerpt, content, metaTitle, metaDescription, featuredImage, blocks])
-
-  const analyzeSEO = () => {
+    // Inline analyzeSEO logic to avoid dependency issues
     const issues: SEOScore["issues"] = []
     let score = 100
 
@@ -142,7 +139,7 @@ export function SEOChecker({
     }
 
     setSeoScore({ score: Math.max(0, score), issues })
-  }
+  }, [title, excerpt, content, metaTitle, metaDescription, featuredImage, blocks])
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return "text-emerald-600"

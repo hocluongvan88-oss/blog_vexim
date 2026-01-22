@@ -82,6 +82,10 @@ export function BlockEditor({ value, onChange }: BlockEditorProps) {
     setBlocks(blocks.map((block) => (block.id === id ? { ...block, data: { ...block.data, ...data } } : block)))
   }
 
+  const convertBlockType = (id: string, newType: BlockType, newData: any) => {
+    setBlocks(blocks.map((block) => (block.id === id ? { ...block, type: newType, data: newData } : block)))
+  }
+
   const deleteBlock = (id: string) => {
     // Prevent deleting the last block - instead clear its content
     if (blocks.length === 1) {
@@ -202,6 +206,7 @@ export function BlockEditor({ value, onChange }: BlockEditorProps) {
             onDelete={() => deleteBlock(block.id)}
             onMoveUp={() => moveBlock(block.id, "up")}
             onMoveDown={() => moveBlock(block.id, "down")}
+            onConvertType={(newType, newData) => convertBlockType(block.id, newType, newData)}
           />
         )}
 
