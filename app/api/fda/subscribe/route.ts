@@ -75,128 +75,79 @@ export async function POST(request: Request) {
     console.log("[v0] === DATABASE INSERT SUCCESS ===")
     console.log("[v0] Inserted record:", insertData)
 
-    // Send verification email (using Zoho SMTP directly)
-    console.log("[v0] === STARTING EMAIL SEND PROCESS ===")
-    console.log("[v0] Target email:", email)
-    console.log("[v0] Categories:", categories)
-    console.log("[v0] Frequency:", frequency)
-    
-    try {
-      // Validate SMTP credentials
-      if (!process.env.MAIL_USERNAME || !process.env.MAIL_PASSWORD) {
-        console.error("[v0] FATAL: SMTP credentials missing!")
-        console.error("[v0] MAIL_USERNAME:", process.env.MAIL_USERNAME ? "SET" : "NOT SET")
-        console.error("[v0] MAIL_PASSWORD:", process.env.MAIL_PASSWORD ? "SET" : "NOT SET")
-        throw new Error("SMTP credentials not configured")
-      }
-      
-      console.log("[v0] SMTP credentials validated")
-      console.log("[v0] Creating transporter with config:", {
-        host: process.env.MAIL_HOST || "smtp.zoho.com",
-        port: process.env.MAIL_PORT || "587",
-        user: process.env.MAIL_USERNAME,
-        secure: false,
-      })
-      
-      // Create transporter (same as consultation form)
-      const transporter = nodemailer.createTransport({
-        host: process.env.MAIL_HOST || "smtp.zoho.com",
-        port: Number.parseInt(process.env.MAIL_PORT || "587"),
-        secure: false,
-        auth: {
-          user: process.env.MAIL_USERNAME,
-          pass: process.env.MAIL_PASSWORD,
-        },
-        tls: {
-          rejectUnauthorized: false,
-        },
-      })
-      
-      console.log("[v0] Transporter created, verifying connection...")
-      
-      // Verify SMTP connection
-      await transporter.verify()
-      console.log("[v0] SMTP connection verified successfully!")
-      
-      const verificationLink = `${process.env.NEXT_PUBLIC_BASE_URL || "https://veximglobal.com"}/api/fda/verify?email=${encodeURIComponent(email)}&token=${verificationToken}`
-      const unsubscribeLink = `${process.env.NEXT_PUBLIC_BASE_URL || "https://veximglobal.com"}/api/fda/subscribe?email=${encodeURIComponent(email)}&token=${verificationToken}`
-      
-      console.log("[v0] Verification link:", verificationLink)
-      
-      const mailOptions = {
-        from: `"${process.env.MAIL_FROM_NAME || "VEXIM GLOBAL"}" <${process.env.MAIL_FROM_ADDRESS || process.env.MAIL_USERNAME}>`,
-        to: email,
-        subject: "Xác nhận đăng ký cảnh báo FDA - Vexim Global",
-        html: `
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="utf-8">
-          </head>
-          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <div style="background: linear-gradient(135deg, #1e3a8a 0%, #065f46 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-              <h1 style="color: white; margin: 0; font-size: 28px;">FDA Alert Tracker</h1>
-              <p style="color: #d1fae5; margin: 10px 0 0 0;">Vexim Global</p>
-            </div>
-            
-            <div style="background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px;">
-              <h2 style="color: #1e3a8a; margin-top: 0;">Xác nhận đăng ký</h2>
-              
-              <p>Cảm ơn bạn đã đăng ký nhận thông báo cảnh báo FDA từ Vexim Global!</p>
-              
-              <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #10b981;">
-                <p style="margin: 0;"><strong>Email:</strong> ${email}</p>
-                <p style="margin: 10px 0 0 0;"><strong>Danh mục:</strong> ${categories.join(", ")}</p>
-                <p style="margin: 10px 0 0 0;"><strong>Tần suất:</strong> ${frequency === "daily" ? "Hàng ngày" : frequency === "weekly" ? "Hàng tuần" : "Ngay lập tức"}</p>
-              </div>
-              
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="${verificationLink}" style="background: #10b981; color: white; padding: 14px 30px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">
-                  Xác nhận đăng ký
-                </a>
-              </div>
-              
-              <p style="color: #6b7280; font-size: 14px;">Hoặc copy link này vào trình duyệt:</p>
-              <p style="background: #f3f4f6; padding: 10px; border-radius: 4px; font-size: 12px; word-break: break-all;">${verificationLink}</p>
-              
-              <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #e5e7eb;">
-                <p style="color: #6b7280; font-size: 14px; margin: 5px 0;">Nếu bạn không đăng ký dịch vụ này, vui lòng bỏ qua email này.</p>
-              </div>
-            </div>
-            
-            <div style="text-align: center; padding: 20px; color: #9ca3af; font-size: 12px;">
-              <p>© 2026 Vexim Global. Bản quyền thuộc về Vexim Global.</p>
-              <p><a href="${unsubscribeLink}" style="color: #9ca3af;">Hủy đăng ký</a></p>
-            </div>
-          </body>
-          </html>
-        `,
-      }
-      
-      console.log("[v0] Mail options prepared, sending email...")
-      console.log("[v0] From:", mailOptions.from)
-      console.log("[v0] To:", mailOptions.to)
-      console.log("[v0] Subject:", mailOptions.subject)
-      
-      // Send verification email
-      const info = await transporter.sendMail(mailOptions)
-      
-      console.log("[v0] === EMAIL SENT SUCCESSFULLY ===")
-      console.log("[v0] Message ID:", info.messageId)
-      console.log("[v0] Response:", info.response)
-      console.log("[v0] Accepted:", info.accepted)
-      console.log("[v0] Rejected:", info.rejected)
-      console.log("[v0] Pending:", info.pending)
-    } catch (emailError) {
-      console.error("[v0] === EMAIL SEND FAILED ===")
-      console.error("[v0] Error type:", emailError?.constructor?.name)
-      console.error("[v0] Error message:", emailError instanceof Error ? emailError.message : emailError)
-      console.error("[v0] Full error object:", emailError)
-      console.error("[v0] Stack trace:", emailError instanceof Error ? emailError.stack : "No stack trace")
-      // Don't fail the subscription, just log the error
+    // Validate SMTP credentials (same as consultation form)
+    if (!process.env.MAIL_USERNAME || !process.env.MAIL_PASSWORD) {
+      console.error("[v0] Missing email credentials!")
+      return NextResponse.json({ error: "Cấu hình email chưa đầy đủ. Vui lòng liên hệ hotline." }, { status: 500 })
     }
-    
-    console.log("[v0] === EMAIL SEND PROCESS COMPLETED ===")
+
+    // Create transporter (same as consultation form)
+    const transporter = nodemailer.createTransport({
+      host: process.env.MAIL_HOST || "smtp.zoho.com",
+      port: Number.parseInt(process.env.MAIL_PORT || "587"),
+      secure: false,
+      auth: {
+        user: process.env.MAIL_USERNAME,
+        pass: process.env.MAIL_PASSWORD,
+      },
+      tls: {
+        rejectUnauthorized: false,
+      },
+    })
+
+    const verificationLink = `${process.env.NEXT_PUBLIC_BASE_URL || "https://veximglobal.com"}/api/fda/verify?email=${encodeURIComponent(email)}&token=${verificationToken}`
+    const unsubscribeLink = `${process.env.NEXT_PUBLIC_BASE_URL || "https://veximglobal.com"}/api/fda/subscribe?email=${encodeURIComponent(email)}&token=${verificationToken}`
+
+    // Send verification email (no try-catch, let it throw to outer catch)
+    await transporter.sendMail({
+      from: `"${process.env.MAIL_FROM_NAME || "VEXIM GLOBAL"}" <${process.env.MAIL_FROM_ADDRESS || process.env.MAIL_USERNAME}>`,
+      to: email,
+      subject: "Xác nhận đăng ký cảnh báo FDA - Vexim Global",
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+        </head>
+        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background: linear-gradient(135deg, #1e3a8a 0%, #065f46 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+            <h1 style="color: white; margin: 0; font-size: 28px;">FDA Alert Tracker</h1>
+            <p style="color: #d1fae5; margin: 10px 0 0 0;">Vexim Global</p>
+          </div>
+          
+          <div style="background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px;">
+            <h2 style="color: #1e3a8a; margin-top: 0;">Xác nhận đăng ký</h2>
+            
+            <p>Cảm ơn bạn đã đăng ký nhận thông báo cảnh báo FDA từ Vexim Global!</p>
+            
+            <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #10b981;">
+              <p style="margin: 0;"><strong>Email:</strong> ${email}</p>
+              <p style="margin: 10px 0 0 0;"><strong>Danh mục:</strong> ${categories.join(", ")}</p>
+              <p style="margin: 10px 0 0 0;"><strong>Tần suất:</strong> ${frequency === "daily" ? "Hàng ngày" : frequency === "weekly" ? "Hàng tuần" : "Ngay lập tức"}</p>
+            </div>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${verificationLink}" style="background: #10b981; color: white; padding: 14px 30px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">
+                Xác nhận đăng ký
+              </a>
+            </div>
+            
+            <p style="color: #6b7280; font-size: 14px;">Hoặc copy link này vào trình duyệt:</p>
+            <p style="background: #f3f4f6; padding: 10px; border-radius: 4px; font-size: 12px; word-break: break-all;">${verificationLink}</p>
+            
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #e5e7eb;">
+              <p style="color: #6b7280; font-size: 14px; margin: 5px 0;">Nếu bạn không đăng ký dịch vụ này, vui lòng bỏ qua email này.</p>
+            </div>
+          </div>
+          
+          <div style="text-align: center; padding: 20px; color: #9ca3af; font-size: 12px;">
+            <p>© 2026 Vexim Global. Bản quyền thuộc về Vexim Global.</p>
+            <p><a href="${unsubscribeLink}" style="color: #9ca3af;">Hủy đăng ký</a></p>
+          </div>
+        </body>
+        </html>
+      `,
+    })
 
 
     return NextResponse.json({
