@@ -6,11 +6,20 @@ import { Menu, X, Shield } from "lucide-react"
 import { ConsultationDialog } from "@/components/consultation-dialog"
 import Link from "next/link"
 import { BlogSearch } from "@/components/blog-search"
+import { UserProfileMenu } from "@/components/user-profile-menu"
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+
+  // Demo user - Replace with actual auth logic
+  const demoUser = {
+    name: "Nguyễn Văn A",
+    email: "admin@veximglobal.vn",
+    avatar: undefined,
+    role: "admin" as const,
+  }
 
   useEffect(() => {
     const handleScroll = () => {
@@ -61,24 +70,17 @@ export function Header() {
               <Link href="/#contact" className="text-foreground hover:text-primary transition-colors font-medium">
                 Liên hệ
               </Link>
-              <Link
-                href="/admin/login"
-                className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"
-                title="Quản trị viên"
-              >
-                <Shield className="w-4 h-4" />
-                <span className="text-sm">Admin</span>
-              </Link>
             </nav>
 
-            {/* CTA Button */}
-            <div className="hidden md:block">
+            {/* CTA & User Profile */}
+            <div className="hidden md:flex items-center gap-4">
               <Button
                 onClick={() => setIsDialogOpen(true)}
                 className="bg-accent text-accent-foreground hover:bg-accent/90"
               >
                 Yêu cầu tư vấn
               </Button>
+              <UserProfileMenu user={demoUser} />
             </div>
 
             {/* Mobile Menu Button */}
@@ -95,6 +97,10 @@ export function Header() {
           {isMobileMenuOpen && (
             <nav className="md:hidden py-4 border-t">
               <div className="flex flex-col gap-4">
+                {/* User Profile in Mobile */}
+                <div className="pb-2 border-b">
+                  <UserProfileMenu user={demoUser} />
+                </div>
                 <div className="pb-2">
                   <BlogSearch />
                 </div>
@@ -132,14 +138,6 @@ export function Header() {
                   className="text-left text-foreground hover:text-primary transition-colors font-medium"
                 >
                   Liên hệ
-                </Link>
-                <Link
-                  href="/admin/login"
-                  className="text-left text-muted-foreground hover:text-primary transition-colors flex items-center gap-2"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <Shield className="w-4 h-4" />
-                  <span>Admin</span>
                 </Link>
                 <Button
                   onClick={() => {
