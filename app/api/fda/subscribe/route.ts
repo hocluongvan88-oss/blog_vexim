@@ -47,20 +47,33 @@ export async function POST(request: Request) {
 
     // Create new subscription
     const verificationToken = generateToken()
+    
+    console.log("[v0] === CREATING DATABASE RECORD ===")
+    console.log("[v0] Email:", email)
+    console.log("[v0] Categories:", categories)
+    console.log("[v0] Frequency:", frequency)
+    console.log("[v0] Verification token:", verificationToken)
 
-    const { error: insertError } = await supabase.from("fda_subscriptions").insert({
+    const { data: insertData, error: insertError } = await supabase.from("fda_subscriptions").insert({
       email,
       categories,
       frequency,
       is_active: true,
       verified: false,
       verification_token: verificationToken,
-    })
+    }).select()
 
     if (insertError) {
-      console.error("[v0] Error creating subscription:", insertError)
+      console.error("[v0] === DATABASE INSERT FAILED ===")
+      console.error("[v0] Error code:", insertError.code)
+      console.error("[v0] Error message:", insertError.message)
+      console.error("[v0] Error details:", insertError.details)
+      console.error("[v0] Error hint:", insertError.hint)
       return NextResponse.json({ error: "Failed to create subscription" }, { status: 500 })
     }
+    
+    console.log("[v0] === DATABASE INSERT SUCCESS ===")
+    console.log("[v0] Inserted record:", insertData)
 
     // Send verification email (using Zoho SMTP directly)
     console.log("[v0] === STARTING EMAIL SEND PROCESS ===")
