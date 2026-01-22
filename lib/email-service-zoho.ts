@@ -205,30 +205,27 @@ export class EmailServiceZoho {
         return true
       }
 
-      // Use Nodemailer via API route to avoid bundling issues
-      const response = await fetch(`${BASE_URL}/api/send-email-smtp`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      // Use nodemailer directly for server-side email sending
+      const nodemailer = await import("nodemailer")
+
+      const transporter = nodemailer.default.createTransport({
+        host: SMTP_HOST,
+        port: SMTP_PORT,
+        secure: SMTP_PORT === 465, // true for 465, false for other ports
+        auth: {
+          user: SMTP_USER,
+          pass: SMTP_PASSWORD,
         },
-        body: JSON.stringify({
-          to,
-          subject,
-          html,
-          from: {
-            name: FROM_NAME,
-            email: FROM_EMAIL,
-          },
-        }),
       })
 
-      if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(`SMTP API error: ${response.status} ${errorText}`)
-      }
+      const info = await transporter.sendMail({
+        from: `"${FROM_NAME}" <${FROM_EMAIL}>`,
+        to,
+        subject,
+        html,
+      })
 
-      const data = await response.json()
-      console.log(`[v0] Email sent successfully via Zoho SMTP:`, data)
+      console.log(`[v0] Email sent successfully via Zoho SMTP: ${info.messageId}`)
       return true
     } catch (error) {
       console.error("[v0] Error sending email via Zoho:", error)
