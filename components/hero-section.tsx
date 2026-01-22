@@ -73,13 +73,16 @@ export function HeroSection() {
           {/* Left Content */}
           <div className="text-white">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-balance leading-tight">
-              ĐỒNG HÀNH CÙNG DOANH NGHIỆP
+              Hàng hóa bị giữ tại cảng vì thiếu giấy tờ?
             </h1>
             <h2 className="text-2xl md:text-3xl font-bold mb-6 text-yellow-400 drop-shadow-lg">
-              Chinh phục những thị trường khó tính nhất
+              Chúng tôi giúp bạn xử lý nhanh chóng
             </h2>
             <p className="text-lg md:text-xl mb-8 text-white/90 leading-relaxed">
-              Điểm khác biệt của chúng tôi là sự am hiểu sâu sắc về thị trường Mỹ, Trung Quốc và Hàn Quốc, kết hợp ứng dụng công nghệ trong việc cập nhật các quy định mới nhất, quản lý truy xuất nguồn gốc và tư vấn hồ sơ chính xác, chuẩn chỉnh. Nhờ đó, chúng tôi giúp doanh nghiệp rút ngắn thời gian, tối ưu chi phí, để bạn có thêm nguồn lực tập trung vào phát triển sản phẩm, mở rộng thị trường và nâng cao năng lực cạnh tranh bền vững.  
+              Xuất khẩu sang Mỹ, Trung Quốc, Hàn Quốc đều có yêu cầu riêng về giấy phép (FDA Registration, GACC Code, MFDS Permit). 
+              Thiếu giấy tờ đúng quy định, hàng sẽ bị giữ lại hoặc trả về ngay. 
+              Vexim Global hiểu rõ quy định từng thị trường, cập nhật thay đổi liên tục, 
+              giúp doanh nghiệp Việt Nam làm hồ sơ đúng, nhanh, tránh rủi ro.
             </p>
             <ul className="space-y-4 mb-8">
               <li className="flex items-center gap-3">

@@ -3,15 +3,15 @@ import { Users, Clock, DollarSign, Headphones } from "lucide-react"
 const benefits = [
   {
     icon: Users,
-    title: "Hiểu rõ quy định từng thị trường",
+    title: "Đội ngũ hiểu rõ quy định từng thị trường",
     description:
-      "Chúng tôi chuyên nghiên cứu luật xuất nhập khẩu Mỹ, Trung Quốc, Hàn Quốc. Theo dõi sát những thay đổi mới nhất của FDA, GACC, MFDS để tư vấn chính xác cho doanh nghiệp. Đội ngũ trẻ, nhiệt huyết, sẵn sàng học hỏi để phục vụ tốt nhất.",
+      "Chúng tôi chuyên nghiên cứu luật xuất nhập khẩu Mỹ, Trung Quốc, Hàn Quốc. Theo dõi sát những thay đổi mới nhất của FDA, GACC, MFDS để tư vấn chính xác cho doanh nghiệp Việt. Đội ngũ trẻ, nhiệt huyết, sẵn sàng học hỏi để phục vụ tốt nhất.",
   },
   {
     icon: Clock,
-    title: "Thời gian và quy trình rõ ràng",
+    title: "Cam kết thời gian và quy trình rõ ràng",
     description:
-      "FDA Registration: 5-10 ngày làm việc. GACC Code: 8-12 tuần. MFDS: 5-8 tuần (tùy sản phẩm). Thời gian phụ thuộc vào độ đầy đủ hồ sơ của bạn và tốc độ xử lý của cơ quan. Chúng tôi theo dõi sát từng bước, báo cáo tiến độ thường xuyên.",
+      "FDA Registration: 5-10 ngày làm việc. GACC Code: 8-12 tuần. MFDS: 10-16 tuần (tùy sản phẩm). Thời gian phụ thuộc vào độ đầy đủ hồ sơ của bạn và tốc độ xử lý của cơ quan. Chúng tôi theo dõi sát từng bước, báo cáo tiến độ thường xuyên.",
   },
   {
     icon: DollarSign,

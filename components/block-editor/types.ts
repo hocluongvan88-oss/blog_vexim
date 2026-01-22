@@ -1,4 +1,4 @@
-export type BlockType = "heading" | "paragraph" | "image" | "quote" | "table"
+export type BlockType = "heading" | "paragraph" | "image" | "quote" | "table" | "list"
 
 export type AlignType = "left" | "center" | "right" | "justify"
 
@@ -9,7 +9,7 @@ export interface Block {
 }
 
 export interface HeadingData {
-  level: 2 | 3
+  level: 1 | 2 | 3 | 4 | 5 | 6
   text: string
   align: "left" | "center" | "right"
 }
@@ -37,4 +37,10 @@ export interface TableData {
   cols: number
   content: string[][]
   align: "left" | "center" | "right"
+}
+
+export interface ListData {
+  style: "ordered" | "unordered"
+  items: string[]
+  align: AlignType
 }

@@ -13,6 +13,8 @@ interface SEOScore {
   }[]
 }
 
+import type { Block } from "@/components/block-editor/types"
+
 interface SEOCheckerProps {
   title: string
   excerpt: string
@@ -20,14 +22,23 @@ interface SEOCheckerProps {
   metaTitle: string
   metaDescription: string
   featuredImage: string
+  blocks?: Block[]
 }
 
-export function SEOChecker({ title, excerpt, content, metaTitle, metaDescription, featuredImage }: SEOCheckerProps) {
+export function SEOChecker({
+  title,
+  excerpt,
+  content,
+  metaTitle,
+  metaDescription,
+  featuredImage,
+  blocks = [],
+}: SEOCheckerProps) {
   const [seoScore, setSeoScore] = useState<SEOScore>({ score: 0, issues: [] })
 
   useEffect(() => {
     analyzeSEO()
-  }, [title, excerpt, content, metaTitle, metaDescription, featuredImage])
+  }, [title, excerpt, content, metaTitle, metaDescription, featuredImage, blocks])
 
   const analyzeSEO = () => {
     const issues: SEOScore["issues"] = []
@@ -77,15 +88,29 @@ export function SEOChecker({ title, excerpt, content, metaTitle, metaDescription
       issues.push({ type: "success", message: `Độ dài nội dung tốt (${wordCount} từ)` })
     }
 
-    // Check headings
-    const h2Count = (content.match(/<h2>/gi) || []).length
-    const h3Count = (content.match(/<h3>/gi) || []).length
+    // Check headings (from blocks if available, otherwise from HTML)
+    let h2Count = 0
+    let h3Count = 0
+
+    if (blocks.length > 0) {
+      // Count from blocks
+      blocks.forEach((block) => {
+        if (block.type === "heading") {
+          if (block.data.level === 2) h2Count++
+          if (block.data.level === 3) h3Count++
+        }
+      })
+    } else {
+      // Fallback to HTML parsing
+      h2Count = (content.match(/<h2>/gi) || []).length
+      h3Count = (content.match(/<h3>/gi) || []).length
+    }
 
     if (h2Count === 0 && h3Count === 0) {
       issues.push({ type: "warning", message: "Nên sử dụng heading (H2, H3) để cấu trúc nội dung" })
       score -= 10
     } else {
-      issues.push({ type: "success", message: `Có ${h2Count} H2 và ${h3Count} H3 trong bài viết` })
+      issues.push({ type: "success", message: `Đã có ${h2Count} H2 và ${h3Count} H3 trong bài viết` })
     }
 
     // Check featured image
@@ -96,8 +121,14 @@ export function SEOChecker({ title, excerpt, content, metaTitle, metaDescription
       issues.push({ type: "success", message: "Đã có ảnh bìa" })
     }
 
-    // Check images in content
-    const imgCount = (content.match(/<img/gi) || []).length
+    // Check images in content (from blocks if available)
+    let imgCount = 0
+    if (blocks.length > 0) {
+      imgCount = blocks.filter((block) => block.type === "image").length
+    } else {
+      imgCount = (content.match(/<img/gi) || []).length
+    }
+
     if (wordCount > 500 && imgCount === 0) {
       issues.push({ type: "info", message: "Với bài dài, nên thêm ảnh minh họa vào nội dung" })
     }

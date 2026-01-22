@@ -240,17 +240,15 @@ export default function NewPostPage() {
           />
 
           {/* SEO Checker Card */}
-          <Card className="p-6">
-            <h3 className="text-lg font-bold text-primary mb-4">Phân tích SEO</h3>
-            <SEOChecker
-              title={title}
-              excerpt={excerpt}
-              content={getTextContent()}
-              metaTitle={metaTitle}
-              metaDescription={metaDescription}
-              featuredImage={featuredImage}
-            />
-          </Card>
+          <SEOChecker
+            title={title}
+            excerpt={excerpt}
+            content={getTextContent()}
+            metaTitle={metaTitle}
+            metaDescription={metaDescription}
+            featuredImage={featuredImage}
+            blocks={blocks}
+          />
 
           {/* Action Buttons Card */}
           <Card className="p-6 sticky top-24">

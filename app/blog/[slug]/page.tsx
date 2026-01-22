@@ -11,6 +11,8 @@ import { BlogShareButtons } from "@/components/blog-share-buttons"
 import { RelatedPosts } from "@/components/related-posts"
 import BlogSidebar from "@/components/blog-sidebar"
 import { ViewTracker } from "@/components/view-tracker"
+import { blocksToHTML } from "@/lib/blocks-to-html"
+import type { Block } from "@/components/block-editor/types"
 
 export const revalidate = 60
 
@@ -53,7 +55,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     keywords: post.tags || [post.category],
     authors: [{ name: "Vexim Global" }],
     alternates: {
-      canonical: `/blog/${post.slug}`,
+      canonical: `https://vexim.vn/blog/${post.slug}`,
     },
     openGraph: {
       title: post.meta_title || post.title,
@@ -107,6 +109,16 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     })
   }
 
+  // Parse blocks from content (could be JSON blocks or HTML)
+  let htmlContent = ""
+  try {
+    const blocks: Block[] = JSON.parse(post.content)
+    htmlContent = blocksToHTML(blocks)
+  } catch {
+    // If parsing fails, assume it's already HTML
+    htmlContent = post.content
+  }
+
   const calculateReadingTime = (content: string): number => {
     const text = content.replace(/<[^>]*>/g, "")
     const wordCount = text.split(/\s+/).length
@@ -114,9 +126,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     return Math.ceil(wordCount / wordsPerMinute)
   }
 
-  const readingTime = calculateReadingTime(post.content)
+  const readingTime = calculateReadingTime(htmlContent)
 
-  const structuredData = {
+  const blogPostingSchema = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     headline: post.title,
@@ -143,9 +155,37 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     },
   }
 
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Trang chủ",
+        item: "https://vexim.vn",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: "https://vexim.vn/blog",
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: post.title,
+        item: `https://vexim.vn/blog/${post.slug}`,
+      },
+    ],
+  }
+
+  const structuredData = { blogPostingSchema, breadcrumbSchema }
+
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostingSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <ViewTracker postId={post.id} />
       <Header />
       <BlogShareButtons />
@@ -200,7 +240,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
                 <div
                   className="prose prose-lg max-w-none prose-headings:text-primary prose-h2:text-3xl prose-h2:font-bold prose-h2:mb-4 prose-h2:mt-8 prose-h3:text-2xl prose-h3:font-bold prose-h3:mb-3 prose-h3:mt-6 prose-p:text-base prose-p:leading-relaxed prose-p:mb-4 prose-ul:my-4 prose-li:text-base prose-li:leading-relaxed prose-a:text-accent prose-a:underline hover:prose-a:opacity-80 prose-figure:my-8 prose-figcaption:text-center prose-figcaption:text-sm prose-figcaption:text-muted-foreground prose-figcaption:italic prose-figcaption:mt-3 prose-img:rounded-lg prose-img:shadow-md"
-                  dangerouslySetInnerHTML={{ __html: post.content }}
+                  dangerouslySetInnerHTML={{ __html: htmlContent }}
                 />
 
                 <div className="mt-16 p-8 bg-gradient-to-br from-primary to-primary/90 rounded-lg text-white text-center">
@@ -211,8 +251,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                   </p>
                   <ConsultationDialog>
                     <Button size="lg" className="bg-red-600 hover:bg-red-700 text-white border-none">
-  Liên hệ tư vấn miễn phí
-</Button>
+                      Liên hệ tư vấn miễn phí
+                    </Button>
                   </ConsultationDialog>
                 </div>
 

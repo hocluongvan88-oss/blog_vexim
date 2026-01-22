@@ -24,14 +24,16 @@ export function blocksToHTML(blocks: Block[]): string {
           const level = data.level || 2
           const sizeClass =
             level === 1
-              ? "text-4xl"
+              ? "text-4xl md:text-5xl"
               : level === 2
-                ? "text-3xl"
+                ? "text-3xl md:text-4xl"
                 : level === 3
-                  ? "text-2xl"
+                  ? "text-2xl md:text-3xl"
                   : level === 4
-                    ? "text-xl"
-                    : "text-lg"
+                    ? "text-xl md:text-2xl"
+                    : level === 5
+                      ? "text-lg md:text-xl"
+                      : "text-base md:text-lg"
 
           return `<h${level} class="${sizeClass} font-bold text-primary mb-4 mt-8 first:mt-0 ${alignmentClass}">${data.text || ""}</h${level}>`
         }
@@ -61,6 +63,19 @@ export function blocksToHTML(blocks: Block[]): string {
             : ""
 
           return `<blockquote class="border-l-4 border-primary pl-4 py-2 my-6 italic ${alignmentClass}"><p class="text-lg text-gray-600">${data.text || ""}</p>${author}</blockquote>`
+        }
+
+        case "list": {
+          const items = (data.items || [])
+            .map((item: string) => `<li class="mb-2">${item}</li>`)
+            .join("")
+          
+          const listTag = data.style === "ordered" ? "ol" : "ul"
+          const listClass = data.style === "ordered" 
+            ? "list-decimal list-inside my-4 space-y-2" 
+            : "list-disc list-inside my-4 space-y-2"
+          
+          return `<${listTag} class="${listClass} ${alignmentClass}">${items}</${listTag}>`
         }
 
         case "table": {
@@ -151,6 +166,31 @@ export function htmlToBlocks(html: string): Block[] {
             align: "left",
           },
         })
+        return
+      }
+
+      // Check for lists (ul/ol)
+      if (tagName === "ul" || tagName === "ol") {
+        const items: string[] = []
+        const lis = element.querySelectorAll("li")
+        lis.forEach((li) => {
+          const text = li.innerHTML.trim()
+          if (text) {
+            items.push(text)
+          }
+        })
+
+        if (items.length > 0) {
+          blocks.push({
+            id: `block_${blockCounter++}_${Math.random().toString(36).substr(2, 9)}`,
+            type: "list",
+            data: {
+              style: tagName === "ol" ? "ordered" : "unordered",
+              items,
+              align: "left",
+            },
+          })
+        }
         return
       }
 

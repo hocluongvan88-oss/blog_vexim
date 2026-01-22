@@ -20,7 +20,7 @@ export const metadata = {
     "pháp lý xuất khẩu",
   ],
   alternates: {
-    canonical: "/blog",
+    canonical: "https://vexim.vn/blog",
   },
   openGraph: {
     title: "Blog - Kiến thức xuất nhập khẩu | Vexim Global",

@@ -43,12 +43,16 @@ export function HTMLPasteDialog({ onImport }: HTMLPasteDialogProps) {
 
       // Convert based on tag type
       if (tagName === "h1" || tagName === "h2" || tagName === "h3" || tagName === "h4" || tagName === "h5" || tagName === "h6") {
+        const level = parseInt(tagName.charAt(1))
+        // Map h4-h6 to h3 since block editor only supports 1-3
+        const mappedLevel = level > 3 ? 3 : (level as 1 | 2 | 3)
+
         blocks.push({
           id: blockId,
           type: "heading",
           data: {
             text: element.textContent || "",
-            level: parseInt(tagName.charAt(1)) as 1 | 2 | 3,
+            level: mappedLevel,
           },
         })
       } else if (tagName === "p") {
