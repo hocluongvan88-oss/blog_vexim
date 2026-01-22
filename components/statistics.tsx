@@ -2,7 +2,7 @@ import { AlertCircle } from "lucide-react"
 
 const stats = [
   {
-    number: "100+",
+    number: "200+",
     label: "Doanh nghiệp đã hợp tác",
   },
   {
