@@ -1,4 +1,4 @@
-// Email templates for FDA Alert System
+// Email templates for FDA Alert System and GACC Submissions
 
 export interface EmailTemplateParams {
   email: string
@@ -6,6 +6,15 @@ export interface EmailTemplateParams {
   unsubscribeLink?: string
   alerts?: any[]
   alertCount?: number
+}
+
+export interface GACCSubmissionParams {
+  companyName: string
+  productName: string
+  hsCode: string
+  submissionId: string
+  submittedAt: string
+  email?: string
 }
 
 // Verification Email Template

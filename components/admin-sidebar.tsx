@@ -14,6 +14,7 @@ import {
   BarChart3,
   MessageCircle,
   Brain,
+  ClipboardCheck,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -109,6 +110,11 @@ export function AdminSidebar({ adminUser }: AdminSidebarProps) {
       title: "Tin tức FDA/GACC",
       href: "/admin/news-crawler",
       icon: Newspaper,
+    },
+    {
+      title: "Hồ sơ đăng ký GACC",
+      href: "/admin/gacc-submissions",
+      icon: ClipboardCheck,
     },
     {
       title: "Cài đặt",
