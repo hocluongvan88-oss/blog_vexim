@@ -34,14 +34,14 @@ FDA Tracker là hệ thống theo dõi và cảnh báo tự động về các th
 
 Chạy migration script để tạo bảng:
 
-```bash
+\`\`\`bash
 # Trong v0 interface, execute script:
 scripts/017_create_fda_subscriptions.sql
-```
+\`\`\`
 
 Hoặc chạy SQL trực tiếp trong Supabase:
 
-```sql
+\`\`\`sql
 -- Tạo bảng fda_subscriptions
 CREATE TABLE IF NOT EXISTS fda_subscriptions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -63,13 +63,13 @@ CREATE INDEX idx_fda_subscriptions_verified ON fda_subscriptions(verified);
 
 -- Enable RLS
 ALTER TABLE fda_subscriptions ENABLE ROW LEVEL SECURITY;
-```
+\`\`\`
 
 ### Bước 2: Environment Variables
 
 Thêm các biến môi trường sau vào Vercel (hoặc .env.local):
 
-```bash
+\`\`\`bash
 # Supabase (đã có sẵn)
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
@@ -86,7 +86,7 @@ NEXT_PUBLIC_BASE_URL=https://vexim.vn
 
 # Groq API (cho AI summary - Optional)
 GROQ_API_KEY=gsk_xxxxxxxxxxxxx
-```
+\`\`\`
 
 #### Lấy Resend API Key:
 
@@ -101,7 +101,7 @@ GROQ_API_KEY=gsk_xxxxxxxxxxxxx
 
 File `vercel-cron.json` đã được tạo với cấu hình:
 
-```json
+\`\`\`json
 {
   "crons": [
     {
@@ -114,7 +114,7 @@ File `vercel-cron.json` đã được tạo với cấu hình:
     }
   ]
 }
-```
+\`\`\`
 
 - **Daily digest**: Chạy lúc 8:00 sáng mỗi ngày
 - **Weekly digest**: Chạy lúc 8:00 sáng thứ 2 hàng tuần
@@ -153,11 +153,11 @@ File `vercel-cron.json` đã được tạo với cấu hình:
 
 #### Test 3: Gửi email thủ công (DEV)
 
-```bash
+\`\`\`bash
 # Gọi API để trigger gửi email
 curl -X GET "https://vexim.vn/api/fda/send-digest?frequency=daily" \
   -H "Authorization: Bearer YOUR_CRON_SECRET"
-```
+\`\`\`
 
 #### Test 4: Hủy đăng ký
 
@@ -170,7 +170,7 @@ curl -X GET "https://vexim.vn/api/fda/send-digest?frequency=daily" \
 
 ### Flow Đăng Ký:
 
-```
+\`\`\`
 User fills form → POST /api/fda/subscribe
                     ↓
               Insert to DB (verified=false)
@@ -184,11 +184,11 @@ User fills form → POST /api/fda/subscribe
               Update verified=true
                     ↓
               Show success page
-```
+\`\`\`
 
 ### Flow Gửi Email Định Kỳ:
 
-```
+\`\`\`
 Cron triggers → GET /api/fda/send-digest?frequency=daily
                     ↓
               emailService.sendAlertDigest('daily')
@@ -204,11 +204,11 @@ Cron triggers → GET /api/fda/send-digest?frequency=daily
               Send via Resend API
                     ↓
               Update last_sent_at
-```
+\`\`\`
 
 ### Flow Cảnh Báo Khẩn Cấp (Immediate):
 
-```
+\`\`\`
 New critical FDA alert detected
                     ↓
               fdaAI.generateVietnameseSummary()
@@ -218,7 +218,7 @@ New critical FDA alert detected
               Query immediate subscribers
                     ↓
               Send email to matching categories
-```
+\`\`\`
 
 ---
 
@@ -267,12 +267,12 @@ Hệ thống có 4 loại email:
 
 ### Kiểm tra logs:
 
-```bash
+\`\`\`bash
 # Vercel logs
 vercel logs --follow
 
 # Hoặc trong Vercel dashboard → Logs
-```
+\`\`\`
 
 ### Metrics cần theo dõi:
 
@@ -282,7 +282,7 @@ vercel logs --follow
    - Active vs inactive
    - Category distribution
 
-```sql
+\`\`\`sql
 -- Query statistics
 SELECT 
   COUNT(*) as total,
@@ -292,7 +292,7 @@ SELECT
   categories
 FROM fda_subscriptions
 GROUP BY frequency, categories;
-```
+\`\`\`
 
 2. **Email metrics**:
    - Emails sent (check Resend dashboard)
@@ -307,11 +307,11 @@ GROUP BY frequency, categories;
 
 ### Cleanup old cache:
 
-```sql
+\`\`\`sql
 -- Run weekly to cleanup expired cache
 DELETE FROM fda_alerts_cache
 WHERE expires_at < NOW();
-```
+\`\`\`
 
 ---
 

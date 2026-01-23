@@ -14,6 +14,12 @@ import nodemailer from "nodemailer"
 // Zoho SMTP Configuration - Using existing Vercel env variables
 // Read at runtime to ensure env vars are available
 function getSmtpConfig() {
+  console.log("[v0] Reading env vars:")
+  console.log("[v0] MAIL_USERNAME:", process.env.MAIL_USERNAME ? `${process.env.MAIL_USERNAME.substring(0, 3)}***` : "undefined")
+  console.log("[v0] MAIL_PASSWORD:", process.env.MAIL_PASSWORD ? `${process.env.MAIL_PASSWORD.substring(0, 2)}*** (length: ${process.env.MAIL_PASSWORD.length})` : "undefined")
+  console.log("[v0] MAIL_HOST:", process.env.MAIL_HOST || "undefined")
+  console.log("[v0] MAIL_PORT:", process.env.MAIL_PORT || "undefined")
+  
   return {
     host: process.env.MAIL_HOST || process.env.SMTP_HOST || "smtp.zoho.com",
     port: Number.parseInt(process.env.MAIL_PORT || process.env.SMTP_PORT || "587", 10),

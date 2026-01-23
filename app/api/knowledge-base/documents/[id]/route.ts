@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server"
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient()
@@ -16,7 +16,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { id } = params
+    const { id } = await params
     const { title, content } = await request.json()
 
     // Update document
@@ -77,7 +77,7 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient()
@@ -87,30 +87,49 @@ export async function DELETE(
       data: { user },
     } = await supabase.auth.getUser()
     if (!user) {
+      console.log("[v0] Delete attempt without auth")
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { id } = params
+    const { id } = await params
+    console.log("[v0] Deleting document:", id, "User:", user.email)
 
-    // Delete document (cascades to chunks)
+    // First, delete chunks manually (in case cascade doesn't work)
+    const { error: chunksError } = await supabase
+      .from("knowledge_chunks")
+      .delete()
+      .eq("document_id", id)
+
+    if (chunksError) {
+      console.error("[v0] Error deleting chunks:", chunksError)
+      // Continue anyway - chunks might not exist
+    }
+
+    // Delete document
     const { error } = await supabase
       .from("knowledge_documents")
       .delete()
       .eq("id", id)
 
     if (error) {
-      console.error("Error deleting document:", error)
+      console.error("[v0] Error deleting document:", {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      })
       return NextResponse.json(
-        { error: "Failed to delete document" },
+        { error: `Failed to delete document: ${error.message}` },
         { status: 500 }
       )
     }
 
+    console.log("[v0] Document deleted successfully:", id)
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error("Delete error:", error)
+    console.error("[v0] Delete error:", error)
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: error instanceof Error ? error.message : "Internal server error" },
       { status: 500 }
     )
   }
