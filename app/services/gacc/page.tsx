@@ -2,8 +2,9 @@ import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { CheckCircle2, AlertTriangle, Clock, TrendingUp, ArrowRight, Globe } from "lucide-react"
+import { CheckCircle2, AlertTriangle, Clock, TrendingUp, ArrowRight, Globe, FileCheck } from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
 import { ConsultationDialog } from "@/components/consultation-dialog"
 import type { Metadata } from "next"
 
@@ -45,13 +46,21 @@ export default function GACCPage() {
                 yêu cầu bắt buộc với hầu hết hàng xuất khẩu thực phẩm, nông sản, thủy hải sản. Chúng tôi giúp bạn đăng
                 ký nhanh chóng, chính xác.
               </p>
-              <ConsultationDialog
-                trigger={
+              <div className="flex flex-wrap gap-4">
+                <Link href="/services/gacc/assessment">
                   <Button size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90">
-                    Tư vấn miễn phí ngay <ArrowRight className="ml-2 w-5 h-5" />
+                    <FileCheck className="mr-2 w-5 h-5" />
+                    Đánh giá hồ sơ miễn phí
                   </Button>
-                }
-              />
+                </Link>
+                <ConsultationDialog
+                  trigger={
+                    <Button size="lg" variant="outline">
+                      Tư vấn miễn phí <ArrowRight className="ml-2 w-5 h-5" />
+                    </Button>
+                  }
+                />
+              </div>
             </div>
             <div className="relative h-[400px] lg:h-[500px]">
               <Image
