@@ -60,6 +60,9 @@ export function Header() {
               <Link href="/fda-tracker" className="text-foreground hover:text-primary transition-colors font-medium">
                 FDA Tracker
               </Link>
+              <Link href="/services/gacc/assessment" className="text-foreground hover:text-primary transition-colors font-medium">
+                Tra cứu GACC
+              </Link>
               <Link href="/#about" className="text-foreground hover:text-primary transition-colors font-medium">
                 Giới thiệu
               </Link>
@@ -139,6 +142,13 @@ export function Header() {
                   className="text-left text-foreground hover:text-primary transition-colors font-medium"
                 >
                   FDA Tracker
+                </Link>
+                <Link
+                  href="/services/gacc/assessment"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="text-left text-foreground hover:text-primary transition-colors font-medium"
+                >
+                  Tra cứu GACC
                 </Link>
                 <Link
                   href="/#about"
