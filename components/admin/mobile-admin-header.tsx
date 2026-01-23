@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Menu, X, Bell, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
@@ -30,7 +30,12 @@ interface MobileAdminHeaderProps {
 export function MobileAdminHeader({ adminUser, pendingCount = 0, pageTitle }: MobileAdminHeaderProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
   const router = useRouter()
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   const handleLogout = async () => {
     setIsLoggingOut(true)
@@ -45,6 +50,23 @@ export function MobileAdminHeader({ adminUser, pendingCount = 0, pageTitle }: Mo
     } finally {
       setIsLoggingOut(false)
     }
+  }
+
+  // Prevent hydration mismatch by only rendering after mount
+  if (!isMounted) {
+    return (
+      <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 lg:hidden">
+        <div className="flex items-center justify-between h-14 px-4">
+          <div className="w-10" />
+          <div className="flex-1 text-center">
+            <h1 className="text-base font-semibold text-primary truncate">
+              {pageTitle || "Admin Dashboard"}
+            </h1>
+          </div>
+          <div className="w-10" />
+        </div>
+      </header>
+    )
   }
 
   return (

@@ -48,6 +48,7 @@ export async function POST(request: Request) {
         traceability_system: data.traceabilitySystem,
         complaint_handling: data.complaintHandling,
         document_retention: data.documentRetention,
+        attachments: data.attachments || [],
         status: "pending",
       })
       .select()

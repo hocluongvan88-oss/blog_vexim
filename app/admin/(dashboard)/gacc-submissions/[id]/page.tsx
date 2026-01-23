@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { ArrowLeft, Building2, Package, FileText, CheckCircle, XCircle, Clock } from "lucide-react"
 import Link from "next/link"
+import { GACCSubmissionActions } from "@/components/admin/gacc-submission-actions"
 
 export const metadata = {
   title: "Chi tiết hồ sơ GACC - Admin | Vexim Global",
@@ -222,25 +223,7 @@ export default async function GACCSubmissionDetailPage({ params }: { params: Pro
       )}
 
       {/* Action Buttons */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Hành động</CardTitle>
-          <CardDescription>Cập nhật trạng thái hồ sơ</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-3">
-            <Button variant="default" className="bg-green-600 hover:bg-green-700">
-              <CheckCircle className="mr-2 h-4 w-4" />
-              Phê duyệt
-            </Button>
-            <Button variant="destructive">
-              <XCircle className="mr-2 h-4 w-4" />
-              Từ chối
-            </Button>
-            <Button variant="outline">Yêu cầu bổ sung</Button>
-          </div>
-        </CardContent>
-      </Card>
+      <GACCSubmissionActions submissionId={submission.id} currentStatus={submission.status} />
     </div>
   )
 }
