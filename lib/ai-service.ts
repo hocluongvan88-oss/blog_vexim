@@ -58,32 +58,34 @@ export async function searchKnowledge(
   supabase: any
 ): Promise<KnowledgeChunk[]> {
   try {
-    // Tạo embedding cho query
-    const queryEmbedding = await createEmbedding(query)
+    console.log("[v0] Searching knowledge base for:", query)
 
-    // Tìm kiếm similarity (cần pgvector extension)
-    // Hiện tại sử dụng full-text search thay thế
+    // Tìm kiếm bằng ILIKE (case-insensitive pattern matching)
+    // Phù hợp với tiếng Việt hơn full-text search
     const { data, error } = await supabase
       .from("knowledge_chunks")
       .select(
         `
         id,
-        chunk_text,
-        knowledge_documents!inner(title, category)
+        content,
+        knowledge_documents!inner(title, category, status)
       `
       )
-      .textSearch("chunk_text", query, {
-        type: "websearch",
-        config: "english",
-      })
+      .ilike("content", `%${query}%`)
+      .eq("knowledge_documents.status", "active")
       .limit(topK)
 
-    if (error) throw error
+    if (error) {
+      console.error("[v0] Knowledge search error:", error)
+      throw error
+    }
+
+    console.log("[v0] Found knowledge chunks:", data?.length || 0)
 
     return (
       data?.map((item: any) => ({
         id: item.id,
-        chunk_text: item.chunk_text,
+        chunk_text: item.content, // Map content back to chunk_text for interface compatibility
         document_title: item.knowledge_documents.title,
         category: item.knowledge_documents.category,
       })) || []
