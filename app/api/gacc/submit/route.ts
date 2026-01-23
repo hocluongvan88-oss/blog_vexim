@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     })
 
     // Validate required fields
-    const requiredFields = ["companyName", "phone", "taxCode", "productionAddress", "productName", "hsCode"]
+    const requiredFields = ["companyName", "email", "phone", "taxCode", "productionAddress", "productName", "hsCode"]
 
     for (const field of requiredFields) {
       if (!data[field]) {
@@ -27,6 +27,7 @@ export async function POST(request: Request) {
       .from("gacc_submissions")
       .insert({
         company_name: data.companyName,
+        email: data.email,
         phone: data.phone,
         tax_code: data.taxCode,
         production_address: data.productionAddress,

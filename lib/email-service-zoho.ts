@@ -9,22 +9,53 @@ import {
   getUnsubscribeEmailHTML,
 } from "@/lib/email-templates"
 import type { FDAItem } from "@/types/fda"
+import nodemailer from "nodemailer"
 
 // Zoho SMTP Configuration - Using existing Vercel env variables
-const SMTP_HOST = process.env.MAIL_HOST || process.env.SMTP_HOST || "smtp.zoho.com"
-const SMTP_PORT = Number.parseInt(process.env.MAIL_PORT || process.env.SMTP_PORT || "587", 10)
-const SMTP_USER = process.env.MAIL_USERNAME || process.env.SMTP_USER || "" // your-email@veximglobal.com
-const SMTP_PASSWORD = process.env.MAIL_PASSWORD || process.env.SMTP_PASSWORD || "" // your Zoho password
-const FROM_EMAIL = process.env.MAIL_FROM_ADDRESS || process.env.FROM_EMAIL || "contact@veximglobal.com"
-const FROM_NAME = process.env.MAIL_FROM_NAME || process.env.FROM_NAME || "VEXIM GLOBAL"
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://vexim.vn"
+// Read at runtime to ensure env vars are available
+function getSmtpConfig() {
+  return {
+    host: process.env.MAIL_HOST || process.env.SMTP_HOST || "smtp.zoho.com",
+    port: Number.parseInt(process.env.MAIL_PORT || process.env.SMTP_PORT || "587", 10),
+    user: process.env.MAIL_USERNAME || process.env.SMTP_USER || "",
+    password: process.env.MAIL_PASSWORD || process.env.SMTP_PASSWORD || "",
+    fromEmail: process.env.MAIL_FROM_ADDRESS || process.env.FROM_EMAIL || "contact@veximglobal.com",
+    fromName: process.env.MAIL_FROM_NAME || process.env.FROM_NAME || "VEXIM GLOBAL",
+    baseUrl: process.env.NEXT_PUBLIC_BASE_URL || "https://vexim.vn",
+  }
+}
 
 export class EmailServiceZoho {
+  private getTransporter() {
+    const config = getSmtpConfig()
+    console.log("[v0] Creating transporter with config:", {
+      host: config.host,
+      port: config.port,
+      user: config.user ? "configured" : "not configured",
+      password: config.password ? `configured (length: ${config.password.length})` : "not configured",
+    })
+    
+    if (!config.user || !config.password) {
+      return null
+    }
+    
+    return nodemailer.createTransport({
+      host: config.host,
+      port: config.port,
+      secure: config.port === 465, // true for 465, false for other ports
+      auth: {
+        user: config.user,
+        pass: config.password,
+      },
+    })
+  }
+
   // Send verification email
   async sendVerificationEmail(email: string, token: string) {
     try {
-      const verificationLink = `${BASE_URL}/api/fda/verify?email=${encodeURIComponent(email)}&token=${token}`
-      const unsubscribeLink = `${BASE_URL}/api/fda/subscribe?email=${encodeURIComponent(email)}&token=${token}`
+      const config = getSmtpConfig()
+      const verificationLink = `${config.baseUrl}/api/fda/verify?email=${encodeURIComponent(email)}&token=${token}`
+      const unsubscribeLink = `${config.baseUrl}/api/fda/subscribe?email=${encodeURIComponent(email)}&token=${token}`
 
       const html = getVerificationEmailHTML({
         email,
@@ -49,6 +80,7 @@ export class EmailServiceZoho {
   // Send daily/weekly alert digest
   async sendAlertDigest(frequency: "daily" | "weekly") {
     try {
+      const config = getSmtpConfig()
       const supabase = await createServerClient()
 
       // Get active subscribers with this frequency
@@ -79,7 +111,7 @@ export class EmailServiceZoho {
             continue
           }
 
-          const unsubscribeLink = `${BASE_URL}/api/fda/subscribe?email=${encodeURIComponent(subscriber.email)}&token=${subscriber.verification_token}`
+          const unsubscribeLink = `${config.baseUrl}/api/fda/subscribe?email=${encodeURIComponent(subscriber.email)}&token=${subscriber.verification_token}`
 
           const html = getAlertEmailHTML({
             email: subscriber.email,
@@ -116,6 +148,7 @@ export class EmailServiceZoho {
   // Send immediate alert for critical items
   async sendImmediateAlert(alert: FDAItem) {
     try {
+      const config = getSmtpConfig()
       const supabase = await createServerClient()
 
       // Get subscribers with immediate frequency and matching category
@@ -136,7 +169,7 @@ export class EmailServiceZoho {
 
       for (const subscriber of subscribers) {
         try {
-          const unsubscribeLink = `${BASE_URL}/api/fda/subscribe?email=${encodeURIComponent(subscriber.email)}&token=${subscriber.verification_token}`
+          const unsubscribeLink = `${config.baseUrl}/api/fda/subscribe?email=${encodeURIComponent(subscriber.email)}&token=${subscriber.verification_token}`
 
           const html = getImmediateAlertEmailHTML({
             email: subscriber.email,
@@ -186,7 +219,7 @@ export class EmailServiceZoho {
   }
 
   // Core email sending function using Zoho SMTP
-  private async sendEmail({
+  async sendEmail({
     to,
     subject,
     html,
@@ -196,13 +229,14 @@ export class EmailServiceZoho {
     html: string
   }): Promise<boolean> {
     try {
+      const config = getSmtpConfig()
       console.log("[v0] Starting email send process...")
-      console.log(`[v0] SMTP Config: host=${SMTP_HOST}, port=${SMTP_PORT}`)
-      console.log(`[v0] SMTP User configured: ${SMTP_USER ? "Yes" : "No"}`)
-      console.log(`[v0] SMTP Password configured: ${SMTP_PASSWORD ? "Yes (length: " + SMTP_PASSWORD.length + ")" : "No"}`)
+      console.log(`[v0] SMTP Config: host=${config.host}, port=${config.port}`)
+      console.log(`[v0] SMTP User configured: ${config.user ? "Yes" : "No"}`)
+      console.log(`[v0] SMTP Password configured: ${config.password ? "Yes (length: " + config.password.length + ")" : "No"}`)
       
       // If SMTP credentials not set, log email instead (dev mode)
-      if (!SMTP_USER || !SMTP_PASSWORD) {
+      if (!config.user || !config.password) {
         console.log("[v0] [DEV MODE] Email would be sent:")
         console.log(`  To: ${to}`)
         console.log(`  Subject: ${subject}`)
@@ -210,24 +244,15 @@ export class EmailServiceZoho {
         return true
       }
 
-      // Use nodemailer directly for server-side email sending
-      console.log("[v0] Importing nodemailer...")
-      const nodemailer = await import("nodemailer")
-
-      console.log("[v0] Creating transporter...")
-      const transporter = nodemailer.default.createTransport({
-        host: SMTP_HOST,
-        port: SMTP_PORT,
-        secure: SMTP_PORT === 465, // true for 465, false for other ports
-        auth: {
-          user: SMTP_USER,
-          pass: SMTP_PASSWORD,
-        },
-      })
+      const transporter = this.getTransporter()
+      if (!transporter) {
+        console.error("[v0] Failed to create transporter - credentials missing")
+        return false
+      }
 
       console.log("[v0] Sending email...")
       const info = await transporter.sendMail({
-        from: `"${FROM_NAME}" <${FROM_EMAIL}>`,
+        from: `"${config.fromName}" <${config.fromEmail}>`,
         to,
         subject,
         html,

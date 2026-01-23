@@ -11,7 +11,8 @@ export const metadata = {
   title: "Chi tiết hồ sơ GACC - Admin | Vexim Global",
 }
 
-export default async function GACCSubmissionDetailPage({ params }: { params: { id: string } }) {
+export default async function GACCSubmissionDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const supabase = await createClient()
 
   // Check authentication
@@ -27,7 +28,7 @@ export default async function GACCSubmissionDetailPage({ params }: { params: { i
   const { data: submission, error } = await supabase
     .from("gacc_submissions")
     .select("*")
-    .eq("id", params.id)
+    .eq("id", id)
     .single()
 
   if (error || !submission) {
@@ -40,6 +41,7 @@ export default async function GACCSubmissionDetailPage({ params }: { params: { i
       icon: Building2,
       fields: [
         { label: "Tên doanh nghiệp", value: submission.company_name },
+        { label: "Email", value: submission.email || "Chưa cung cấp" },
         { label: "Số điện thoại", value: submission.phone },
         { label: "Mã số thuế", value: submission.tax_code },
         { label: "Địa chỉ sản xuất", value: submission.production_address },

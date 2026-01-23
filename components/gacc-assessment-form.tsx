@@ -23,6 +23,7 @@ interface FileUploadInfo {
 
 interface Step1Data {
   companyName: string
+  email: string
   phone: string
   taxCode: string
   productionAddress: string
@@ -101,6 +102,7 @@ export function GACCAssessmentForm() {
   // Step 1 data
   const [step1Data, setStep1Data] = useState<Step1Data>({
     companyName: "",
+    email: "",
     phone: "",
     taxCode: "",
     productionAddress: "",
@@ -159,11 +161,18 @@ export function GACCAssessmentForm() {
   })
 
   const validateStep1 = (): boolean => {
-    const required = ["companyName", "phone", "taxCode", "productionAddress", "productName", "hsCode"]
+    const required = ["companyName", "email", "phone", "taxCode", "productionAddress", "productName", "hsCode"]
     const isEmpty = required.some((field) => !step1Data[field as keyof Step1Data])
 
     if (isEmpty) {
       toast.error("Vui lòng điền đầy đủ các trường bắt buộc")
+      return false
+    }
+
+    // Validate email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(step1Data.email)) {
+      toast.error("Email không hợp lệ")
       return false
     }
 
@@ -313,6 +322,20 @@ export function GACCAssessmentForm() {
                     value={step1Data.companyName}
                     onChange={(e) => setStep1Data({ ...step1Data, companyName: e.target.value })}
                     placeholder="Công ty TNHH ABC"
+                    className="mt-1.5"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="email">
+                    Email <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={step1Data.email}
+                    onChange={(e) => setStep1Data({ ...step1Data, email: e.target.value })}
+                    placeholder="example@company.com"
                     className="mt-1.5"
                   />
                 </div>
