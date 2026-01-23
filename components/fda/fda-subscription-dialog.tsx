@@ -23,6 +23,7 @@ export function FDASubscriptionDialog({ open, onOpenChange }: FDASubscriptionDia
   const [frequency, setFrequency] = useState<"daily" | "weekly" | "immediate">("weekly")
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [honeypot, setHoneypot] = useState("") // Anti-spam honeypot
 
   const handleCategoryToggle = (category: FDACategory) => {
     if (categories.includes(category)) {
@@ -55,6 +56,7 @@ export function FDASubscriptionDialog({ open, onOpenChange }: FDASubscriptionDia
           email,
           categories,
           frequency,
+          honeypot, // Anti-spam field
         }),
       })
 
@@ -99,6 +101,18 @@ export function FDASubscriptionDialog({ open, onOpenChange }: FDASubscriptionDia
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Honeypot field - hidden from users but visible to bots */}
+            <input
+              type="text"
+              name="website"
+              value={honeypot}
+              onChange={(e) => setHoneypot(e.target.value)}
+              style={{ position: "absolute", left: "-9999px", width: "1px", height: "1px" }}
+              tabIndex={-1}
+              autoComplete="off"
+              aria-hidden="true"
+            />
+            
             {/* Email Input */}
             <div className="space-y-2">
               <Label htmlFor="email">Email của bạn</Label>

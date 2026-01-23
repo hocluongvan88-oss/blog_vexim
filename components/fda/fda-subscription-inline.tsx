@@ -18,6 +18,7 @@ export function FDASubscriptionInline({ variant = "default", className = "" }: F
   const [email, setEmail] = useState("")
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [honeypot, setHoneypot] = useState("") // Anti-spam honeypot
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -37,6 +38,7 @@ export function FDASubscriptionInline({ variant = "default", className = "" }: F
           email,
           categories: ["food", "drug", "cosmetic"], // Default all categories
           frequency: "weekly",
+          honeypot, // Anti-spam field
         }),
       })
 
