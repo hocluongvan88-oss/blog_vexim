@@ -10,7 +10,8 @@ import { Progress } from "@/components/ui/progress"
 import { Checkbox } from "@/components/ui/checkbox"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { CheckCircle2, AlertCircle, ArrowLeft, ArrowRight, Loader2 } from "lucide-react"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { CheckCircle2, AlertCircle, ArrowLeft, ArrowRight, Loader2, Sparkles } from "lucide-react"
 import { toast } from "sonner"
 import { FileUploader } from "@/components/file-uploader"
 
@@ -98,6 +99,7 @@ export function GACCAssessmentForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
   const [attachments, setAttachments] = useState<Record<string, FileUploadInfo[]>>({})
+  const [honeypot, setHoneypot] = useState("") // Anti-spam honeypot field
 
   // Step 1 data
   const [step1Data, setStep1Data] = useState<Step1Data>({
@@ -220,6 +222,7 @@ export function GACCAssessmentForm() {
         ...step4Data,
         attachments: attachmentsData,
         submittedAt: new Date().toISOString(),
+        honeypot, // Anti-spam field
       }
 
       const response = await fetch("/api/gacc/submit", {
@@ -256,6 +259,18 @@ export function GACCAssessmentForm() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
+      {/* Honeypot field - hidden from users but visible to bots */}
+      <input
+        type="text"
+        name="website"
+        value={honeypot}
+        onChange={(e) => setHoneypot(e.target.value)}
+        style={{ position: "absolute", left: "-9999px", width: "1px", height: "1px" }}
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+      />
+      
       {/* Progress indicator */}
       <Card>
         <CardContent className="pt-6 pb-6">
@@ -1340,19 +1355,54 @@ export function GACCAssessmentForm() {
         </Card>
       )}
 
-      {/* Success Submission Card */}
-      {submitSuccess && (
-        <Card className="max-w-2xl mx-auto">
-          <CardContent className="pt-8 text-center">
-            <CheckCircle2 className="w-16 h-16 text-green-600 mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-primary mb-2">Gửi đánh giá thành công!</h3>
-            <p className="text-muted-foreground mb-6">
+      {/* Success Modal */}
+      <Dialog open={submitSuccess} onOpenChange={(open) => !open && window.location.reload()}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader className="text-center pb-4">
+            <div className="mx-auto mb-4 relative">
+              <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center relative">
+                <CheckCircle2 className="w-12 h-12 text-green-600" />
+                <Sparkles className="w-4 h-4 text-green-500 absolute -top-1 -right-1 animate-pulse" />
+              </div>
+            </div>
+            <DialogTitle className="text-2xl font-bold text-green-600">
+              Gửi đánh giá thành công!
+            </DialogTitle>
+            <DialogDescription className="text-base text-muted-foreground pt-2">
               Chuyên viên của chúng tôi sẽ đánh giá hồ sơ và liên hệ với bạn trong thời gian sớm nhất.
-            </p>
-            <Button onClick={() => window.location.reload()}>Gửi đánh giá mới</Button>
-          </CardContent>
-        </Card>
-      )}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="bg-accent/50 rounded-lg p-4 space-y-2 text-sm">
+            <div className="flex items-start gap-2">
+              <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+              <p>Hồ sơ của bạn đã được tiếp nhận và đang được xử lý</p>
+            </div>
+            <div className="flex items-start gap-2">
+              <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+              <p>Email xác nhận đã được gửi đến địa chỉ của bạn</p>
+            </div>
+            <div className="flex items-start gap-2">
+              <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+              <p>Chúng tôi sẽ liên hệ trong vòng 24-48 giờ</p>
+            </div>
+          </div>
+          <div className="flex gap-3 pt-4">
+            <Button 
+              variant="outline" 
+              className="flex-1 bg-transparent"
+              onClick={() => window.location.href = '/'}
+            >
+              Về trang chủ
+            </Button>
+            <Button 
+              className="flex-1 bg-green-600 hover:bg-green-700"
+              onClick={() => window.location.reload()}
+            >
+              Gửi đánh giá mới
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

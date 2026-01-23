@@ -10,6 +10,12 @@ export async function POST(request: Request) {
       product: data.productName,
     })
 
+    // Anti-spam: Check honeypot field
+    if (data.honeypot && data.honeypot.trim() !== "") {
+      console.log("[v0] Spam detected - honeypot filled:", data.honeypot)
+      return NextResponse.json({ error: "Invalid submission" }, { status: 400 })
+    }
+
     // Validate required fields
     const requiredFields = ["companyName", "email", "phone", "taxCode", "productionAddress", "productName", "hsCode"]
 
