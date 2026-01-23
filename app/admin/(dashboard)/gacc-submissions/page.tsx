@@ -28,7 +28,7 @@ export default async function GACCSubmissionsPage() {
   const { data: submissions, error } = await supabase
     .from("gacc_submissions")
     .select("*")
-    .order("created_at", { ascending: false })
+    .order("submitted_at", { ascending: false })
 
   if (error) {
     console.error("Error fetching GACC submissions:", error)
@@ -166,7 +166,7 @@ export default async function GACCSubmissionsPage() {
                         )}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
-                        {new Date(submission.created_at).toLocaleDateString("vi-VN", {
+                        {new Date(submission.submitted_at).toLocaleDateString("vi-VN", {
                           year: "numeric",
                           month: "2-digit",
                           day: "2-digit",
