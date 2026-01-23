@@ -43,7 +43,7 @@ export default async function GACCSubmissionsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="p-8 space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Hồ sơ đăng ký GACC</h1>
         <p className="text-muted-foreground mt-2">Quản lý và xem xét hồ sơ đánh giá GACC từ khách hàng</p>

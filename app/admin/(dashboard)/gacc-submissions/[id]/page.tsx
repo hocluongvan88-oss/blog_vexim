@@ -58,27 +58,55 @@ export default async function GACCSubmissionDetailPage({ params }: { params: Pro
     },
   ]
 
+  // Helper function to format content - handles objects, arrays, and primitives
+  const formatContent = (content: any): string => {
+    if (content === null || content === undefined) {
+      return "Chưa có thông tin"
+    }
+    if (typeof content === "object") {
+      if (Array.isArray(content)) {
+        return content.map((item, i) => `${i + 1}. ${formatContent(item)}`).join("\n")
+      }
+      // Format object with key-value pairs
+      return Object.entries(content)
+        .map(([key, value]) => {
+          const label = key
+            .replace(/([A-Z])/g, " $1")
+            .replace(/^./, (str) => str.toUpperCase())
+            .replace(/has/i, "Có")
+            .replace(/BusinessLicense/i, "Giấy phép kinh doanh")
+            .replace(/ProductionPermit/i, "Giấy phép sản xuất")
+            .replace(/QualitySystem/i, "Hệ thống chất lượng")
+            .replace(/FoodSafety/i, "An toàn thực phẩm")
+          const displayValue = typeof value === "boolean" ? (value ? "Có" : "Không") : String(value)
+          return `- ${label}: ${displayValue}`
+        })
+        .join("\n")
+    }
+    return String(content)
+  }
+
   const assessmentData = [
-    { title: "1. Tổng quan", content: submission.general_info },
-    { title: "2. Môi trường sản xuất", content: submission.production_environment },
-    { title: "3. Vệ sinh thiết bị", content: submission.equipment_cleaning },
-    { title: "4. Kiểm soát quy trình", content: submission.process_control },
-    { title: "5. Ghi chép hồ sơ", content: submission.record_keeping },
-    { title: "6. Đào tạo nhân viên", content: submission.employee_training },
-    { title: "7. Kiểm soát dịch hại", content: submission.pest_control },
-    { title: "8. Chất lượng nước", content: submission.water_quality },
-    { title: "9. Kiểm soát nguyên liệu", content: submission.raw_material_control },
-    { title: "10. Vật liệu bao bì", content: submission.packaging_material },
-    { title: "11. Kiểm tra sản phẩm", content: submission.product_testing },
-    { title: "12. Hệ thống truy xuất", content: submission.traceability_system },
-    { title: "13. Xử lý khiếu nại", content: submission.complaint_handling },
-    { title: "14. Lưu trữ tài liệu", content: submission.document_retention },
+    { title: "1. Tổng quan", content: formatContent(submission.general_info) },
+    { title: "2. Môi trường sản xuất", content: formatContent(submission.production_environment) },
+    { title: "3. Vệ sinh thiết bị", content: formatContent(submission.equipment_cleaning) },
+    { title: "4. Kiểm soát quy trình", content: formatContent(submission.process_control) },
+    { title: "5. Ghi chép hồ sơ", content: formatContent(submission.record_keeping) },
+    { title: "6. Đào tạo nhân viên", content: formatContent(submission.employee_training) },
+    { title: "7. Kiểm soát dịch hại", content: formatContent(submission.pest_control) },
+    { title: "8. Chất lượng nước", content: formatContent(submission.water_quality) },
+    { title: "9. Kiểm soát nguyên liệu", content: formatContent(submission.raw_material_control) },
+    { title: "10. Vật liệu bao bì", content: formatContent(submission.packaging_material) },
+    { title: "11. Kiểm tra sản phẩm", content: formatContent(submission.product_testing) },
+    { title: "12. Hệ thống truy xuất", content: formatContent(submission.traceability_system) },
+    { title: "13. Xử lý khiếu nại", content: formatContent(submission.complaint_handling) },
+    { title: "14. Lưu trữ tài liệu", content: formatContent(submission.document_retention) },
   ]
 
   return (
-    <div className="space-y-6">
+    <div className="p-8 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="icon" asChild>
             <Link href="/admin/gacc-submissions">
