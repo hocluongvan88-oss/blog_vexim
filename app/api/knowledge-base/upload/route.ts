@@ -50,24 +50,45 @@ export async function POST(request: NextRequest) {
       console.log("[v0] Processing file:", file.name, "Type:", file.type, "Size:", file.size)
       
       const fileExtension = file.name.split('.').pop()?.toLowerCase()
+      const fileBuffer = Buffer.from(await file.arrayBuffer())
       
       // For text-based files, read directly
-      if (['.txt', '.md', '.rtf'].includes(`.${fileExtension}`)) {
-        const fileContent = await file.text()
-        documentContent = fileContent
+      if (['txt', 'md', 'rtf'].includes(fileExtension || '')) {
+        documentContent = fileBuffer.toString('utf-8')
       } 
-      // For PDF, DOCX, DOC - we'll read as text for now
-      // TODO: Add proper PDF/DOCX parsing libraries for better extraction
-      else if (['.pdf', '.docx', '.doc'].includes(`.${fileExtension}`)) {
+      // For PDF files
+      else if (fileExtension === 'pdf') {
         try {
-          const fileContent = await file.text()
-          documentContent = fileContent
+          // Dynamic import pdf-parse
+          const pdfParse = (await import('pdf-parse')).default
+          const pdfData = await pdfParse(fileBuffer)
+          documentContent = pdfData.text
+          console.log("[v0] PDF parsed successfully, pages:", pdfData.numpages)
         } catch (error) {
-          console.error("[v0] Error reading binary file:", error)
+          console.error("[v0] Error parsing PDF:", error)
           return NextResponse.json(
             { 
-              error: "Không thể đọc file này. Vui lòng chuyển đổi sang định dạng TXT hoặc MD.",
-              details: "Binary file reading requires additional processing"
+              error: "Không thể đọc file PDF. Vui lòng kiểm tra file có hợp lệ không.",
+              details: error instanceof Error ? error.message : "PDF parsing failed"
+            },
+            { status: 400 }
+          )
+        }
+      }
+      // For DOCX files
+      else if (['docx', 'doc'].includes(fileExtension || '')) {
+        try {
+          // Dynamic import mammoth
+          const mammoth = await import('mammoth')
+          const result = await mammoth.extractRawText({ buffer: fileBuffer })
+          documentContent = result.value
+          console.log("[v0] DOCX parsed successfully")
+        } catch (error) {
+          console.error("[v0] Error parsing DOCX:", error)
+          return NextResponse.json(
+            { 
+              error: "Không thể đọc file Word. Vui lòng kiểm tra file có hợp lệ không.",
+              details: error instanceof Error ? error.message : "DOCX parsing failed"
             },
             { status: 400 }
           )
@@ -75,7 +96,7 @@ export async function POST(request: NextRequest) {
       }
       else {
         return NextResponse.json(
-          { error: `Định dạng file .${fileExtension} chưa được hỗ trợ` },
+          { error: `Định dạng file .${fileExtension} chưa được hỗ trợ. Hỗ trợ: TXT, MD, RTF, PDF, DOCX, DOC` },
           { status: 400 }
         )
       }
@@ -83,6 +104,13 @@ export async function POST(request: NextRequest) {
       sourceUrl = file.name
       
       console.log("[v0] File processed, content length:", documentContent.length)
+      
+      if (!documentContent || documentContent.trim().length === 0) {
+        return NextResponse.json(
+          { error: "File không có nội dung hoặc không thể trích xuất text" },
+          { status: 400 }
+        )
+      }
     }
 
     // Insert document
