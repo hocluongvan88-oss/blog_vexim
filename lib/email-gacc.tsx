@@ -109,7 +109,7 @@ export function getGACCUserConfirmationHTML(params: GACCSubmissionParams): strin
         <p style="margin-top: 10px;">
           Email: <a href="mailto:contact@veximglobal.vn">contact@veximglobal.vn</a><br>
           Hotline: 0373 685 634<br>
-          Website: <a href="https://vexim.vn">vexim.vn</a>
+          Website: <a href="https://veximglobal.com">vexim.vn</a>
         </p>
       </div>
     </div>
@@ -203,7 +203,7 @@ export function getGACCAdminNotificationHTML(params: GACCSubmissionParams): stri
         </div>
         
         <div style="text-align: center;">
-          <a href="https://vexim.vn/admin/gacc-submissions/${params.submissionId}" class="btn">
+          <a href="https://veximglobal.com.vn/admin/gacc-submissions/${params.submissionId}" class="btn">
             Xem chi tiết hồ sơ →
           </a>
         </div>

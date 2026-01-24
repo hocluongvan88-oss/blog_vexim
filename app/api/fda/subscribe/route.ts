@@ -68,16 +68,32 @@ export async function POST(request: Request) {
     }
 
     // Check if email already exists
-    const { data: existingSubscription } = await supabase.from("fda_subscriptions").select("id").eq("email", email).single()
+    const { data: existingSubscription } = await supabase.from("fda_subscriptions").select("*").eq("email", email).single()
 
     if (existingSubscription) {
-      // Update existing subscription
+      // If already verified, inform the user
+      if (existingSubscription.verified) {
+        console.log("[v0] Email already subscribed and verified:", email)
+        return NextResponse.json({
+          success: false,
+          alreadySubscribed: true,
+          message: "Email này đã được đăng ký và xác nhận. Nếu bạn muốn thay đổi cài đặt, vui lòng hủy đăng ký trước rồi đăng ký lại.",
+        }, { status: 409 })
+      }
+      
+      // If not verified, update and resend verification email
+      const verificationToken = generateToken()
+      const tokenExpiresAt = new Date()
+      tokenExpiresAt.setHours(tokenExpiresAt.getHours() + 24)
+      
       const { error: updateError } = await supabase
         .from("fda_subscriptions")
         .update({
           categories,
           frequency,
           is_active: true,
+          verification_token: verificationToken,
+          token_expires_at: tokenExpiresAt.toISOString(),
           updated_at: new Date().toISOString(),
         })
         .eq("email", email)
@@ -87,9 +103,17 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Failed to update subscription" }, { status: 500 })
       }
 
+      // Resend verification email
+      console.log("[v0] Resending verification email to:", email)
+      try {
+        await emailService.sendVerificationEmail(email, verificationToken)
+      } catch (emailError) {
+        console.error("[v0] Error resending verification email:", emailError)
+      }
+
       return NextResponse.json({
         success: true,
-        message: "Subscription updated successfully",
+        message: "Email xác nhận đã được gửi lại. Vui lòng kiểm tra hộp thư của bạn.",
       })
     }
 
