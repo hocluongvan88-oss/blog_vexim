@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { AlertTriangle, Calendar, Building2, FileText, Bell, Mail, Lock, Loader2, Shield } from "lucide-react"
 import type { FDACategory, FDAItem } from "@/types/fda"
 import { FDASubscriptionDialog } from "@/components/fda/fda-subscription-dialog"
+import { fdaApi } from "@/lib/fda-api"
 
 const FREE_ITEMS_LIMIT = 3
 
@@ -30,20 +31,35 @@ export function FDATrackerDashboard() {
       const endpoint = selectedCategory === "cosmetic" ? "event" : "enforcement"
       console.log("[v0] Loading FDA data for category:", selectedCategory, "endpoint:", endpoint)
 
-      // Call API route instead of direct FDA API (handles caching server-side)
-      const response = await fetch(
-        `/api/fda/items?category=${selectedCategory}&endpoint=${endpoint}&limit=10`
-      )
+      // Try API route first (with caching)
+      try {
+        const response = await fetch(
+          `/api/fda/items?category=${selectedCategory}&endpoint=${endpoint}&limit=10`
+        )
 
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`)
+        if (response.ok) {
+          const result = await response.json()
+          console.log("[v0] FDA API result from route:", result)
+
+          if (result && result.items) {
+            console.log("[v0] Setting items:", result.items.length, "total:", result.total)
+            setItems(result.items)
+            setTotalCount(result.total)
+            return
+          }
+        } else {
+          console.log("[v0] API route returned:", response.status, "- falling back to direct FDA API")
+        }
+      } catch (routeError) {
+        console.log("[v0] API route error - falling back to direct FDA API:", routeError)
       }
 
-      const result = await response.json()
-      console.log("[v0] FDA API result:", result)
+      // Fallback: Call FDA API directly (no caching)
+      console.log("[v0] Falling back to direct FDA API call")
+      const result = await fdaApi.getFDAItems(selectedCategory, endpoint, {}, 10)
 
-      if (result && result.items) {
-        console.log("[v0] Setting items:", result.items.length, "total:", result.total)
+      if (result) {
+        console.log("[v0] Setting items from direct API:", result.items.length, "total:", result.total)
         setItems(result.items)
         setTotalCount(result.total)
       } else {

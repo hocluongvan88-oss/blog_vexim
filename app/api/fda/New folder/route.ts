@@ -7,12 +7,16 @@ const CACHE_DURATION_HOURS = 4
 
 // GET /api/fda/items?category=food&endpoint=enforcement&limit=10
 export async function GET(request: Request) {
+  console.log("[v0] FDA items API route called:", request.url)
+  
   try {
     const { searchParams } = new URL(request.url)
     const category = searchParams.get("category") as FDACategory
     const endpoint = searchParams.get("endpoint") as FDAEndpoint
     const limit = Number.parseInt(searchParams.get("limit") || "10")
     const searchTerm = searchParams.get("searchTerm") || undefined
+    
+    console.log("[v0] Parameters:", { category, endpoint, limit, searchTerm })
 
     if (!category || !endpoint) {
       return NextResponse.json(
