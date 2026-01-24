@@ -50,7 +50,7 @@ export default function USAgentPage() {
                   Dịch vụ US Agent - Cầu nối pháp lý tại Mỹ
                 </h1>
                 <p className="text-xl text-white/90 mb-8 text-pretty leading-relaxed">
-                  Làm đại diện pháp lý (US Agent) cho doanh nghiệp Việt Nam xuất khẩu thực phẩm, mỹ phẩm, thiết bị y tế
+                  Làm đại diện pháp lý US Agent cho doanh nghiệp Việt Nam xuất khẩu thực phẩm, mỹ phẩm, thiết bị y tế
                   sang Hoa Kỳ. Bắt buộc theo FDA, đảm bảo 24/7 liên lạc với FDA.
                 </p>
                 <div className="flex flex-wrap gap-4 justify-center">
@@ -119,7 +119,7 @@ export default function USAgentPage() {
                   <UserCheck className="w-12 h-12 text-accent mb-4" />
                   <h3 className="text-xl font-semibold mb-2">Đại diện chuyên nghiệp</h3>
                   <p className="text-muted-foreground">
-                    US Agent của Vexim tại Houston, Texas. Địa chỉ văn phòng thật, điện thoại Mỹ, email doanh nghiệp.
+                    US Agent của Vexim tại Willmington, North Carolina. Địa chỉ văn phòng thật, điện thoại Mỹ, email doanh nghiệp.
                     Sẵn sàng 24/7.
                   </p>
                 </CardContent>
