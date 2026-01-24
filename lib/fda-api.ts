@@ -86,7 +86,7 @@ export class FDAApiService {
         headers: {
           "User-Agent": "VeximGlobal/1.0",
         },
-        next: { revalidate: 1800 }, // Cache for 30 minutes
+        cache: "default",
       })
 
       if (!response.ok) {

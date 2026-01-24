@@ -29,15 +29,20 @@ export function FDATrackerDashboard() {
     setLoading(true)
     try {
       const endpoint = selectedCategory === "cosmetic" ? "event" : "enforcement"
+      console.log("[v0] Loading FDA data for category:", selectedCategory, "endpoint:", endpoint)
 
       const result = await fdaApi.getFDAItems(selectedCategory, endpoint, {}, 10)
+      console.log("[v0] FDA API result:", result)
 
       if (result) {
+        console.log("[v0] Setting items:", result.items.length, "total:", result.total)
         setItems(result.items)
         setTotalCount(result.total)
+      } else {
+        console.log("[v0] No result from FDA API")
       }
     } catch (error) {
-      console.error("Error loading FDA data:", error)
+      console.error("[v0] Error loading FDA data:", error)
     } finally {
       setLoading(false)
     }
@@ -146,9 +151,20 @@ export function FDATrackerDashboard() {
 
               {/* Visible Items */}
               <div className="grid gap-4">
-                {filteredVisibleItems.map((item, index) => (
-                  <FDAItemCard key={item.id} item={item} index={index + 1} />
-                ))}
+                {filteredVisibleItems.length > 0 ? (
+                  filteredVisibleItems.map((item, index) => (
+                    <FDAItemCard key={item.id} item={item} index={index + 1} />
+                  ))
+                ) : (
+                  <Card className="p-8 text-center">
+                    <p className="text-slate-600">
+                      {searchTerm ? "Không tìm thấy kết quả phù hợp" : "Không có dữ liệu"}
+                    </p>
+                    <p className="text-sm text-slate-500 mt-2">
+                      Items: {items.length}, Total: {totalCount}
+                    </p>
+                  </Card>
+                )}
               </div>
 
               {/* Gated Content Blur Effect */}
@@ -277,7 +293,7 @@ function FDAItemCard({ item, index }: { item: FDAItem; index: number }) {
           {/* Critical Info */}
           <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-md p-2 sm:p-3">
             <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-red-600 flex-shrink-0 mt-0.5" />
-            <p className="text-xs sm:text-sm text-red-900 leading-relaxed line-clamp-3 sm:line-clamp-none">
+            <p className="text-xs sm:text-sm text-red-900 leading-relaxed line-clamp-3">
               {item.criticalInfo}
             </p>
           </div>
