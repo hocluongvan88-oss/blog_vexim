@@ -289,7 +289,7 @@ export default function USAgentPage() {
                   step: "03",
                   title: "Nhận thông tin US Agent chính thức",
                   description:
-                    "Vexim cung cấp: Tên US Agent, địa chỉ Houston TX, phone/email Mỹ, signed LOA. Bạn dùng thông tin này để điền FDA Form 3537a / 2891 / Cosmetic Registration.",
+                    "Vexim cung cấp: Tên US Agent, địa chỉ Agent, phone/email tại Mỹ, signed LOA. Bạn dùng thông tin này để điền FDA Form 3537a / 2891 / Cosmetic Registration.",
                 },
               ].map((process, idx) => (
                 <Card key={idx} className="border-l-4 border-l-primary hover:shadow-md transition-all">
