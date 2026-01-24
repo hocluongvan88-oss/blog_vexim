@@ -39,7 +39,7 @@ export default function GACCPage() {
                 Thị trường Trung Quốc
               </div>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-primary mb-6 text-balance">
-                Đăng ký Mã GACC (Trung Quốc)
+                Đăng ký Mã GACC
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed">
                 Chìa khóa vàng mở cửa thị trường tỷ dân Trung Quốc. GACC (General Administration of Customs of China) là
@@ -79,7 +79,7 @@ export default function GACCPage() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-primary mb-4 text-balance">
-              Mã GACC là gì và tại sao bắt buộc?
+              GACC code là gì và tại sao bắt buộc?
             </h2>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               GACC code (Mã số Tổng cục Hải quan Trung Quốc) là mã số định danh duy nhất cho cơ sở sản xuất, chế biến muốn
