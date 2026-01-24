@@ -28,7 +28,7 @@ export async function GET(request: Request) {
           <div class="container">
             <h1>❌ Lỗi xác thực</h1>
             <p>Link xác thực không hợp lệ hoặc đã hết hạn.</p>
-            <p><a href="https://vexim.vn/fda-tracker">← Quay lại trang chủ</a></p>
+            <p><a href="https://www.veximglobal.com/fda-tracker">← Quay lại trang chủ</a></p>
           </div>
         </body>
         </html>
@@ -72,7 +72,7 @@ export async function GET(request: Request) {
             <h1>❌ Không tìm thấy đăng ký</h1>
             <p>Không tìm thấy đăng ký với email và token này.</p>
             <p>Link có thể đã hết hạn hoặc bạn đã xác thực trước đó.</p>
-            <p style="margin-top: 30px;"><a href="https://vexim.vn/fda-tracker">← Quay lại FDA Tracker</a></p>
+            <p style="margin-top: 30px;"><a href="https://www.veximglobal.com/fda-tracker">← Quay lại FDA Tracker</a></p>
           </div>
         </body>
         </html>
@@ -106,7 +106,7 @@ export async function GET(request: Request) {
             <h1>✅ Email đã được xác thực trước đó</h1>
             <p>Email <strong>${email}</strong> đã được xác thực.</p>
             <p>Bạn đang nhận cảnh báo FDA theo lịch đã đăng ký.</p>
-            <a href="https://vexim.vn/fda-tracker">Xem cảnh báo FDA →</a>
+            <a href="https://www.veximglobal.com/fda-tracker">Xem cảnh báo FDA →</a>
           </div>
         </body>
         </html>
@@ -242,7 +242,7 @@ export async function GET(request: Request) {
           
           <p>Hệ thống đã kích hoạt và sẽ bắt đầu gửi cảnh báo theo lịch của bạn.</p>
           
-          <a href="https://vexim.vn/fda-tracker" class="btn">Xem cảnh báo FDA ngay →</a>
+          <a href="https://www.veximglobal.com/fda-tracker" class="btn">Xem cảnh báo FDA ngay →</a>
           
           <div class="footer">
             <p><strong>Vexim Global</strong> - Chuyên gia xuất nhập khẩu toàn cầu</p>

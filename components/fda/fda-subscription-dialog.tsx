@@ -60,12 +60,24 @@ export function FDASubscriptionDialog({ open, onOpenChange }: FDASubscriptionDia
         }),
       })
 
+      const data = await response.json()
+
+      // Check if email already subscribed
+      if (response.status === 409 && data.alreadySubscribed) {
+        toast.error(data.message || "Email này đã được đăng ký trước đó.", {
+          description: "Vui lòng kiểm tra hộp thư hoặc sử dụng email khác.",
+          duration: 5000,
+        })
+        setLoading(false)
+        return
+      }
+
       if (!response.ok) {
-        throw new Error("Subscription failed")
+        throw new Error(data.error || "Subscription failed")
       }
 
       setSuccess(true)
-      toast.success("Đăng ký thành công! Kiểm tra email để xác nhận.")
+      toast.success(data.message || "Đăng ký thành công! Kiểm tra email để xác nhận.")
 
       // Reset form after 2 seconds
       setTimeout(() => {

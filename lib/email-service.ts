@@ -12,7 +12,7 @@ import type { FDAItem } from "@/types/fda"
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY || ""
 const FROM_EMAIL = "FDA Tracker <alerts@veximglobal.vn>"
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://vexim.vn"
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://www.veximglobal.com"
 
 export class EmailService {
   // Send verification email

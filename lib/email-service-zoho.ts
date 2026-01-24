@@ -28,7 +28,7 @@ function getSmtpConfig() {
     password: process.env.MAIL_PASSWORD || process.env.SMTP_PASSWORD || "",
     fromEmail: process.env.MAIL_FROM_ADDRESS || process.env.FROM_EMAIL || "contact@veximglobal.com",
     fromName: process.env.MAIL_FROM_NAME || process.env.FROM_NAME || "VEXIM GLOBAL",
-    baseUrl: process.env.NEXT_PUBLIC_BASE_URL || "https://vexim.vn",
+    baseUrl: process.env.NEXT_PUBLIC_BASE_URL || "https://www.veximglobal.com",
   }
 }
 

@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next"
 import { createStaticClient } from "@/lib/supabase/server"
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://vexim.vn"
+  const baseUrl = "https://www.veximglobal.com"
   const supabase = createStaticClient()
 
   let blogPages: MetadataRoute.Sitemap = []

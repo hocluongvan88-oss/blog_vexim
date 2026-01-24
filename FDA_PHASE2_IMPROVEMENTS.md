@@ -22,7 +22,7 @@ Phase 2 tập trung vào cải thiện reliability, security và performance c�
 - `/app/api/fda/subscribe/route.ts` - Set expiry khi tạo
 
 **Testing**:
-```bash
+\`\`\`bash
 # Test 1: Subscribe và verify trong 24h (thành công)
 curl -X POST http://localhost:3000/api/fda/subscribe \
   -H "Content-Type: application/json" \
@@ -37,7 +37,7 @@ SET token_expires_at = NOW() - INTERVAL '1 hour'
 WHERE email = 'test@example.com';
 
 # Click verify link → "Không tìm thấy đăng ký" error
-```
+\`\`\`
 
 ---
 
@@ -56,7 +56,7 @@ WHERE email = 'test@example.com';
 - `/lib/fda-ai.ts` - Cache logic
 
 **Cách sử dụng**:
-```typescript
+\`\`\`typescript
 // Trong FDA API service
 const items = await fdaApi.getFDAItems('food', 'enforcement', {}, 10)
 const cacheKey = 'food-enforcement-abc123'
@@ -67,7 +67,7 @@ for (const item of items) {
   // Lần đầu: Call Groq API + save to cache
   // Lần sau: Read from cache (no API call)
 }
-```
+\`\`\`
 
 **Performance improvement**:
 - Giảm 90% Groq API calls
@@ -91,7 +91,7 @@ for (const item of items) {
 - `/app/api/fda/subscribe/route.ts` - Rate limit check
 
 **Configuration**:
-```typescript
+\`\`\`typescript
 // Trong subscribe endpoint
 const isRateLimited = await checkRateLimit(
   supabase,
@@ -100,10 +100,10 @@ const isRateLimited = await checkRateLimit(
   5,              // Max 5 requests
   3600            // Per 1 hour (3600 seconds)
 )
-```
+\`\`\`
 
 **Testing**:
-```bash
+\`\`\`bash
 # Test rate limiting
 for i in {1..6}; do
   curl -X POST http://localhost:3000/api/fda/subscribe \
@@ -114,14 +114,14 @@ done
 
 # Request 1-5: Success
 # Request 6: 429 Too Many Requests
-```
+\`\`\`
 
 **Response khi bị rate limited**:
-```json
+\`\`\`json
 {
   "error": "Too many subscription attempts. Please try again later."
 }
-```
+\`\`\`
 
 ---
 
@@ -151,16 +151,16 @@ done
 4. Enable bounce events
 
 **Webhook payload format**:
-```json
+\`\`\`json
 {
   "email": "user@example.com",
   "bounceType": "hard",
   "reason": "Mailbox does not exist"
 }
-```
+\`\`\`
 
 **Bounce status endpoint**:
-```bash
+\`\`\`bash
 # Check bounce status
 curl http://localhost:3000/api/webhooks/email-bounce?email=test@example.com
 
@@ -173,7 +173,7 @@ curl http://localhost:3000/api/webhooks/email-bounce?email=test@example.com
   "isActive": true,
   "status": "warning"
 }
-```
+\`\`\`
 
 **Status levels**:
 - `healthy`: bounce_count = 0
@@ -185,7 +185,7 @@ curl http://localhost:3000/api/webhooks/email-bounce?email=test@example.com
 ## Database Schema Changes
 
 ### fda_subscriptions (updated)
-```sql
+\`\`\`sql
 -- New columns
 token_expires_at TIMESTAMP WITH TIME ZONE  -- H-3: Token expiry
 bounce_count INTEGER DEFAULT 0             -- H-4: Bounce tracking
@@ -195,19 +195,19 @@ bounce_type TEXT                           -- H-4: hard, soft, complaint
 -- New indexes
 idx_fda_subscriptions_verification (verification_token, token_expires_at)
 idx_fda_subscriptions_bounce (bounce_count, is_active)
-```
+\`\`\`
 
 ### fda_alerts_cache (updated)
-```sql
+\`\`\`sql
 -- New column
 ai_summaries JSONB  -- C-4: Cached AI summaries
 
 -- New index
 idx_fda_alerts_cache_ai_summaries (ai_summaries) USING GIN
-```
+\`\`\`
 
 ### rate_limits (new table)
-```sql
+\`\`\`sql
 CREATE TABLE rate_limits (
     id UUID PRIMARY KEY,
     identifier TEXT NOT NULL,        -- IP or email
@@ -220,7 +220,7 @@ CREATE TABLE rate_limits (
 
 -- Unique index for lookups
 idx_rate_limits_identifier_endpoint (identifier, endpoint, window_start)
-```
+\`\`\`
 
 ---
 
@@ -228,39 +228,39 @@ idx_rate_limits_identifier_endpoint (identifier, endpoint, window_start)
 
 Thêm vào Vercel:
 
-```bash
+\`\`\`bash
 # H-4: Email bounce webhook secret
 EMAIL_WEBHOOK_SECRET=your-secure-webhook-secret-here-min-32-chars
-```
+\`\`\`
 
 ---
 
 ## Migration Instructions
 
 ### Bước 1: Chạy database migration
-```sql
+\`\`\`sql
 -- Option 1: Qua Supabase Dashboard
 -- Copy nội dung scripts/021_phase2_improvements.sql
 -- Paste vào SQL Editor → Run
 
 -- Option 2: Qua psql
 psql $DATABASE_URL < scripts/021_phase2_improvements.sql
-```
+\`\`\`
 
 ### Bước 2: Set environment variables
-```bash
+\`\`\`bash
 # Vercel Dashboard
 vercel env add EMAIL_WEBHOOK_SECRET production
 # Enter value: [secure-random-string]
-```
+\`\`\`
 
 ### Bước 3: Deploy code
-```bash
+\`\`\`bash
 git add .
 git commit -m "Phase 2: Token expiry, AI cache, rate limiting, bounce handling"
 git push origin main
 # Vercel auto-deploys
-```
+\`\`\`
 
 ### Bước 4: Setup email bounce webhook
 1. Đăng nhập Zoho Mail Admin
@@ -272,7 +272,7 @@ git push origin main
 7. Save
 
 ### Bước 5: Test everything
-```bash
+\`\`\`bash
 # Test 1: Token expiry
 npm run test:token-expiry
 
@@ -285,14 +285,14 @@ npm run test:ai-cache
 # Test 4: Email bounce (manual)
 # Send test email to invalid@example.com
 # Check webhook receives bounce notification
-```
+\`\`\`
 
 ---
 
 ## Monitoring & Maintenance
 
 ### Daily checks
-```sql
+\`\`\`sql
 -- Check rate limit usage
 SELECT identifier, endpoint, request_count, window_start
 FROM rate_limits
@@ -315,10 +315,10 @@ FROM fda_subscriptions
 WHERE verified = false 
   AND token_expires_at < NOW()
   AND created_at > NOW() - INTERVAL '7 days';
-```
+\`\`\`
 
 ### Weekly cleanup
-```sql
+\`\`\`sql
 -- Clean up old rate limit entries (auto via function)
 SELECT cleanup_old_rate_limits();
 
@@ -326,10 +326,10 @@ SELECT cleanup_old_rate_limits();
 DELETE FROM fda_subscriptions
 WHERE verified = false 
   AND token_expires_at < NOW() - INTERVAL '7 days';
-```
+\`\`\`
 
 ### Monthly reports
-```sql
+\`\`\`sql
 -- Subscription health report
 SELECT 
   'Total Active' as metric,
@@ -360,7 +360,7 @@ SELECT
   COUNT(*)
 FROM fda_subscriptions
 WHERE verified = false AND token_expires_at < NOW();
-```
+\`\`\`
 
 ---
 
@@ -390,7 +390,7 @@ WHERE verified = false AND token_expires_at < NOW();
 ## Troubleshooting
 
 ### Problem: Token expiry check fails
-```sql
+\`\`\`sql
 -- Check if column exists
 SELECT column_name, data_type 
 FROM information_schema.columns 
@@ -398,10 +398,10 @@ WHERE table_name = 'fda_subscriptions'
   AND column_name = 'token_expires_at';
 
 -- If missing, run migration again
-```
+\`\`\`
 
 ### Problem: Rate limiting too aggressive
-```typescript
+\`\`\`typescript
 // Adjust limits in subscribe endpoint
 const isRateLimited = await checkRateLimit(
   supabase,
@@ -410,27 +410,27 @@ const isRateLimited = await checkRateLimit(
   10,    // Increase from 5 to 10
   3600
 )
-```
+\`\`\`
 
 ### Problem: AI cache not working
-```sql
+\`\`\`sql
 -- Check cache table structure
 SELECT * FROM fda_alerts_cache LIMIT 1;
 
 -- Check if ai_summaries column exists
 SELECT ai_summaries FROM fda_alerts_cache WHERE cache_key = 'food-enforcement-...';
-```
+\`\`\`
 
 ### Problem: Bounce webhook not receiving
 - Check Zoho webhook logs
 - Verify EMAIL_WEBHOOK_SECRET matches
 - Test webhook manually:
-```bash
+\`\`\`bash
 curl -X POST https://vexim.vn/api/webhooks/email-bounce \
   -H "Authorization: Bearer your-secret" \
   -H "Content-Type: application/json" \
   -d '{"email":"test@example.com","bounceType":"soft","reason":"Test"}'
-```
+\`\`\`
 
 ---
 

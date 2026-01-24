@@ -14,7 +14,7 @@ const beVietnamPro = Be_Vietnam_Pro({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://vexim.vn"),
+  metadataBase: new URL("https://www.veximglobal.com"),
   title: {
     default: "Vexim Global - Giải Pháp Xuất Nhập Khẩu Toàn Cầu",
     template: "%s | Vexim Global",
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "vi_VN",
-    url: "https://vexim.vn",
+    url: "https://www.veximglobal.com",
     siteName: "Vexim Global",
     title: "Vexim Global - Giải Pháp Xuất Nhập Khẩu Toàn Cầu",
     description:
@@ -75,7 +75,7 @@ export const metadata: Metadata = {
     google: "your-google-verification-code",
   },
   alternates: {
-    canonical: "https://vexim.vn",
+    canonical: "https://www.veximglobal.com",
   },
   icons: {
     icon: [

@@ -65,7 +65,7 @@ export function getVerificationEmailHTML(params: EmailTemplateParams): string {
           <h3 style="margin-top: 0; color: #0f172a;">Bạn sẽ nhận được:</h3>
           <ul>
             <li>✅ Cảnh báo thu hồi thực phẩm, dược phẩm, mỹ phẩm từ FDA</li>
-            <li>✅ Tóm tắt nội dung bằng tiếng Việt với AI</li>
+            <li>✅ Tóm tắt bằng tiếng Việt với AI</li>
             <li>✅ Thông báo realtime hoặc tổng hợp theo tuần</li>
             <li>✅ Hoàn toàn MIỄN PHÍ và có thể hủy bất cứ lúc nào</li>
           </ul>
@@ -190,7 +190,7 @@ export function getAlertEmailHTML(params: EmailTemplateParams & { frequency: "da
           <p style="color: #1e293b; font-size: 16px; margin-bottom: 15px;">
             <strong>Còn ${alertCount - 5} cảnh báo khác</strong> chưa hiển thị trong email này.
           </p>
-          <a href="https://vexim.vn/fda-tracker" class="btn">Xem tất cả cảnh báo →</a>
+          <a href="https://www.veximglobal.com/fda-tracker" class="btn">Xem tất cả cảnh báo →</a>
         </div>
         `
             : ""
@@ -210,7 +210,7 @@ export function getAlertEmailHTML(params: EmailTemplateParams & { frequency: "da
         <p><strong>Vexim Global</strong> - FDA Tracker</p>
         <p>Email: contact@veximglobal.vn | Phone: 0373 685 634</p>
         <p style="margin-top: 15px;">
-          <a href="https://vexim.vn/fda-tracker">Xem trên web</a> | 
+          <a href="https://www.veximglobal.com/fda-tracker">Xem trên web</a> | 
           <a href="${params.unsubscribeLink}">Hủy đăng ký</a>
         </p>
       </div>
@@ -290,7 +290,7 @@ export function getImmediateAlertEmailHTML(params: EmailTemplateParams & { alert
           <p style="color: #713f12; margin: 0 0 15px 0; font-weight: 600;">
             ⚡ Hành động ngay để đảm bảo an toàn
           </p>
-          <a href="https://veximglobal.com/fda-tracker" class="btn">Xem chi tiết →</a>
+          <a href="https://www.veximglobal.com/fda-tracker" class="btn">Xem chi tiết →</a>
         </div>
         
         <div style="background: #f1f5f9; padding: 15px; border-radius: 6px; margin-top: 20px;">
@@ -338,7 +338,7 @@ export function getUnsubscribeEmailHTML(params: EmailTemplateParams): string {
       <h1>✅ Đã hủy đăng ký thành công</h1>
       <p>Bạn sẽ không còn nhận được cảnh báo FDA từ Vexim Global nữa.</p>
       <p>Nếu bạn muốn đăng ký lại, bạn có thể quay lại bất cứ lúc nào.</p>
-      <a href="https://veximglobal.com/fda-tracker" class="btn">Đăng ký lại</a>
+      <a href="https://www.veximglobal.com/fda-tracker" class="btn">Đăng ký lại</a>
       <p style="margin-top: 30px; font-size: 14px;">
         Cảm ơn bạn đã tin tưởng Vexim Global!
       </p>
