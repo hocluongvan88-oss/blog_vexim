@@ -175,7 +175,7 @@ export default function USAgentPage() {
                 {
                   title: "Văn phòng thật tại Houston, TX",
                   description:
-                    "Địa chỉ: 1234 Main Street, Houston, TX 77002. Điện thoại: +1-713-XXX-XXXX. Không phải PO Box hay virtual office. FDA audit OK.",
+                    "Địa chỉ: 1207 Delaware Ave #000, Wilmington, North Carolina. Điện thoại: +1-812-2276268. Không phải PO Box hay virtual office. FDA audit OK.",
                   icon: Shield,
                 },
               ].map((service, idx) => (
@@ -354,7 +354,7 @@ export default function USAgentPage() {
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="text-3xl md:text-4xl font-bold mb-6">Bảo vệ doanh nghiệp với US Agent uy tín</h2>
               <p className="text-xl text-white/90 mb-8">
-                Vexim Global - Văn phòng thật tại Houston, Texas. Phản hồi FDA trong vòng 2 giờ. Đồng hành cùng 500+
+                Vexim Global - 1207 Delaware Ave #000, Wilmington, North Carolina. Phản hồi FDA trong vòng 2 giờ. Đồng hành cùng 500+
                 doanh nghiệp Việt Nam.
               </p>
               <div className="flex flex-wrap gap-4 justify-center">
@@ -372,7 +372,7 @@ export default function USAgentPage() {
                 </Button>
               </div>
               <p className="mt-6 text-white/80 text-sm">
-                Sẵn sàng 24/7 • Văn phòng tại Houston TX • Phản hồi FDA nhanh chóng
+                Sẵn sàng 24/7 • 1207 Delaware Ave #000, Wilmington, North Carolina • Phản hồi FDA nhanh chóng
               </p>
             </div>
           </div>
