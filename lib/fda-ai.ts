@@ -1,10 +1,21 @@
 import { generateText } from "ai"
 import type { FDAItem } from "@/types/fda"
+import { createServerClient } from "@/lib/supabase-server"
 
 export class FDAAIService {
-  // Tạo summary tiếng Việt cho FDA item
-  async generateVietnameseSummary(item: FDAItem): Promise<string> {
+  // C-4: Tạo summary tiếng Việt cho FDA item với cache
+  async generateVietnameseSummary(item: FDAItem, cacheKey?: string): Promise<string> {
     try {
+      // Check cache first if cacheKey provided
+      if (cacheKey) {
+        const cached = await this.getCachedSummary(cacheKey, item.id)
+        if (cached) {
+          console.log(`[v0] AI summary cache HIT for item: ${item.id}`)
+          return cached
+        }
+        console.log(`[v0] AI summary cache MISS for item: ${item.id}`)
+      }
+
       console.log(`[v0] Generating Vietnamese summary for: ${item.title.substring(0, 50)}...`)
 
       // Prompt tùy theo category
@@ -16,12 +27,74 @@ export class FDAAIService {
         maxTokens: 200,
       })
 
-      console.log(`[v0] Generated summary: ${text.substring(0, 100)}...`)
+      const summary = text.trim()
+      console.log(`[v0] Generated summary: ${summary.substring(0, 100)}...`)
 
-      return text.trim()
+      // Save to cache if cacheKey provided
+      if (cacheKey) {
+        await this.saveSummaryToCache(cacheKey, item.id, summary)
+      }
+
+      return summary
     } catch (error) {
       console.error("[v0] Error generating Vietnamese summary:", error)
       return `${item.title} - ${item.criticalInfo}`
+    }
+  }
+
+  // Get cached AI summary from database
+  private async getCachedSummary(cacheKey: string, itemId: string): Promise<string | null> {
+    try {
+      const supabase = await createServerClient()
+      
+      const { data, error } = await supabase
+        .from("fda_alerts_cache")
+        .select("ai_summaries")
+        .eq("cache_key", cacheKey)
+        .gt("expires_at", new Date().toISOString())
+        .single()
+
+      if (error || !data || !data.ai_summaries) {
+        return null
+      }
+
+      const summaries = data.ai_summaries as Record<string, string>
+      return summaries[itemId] || null
+    } catch (error) {
+      console.error("[v0] Error getting cached summary:", error)
+      return null
+    }
+  }
+
+  // Save AI summary to cache
+  private async saveSummaryToCache(cacheKey: string, itemId: string, summary: string): Promise<void> {
+    try {
+      const supabase = await createServerClient()
+      
+      // Get existing cache entry
+      const { data: existing } = await supabase
+        .from("fda_alerts_cache")
+        .select("ai_summaries")
+        .eq("cache_key", cacheKey)
+        .single()
+
+      const existingSummaries = (existing?.ai_summaries as Record<string, string>) || {}
+      const updatedSummaries = {
+        ...existingSummaries,
+        [itemId]: summary,
+      }
+
+      // Update cache with new summary
+      await supabase
+        .from("fda_alerts_cache")
+        .update({
+          ai_summaries: updatedSummaries,
+        })
+        .eq("cache_key", cacheKey)
+
+      console.log(`[v0] Saved AI summary to cache for item: ${itemId}`)
+    } catch (error) {
+      console.error("[v0] Error saving summary to cache:", error)
     }
   }
 

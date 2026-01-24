@@ -14,3 +14,6 @@ export function getSupabaseBrowserClient() {
 
   return supabaseClient
 }
+
+// Export with multiple names for compatibility
+export const createClient = getSupabaseBrowserClient

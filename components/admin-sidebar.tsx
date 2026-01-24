@@ -15,6 +15,7 @@ import {
   MessageCircle,
   Brain,
   ClipboardCheck,
+  Timer,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -115,6 +116,11 @@ export function AdminSidebar({ adminUser }: AdminSidebarProps) {
       title: "Hồ sơ đăng ký GACC",
       href: "/admin/gacc-submissions",
       icon: ClipboardCheck,
+    },
+    {
+      title: "Cron Job Monitor",
+      href: "/admin/cron-monitor",
+      icon: Timer,
     },
     {
       title: "Cài đặt",

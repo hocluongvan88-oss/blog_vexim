@@ -4,15 +4,58 @@ import type { FDACategory } from "@/types/fda"
 import { emailService } from "@/lib/email-service-zoho"
 import nodemailer from "nodemailer"
 
+// Generate random token
+function generateToken(): string {
+  return Math.random().toString(36).substring(2) + Date.now().toString(36)
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json()
     const { email, categories, frequency, honeypot } = body
 
+    const supabase = await createServerClient() // Move supabase creation here
+
     // Anti-spam: Check honeypot field
     if (honeypot && honeypot.trim() !== "") {
       console.log("[v0] Spam detected - honeypot filled:", honeypot)
       return NextResponse.json({ error: "Invalid submission" }, { status: 400 })
+    }
+
+    // H-2: Rate limiting check (5 subscriptions per hour per IP/email)
+    const clientIp = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown"
+    const identifier = email || clientIp
+    
+    const { data: existingRateLimit } = await supabase
+      .from("rate_limits")
+      .select("*")
+      .eq("identifier", identifier)
+      .eq("endpoint", "/api/fda/subscribe")
+      .gt("window_start", new Date(new Date().getTime() - 3600000).toISOString())
+      .single()
+
+    if (existingRateLimit && existingRateLimit.request_count >= 5) {
+      console.log(`[v0] Rate limit exceeded for: ${identifier}`)
+      return NextResponse.json({ 
+        error: "Too many subscription attempts. Please try again later." 
+      }, { status: 429 })
+    }
+
+    if (existingRateLimit) {
+      await supabase
+        .from("rate_limits")
+        .update({
+          request_count: existingRateLimit.request_count + 1,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", existingRateLimit.id)
+    } else {
+      await supabase.from("rate_limits").insert({
+        identifier,
+        endpoint: "/api/fda/subscribe",
+        request_count: 1,
+        window_start: new Date().toISOString(),
+      })
     }
 
     // Validation
@@ -24,12 +67,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "At least one category is required" }, { status: 400 })
     }
 
-    const supabase = await createServerClient()
-
     // Check if email already exists
-    const { data: existing } = await supabase.from("fda_subscriptions").select("id").eq("email", email).single()
+    const { data: existingSubscription } = await supabase.from("fda_subscriptions").select("id").eq("email", email).single()
 
-    if (existing) {
+    if (existingSubscription) {
       // Update existing subscription
       const { error: updateError } = await supabase
         .from("fda_subscriptions")
@@ -52,14 +93,17 @@ export async function POST(request: Request) {
       })
     }
 
-    // Create new subscription
+    // Create new subscription with token expiry (24 hours)
     const verificationToken = generateToken()
+    const tokenExpiresAt = new Date()
+    tokenExpiresAt.setHours(tokenExpiresAt.getHours() + 24)
     
     console.log("[v0] === CREATING DATABASE RECORD ===")
     console.log("[v0] Email:", email)
     console.log("[v0] Categories:", categories)
     console.log("[v0] Frequency:", frequency)
     console.log("[v0] Verification token:", verificationToken)
+    console.log("[v0] Token expires at:", tokenExpiresAt.toISOString())
 
     const { data: insertData, error: insertError } = await supabase.from("fda_subscriptions").insert({
       email,
@@ -68,6 +112,7 @@ export async function POST(request: Request) {
       is_active: true,
       verified: false,
       verification_token: verificationToken,
+      token_expires_at: tokenExpiresAt.toISOString(),
     }).select()
 
     if (insertError) {
@@ -164,9 +209,4 @@ export async function DELETE(request: Request) {
     console.error("[v0] Unsubscribe error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
-}
-
-// Generate random token
-function generateToken(): string {
-  return Math.random().toString(36).substring(2) + Date.now().toString(36)
 }

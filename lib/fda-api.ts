@@ -70,17 +70,17 @@ export class FDAApiService {
     return `${url}?${params.toString()}`
   }
 
-  // Fetch data từ FDA API
-  async fetchFDAData(
-    category: FDACategory,
-    endpoint: FDAEndpoint,
-    filters: Partial<FDAFilters> = {},
-    limit = 10,
-  ): Promise<FDAApiResponse | null> {
+
+
+  // Fetch data từ FDA API with retry mechanism
+  async fetchFDAData(category: FDACategory, endpoint: FDAEndpoint, filters: Partial<FDAFilters> = {}, limit = 10, retryCount = 0): Promise<FDAApiResponse | null> {
+    const MAX_RETRIES = 3
+    const RETRY_DELAY_MS = 1000
+
     try {
       const url = this.buildEndpointUrl(category, endpoint, filters, limit)
 
-      console.log(`[v0] Fetching FDA data from: ${url}`)
+      console.log(`[v0] Fetching FDA data from: ${url} (attempt ${retryCount + 1}/${MAX_RETRIES + 1})`)
 
       const response = await fetch(url, {
         headers: {
@@ -90,6 +90,14 @@ export class FDAApiService {
       })
 
       if (!response.ok) {
+        if (response.status === 429 && retryCount < MAX_RETRIES) {
+          // Rate limited - retry with exponential backoff
+          const delay = RETRY_DELAY_MS * Math.pow(2, retryCount)
+          console.log(`[v0] FDA API rate limited (429). Retrying in ${delay}ms...`)
+          await new Promise(resolve => setTimeout(resolve, delay))
+          return this.fetchFDAData(category, endpoint, filters, limit, retryCount + 1)
+        }
+        
         console.error(`[v0] FDA API error: ${response.status} ${response.statusText}`)
         return null
       }
@@ -100,7 +108,14 @@ export class FDAApiService {
 
       return data
     } catch (error) {
-      console.error("[v0] Error fetching FDA data:", error)
+      if (retryCount < MAX_RETRIES) {
+        const delay = RETRY_DELAY_MS * Math.pow(2, retryCount)
+        console.log(`[v0] Error fetching FDA data. Retrying in ${delay}ms... (${error})`)
+        await new Promise(resolve => setTimeout(resolve, delay))
+        return this.fetchFDAData(category, endpoint, filters, limit, retryCount + 1)
+      }
+      
+      console.error("[v0] Error fetching FDA data after all retries:", error)
       return null
     }
   }
@@ -177,7 +192,7 @@ export class FDAApiService {
     })
   }
 
-  // Tổng hợp: Fetch + Normalize
+  // Tổng hợp: Fetch → Normalize (caching handled in API route layer)
   async getFDAItems(
     category: FDACategory,
     endpoint: FDAEndpoint,
@@ -191,10 +206,11 @@ export class FDAApiService {
     }
 
     const items = this.normalizeData(response.results, category, endpoint)
+    const total = response.meta.results.total
 
     return {
       items,
-      total: response.meta.results.total,
+      total,
     }
   }
 }

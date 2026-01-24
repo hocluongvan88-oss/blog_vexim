@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { AlertTriangle, Calendar, Building2, FileText, Bell, Mail, Lock, Loader2, Shield } from "lucide-react"
 import type { FDACategory, FDAItem } from "@/types/fda"
-import { fdaApi } from "@/lib/fda-api"
 import { FDASubscriptionDialog } from "@/components/fda/fda-subscription-dialog"
 
 const FREE_ITEMS_LIMIT = 3
@@ -31,18 +30,31 @@ export function FDATrackerDashboard() {
       const endpoint = selectedCategory === "cosmetic" ? "event" : "enforcement"
       console.log("[v0] Loading FDA data for category:", selectedCategory, "endpoint:", endpoint)
 
-      const result = await fdaApi.getFDAItems(selectedCategory, endpoint, {}, 10)
+      // Call API route instead of direct FDA API (handles caching server-side)
+      const response = await fetch(
+        `/api/fda/items?category=${selectedCategory}&endpoint=${endpoint}&limit=10`
+      )
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`)
+      }
+
+      const result = await response.json()
       console.log("[v0] FDA API result:", result)
 
-      if (result) {
+      if (result && result.items) {
         console.log("[v0] Setting items:", result.items.length, "total:", result.total)
         setItems(result.items)
         setTotalCount(result.total)
       } else {
         console.log("[v0] No result from FDA API")
+        setItems([])
+        setTotalCount(0)
       }
     } catch (error) {
       console.error("[v0] Error loading FDA data:", error)
+      setItems([])
+      setTotalCount(0)
     } finally {
       setLoading(false)
     }

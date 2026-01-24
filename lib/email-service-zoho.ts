@@ -84,7 +84,9 @@ export class EmailServiceZoho {
   }
 
   // Send daily/weekly alert digest
-  async sendAlertDigest(frequency: "daily" | "weekly") {
+  async sendAlertDigest(frequency: "daily" | "weekly"): Promise<{ emailsSent: number }> {
+    let emailsSent = 0
+
     try {
       const config = getSmtpConfig()
       const supabase = await createServerClient()
@@ -99,7 +101,7 @@ export class EmailServiceZoho {
 
       if (error || !subscribers || subscribers.length === 0) {
         console.log(`[v0] No active ${frequency} subscribers found`)
-        return
+        return { emailsSent: 0 }
       }
 
       console.log(`[v0] Sending ${frequency} digest to ${subscribers.length} subscribers`)
@@ -139,15 +141,18 @@ export class EmailServiceZoho {
             .update({ last_sent_at: new Date().toISOString() })
             .eq("id", subscriber.id)
 
+          emailsSent++
           console.log(`[v0] Sent ${frequency} digest to ${subscriber.email}`)
         } catch (error) {
           console.error(`[v0] Error sending to ${subscriber.email}:`, error)
         }
       }
 
-      console.log(`[v0] Completed ${frequency} digest sending`)
+      console.log(`[v0] Completed ${frequency} digest sending. Total sent: ${emailsSent}`)
+      return { emailsSent }
     } catch (error) {
       console.error(`[v0] Error in sendAlertDigest ${frequency}:`, error)
+      return { emailsSent }
     }
   }
 
@@ -224,19 +229,24 @@ export class EmailServiceZoho {
     }
   }
 
-  // Core email sending function using Zoho SMTP
+  // Core email sending function using Zoho SMTP with retry mechanism
   async sendEmail({
     to,
     subject,
     html,
+    retryCount = 0,
   }: {
     to: string
     subject: string
     html: string
+    retryCount?: number
   }): Promise<boolean> {
+    const MAX_RETRIES = 3
+    const RETRY_DELAY_MS = 2000
+
     try {
       const config = getSmtpConfig()
-      console.log("[v0] Starting email send process...")
+      console.log(`[v0] Starting email send process (attempt ${retryCount + 1}/${MAX_RETRIES + 1})...`)
       console.log(`[v0] SMTP Config: host=${config.host}, port=${config.port}`)
       console.log(`[v0] SMTP User configured: ${config.user ? "Yes" : "No"}`)
       console.log(`[v0] SMTP Password configured: ${config.password ? "Yes (length: " + config.password.length + ")" : "No"}`)
@@ -269,12 +279,46 @@ export class EmailServiceZoho {
       console.log(`[v0] Response: ${info.response}`)
       return true
     } catch (error) {
-      console.error("[v0] Error sending email via Zoho:", error)
+      console.error(`[v0] Error sending email via Zoho (attempt ${retryCount + 1}):`, error)
       if (error instanceof Error) {
         console.error("[v0] Error message:", error.message)
         console.error("[v0] Error stack:", error.stack)
       }
+
+      // Retry logic with exponential backoff
+      if (retryCount < MAX_RETRIES) {
+        const delay = RETRY_DELAY_MS * Math.pow(2, retryCount)
+        console.log(`[v0] Retrying email send in ${delay}ms... (${retryCount + 1}/${MAX_RETRIES})`)
+        
+        await new Promise(resolve => setTimeout(resolve, delay))
+        
+        return this.sendEmail({ to, subject, html, retryCount: retryCount + 1 })
+      }
+
+      // All retries exhausted - log failed email to database for manual review
+      await this.logFailedEmail(to, subject, error instanceof Error ? error.message : String(error))
+      
+      console.error("[v0] Failed to send email after all retries")
       throw error
+    }
+  }
+
+  // Log failed emails to database for manual retry
+  private async logFailedEmail(to: string, subject: string, errorMessage: string): Promise<void> {
+    try {
+      const supabase = await createServerClient()
+      
+      await supabase.from("failed_emails_log").insert({
+        recipient: to,
+        subject,
+        error_message: errorMessage,
+        retry_count: 3,
+        created_at: new Date().toISOString(),
+      })
+      
+      console.log(`[v0] Logged failed email to database: ${to}`)
+    } catch (error) {
+      console.error("[v0] Error logging failed email:", error)
     }
   }
 

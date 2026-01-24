@@ -42,12 +42,13 @@ export async function GET(request: Request) {
 
     const supabase = await createServerClient()
 
-    // Find subscription with matching email and token
+    // Find subscription with matching email and token (check expiry)
     const { data: subscription, error } = await supabase
       .from("fda_subscriptions")
       .select("*")
       .eq("email", email)
       .eq("verification_token", token)
+      .gt("token_expires_at", new Date().toISOString()) // Token must not be expired
       .single()
 
     if (error || !subscription) {
