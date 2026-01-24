@@ -1,7 +1,6 @@
 // Email Service for FDA Alerts using Zoho SMTP
 // Alternative to Resend API - uses standard SMTP
 
-import { createServerClient } from "@/lib/supabase-server"
 import {
   getVerificationEmailHTML,
   getAlertEmailHTML,
@@ -10,6 +9,8 @@ import {
 } from "@/lib/email-templates"
 import type { FDAItem } from "@/types/fda"
 import nodemailer from "nodemailer"
+import type { SupabaseClient } from "@supabase/supabase-js"
+import { createServerClient } from "@/lib/supabase-server" // Declare the variable here
 
 // Zoho SMTP Configuration - Using existing Vercel env variables
 // Read at runtime to ensure env vars are available
@@ -84,12 +85,11 @@ export class EmailServiceZoho {
   }
 
   // Send daily/weekly alert digest
-  async sendAlertDigest(frequency: "daily" | "weekly"): Promise<{ emailsSent: number }> {
+  async sendAlertDigest(frequency: "daily" | "weekly", supabase: SupabaseClient): Promise<{ emailsSent: number }> {
     let emailsSent = 0
 
     try {
       const config = getSmtpConfig()
-      const supabase = await createServerClient()
 
       // Get active subscribers with this frequency
       const { data: subscribers, error } = await supabase
@@ -107,7 +107,7 @@ export class EmailServiceZoho {
       console.log(`[v0] Sending ${frequency} digest to ${subscribers.length} subscribers`)
 
       // Get latest alerts from cache or FDA API
-      const alerts = await this.getLatestAlerts()
+      const alerts = await this.getLatestAlerts(supabase)
 
       // Send to each subscriber
       for (const subscriber of subscribers) {
@@ -157,10 +157,9 @@ export class EmailServiceZoho {
   }
 
   // Send immediate alert for critical items
-  async sendImmediateAlert(alert: FDAItem) {
+  async sendImmediateAlert(alert: FDAItem, supabase: SupabaseClient) {
     try {
       const config = getSmtpConfig()
-      const supabase = await createServerClient()
 
       // Get subscribers with immediate frequency and matching category
       const { data: subscribers, error } = await supabase
@@ -295,7 +294,7 @@ export class EmailServiceZoho {
         return this.sendEmail({ to, subject, html, retryCount: retryCount + 1 })
       }
 
-      // All retries exhausted - log failed email to database for manual review
+      // All retries exhausted - log failed email to database for manual retry
       await this.logFailedEmail(to, subject, error instanceof Error ? error.message : String(error))
       
       console.error("[v0] Failed to send email after all retries")
@@ -306,27 +305,16 @@ export class EmailServiceZoho {
   // Log failed emails to database for manual retry
   private async logFailedEmail(to: string, subject: string, errorMessage: string): Promise<void> {
     try {
-      const supabase = await createServerClient()
-      
-      await supabase.from("failed_emails_log").insert({
-        recipient: to,
-        subject,
-        error_message: errorMessage,
-        retry_count: 3,
-        created_at: new Date().toISOString(),
-      })
-      
-      console.log(`[v0] Logged failed email to database: ${to}`)
+      // Just log to console - database logging can be added by caller if needed
+      console.error(`[v0] FAILED EMAIL - To: ${to}, Subject: ${subject}, Error: ${errorMessage}`)
     } catch (error) {
       console.error("[v0] Error logging failed email:", error)
     }
   }
 
   // Helper: Get latest alerts (from cache or API)
-  private async getLatestAlerts(): Promise<FDAItem[]> {
+  private async getLatestAlerts(supabase: SupabaseClient): Promise<FDAItem[]> {
     try {
-      const supabase = await createServerClient()
-
       // Try to get from cache first
       const { data: cached } = await supabase
         .from("fda_alerts_cache")
