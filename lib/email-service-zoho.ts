@@ -54,6 +54,15 @@ export class EmailServiceZoho {
         user: config.user,
         pass: config.password,
       },
+      tls: {
+        // Required for Zoho SMTP
+        ciphers: 'SSLv3',
+        rejectUnauthorized: false,
+      },
+      requireTLS: true, // Force TLS
+      connectionTimeout: 10000, // 10 seconds timeout
+      greetingTimeout: 10000,
+      socketTimeout: 10000,
     })
   }
 
