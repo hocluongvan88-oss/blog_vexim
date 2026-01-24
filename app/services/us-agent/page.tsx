@@ -11,7 +11,7 @@ import type { Metadata } from "next"
 export const metadata: Metadata = {
   title: "Dịch vụ US Agent - Đại diện pháp lý tại Mỹ",
   description:
-    "Làm đại diện pháp lý (US Agent) cho doanh nghiệp Việt Nam xuất khẩu thực phẩm, mỹ phẩm, thiết bị y tế sang Hoa Kỳ. Bắt buộc theo FDA, đảm bảo 24/7.",
+    "Làm đại diện pháp lý - US Agent cho doanh nghiệp Việt Nam xuất khẩu thực phẩm, mỹ phẩm, thiết bị y tế sang Hoa Kỳ. Bắt buộc theo FDA, đảm bảo 24/7.",
   keywords: [
     "US Agent",
     "FDA Agent",
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Dịch vụ US Agent - Đại diện pháp lý tại Mỹ - Vexim Global",
     description:
-      "Làm đại diện pháp lý (US Agent) cho doanh nghiệp Việt Nam xuất khẩu thực phẩm, mỹ phẩm, thiết bị y tế sang Hoa Kỳ. Bắt buộc theo FDA, đảm bảo 24/7.",
+      "Làm đại diện pháp lý US Agent cho doanh nghiệp Việt Nam xuất khẩu thực phẩm, mỹ phẩm, thiết bị y tế sang Hoa Kỳ. Bắt buộc theo FDA, đảm bảo 24/7.",
     url: "/services/us-agent",
     type: "website",
   },
