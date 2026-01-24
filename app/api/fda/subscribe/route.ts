@@ -128,8 +128,28 @@ export async function POST(request: Request) {
     console.log("[v0] Inserted record:", insertData)
 
     // Send verification email using EmailServiceZoho
-    console.log("[v0] Sending FDA verification email to:", email)
-    await emailService.sendVerificationEmail(email, verificationToken)
+    console.log("[v0] === SENDING FDA VERIFICATION EMAIL ===")
+    console.log("[v0] Recipient:", email)
+    console.log("[v0] Token:", verificationToken.substring(0, 10) + "...")
+    console.log("[v0] Checking env vars:")
+    console.log("[v0] - MAIL_USERNAME:", process.env.MAIL_USERNAME ? "✓ Set" : "✗ Missing")
+    console.log("[v0] - MAIL_PASSWORD:", process.env.MAIL_PASSWORD ? "✓ Set" : "✗ Missing")
+    console.log("[v0] - MAIL_HOST:", process.env.MAIL_HOST || "smtp.zoho.com (default)")
+    console.log("[v0] - MAIL_PORT:", process.env.MAIL_PORT || "587 (default)")
+    
+    try {
+      const emailSent = await emailService.sendVerificationEmail(email, verificationToken)
+      if (emailSent) {
+        console.log("[v0] ✓ Verification email sent successfully")
+      } else {
+        console.error("[v0] ✗ Email service returned false")
+      }
+    } catch (emailError) {
+      console.error("[v0] === EMAIL SENDING FAILED ===")
+      console.error("[v0] Error:", emailError)
+      console.error("[v0] Error message:", emailError instanceof Error ? emailError.message : String(emailError))
+      // Don't fail the subscription - user can still verify later
+    }
 
 
     return NextResponse.json({
