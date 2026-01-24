@@ -169,7 +169,7 @@ export function FDATrackerDashboard() {
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs sm:text-sm text-slate-600">Miễn phí</p>
+                    <p className="text-xs sm:text-sm text-slate-600">Giới hạn</p>
                     <p className="text-xl sm:text-2xl font-bold text-blue-600">
                       {FREE_ITEMS_LIMIT}
                     </p>
@@ -222,7 +222,7 @@ export function FDATrackerDashboard() {
                           Còn {lockedItemsCount} cảnh báo
                         </h3>
                         <p className="text-xs sm:text-sm md:text-base text-slate-600 mb-4 sm:mb-6">
-                          Đăng ký email để nhận <strong>tất cả {totalCount} cảnh báo</strong> với tóm tắt tiếng Việt và
+                          Đăng ký email để nhận <strong>{totalCount} cảnh báo</strong> theo ngành hàng của bạn, tóm tắt bằng tiếng Việt và
                           thông báo tự động.
                         </p>
                         <Button
