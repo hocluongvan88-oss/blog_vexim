@@ -19,8 +19,10 @@ export function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
+    setIsMounted(true)
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20)
     }
@@ -74,32 +76,34 @@ export function Header() {
               </Link>
 
               {/* Profile Dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-gray-100 transition-colors">
-                    <Avatar className="w-8 h-8">
-                      <AvatarFallback className="bg-emerald-600 text-white text-xs font-semibold">
-                        AD
-                      </AvatarFallback>
-                    </Avatar>
-                    <ChevronDown className="w-4 h-4 text-muted-foreground" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem asChild>
-                    <Link href="/admin/login" className="cursor-pointer">
-                      <User className="w-4 h-4 mr-2" />
-                      <span>Quản trị viên</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/admin/login" className="cursor-pointer text-sm">
-                      <span>Đăng nhập Admin</span>
-                    </Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              {isMounted && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-gray-100 transition-colors">
+                      <Avatar className="w-8 h-8">
+                        <AvatarFallback className="bg-emerald-600 text-white text-xs font-semibold">
+                          AD
+                        </AvatarFallback>
+                      </Avatar>
+                      <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem asChild>
+                      <Link href="/admin/login" className="cursor-pointer">
+                        <User className="w-4 h-4 mr-2" />
+                        <span>Quản trị viên</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/admin/login" className="cursor-pointer text-sm">
+                        <span>Đăng nhập Admin</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </nav>
 
             {/* CTA Button */}
