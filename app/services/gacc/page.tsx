@@ -9,9 +9,9 @@ import { ConsultationDialog } from "@/components/consultation-dialog"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Mã GACC (Trung Quốc)",
+  title: "Mã Xuất Khẩu GACC ",
   description:
-    "Dịch vụ đăng ký mã số GACC để xuất khẩu hàng hóa vào Trung Quốc. Kinh nghiệm phong phú, tỷ lệ thành công cao.",
+    "Dịch vụ đăng ký mã số GACC để xuất khẩu hàng hóa vào Trung Quốc. Kinh nghiệm thực chiến, tỷ lệ thành công cao.",
   keywords: ["GACC", "mã GACC", "đăng ký GACC", "xuất khẩu Trung Quốc", "GACC code", "GACC registration"],
   alternates: {
     canonical: "/services/gacc",
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Mã GACC (Trung Quốc) - Vexim Global",
     description:
-      "Dịch vụ đăng ký mã số GACC để xuất khẩu hàng hóa vào Trung Quốc. Kinh nghiệm phong phú, tỷ lệ thành công cao.",
+      "Dịch vụ đăng ký mã số GACC để xuất khẩu hàng hóa vào Trung Quốc. Kinh nghiệm thực chiến, tỷ lệ thành công cao.",
     url: "/services/gacc",
     type: "website",
   },
@@ -82,7 +82,7 @@ export default function GACCPage() {
               Mã GACC là gì và tại sao bắt buộc?
             </h2>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              GACC Code (Mã Tổng cục Hải quan Trung Quốc) là mã số định danh duy nhất cho cơ sở sản xuất, chế biến muốn
+              GACC code (Mã số Tổng cục Hải quan Trung Quốc) là mã số định danh duy nhất cho cơ sở sản xuất, chế biến muốn
               xuất khẩu vào Trung Quốc
             </p>
           </div>
