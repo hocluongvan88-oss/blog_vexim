@@ -16,6 +16,8 @@ import {
   Brain,
   ClipboardCheck,
   Timer,
+  Shield,
+  Users,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -116,6 +118,16 @@ export function AdminSidebar({ adminUser }: AdminSidebarProps) {
       title: "Hồ sơ đăng ký GACC",
       href: "/admin/gacc-submissions",
       icon: ClipboardCheck,
+    },
+    {
+      title: "Quản lý Khách hàng",
+      href: "/admin/clients",
+      icon: Users,
+    },
+    {
+      title: "Quản lý đăng ký FDA",
+      href: "/admin/fda-registrations",
+      icon: Shield,
     },
     {
       title: "Cron Job Monitor",

@@ -11,7 +11,7 @@ import type { Metadata } from "next"
 export const metadata: Metadata = {
   title: "Dịch vụ US Agent - Đại diện pháp lý tại Mỹ",
   description:
-    "Làm đại diện pháp lý - US Agent cho doanh nghiệp Việt Nam xuất khẩu thực phẩm, mỹ phẩm, thiết bị y tế sang Hoa Kỳ. Bắt buộc theo FDA, đảm bảo 24/7.",
+    "Làm đại diện pháp lý (US Agent) cho doanh nghiệp Việt Nam xuất khẩu thực phẩm, mỹ phẩm, thiết bị y tế sang Hoa Kỳ. Bắt buộc theo FDA, đảm bảo 24/7.",
   keywords: [
     "US Agent",
     "FDA Agent",
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Dịch vụ US Agent - Đại diện pháp lý tại Mỹ - Vexim Global",
     description:
-      "Làm đại diện pháp lý US Agent cho doanh nghiệp Việt Nam xuất khẩu thực phẩm, mỹ phẩm, thiết bị y tế sang Hoa Kỳ. Bắt buộc theo FDA, đảm bảo 24/7.",
+      "Làm đại diện pháp lý (US Agent) cho doanh nghiệp Việt Nam xuất khẩu thực phẩm, mỹ phẩm, thiết bị y tế sang Hoa Kỳ. Bắt buộc theo FDA, đảm bảo 24/7.",
     url: "/services/us-agent",
     type: "website",
   },
@@ -50,7 +50,7 @@ export default function USAgentPage() {
                   Dịch vụ US Agent - Cầu nối pháp lý tại Mỹ
                 </h1>
                 <p className="text-xl text-white/90 mb-8 text-pretty leading-relaxed">
-                  Làm đại diện pháp lý US Agent cho doanh nghiệp Việt Nam xuất khẩu thực phẩm, mỹ phẩm, thiết bị y tế
+                  Làm đại diện pháp lý (US Agent) cho doanh nghiệp Việt Nam xuất khẩu thực phẩm, mỹ phẩm, thiết bị y tế
                   sang Hoa Kỳ. Bắt buộc theo FDA, đảm bảo 24/7 liên lạc với FDA.
                 </p>
                 <div className="flex flex-wrap gap-4 justify-center">
@@ -119,7 +119,7 @@ export default function USAgentPage() {
                   <UserCheck className="w-12 h-12 text-accent mb-4" />
                   <h3 className="text-xl font-semibold mb-2">Đại diện chuyên nghiệp</h3>
                   <p className="text-muted-foreground">
-                    US Agent của Vexim tại Willmington, North Carolina. Địa chỉ văn phòng thật, điện thoại Mỹ, email doanh nghiệp.
+                    US Agent của Vexim tại Houston, Texas. Địa chỉ văn phòng thật, điện thoại Mỹ, email doanh nghiệp.
                     Sẵn sàng 24/7.
                   </p>
                 </CardContent>
@@ -175,7 +175,7 @@ export default function USAgentPage() {
                 {
                   title: "Văn phòng thật tại Houston, TX",
                   description:
-                    "Địa chỉ: 1207 Delaware Ave #000, Wilmington, North Carolina. Điện thoại: +1-812-2276268. Không phải PO Box hay virtual office. FDA audit OK.",
+                    "Địa chỉ: 1234 Main Street, Houston, TX 77002. Điện thoại: +1-713-XXX-XXXX. Không phải PO Box hay virtual office. FDA audit OK.",
                   icon: Shield,
                 },
               ].map((service, idx) => (
@@ -289,7 +289,7 @@ export default function USAgentPage() {
                   step: "03",
                   title: "Nhận thông tin US Agent chính thức",
                   description:
-                    "Vexim cung cấp: Tên US Agent, địa chỉ Agent, phone/email tại Mỹ, signed LOA. Bạn dùng thông tin này để điền FDA Form 3537a / 2891 / Cosmetic Registration.",
+                    "Vexim cung cấp: Tên US Agent, địa chỉ Houston TX, phone/email Mỹ, signed LOA. Bạn dùng thông tin này để điền FDA Form 3537a / 2891 / Cosmetic Registration.",
                 },
               ].map((process, idx) => (
                 <Card key={idx} className="border-l-4 border-l-primary hover:shadow-md transition-all">
@@ -354,7 +354,7 @@ export default function USAgentPage() {
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="text-3xl md:text-4xl font-bold mb-6">Bảo vệ doanh nghiệp với US Agent uy tín</h2>
               <p className="text-xl text-white/90 mb-8">
-                Vexim Global - 1207 Delaware Ave #000, Wilmington, North Carolina. Phản hồi FDA trong vòng 2 giờ. Đồng hành cùng 500+
+                Vexim Global - Văn phòng thật tại Houston, Texas. Phản hồi FDA trong vòng 2 giờ. Đồng hành cùng 500+
                 doanh nghiệp Việt Nam.
               </p>
               <div className="flex flex-wrap gap-4 justify-center">
@@ -372,7 +372,7 @@ export default function USAgentPage() {
                 </Button>
               </div>
               <p className="mt-6 text-white/80 text-sm">
-                Sẵn sàng 24/7 • 1207 Delaware Ave #000, Wilmington, North Carolina • Phản hồi FDA nhanh chóng
+                Sẵn sàng 24/7 • Văn phòng tại Houston TX • Phản hồi FDA nhanh chóng
               </p>
             </div>
           </div>
