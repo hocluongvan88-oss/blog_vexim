@@ -121,9 +121,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Hash password
+    console.log("[v0] Hashing password...")
     const password_hash = await hashPassword(password)
+    console.log("[v0] Password hashed, length:", password_hash.length)
 
     // Create client using admin client
+    console.log("[v0] Inserting client into database:", { email, company_name, contact_name })
     const { data: newClient, error } = await adminClient
       .from("clients")
       .insert({
@@ -142,6 +145,8 @@ export async function POST(request: NextRequest) {
       console.error("[v0] Error creating client:", error)
       return NextResponse.json({ error: "Failed to create client", details: error.message }, { status: 500 })
     }
+
+    console.log("[v0] Client created successfully:", newClient.id)
 
     // Remove password_hash from response
     const { password_hash: _, ...clientData } = newClient
