@@ -276,19 +276,31 @@ export default function FdaRegistrationDetailPage({ params }: { params: { id: st
             <div>
               <p className="text-sm text-yellow-700">FDA User ID</p>
               <p className="font-mono font-medium">
-                {showCredentials ? registration.fda_user_id : "••••••••"}
+                {showCredentials
+                  ? registration.fda_user_id || "(Chưa có)"
+                  : registration.fda_user_id
+                    ? "••••••••"
+                    : "(Chưa có)"}
               </p>
             </div>
             <div>
               <p className="text-sm text-yellow-700">FDA Password</p>
               <p className="font-mono font-medium">
-                {showCredentials ? registration.fda_password : "••••••••"}
+                {showCredentials
+                  ? registration.fda_password || "(Chưa có)"
+                  : registration.fda_password
+                    ? "••••••••"
+                    : "(Chưa có)"}
               </p>
             </div>
             <div>
               <p className="text-sm text-yellow-700">FDA PIN</p>
               <p className="font-mono font-medium">
-                {showCredentials ? registration.fda_pin : "••••••••"}
+                {showCredentials
+                  ? registration.fda_pin || "(Chưa có)"
+                  : registration.fda_pin
+                    ? "••••••••"
+                    : "(Chưa có)"}
               </p>
             </div>
           </div>
