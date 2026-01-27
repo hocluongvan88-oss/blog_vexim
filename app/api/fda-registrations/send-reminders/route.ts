@@ -277,7 +277,7 @@ async function sendAgentRenewalReminder(registration: any) {
             <li><strong>Website:</strong> <a href="https://www.veximglobal.com">www.veximglobal.com</a></li>
           </ul>
           
-          <p>Chúng tôi cung cấp dịch vụ US Agent uy tín với mức giá cạnh tranh.</p>
+          <p>Chúng tôi cung cấp dịch v��� US Agent uy tín với mức giá cạnh tranh.</p>
           
           <a href="https://www.veximglobal.com/services/us-agent" class="btn">Gia hạn US Agent ngay →</a>
         </div>

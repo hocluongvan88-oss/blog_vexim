@@ -215,8 +215,25 @@ export async function POST(request: Request) {
       .single()
 
     if (insertError) {
-      console.error("[v0] Error creating FDA registration:", insertError)
-      return NextResponse.json({ error: "Failed to create registration" }, { status: 500 })
+      console.error("[v0] Error creating FDA registration:", {
+        code: insertError.code,
+        message: insertError.message,
+        details: insertError.details,
+        hint: insertError.hint,
+      })
+      
+      // Return more specific error messages
+      if (insertError.code === "23505") {
+        return NextResponse.json(
+          { error: "Đăng ký FDA đã tồn tại với thông tin tương tự" },
+          { status: 409 }
+        )
+      }
+      
+      return NextResponse.json(
+        { error: "Failed to create registration", details: insertError.message },
+        { status: 500 }
+      )
     }
 
     // Mã hóa thông tin đăng nhập bằng RPC
