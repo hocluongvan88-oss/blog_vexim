@@ -39,7 +39,7 @@ export default function NewFdaRegistrationPage() {
   const [formData, setFormData] = useState({
     client_id: "",
     company_name: "",
-    registration_type: "food_facility",
+    registration_type: "Food Facility",
     registration_number: "",
     expiration_date: "",
     contact_name: "",
@@ -233,10 +233,13 @@ export default function NewFdaRegistrationPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="food_facility">Food Facility Registration</SelectItem>
-                  <SelectItem value="drug_establishment">Drug Establishment Registration</SelectItem>
-                  <SelectItem value="device_establishment">Device Establishment Registration</SelectItem>
-                  <SelectItem value="cosmetic_facility">Cosmetic Facility Registration</SelectItem>
+                  <SelectItem value="Food Facility">Food Facility</SelectItem>
+                  <SelectItem value="Drug Establishment">Drug Establishment</SelectItem>
+                  <SelectItem value="Medical Device">Medical Device</SelectItem>
+                  <SelectItem value="Cosmetic">Cosmetic</SelectItem>
+                  <SelectItem value="Dietary Supplement">Dietary Supplement</SelectItem>
+                  <SelectItem value="Infant Formula">Infant Formula</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
                 </SelectContent>
               </Select>
             </div>
