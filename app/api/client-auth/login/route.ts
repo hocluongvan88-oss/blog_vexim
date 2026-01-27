@@ -21,6 +21,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    console.log("[v0] Looking up client by email:", email)
+    
     // Get client by email
     const { data: client, error: clientError } = await supabase
       .from("clients")
@@ -28,7 +30,10 @@ export async function POST(request: NextRequest) {
       .eq("email", email)
       .single()
 
+    console.log("[v0] Client lookup result:", { found: !!client, error: clientError?.message })
+
     if (clientError || !client) {
+      console.error("[v0] Client not found or error:", clientError)
       return NextResponse.json(
         { error: "Invalid credentials" },
         { status: 401 }
@@ -44,7 +49,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify password
+    console.log("[v0] Verifying password, hash format:", client.password_hash?.substring(0, 10))
     const passwordMatch = await verifyPassword(password, client.password_hash)
+    console.log("[v0] Password match:", passwordMatch)
+    
     if (!passwordMatch) {
       return NextResponse.json(
         { error: "Invalid credentials" },
