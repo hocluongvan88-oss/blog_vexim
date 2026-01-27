@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server"
-import { createStaticClient } from "@/lib/supabase/server"
+import { createServerClient } from "@/lib/supabase-server"
 
 // GET - Get single FDA registration with decrypted credentials
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   try {
-    const supabase = createStaticClient()
+    const supabase = await createServerClient()
 
     // Check admin authentication
     const {
@@ -97,7 +97,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
 // PUT - Update FDA registration
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   try {
-    const supabase = createStaticClient()
+    const supabase = await createServerClient()
 
     // Check admin authentication
     const {
@@ -169,7 +169,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 // DELETE - Delete FDA registration
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   try {
-    const supabase = createStaticClient()
+    const supabase = await createServerClient()
 
     // Check admin authentication
     const {
