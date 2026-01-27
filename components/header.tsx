@@ -74,14 +74,25 @@ export function Header() {
               <Link href="/#contact" className="text-foreground hover:text-primary transition-colors font-medium">
                 Liên hệ
               </Link>
+            </nav>
+
+            {/* Right side actions */}
+            <div className="hidden md:flex items-center gap-3">
+              {/* CTA Button */}
+              <Button
+                onClick={() => setIsDialogOpen(true)}
+                className="bg-accent text-accent-foreground hover:bg-accent/90"
+              >
+                Yêu cầu tư vấn
+              </Button>
 
               {/* Profile Dropdown */}
               {isMounted && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-gray-100 transition-colors">
-                      <Avatar className="w-8 h-8">
-                        <AvatarFallback className="bg-emerald-600 text-white text-xs font-semibold">
+                      <Avatar className="w-9 h-9">
+                        <AvatarFallback className="bg-emerald-600 text-white text-sm font-semibold">
                           AD
                         </AvatarFallback>
                       </Avatar>
@@ -104,16 +115,6 @@ export function Header() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}
-            </nav>
-
-            {/* CTA Button */}
-            <div className="hidden md:block">
-              <Button
-                onClick={() => setIsDialogOpen(true)}
-                className="bg-accent text-accent-foreground hover:bg-accent/90"
-              >
-                Yêu cầu tư vấn
-              </Button>
             </div>
 
             {/* Mobile Menu Button */}
