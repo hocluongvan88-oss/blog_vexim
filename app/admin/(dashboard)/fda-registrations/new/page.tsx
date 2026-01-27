@@ -132,8 +132,15 @@ export default function NewFdaRegistrationPage() {
       return
     }
 
+    if (!formData.address) {
+      toast.error("Vui lòng nhập địa chỉ cơ sở")
+      return
+    }
+
     try {
       setLoading(true)
+      console.log("[v0] Submitting FDA registration:", { ...formData, fda_password: "***", fda_pin: "***" })
+      
       const response = await fetch("/api/fda-registrations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -141,11 +148,13 @@ export default function NewFdaRegistrationPage() {
       })
 
       const result = await response.json()
+      console.log("[v0] API response:", result)
 
       if (response.ok) {
         toast.success("Đã tạo đăng ký FDA thành công")
         router.push("/admin/fda-registrations")
       } else {
+        console.error("[v0] API error:", result)
         toast.error(result.error || "Không thể tạo đăng ký")
       }
     } catch (error) {
@@ -256,13 +265,16 @@ export default function NewFdaRegistrationPage() {
               </p>
             </div>
             <div className="md:col-span-2">
-              <Label htmlFor="address">Địa chỉ cơ sở</Label>
+              <Label htmlFor="address">
+                Địa chỉ cơ sở <span className="text-red-500">*</span>
+              </Label>
               <Textarea
                 id="address"
                 placeholder="Địa chỉ đầy đủ của cơ sở sản xuất/phân phối"
                 value={formData.address}
                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                 rows={2}
+                required
               />
             </div>
           </div>

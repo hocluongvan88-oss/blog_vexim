@@ -159,10 +159,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Server configuration error" }, { status: 500 })
     }
 
+    // Ensure we have company_address - support both field names
+    const finalAddress = company_address || address
+    if (!finalAddress) {
+      console.error("[v0] Missing company address")
+      return NextResponse.json({ error: "Missing required field: company_address or address" }, { status: 400 })
+    }
+
     const insertData: any = {
       company_name,
       company_name_english,
-      company_address: company_address || address || "", // Support both field names
+      company_address: finalAddress,
       company_city,
       company_state,
       company_country: company_country || "Vietnam",
@@ -199,7 +206,7 @@ export async function POST(request: Request) {
       created_by: user.id,
     }
     
-    console.log("[v0] Inserting FDA registration:", { ...insertData, created_by: user.id })
+    console.log("[v0] Inserting FDA registration:", { ...insertData, fda_user_id_encrypted: undefined, fda_password_encrypted: undefined, fda_pin_encrypted: undefined })
 
     const { data: registration, error: insertError } = await supabase
       .from("fda_registrations")

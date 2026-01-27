@@ -67,11 +67,16 @@ export default function FdaRegistrationsPage() {
       if (statusFilter !== "all") params.append("status", statusFilter)
       if (searchQuery) params.append("search", searchQuery)
 
+      console.log("[v0] Loading FDA registrations with params:", params.toString())
       const response = await fetch(`/api/fda-registrations?${params}`)
       const result = await response.json()
+      console.log("[v0] FDA registrations loaded:", result)
 
       if (result.data) {
         setRegistrations(result.data)
+        console.log("[v0] Set registrations count:", result.data.length)
+      } else {
+        console.warn("[v0] No data in response:", result)
       }
     } catch (error) {
       console.error("[v0] Error loading FDA registrations:", error)
