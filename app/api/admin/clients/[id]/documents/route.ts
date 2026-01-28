@@ -116,9 +116,10 @@ export async function POST(
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
-    // Upload to Vercel Blob
+    // Upload to Vercel Blob with random suffix to avoid conflicts
     const blob = await put(`client-documents/${clientId}/${file.name}`, file, {
       access: "public",
+      addRandomSuffix: true,
     })
 
     // Use admin client to bypass RLS for insert
