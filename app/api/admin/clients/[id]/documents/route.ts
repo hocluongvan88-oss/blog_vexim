@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { createServerClient } from "@/lib/supabase-server"
+import { createAdminClient } from "@/lib/supabase-admin"
 import { put } from "@vercel/blob"
 
 // GET - Fetch client documents (admin view)
@@ -33,9 +34,11 @@ export async function GET(
       return NextResponse.json({ error: "Forbidden - Admin only" }, { status: 403 })
     }
 
-    // Fetch all documents for this client
-    // First try with the join
-    let { data: documents, error } = await supabase
+    // Use admin client to bypass RLS
+    const adminClient = createAdminClient()
+    
+    // Fetch all documents for this client with join
+    const { data: documents, error } = await adminClient
       .from("client_documents")
       .select(`
         *,
@@ -47,19 +50,6 @@ export async function GET(
       `)
       .eq("client_id", id)
       .order("created_at", { ascending: false })
-
-    // If join fails due to RLS, try without join
-    if (error) {
-      console.log("[v0] Join query failed, trying without join:", error.message)
-      const simpleQuery = await supabase
-        .from("client_documents")
-        .select("*")
-        .eq("client_id", id)
-        .order("created_at", { ascending: false })
-      
-      documents = simpleQuery.data
-      error = simpleQuery.error
-    }
 
     if (error) {
       console.error("[v0] Error fetching documents:", error)
@@ -99,24 +89,20 @@ export async function POST(
       error: authError,
     } = await supabase.auth.getUser()
 
-    console.log("[v0] POST documents - User:", user?.email)
-
     if (authError || !user) {
-      console.log("[v0] POST documents - Auth error or no user")
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     // Verify admin by email
-    const { data: adminUser, error: adminError } = await supabase.from("admin_users").select("id").eq("email", user.email).maybeSingle()
-
-    console.log("[v0] POST documents - Admin check:", { email: user.email, found: !!adminUser, error: adminError })
+    const { data: adminUser } = await supabase
+      .from("admin_users")
+      .select("id")
+      .eq("email", user.email)
+      .maybeSingle()
 
     if (!adminUser) {
-      console.log("[v0] POST documents - Not an admin user")
       return NextResponse.json({ error: "Forbidden - Admin only" }, { status: 403 })
     }
-
-    console.log("[v0] POST documents - Admin verified, proceeding with upload")
 
     const formData = await request.formData()
     const file = formData.get("file") as File
@@ -135,8 +121,11 @@ export async function POST(
       access: "public",
     })
 
+    // Use admin client to bypass RLS for insert
+    const adminClient = createAdminClient()
+    
     // Save to database
-    const { data: document, error } = await supabase
+    const { data: document, error } = await adminClient
       .from("client_documents")
       .insert({
         client_id: clientId,
@@ -202,8 +191,11 @@ export async function DELETE(
       return NextResponse.json({ error: "Forbidden - Admin only" }, { status: 403 })
     }
 
+    // Use admin client to bypass RLS for delete
+    const adminClient = createAdminClient()
+    
     // Delete document
-    const { error } = await supabase
+    const { error } = await adminClient
       .from("client_documents")
       .delete()
       .eq("id", documentId)
