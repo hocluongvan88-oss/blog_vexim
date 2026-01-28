@@ -34,7 +34,8 @@ export async function GET(
     }
 
     // Fetch all documents for this client
-    const { data: documents, error } = await supabase
+    // First try with the join
+    let { data: documents, error } = await supabase
       .from("client_documents")
       .select(`
         *,
@@ -47,8 +48,32 @@ export async function GET(
       .eq("client_id", id)
       .order("created_at", { ascending: false })
 
+    // If join fails due to RLS, try without join
+    if (error) {
+      console.log("[v0] Join query failed, trying without join:", error.message)
+      const simpleQuery = await supabase
+        .from("client_documents")
+        .select("*")
+        .eq("client_id", id)
+        .order("created_at", { ascending: false })
+      
+      documents = simpleQuery.data
+      error = simpleQuery.error
+    }
+
     if (error) {
       console.error("[v0] Error fetching documents:", error)
+      console.error("[v0] Error details:", JSON.stringify(error))
+      
+      // If table doesn't exist, return empty array
+      if (error.message?.includes("relation") || error.message?.includes("does not exist")) {
+        console.error("[v0] client_documents table does not exist. Please run migration script: scripts/020_create_client_documents.sql")
+        return NextResponse.json({ 
+          documents: [], 
+          warning: "Documents table not initialized. Please contact administrator." 
+        })
+      }
+      
       return NextResponse.json({ error: "Failed to fetch documents" }, { status: 500 })
     }
 
@@ -74,27 +99,24 @@ export async function POST(
       error: authError,
     } = await supabase.auth.getUser()
 
+    console.log("[v0] POST documents - User:", user?.email)
+
     if (authError || !user) {
+      console.log("[v0] POST documents - Auth error or no user")
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     // Verify admin by email
-    const { data: adminUserByEmail } = await supabase.from("admin_users").select("id").eq("email", user.email).maybeSingle()
+    const { data: adminUser, error: adminError } = await supabase.from("admin_users").select("id").eq("email", user.email).maybeSingle()
 
-    if (!adminUserByEmail) {
+    console.log("[v0] POST documents - Admin check:", { email: user.email, found: !!adminUser, error: adminError })
+
+    if (!adminUser) {
+      console.log("[v0] POST documents - Not an admin user")
       return NextResponse.json({ error: "Forbidden - Admin only" }, { status: 403 })
     }
 
-    // Verify admin
-    const { data: adminUserById } = await supabase
-      .from("admin_users")
-      .select("id")
-      .eq("id", user.id)
-      .single()
-
-    if (!adminUserById) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-    }
+    console.log("[v0] POST documents - Admin verified, proceeding with upload")
 
     const formData = await request.formData()
     const file = formData.get("file") as File
