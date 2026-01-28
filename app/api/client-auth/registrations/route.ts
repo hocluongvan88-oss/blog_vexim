@@ -43,6 +43,13 @@ export async function GET(request: NextRequest) {
 
     console.log("[v0] Fetching registrations for client:", session.client_id)
 
+    // First, let's see all registrations to debug
+    const { data: allRegs } = await supabase
+      .from("fda_registrations")
+      .select("id, company_name, client_id")
+    
+    console.log("[v0] All FDA registrations in database:", allRegs)
+
     // Get FDA registrations for this client
     const { data: registrations, error: regError } = await supabase
       .from("fda_registrations")
@@ -58,7 +65,8 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    console.log("[v0] Found registrations:", registrations?.length || 0)
+    console.log("[v0] Found registrations for this client:", registrations?.length || 0)
+    console.log("[v0] Registration client_ids:", registrations?.map(r => ({ id: r.id, client_id: r.client_id })))
 
     return NextResponse.json({
       registrations: registrations || [],
