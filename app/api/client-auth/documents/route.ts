@@ -14,13 +14,29 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Decode token to get client_id
-    const payload = JSON.parse(Buffer.from(token.split(".")[1], "base64").toString())
-    const clientId = payload.clientId
-    console.log("[v0] Client ID from token:", clientId)
-
     // Use admin client to bypass RLS
     const adminClient = createAdminClient()
+
+    // Look up session in database
+    const { data: session, error: sessionError } = await adminClient
+      .from("client_sessions")
+      .select("client_id, expires_at")
+      .eq("token", token)
+      .single()
+
+    if (sessionError || !session) {
+      console.error("[v0] Session not found:", sessionError)
+      return NextResponse.json({ error: "Invalid session" }, { status: 401 })
+    }
+
+    // Check if session is expired
+    if (new Date(session.expires_at) < new Date()) {
+      console.error("[v0] Session expired")
+      return NextResponse.json({ error: "Session expired" }, { status: 401 })
+    }
+
+    const clientId = session.client_id
+    console.log("[v0] Client ID from session:", clientId)
 
     // Fetch documents visible to client
     console.log("[v0] Querying documents for client:", clientId)

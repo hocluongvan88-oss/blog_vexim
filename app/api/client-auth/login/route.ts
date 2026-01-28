@@ -48,12 +48,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Verify password
-    console.log("[v0] Verifying password, hash format:", client.password_hash?.substring(0, 10))
+    // Verify password using scrypt
+    console.log("[v0] Verifying password, hash length:", client.password_hash?.length)
     const passwordMatch = await verifyPassword(password, client.password_hash)
-    console.log("[v0] Password match:", passwordMatch)
+    console.log("[v0] Password match result:", passwordMatch)
     
     if (!passwordMatch) {
+      console.error("[v0] Password verification failed for email:", email)
       return NextResponse.json(
         { error: "Invalid credentials" },
         { status: 401 }

@@ -34,20 +34,19 @@ interface FdaRegistration {
   contact_name: string
   contact_email: string
   contact_phone?: string
-  address?: string
+  company_address?: string
   fda_user_id?: string
   fda_password?: string
   fda_pin?: string
   uses_us_agent: boolean
-  us_agent_id?: string
-  us_agent_name?: string
-  us_agent_company?: string
-  us_agent_phone?: string
-  us_agent_email?: string
-  us_agent_address?: string
+  agent_company_name?: string
+  agent_name?: string
+  agent_phone?: string
+  agent_email?: string
+  agent_address?: string
   agent_contract_start_date?: string
   agent_contract_end_date?: string
-  agent_contract_years?: string
+  agent_contract_years?: number
   notes?: string
   has_credentials: boolean
   created_at: string
@@ -67,7 +66,8 @@ export default function FdaRegistrationDetailPage({ params }: { params: { id: st
   const loadRegistration = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/fda-registrations/${params.id}`)
+      // Request credentials to be decrypted and included
+      const response = await fetch(`/api/fda-registrations/${params.id}?credentials=true`)
       const result = await response.json()
 
       if (result.data) {
@@ -197,13 +197,13 @@ export default function FdaRegistrationDetailPage({ params }: { params: { id: st
               {new Date(registration.expiration_date).toLocaleDateString("vi-VN")}
             </p>
           </div>
-          {registration.address && (
+          {registration.company_address && (
             <div className="md:col-span-2">
               <p className="text-sm text-muted-foreground flex items-center gap-1">
                 <MapPin className="w-4 h-4" />
                 Địa chỉ
               </p>
-              <p className="font-medium">{registration.address}</p>
+              <p className="font-medium">{registration.company_address}</p>
             </div>
           )}
         </div>
@@ -315,40 +315,34 @@ export default function FdaRegistrationDetailPage({ params }: { params: { id: st
             Thông tin US Agent
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {registration.us_agent_id && (
+            {registration.agent_company_name && (
               <div>
-                <p className="text-sm text-muted-foreground">U.S. Agent ID</p>
-                <p className="font-medium">{registration.us_agent_id}</p>
+                <p className="text-sm text-muted-foreground">Công ty US Agent</p>
+                <p className="font-medium">{registration.agent_company_name}</p>
               </div>
             )}
-            {registration.us_agent_company && (
-              <div>
-                <p className="text-sm text-muted-foreground">Công ty</p>
-                <p className="font-medium">{registration.us_agent_company}</p>
-              </div>
-            )}
-            {registration.us_agent_name && (
+            {registration.agent_name && (
               <div>
                 <p className="text-sm text-muted-foreground">Tên US Agent</p>
-                <p className="font-medium">{registration.us_agent_name}</p>
+                <p className="font-medium">{registration.agent_name}</p>
               </div>
             )}
-            {registration.us_agent_email && (
+            {registration.agent_email && (
               <div>
                 <p className="text-sm text-muted-foreground">Email</p>
-                <p className="font-medium">{registration.us_agent_email}</p>
+                <p className="font-medium">{registration.agent_email}</p>
               </div>
             )}
-            {registration.us_agent_phone && (
+            {registration.agent_phone && (
               <div>
                 <p className="text-sm text-muted-foreground">Số điện thoại</p>
-                <p className="font-medium">{registration.us_agent_phone}</p>
+                <p className="font-medium">{registration.agent_phone}</p>
               </div>
             )}
-            {registration.us_agent_address && (
+            {registration.agent_address && (
               <div className="md:col-span-2">
                 <p className="text-sm text-muted-foreground">Địa chỉ</p>
-                <p className="font-medium">{registration.us_agent_address}</p>
+                <p className="font-medium">{registration.agent_address}</p>
               </div>
             )}
             {registration.agent_contract_start_date && (

@@ -45,20 +45,19 @@ export default function NewFdaRegistrationPage() {
     contact_name: "",
     contact_email: "",
     contact_phone: "",
-    address: "",
+    company_address: "",
     fda_user_id: "",
     fda_password: "",
     fda_pin: "",
     uses_us_agent: false,
-    us_agent_id: "",
-    us_agent_name: "",
-    us_agent_company: "",
-    us_agent_phone: "",
-    us_agent_email: "",
-    us_agent_address: "",
+    agent_company_name: "",
+    agent_name: "",
+    agent_phone: "",
+    agent_email: "",
+    agent_address: "",
     agent_contract_start_date: "",
     agent_contract_end_date: "",
-    agent_contract_years: "1",
+    agent_contract_years: 1,
     notes: "",
   })
 
@@ -132,7 +131,7 @@ export default function NewFdaRegistrationPage() {
       return
     }
 
-    if (!formData.address) {
+    if (!formData.company_address) {
       toast.error("Vui lòng nhập địa chỉ cơ sở")
       return
     }
@@ -268,14 +267,14 @@ export default function NewFdaRegistrationPage() {
               </p>
             </div>
             <div className="md:col-span-2">
-              <Label htmlFor="address">
+              <Label htmlFor="company_address">
                 Địa chỉ cơ sở <span className="text-red-500">*</span>
               </Label>
               <Textarea
-                id="address"
+                id="company_address"
                 placeholder="Địa chỉ đầy đủ của cơ sở sản xuất/phân phối"
-                value={formData.address}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                value={formData.company_address}
+                onChange={(e) => setFormData({ ...formData, company_address: e.target.value })}
                 rows={2}
                 required
               />
@@ -399,58 +398,49 @@ export default function NewFdaRegistrationPage() {
           {formData.uses_us_agent && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="us_agent_id">U.S. Agent ID</Label>
+                <Label htmlFor="agent_company_name">Công ty US Agent</Label>
                 <Input
-                  id="us_agent_id"
-                  value={formData.us_agent_id}
-                  onChange={(e) => setFormData({ ...formData, us_agent_id: e.target.value })}
-                  placeholder="USID4471964"
-                />
-              </div>
-              <div>
-                <Label htmlFor="us_agent_company">Công ty US Agent</Label>
-                <Input
-                  id="us_agent_company"
-                  value={formData.us_agent_company}
-                  onChange={(e) => setFormData({ ...formData, us_agent_company: e.target.value })}
+                  id="agent_company_name"
+                  value={formData.agent_company_name}
+                  onChange={(e) => setFormData({ ...formData, agent_company_name: e.target.value })}
                   placeholder="Vexim Global"
                 />
               </div>
               <div>
-                <Label htmlFor="us_agent_name">Tên US Agent</Label>
+                <Label htmlFor="agent_name">Tên US Agent</Label>
                 <Input
-                  id="us_agent_name"
-                  value={formData.us_agent_name}
-                  onChange={(e) => setFormData({ ...formData, us_agent_name: e.target.value })}
+                  id="agent_name"
+                  value={formData.agent_name}
+                  onChange={(e) => setFormData({ ...formData, agent_name: e.target.value })}
                   placeholder="Richard Luong"
                 />
               </div>
               <div>
-                <Label htmlFor="us_agent_phone">Số điện thoại</Label>
+                <Label htmlFor="agent_phone">Số điện thoại</Label>
                 <Input
-                  id="us_agent_phone"
+                  id="agent_phone"
                   type="tel"
-                  value={formData.us_agent_phone}
-                  onChange={(e) => setFormData({ ...formData, us_agent_phone: e.target.value })}
+                  value={formData.agent_phone}
+                  onChange={(e) => setFormData({ ...formData, agent_phone: e.target.value })}
                   placeholder="+18122276268"
                 />
               </div>
               <div>
-                <Label htmlFor="us_agent_email">Email liên hệ</Label>
+                <Label htmlFor="agent_email">Email liên hệ</Label>
                 <Input
-                  id="us_agent_email"
+                  id="agent_email"
                   type="email"
-                  value={formData.us_agent_email}
-                  onChange={(e) => setFormData({ ...formData, us_agent_email: e.target.value })}
+                  value={formData.agent_email}
+                  onChange={(e) => setFormData({ ...formData, agent_email: e.target.value })}
                   placeholder="richardluong2788@gmail.com"
                 />
               </div>
               <div className="md:col-span-2">
-                <Label htmlFor="us_agent_address">Địa chỉ US Agent</Label>
+                <Label htmlFor="agent_address">Địa chỉ US Agent</Label>
                 <Textarea
-                  id="us_agent_address"
-                  value={formData.us_agent_address}
-                  onChange={(e) => setFormData({ ...formData, us_agent_address: e.target.value })}
+                  id="agent_address"
+                  value={formData.agent_address}
+                  onChange={(e) => setFormData({ ...formData, agent_address: e.target.value })}
                   rows={2}
                   placeholder="1207 Delaware Ave #000, Wilmington"
                 />

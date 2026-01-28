@@ -29,17 +29,16 @@ interface FormData {
   contact_name: string
   contact_email: string
   contact_phone: string
-  address: string
+  company_address: string
   fda_user_id: string
   fda_password: string
   fda_pin: string
   uses_us_agent: boolean
-  us_agent_id: string
-  us_agent_name: string
-  us_agent_company: string
-  us_agent_phone: string
-  us_agent_email: string
-  us_agent_address: string
+  agent_company_name: string
+  agent_name: string
+  agent_phone: string
+  agent_email: string
+  agent_address: string
   agent_contract_start_date: string
   agent_contract_end_date: string
   agent_contract_years: string
@@ -61,17 +60,16 @@ export default function EditFdaRegistrationPage({ params }: { params: { id: stri
     contact_name: "",
     contact_email: "",
     contact_phone: "",
-    address: "",
+    company_address: "",
     fda_user_id: "",
     fda_password: "",
     fda_pin: "",
     uses_us_agent: false,
-    us_agent_id: "",
-    us_agent_name: "",
-    us_agent_company: "",
-    us_agent_phone: "",
-    us_agent_email: "",
-    us_agent_address: "",
+    agent_company_name: "",
+    agent_name: "",
+    agent_phone: "",
+    agent_email: "",
+    agent_address: "",
     agent_contract_start_date: "",
     agent_contract_end_date: "",
     agent_contract_years: "1",
@@ -115,20 +113,19 @@ export default function EditFdaRegistrationPage({ params }: { params: { id: stri
           contact_name: reg.contact_name || "",
           contact_email: reg.contact_email || "",
           contact_phone: reg.contact_phone || "",
-          address: reg.address || "",
+          company_address: reg.company_address || "",
           fda_user_id: reg.fda_user_id || "",
           fda_password: reg.fda_password || "",
           fda_pin: reg.fda_pin || "",
           uses_us_agent: reg.uses_us_agent || false,
-          us_agent_id: reg.us_agent_id || "",
-          us_agent_name: reg.us_agent_name || "",
-          us_agent_company: reg.us_agent_company || "",
-          us_agent_phone: reg.us_agent_phone || "",
-          us_agent_email: reg.us_agent_email || "",
-          us_agent_address: reg.us_agent_address || "",
+          agent_company_name: reg.agent_company_name || "",
+          agent_name: reg.agent_name || "",
+          agent_phone: reg.agent_phone || "",
+          agent_email: reg.agent_email || "",
+          agent_address: reg.agent_address || "",
           agent_contract_start_date: reg.agent_contract_start_date || "",
           agent_contract_end_date: reg.agent_contract_end_date || "",
-          agent_contract_years: reg.agent_contract_years || "1",
+          agent_contract_years: String(reg.agent_contract_years || 1),
           notes: reg.notes || "",
           status: reg.status || "active",
         })
@@ -268,12 +265,12 @@ export default function EditFdaRegistrationPage({ params }: { params: { id: stri
               </Select>
             </div>
             <div className="md:col-span-2">
-              <Label htmlFor="address">Địa chỉ cơ sở</Label>
+              <Label htmlFor="company_address">Địa chỉ cơ sở</Label>
               <Textarea
-                id="address"
+                id="company_address"
                 placeholder="Địa chỉ đầy đủ của cơ sở sản xuất/phân phối"
-                value={formData.address}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                value={formData.company_address}
+                onChange={(e) => setFormData({ ...formData, company_address: e.target.value })}
                 rows={2}
               />
             </div>
@@ -392,53 +389,45 @@ export default function EditFdaRegistrationPage({ params }: { params: { id: stri
           {formData.uses_us_agent && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="us_agent_id">U.S. Agent ID</Label>
+                <Label htmlFor="agent_company_name">Công ty US Agent</Label>
                 <Input
-                  id="us_agent_id"
-                  value={formData.us_agent_id}
-                  onChange={(e) => setFormData({ ...formData, us_agent_id: e.target.value })}
+                  id="agent_company_name"
+                  value={formData.agent_company_name}
+                  onChange={(e) => setFormData({ ...formData, agent_company_name: e.target.value })}
                 />
               </div>
               <div>
-                <Label htmlFor="us_agent_company">Công ty US Agent</Label>
+                <Label htmlFor="agent_name">Tên US Agent</Label>
                 <Input
-                  id="us_agent_company"
-                  value={formData.us_agent_company}
-                  onChange={(e) => setFormData({ ...formData, us_agent_company: e.target.value })}
+                  id="agent_name"
+                  value={formData.agent_name}
+                  onChange={(e) => setFormData({ ...formData, agent_name: e.target.value })}
                 />
               </div>
               <div>
-                <Label htmlFor="us_agent_name">Tên US Agent</Label>
+                <Label htmlFor="agent_phone">Số điện thoại</Label>
                 <Input
-                  id="us_agent_name"
-                  value={formData.us_agent_name}
-                  onChange={(e) => setFormData({ ...formData, us_agent_name: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label htmlFor="us_agent_phone">Số điện thoại</Label>
-                <Input
-                  id="us_agent_phone"
+                  id="agent_phone"
                   type="tel"
-                  value={formData.us_agent_phone}
-                  onChange={(e) => setFormData({ ...formData, us_agent_phone: e.target.value })}
+                  value={formData.agent_phone}
+                  onChange={(e) => setFormData({ ...formData, agent_phone: e.target.value })}
                 />
               </div>
               <div>
-                <Label htmlFor="us_agent_email">Email liên hệ</Label>
+                <Label htmlFor="agent_email">Email liên hệ</Label>
                 <Input
-                  id="us_agent_email"
+                  id="agent_email"
                   type="email"
-                  value={formData.us_agent_email}
-                  onChange={(e) => setFormData({ ...formData, us_agent_email: e.target.value })}
+                  value={formData.agent_email}
+                  onChange={(e) => setFormData({ ...formData, agent_email: e.target.value })}
                 />
               </div>
               <div className="md:col-span-2">
-                <Label htmlFor="us_agent_address">Địa chỉ US Agent</Label>
+                <Label htmlFor="agent_address">Địa chỉ US Agent</Label>
                 <Textarea
-                  id="us_agent_address"
-                  value={formData.us_agent_address}
-                  onChange={(e) => setFormData({ ...formData, us_agent_address: e.target.value })}
+                  id="agent_address"
+                  value={formData.agent_address}
+                  onChange={(e) => setFormData({ ...formData, agent_address: e.target.value })}
                   rows={2}
                 />
               </div>

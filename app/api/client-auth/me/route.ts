@@ -12,8 +12,11 @@ export async function GET(request: NextRequest) {
     const token = request.cookies.get("client-token")?.value
 
     if (!token) {
+      console.log("[v0] No client token found in cookies")
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
     }
+    
+    console.log("[v0] Verifying client session...")
 
     // Get session
     const { data: session, error: sessionError } = await supabase

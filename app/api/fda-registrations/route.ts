@@ -166,6 +166,20 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing required field: company_address or address" }, { status: 400 })
     }
 
+    // Normalize registration_type to match database constraint
+    const typeMapping: Record<string, string> = {
+      'food_facility': 'Food Facility',
+      'drug_establishment': 'Drug Establishment', 
+      'medical_device': 'Medical Device',
+      'cosmetic': 'Cosmetic',
+      'dietary_supplement': 'Dietary Supplement',
+      'infant_formula': 'Infant Formula',
+      'other': 'Other'
+    }
+    
+    const normalizedType = typeMapping[registration_type.toLowerCase().replace(/\s+/g, '_')] || registration_type
+    console.log("[v0] Normalized registration_type:", { original: registration_type, normalized: normalizedType })
+
     const insertData: any = {
       client_id, // IMPORTANT: Link registration to client
       company_name,
@@ -180,7 +194,7 @@ export async function POST(request: Request) {
       contact_title,
       contact_phone,
       contact_email,
-      registration_type,
+      registration_type: normalizedType,
       registration_number,
       fei_number,
       duns_number,
@@ -239,34 +253,68 @@ export async function POST(request: Request) {
 
     // Mã hóa thông tin đăng nhập bằng RPC
     if (fda_user_id || fda_password || fda_pin) {
+      console.log("[v0] Encrypting FDA credentials...")
       const updates: any = {}
 
       if (fda_user_id) {
-        const { data: encryptedUserId } = await supabase.rpc("encrypt_fda_credential", {
+        console.log("[v0] Encrypting FDA User ID")
+        const { data: encryptedUserId, error: encryptError } = await supabase.rpc("encrypt_fda_credential", {
           plaintext: fda_user_id,
           encryption_key: encryptionKey,
         })
+        if (encryptError) {
+          console.error("[v0] Error encrypting FDA User ID:", encryptError)
+          return NextResponse.json({ error: "Failed to encrypt FDA User ID", details: encryptError.message }, { status: 500 })
+        }
+        if (!encryptedUserId) {
+          console.error("[v0] Encryption returned null for FDA User ID")
+        }
         updates.fda_user_id_encrypted = encryptedUserId
+        console.log("[v0] FDA User ID encrypted successfully")
       }
 
       if (fda_password) {
-        const { data: encryptedPassword } = await supabase.rpc("encrypt_fda_credential", {
+        console.log("[v0] Encrypting FDA Password")
+        const { data: encryptedPassword, error: encryptError } = await supabase.rpc("encrypt_fda_credential", {
           plaintext: fda_password,
           encryption_key: encryptionKey,
         })
+        if (encryptError) {
+          console.error("[v0] Error encrypting FDA Password:", encryptError)
+          return NextResponse.json({ error: "Failed to encrypt FDA Password", details: encryptError.message }, { status: 500 })
+        }
+        if (!encryptedPassword) {
+          console.error("[v0] Encryption returned null for FDA Password")
+        }
         updates.fda_password_encrypted = encryptedPassword
+        console.log("[v0] FDA Password encrypted successfully")
       }
 
       if (fda_pin) {
-        const { data: encryptedPin } = await supabase.rpc("encrypt_fda_credential", {
+        console.log("[v0] Encrypting FDA PIN")
+        const { data: encryptedPin, error: encryptError } = await supabase.rpc("encrypt_fda_credential", {
           plaintext: fda_pin,
           encryption_key: encryptionKey,
         })
+        if (encryptError) {
+          console.error("[v0] Error encrypting FDA PIN:", encryptError)
+          return NextResponse.json({ error: "Failed to encrypt FDA PIN", details: encryptError.message }, { status: 500 })
+        }
+        if (!encryptedPin) {
+          console.error("[v0] Encryption returned null for FDA PIN")
+        }
         updates.fda_pin_encrypted = encryptedPin
+        console.log("[v0] FDA PIN encrypted successfully")
       }
 
       if (Object.keys(updates).length > 0) {
-        await supabase.from("fda_registrations").update(updates).eq("id", registration.id)
+        console.log("[v0] Saving encrypted credentials to database...")
+        const { error: credError } = await supabase.from("fda_registrations").update(updates).eq("id", registration.id)
+        if (credError) {
+          console.error("[v0] Error saving encrypted credentials:", credError)
+          return NextResponse.json({ error: "Failed to save credentials", details: credError.message }, { status: 500 })
+        }
+        console.log("[v0] Credentials saved successfully")
       }
     }
 

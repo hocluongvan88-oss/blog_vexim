@@ -1,15 +1,19 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createAdminClient } from "@/lib/supabase-admin"
+import { createClient } from "@supabase/supabase-js"
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
 // GET /api/client-auth/registrations - Get FDA registrations for authenticated client
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createAdminClient()
-    
-    // Get token from cookie
+    // Get token from cookie (using hyphen, not underscore)
     const token = request.cookies.get("client-token")?.value
 
     if (!token) {
+      console.log("[v0] No client token found in registrations API")
       return NextResponse.json(
         { error: "Not authenticated" },
         { status: 401 }

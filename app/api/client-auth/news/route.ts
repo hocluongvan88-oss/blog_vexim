@@ -9,14 +9,31 @@ export async function GET(request: Request) {
     const token = cookieStore.get("client-token")?.value
 
     if (!token) {
+      console.log("[v0] No client token found in news API")
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Decode token to get client_id
-    const payload = JSON.parse(Buffer.from(token.split(".")[1], "base64").toString())
-    const clientId = payload.clientId
-
     const supabase = await createServerClient()
+
+    // Look up session in database
+    const { data: session, error: sessionError } = await supabase
+      .from("client_sessions")
+      .select("client_id, expires_at")
+      .eq("token", token)
+      .single()
+
+    if (sessionError || !session) {
+      console.error("[v0] Session not found:", sessionError)
+      return NextResponse.json({ error: "Invalid session" }, { status: 401 })
+    }
+
+    // Check if session is expired
+    if (new Date(session.expires_at) < new Date()) {
+      console.error("[v0] Session expired")
+      return NextResponse.json({ error: "Session expired" }, { status: 401 })
+    }
+
+    const clientId = session.client_id
 
     // Get client's registrations to determine relevant categories
     const { data: registrations, error: regError } = await supabase
@@ -38,43 +55,14 @@ export async function GET(request: Request) {
       if (reg.registration_type.includes("Cosmetic")) categories.add("Cosmetics")
     })
 
-    // Fetch relevant published news
-    let query = supabase
-      .from("crawled_news")
-      .select("*")
-      .eq("status", "published")
-      .order("created_at", { ascending: false })
-      .limit(50)
-
-    // Filter by categories if any
-    if (categories.size > 0) {
-      query = query.overlaps("categories", Array.from(categories))
-    }
-
-    const { data: news, error: newsError } = await query
-
-    if (newsError) {
-      console.error("[v0] Error fetching news:", newsError)
-      return NextResponse.json({ error: "Failed to fetch news" }, { status: 500 })
-    }
-
-    // Filter by relevance and add read status
-    const relevantNews = (news || [])
-      .filter(item => item.relevance === "high" || item.relevance === "medium")
-      .map(item => ({
-        id: item.id,
-        source: item.source,
-        title: item.title,
-        summary: item.summary || item.title,
-        articleUrl: item.article_url,
-        publishedDate: item.published_date,
-        relevance: item.relevance,
-        categories: item.categories,
-        aiAnalysis: item.ai_analysis,
-        createdAt: item.created_at,
-      }))
-
-    return NextResponse.json({ news: relevantNews })
+    // TODO: crawled_news table hasn't been created yet
+    // For now, return empty news array
+    console.log("[v0] News feature not yet implemented - crawled_news table missing")
+    
+    return NextResponse.json({ 
+      news: [],
+      message: "News feature coming soon"
+    })
   } catch (error) {
     console.error("[v0] Error in client news API:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })

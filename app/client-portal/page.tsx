@@ -866,11 +866,16 @@ export default function ClientPortal() {
                               <span>{new Date(doc.created_at).toLocaleDateString("vi-VN")}</span>
                             </div>
                           </div>
-                          <Button asChild size="sm" className="bg-emerald-600 hover:bg-emerald-700 gap-2">
-                            <a href={doc.file_url} download={doc.file_name} target="_blank" rel="noopener noreferrer">
-                              <Download className="w-4 h-4" />
-                              <span className="hidden sm:inline">Tai xuong</span>
-                            </a>
+                          <Button 
+                            size="sm" 
+                            className="bg-emerald-600 hover:bg-emerald-700 gap-2"
+                            onClick={() => {
+                              // Use proxy endpoint to download file with proper headers
+                              window.open(`/api/client-auth/documents/${doc.id}/download`, '_blank')
+                            }}
+                          >
+                            <Download className="w-4 h-4" />
+                            <span className="hidden sm:inline">Tai xuong</span>
                           </Button>
                         </div>
                       </CardContent>
