@@ -9,7 +9,7 @@ const supabase = createClient(
 // POST /api/client-auth/logout
 export async function POST(request: NextRequest) {
   try {
-    const token = request.cookies.get("client_token")?.value
+    const token = request.cookies.get("client-token")?.value
 
     if (token) {
       // Delete session from database
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
 
     // Clear cookie
     const response = NextResponse.json({ success: true })
-    response.cookies.delete("client_token")
+    response.cookies.delete("client-token")
 
     return response
   } catch (error) {

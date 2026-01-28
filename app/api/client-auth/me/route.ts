@@ -9,7 +9,7 @@ const supabase = createClient(
 // GET /api/client-auth/me - Get current client
 export async function GET(request: NextRequest) {
   try {
-    const token = request.cookies.get("client_token")?.value
+    const token = request.cookies.get("client-token")?.value
 
     if (!token) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 })

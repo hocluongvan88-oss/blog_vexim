@@ -10,7 +10,7 @@ const supabase = createClient(
 export async function GET(request: NextRequest) {
   try {
     // Get token from cookie
-    const token = request.cookies.get("client_token")?.value
+    const token = request.cookies.get("client-token")?.value
 
     if (!token) {
       return NextResponse.json(
