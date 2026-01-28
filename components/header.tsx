@@ -101,15 +101,15 @@ export function Header() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48">
                     <DropdownMenuItem asChild>
-                      <Link href="/admin/login" className="cursor-pointer">
+                      <Link href="/client-portal" className="cursor-pointer">
                         <User className="w-4 h-4 mr-2" />
-                        <span>Quản trị viên</span>
+                        <span>Khách hàng</span>
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                      <Link href="/admin/login" className="cursor-pointer text-sm">
-                        <span>Đăng nhập Admin</span>
+                      <Link href="/admin/login" className="cursor-pointer">
+                        <Shield className="w-4 h-4 mr-2" />
+                        <span>Quản trị viên</span>
                       </Link>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -176,14 +176,24 @@ export function Header() {
                 >
                   Liên hệ
                 </Link>
-                <Link
-                  href="/admin/login"
-                  className="text-left text-muted-foreground hover:text-primary transition-colors flex items-center gap-2"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <User className="w-4 h-4" />
-                  <span>Quản trị viên</span>
-                </Link>
+                <div className="pt-2 border-t">
+                  <Link
+                    href="/client-portal"
+                    className="text-left text-muted-foreground hover:text-primary transition-colors flex items-center gap-2 mb-3"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <User className="w-4 h-4" />
+                    <span>Đăng nhập Khách hàng</span>
+                  </Link>
+                  <Link
+                    href="/admin/login"
+                    className="text-left text-muted-foreground hover:text-primary transition-colors flex items-center gap-2"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Shield className="w-4 h-4" />
+                    <span>Quản trị viên</span>
+                  </Link>
+                </div>
                 <Button
                   onClick={() => {
                     setIsDialogOpen(true)
