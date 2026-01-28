@@ -689,28 +689,63 @@ export default function ClientPortal() {
                                     <p className="text-xs text-gray-500">ngay con lai</p>
                                   </div>
                                 )}
-                              </div>
+                            </div>
 
-                              {/* Status badge */}
-                              <div className="flex items-center gap-2">
-                                <Badge className={`${
-                                  reg.status === "active"
-                                    ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100"
-                                    : "bg-red-100 text-red-700 hover:bg-red-100"
-                                } border-0 px-3 py-1`}>
-                                  {reg.status === "active" ? (
-                                    <><CheckCircle2 className="w-3 h-3 mr-1" /> Con hieu luc</>
-                                  ) : (
-                                    <><AlertCircle className="w-3 h-3 mr-1" /> Het han</>
-                                  )}
-                                </Badge>
+                            {/* Status badge */}
+                            <div className="flex items-center gap-2">
+                              <Badge className={`${
+                                reg.status === "active"
+                                  ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100"
+                                  : "bg-red-100 text-red-700 hover:bg-red-100"
+                              } border-0 px-3 py-1`}>
+                                {reg.status === "active" ? (
+                                  <><CheckCircle2 className="w-3 h-3 mr-1" /> Con hieu luc</>
+                                ) : (
+                                  <><AlertCircle className="w-3 h-3 mr-1" /> Het han</>
+                                )}
+                              </Badge>
+                            </div>
+                          </div>
+
+                          {/* FDA Credentials Section */}
+                          {reg.has_credentials && (
+                            <div className="mt-6 pt-6 border-t border-gray-100">
+                              <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-8 h-8 rounded-lg bg-yellow-100 flex items-center justify-center">
+                                    <Shield className="w-4 h-4 text-yellow-700" />
+                                  </div>
+                                  <h4 className="font-semibold text-gray-900">Thông tin đăng nhập FDA</h4>
+                                </div>
+                                <p className="text-xs text-gray-500">Thông tin được mã hóa AES-256 theo chuẩn ISO 27001</p>
+                              </div>
+                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-yellow-50 rounded-lg p-4">
+                                <div>
+                                  <p className="text-xs text-gray-600 mb-1">FDA User ID</p>
+                                  <p className="text-sm font-mono font-medium text-gray-900">
+                                    {reg.fda_user_id || "(Chưa có)"}
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-xs text-gray-600 mb-1">FDA Password</p>
+                                  <p className="text-sm font-mono font-medium text-gray-900">
+                                    {reg.fda_user_id ? "••••••••" : "(Chưa có)"}
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-xs text-gray-600 mb-1">FDA PIN</p>
+                                  <p className="text-sm font-mono font-medium text-gray-900">
+                                    {reg.fda_user_id ? "••••••••" : "(Chưa có)"}
+                                  </p>
+                                </div>
                               </div>
                             </div>
-                          </CardContent>
-                        </Card>
-                      )
-                    })}
-                  </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    )
+                  })}
+                </div>
                 )}
               </div>
             </div>

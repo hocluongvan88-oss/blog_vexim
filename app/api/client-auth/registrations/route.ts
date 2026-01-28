@@ -43,13 +43,6 @@ export async function GET(request: NextRequest) {
 
     console.log("[v0] Fetching registrations for client:", session.client_id)
 
-    // First, let's see all registrations to debug
-    const { data: allRegs } = await supabase
-      .from("fda_registrations")
-      .select("id, company_name, client_id")
-    
-    console.log("[v0] All FDA registrations in database:", allRegs)
-
     // Get FDA registrations for this client
     const { data: registrations, error: regError } = await supabase
       .from("fda_registrations")
@@ -65,11 +58,16 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    console.log("[v0] Found registrations for this client:", registrations?.length || 0)
-    console.log("[v0] Registration client_ids:", registrations?.map(r => ({ id: r.id, client_id: r.client_id })))
+    // Add has_credentials flag and ensure credentials are included
+    const registrationsWithFlags = registrations?.map(reg => ({
+      ...reg,
+      has_credentials: !!(reg.fda_user_id || reg.fda_password || reg.fda_pin)
+    }))
+
+    console.log("[v0] Found", registrationsWithFlags?.length || 0, "registrations for client:", session.client_id)
 
     return NextResponse.json({
-      registrations: registrations || [],
+      registrations: registrationsWithFlags || [],
     })
   } catch (error) {
     console.error("[v0] Error in GET /api/client-auth/registrations:", error)
