@@ -25,7 +25,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { ArrowLeft, Building2, Mail, Phone, MapPin, Calendar, Shield } from "lucide-react"
+import { ArrowLeft, Building2, Mail, Phone, MapPin, Calendar, Shield, FileText, Upload, Download, Trash2, Eye, EyeOff } from "lucide-react"
 import Link from "next/link"
 import { toast } from "sonner"
 
@@ -40,10 +40,21 @@ export default function ClientDetailPage() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [newPassword, setNewPassword] = useState("")
   const [actionLoading, setActionLoading] = useState(false)
+  const [documents, setDocuments] = useState<any[]>([])
+  const [showUploadDialog, setShowUploadDialog] = useState(false)
+  const [uploadData, setUploadData] = useState({
+    title: "",
+    description: "",
+    document_type: "certificate",
+    is_visible_to_client: true,
+  })
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
     if (clientId && clientId !== "undefined") {
       fetchClient()
+      fetchDocuments()
     } else {
       router.push("/admin/clients")
     }
@@ -63,6 +74,17 @@ export default function ClientDetailPage() {
       router.push("/admin/clients")
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function fetchDocuments() {
+    try {
+      const res = await fetch(`/api/admin/clients/${clientId}/documents`)
+      if (!res.ok) throw new Error("Failed to fetch documents")
+      const data = await res.json()
+      setDocuments(data.documents || [])
+    } catch (error) {
+      console.error("[v0] Error fetching documents:", error)
     }
   }
 
@@ -142,6 +164,64 @@ export default function ClientDetailPage() {
     }
     setNewPassword(password)
     toast.success("Đã tạo mật khẩu ngẫu nhiên")
+  }
+
+  const handleUploadDocument = async () => {
+    if (!selectedFile || !uploadData.title) {
+      toast.error("Vui lòng chọn file và nhập tiêu đề")
+      return
+    }
+
+    setUploading(true)
+    try {
+      const formData = new FormData()
+      formData.append("file", selectedFile)
+      formData.append("title", uploadData.title)
+      formData.append("description", uploadData.description)
+      formData.append("document_type", uploadData.document_type)
+      formData.append("is_visible_to_client", uploadData.is_visible_to_client.toString())
+
+      const res = await fetch(`/api/admin/clients/${clientId}/documents`, {
+        method: "POST",
+        body: formData,
+      })
+
+      if (!res.ok) throw new Error("Failed to upload document")
+
+      toast.success("Đã tải lên tài liệu thành công")
+      setShowUploadDialog(false)
+      setSelectedFile(null)
+      setUploadData({
+        title: "",
+        description: "",
+        document_type: "certificate",
+        is_visible_to_client: true,
+      })
+      fetchDocuments()
+    } catch (error) {
+      console.error("[v0] Error uploading document:", error)
+      toast.error("Không thể tải lên tài liệu")
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const handleDeleteDocument = async (documentId: string) => {
+    if (!confirm("Bạn có chắc muốn xóa tài liệu này?")) return
+
+    try {
+      const res = await fetch(`/api/admin/clients/${clientId}/documents?document_id=${documentId}`, {
+        method: "DELETE",
+      })
+
+      if (!res.ok) throw new Error("Failed to delete document")
+
+      toast.success("Đã xóa tài liệu")
+      fetchDocuments()
+    } catch (error) {
+      console.error("[v0] Error deleting document:", error)
+      toast.error("Không thể xóa tài liệu")
+    }
   }
 
   if (loading) {
@@ -269,6 +349,90 @@ export default function ClientDetailPage() {
         </CardContent>
       </Card>
 
+      {/* Documents Section */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Tài liệu & Chứng nhận</CardTitle>
+              <CardDescription>Quản lý tài liệu, chứng chỉ FDA cho khách hàng</CardDescription>
+            </div>
+            <Button onClick={() => setShowUploadDialog(true)}>
+              <Upload className="mr-2 h-4 w-4" />
+              Tải lên tài liệu
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {documents.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <FileText className="mx-auto h-12 w-12 text-gray-400 mb-3" />
+              <p>Chưa có tài liệu nào</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {documents.map((doc) => (
+                <div
+                  key={doc.id}
+                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center gap-3 flex-1">
+                    <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+                      <FileText className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-medium text-sm truncate">{doc.title}</h4>
+                        <Badge variant="outline" className="text-xs">
+                          {doc.document_type}
+                        </Badge>
+                        {doc.is_visible_to_client ? (
+                          <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                            <Eye className="w-3 h-3 mr-1" />
+                            Client có thể xem
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-xs bg-gray-50 text-gray-600">
+                            <EyeOff className="w-3 h-3 mr-1" />
+                            Riêng tư
+                          </Badge>
+                        )}
+                      </div>
+                      {doc.description && (
+                        <p className="text-xs text-muted-foreground mt-1 truncate">{doc.description}</p>
+                      )}
+                      <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                        <span>{doc.file_name}</span>
+                        <span>{(doc.file_size / 1024).toFixed(0)} KB</span>
+                        <span>{new Date(doc.created_at).toLocaleDateString("vi-VN")}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      asChild
+                    >
+                      <a href={doc.file_url} target="_blank" rel="noopener noreferrer">
+                        <Download className="h-4 w-4" />
+                      </a>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDeleteDocument(doc.id)}
+                    >
+                      <Trash2 className="h-4 w-4 text-red-600" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Actions */}
       <Card>
         <CardHeader>
@@ -368,6 +532,89 @@ export default function ClientDetailPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Upload Document Dialog */}
+      <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Tải lên tài liệu</DialogTitle>
+            <DialogDescription>
+              Upload chứng nhận, hợp đồng hoặc tài liệu khác cho khách hàng
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="doc-file">File tài liệu *</Label>
+              <Input
+                id="doc-file"
+                type="file"
+                onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+              />
+              <p className="text-xs text-muted-foreground">
+                Chấp nhận: PDF, Word, JPG, PNG. Tối đa 10MB
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="doc-title">Tiêu đề *</Label>
+              <Input
+                id="doc-title"
+                value={uploadData.title}
+                onChange={(e) => setUploadData({ ...uploadData, title: e.target.value })}
+                placeholder="Ví dụ: Chứng nhận FDA Registration 2024"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="doc-description">Mô tả</Label>
+              <Input
+                id="doc-description"
+                value={uploadData.description}
+                onChange={(e) => setUploadData({ ...uploadData, description: e.target.value })}
+                placeholder="Thông tin bổ sung về tài liệu"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="doc-type">Loại tài liệu</Label>
+              <select
+                id="doc-type"
+                value={uploadData.document_type}
+                onChange={(e) => setUploadData({ ...uploadData, document_type: e.target.value })}
+                className="w-full h-10 px-3 rounded-md border border-input bg-background"
+              >
+                <option value="certificate">Chứng nhận</option>
+                <option value="contract">Hợp đồng</option>
+                <option value="invoice">Hóa đơn</option>
+                <option value="report">Báo cáo</option>
+                <option value="other">Khác</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="doc-visible"
+                checked={uploadData.is_visible_to_client}
+                onChange={(e) => setUploadData({ ...uploadData, is_visible_to_client: e.target.checked })}
+                className="w-4 h-4"
+              />
+              <Label htmlFor="doc-visible" className="font-normal cursor-pointer">
+                Cho phép khách hàng xem tài liệu này
+              </Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowUploadDialog(false)} disabled={uploading}>
+              Hủy
+            </Button>
+            <Button onClick={handleUploadDocument} disabled={uploading || !selectedFile}>
+              {uploading ? "Đang tải lên..." : "Tải lên"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
