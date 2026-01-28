@@ -22,15 +22,15 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Verify admin
-    const { data: adminUser } = await supabase
+    // Verify admin by email
+    const { data: adminUserByEmail } = await supabase
       .from("admin_users")
       .select("id")
-      .eq("id", user.id)
-      .single()
+      .eq("email", user.email)
+      .maybeSingle()
 
-    if (!adminUser) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    if (!adminUserByEmail) {
+      return NextResponse.json({ error: "Forbidden - Admin only" }, { status: 403 })
     }
 
     // Fetch all documents for this client
@@ -78,14 +78,21 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    // Verify admin by email
+    const { data: adminUserByEmail } = await supabase.from("admin_users").select("id").eq("email", user.email).maybeSingle()
+
+    if (!adminUserByEmail) {
+      return NextResponse.json({ error: "Forbidden - Admin only" }, { status: 403 })
+    }
+
     // Verify admin
-    const { data: adminUser } = await supabase
+    const { data: adminUserById } = await supabase
       .from("admin_users")
       .select("id")
       .eq("id", user.id)
       .single()
 
-    if (!adminUser) {
+    if (!adminUserById) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
@@ -162,15 +169,15 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Verify admin
-    const { data: adminUser } = await supabase
+    // Verify admin by email
+    const { data: adminUserById } = await supabase
       .from("admin_users")
       .select("id")
-      .eq("id", user.id)
-      .single()
+      .eq("email", user.email)
+      .maybeSingle()
 
-    if (!adminUser) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    if (!adminUserById) {
+      return NextResponse.json({ error: "Forbidden - Admin only" }, { status: 403 })
     }
 
     // Delete document
