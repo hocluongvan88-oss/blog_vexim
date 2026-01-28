@@ -167,6 +167,7 @@ export async function POST(request: Request) {
     }
 
     const insertData: any = {
+      client_id, // IMPORTANT: Link registration to client
       company_name,
       company_name_english,
       company_address: finalAddress,
