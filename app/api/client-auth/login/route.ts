@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
     })
 
     // Set cookie
-    response.cookies.set("client_token", token, {
+    response.cookies.set("client-token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
