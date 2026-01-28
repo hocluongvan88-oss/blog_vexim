@@ -1,14 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createClient } from "@supabase/supabase-js"
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+import { createAdminClient } from "@/lib/supabase-admin"
 
 // GET /api/client-auth/registrations - Get FDA registrations for authenticated client
 export async function GET(request: NextRequest) {
   try {
+    const supabase = createAdminClient()
+    
     // Get token from cookie
     const token = request.cookies.get("client-token")?.value
 
