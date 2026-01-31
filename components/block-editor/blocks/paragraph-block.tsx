@@ -90,32 +90,53 @@ export function ParagraphBlock({ data, onChange, onEnter, onBackspace, onPasteSp
   const handlePaste = (e: React.ClipboardEvent<HTMLParagraphElement>) => {
     e.preventDefault()
     
-    // Try to get HTML first for structured content detection
-    const pastedHTML = e.clipboardData.getData("text/html")
     const pastedText = e.clipboardData.getData("text/plain")
     
-    // Check if HTML contains structured elements (headings, paragraphs, etc.)
-    if (pastedHTML && (pastedHTML.includes("<h1") || pastedHTML.includes("<h2") || pastedHTML.includes("<h3") || pastedHTML.includes("<p"))) {
-      // HTML content detected - this will be handled by parent block editor
-      console.log("[v0] HTML content detected in paste")
-      // For now, just use plain text
-      // In the future, signal to parent to parse HTML into blocks
+    // More robust line splitting - handles various line break formats
+    // Split by double newlines first (paragraph breaks), then single newlines
+    let lines: string[] = []
+    
+    // First try splitting by double newlines (clear paragraph separators)
+    const paragraphs = pastedText.split(/\n\s*\n|\r\n\s*\r\n/)
+    
+    if (paragraphs.length > 1) {
+      // Multiple paragraphs detected
+      lines = paragraphs
+        .map(p => p.trim())
+        .filter(p => p.length > 0)
+    } else {
+      // Fall back to single newline splitting
+      lines = pastedText
+        .split(/\r?\n/)
+        .map(line => line.trim())
+        .filter(line => line.length > 0)
     }
     
-    // Split by newlines
-    const lines = pastedText.split(/\r?\n/)
-    const nonEmptyLines = lines.filter((line) => line.trim())
-    
-    if (nonEmptyLines.length > 1 && onPasteSplit) {
-      // Multiple lines - create multiple blocks
-      onPasteSplit(nonEmptyLines)
-    } else {
-      // Single line - insert as normal text
+    // If we have multiple lines and the callback exists, split into blocks
+    if (lines.length > 1 && onPasteSplit) {
+      onPasteSplit(lines)
+    } else if (lines.length === 1) {
+      // Single line/paragraph - insert as normal text
+      const textToInsert = lines[0]
       const selection = window.getSelection()
       if (selection && selection.rangeCount > 0) {
         const range = selection.getRangeAt(0)
         range.deleteContents()
-        const textNode = document.createTextNode(pastedText)
+        const textNode = document.createTextNode(textToInsert)
+        range.insertNode(textNode)
+        range.setStartAfter(textNode)
+        range.setEndAfter(textNode)
+        selection.removeAllRanges()
+        selection.addRange(range)
+      }
+      onChange({ text: e.currentTarget.textContent || "" })
+    } else if (pastedText.trim()) {
+      // Fallback - just insert the trimmed text
+      const selection = window.getSelection()
+      if (selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0)
+        range.deleteContents()
+        const textNode = document.createTextNode(pastedText.trim())
         range.insertNode(textNode)
         range.setStartAfter(textNode)
         range.setEndAfter(textNode)

@@ -1,11 +1,11 @@
 "use client"
 
-import { useRef } from "react"
+import { useRef, useCallback } from "react"
 
 import React from "react"
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Plus, GripVertical } from "lucide-react"
+import { Plus, GripVertical, Undo2, Redo2 } from "lucide-react"
 import { BlockToolbar } from "./block-toolbar"
 import { HeadingBlock } from "./blocks/heading-block"
 import { ParagraphBlock } from "./blocks/paragraph-block"
@@ -18,6 +18,9 @@ interface BlockEditorProps {
   value: Block[]
   onChange: (blocks: Block[]) => void
 }
+
+// Maximum history size
+const MAX_HISTORY_SIZE = 50
 
 export function BlockEditor({ value, onChange }: BlockEditorProps) {
   // Always ensure at least one block exists - use static ID to avoid hydration mismatch
@@ -32,11 +35,86 @@ export function BlockEditor({ value, onChange }: BlockEditorProps) {
   const [showBlockMenu, setShowBlockMenu] = useState(false)
   const [insertPosition, setInsertPosition] = useState<number>(0)
   const blockCounterRef = useRef(0)
+  
+  // Undo/Redo history
+  const [history, setHistory] = useState<Block[][]>([initialBlocks])
+  const [historyIndex, setHistoryIndex] = useState(0)
+  const isUndoRedoRef = useRef(false)
+  
+  // Save to history with debounce
+  const saveToHistory = useCallback((newBlocks: Block[]) => {
+    if (isUndoRedoRef.current) {
+      isUndoRedoRef.current = false
+      return
+    }
+    
+    setHistory(prev => {
+      // Remove any future history if we're not at the end
+      const newHistory = prev.slice(0, historyIndex + 1)
+      // Add new state
+      newHistory.push(JSON.parse(JSON.stringify(newBlocks)))
+      // Limit history size
+      if (newHistory.length > MAX_HISTORY_SIZE) {
+        newHistory.shift()
+        return newHistory
+      }
+      return newHistory
+    })
+    setHistoryIndex(prev => Math.min(prev + 1, MAX_HISTORY_SIZE - 1))
+  }, [historyIndex])
+  
+  // Undo function
+  const undo = useCallback(() => {
+    if (historyIndex > 0) {
+      isUndoRedoRef.current = true
+      const newIndex = historyIndex - 1
+      setHistoryIndex(newIndex)
+      const previousState = JSON.parse(JSON.stringify(history[newIndex]))
+      setBlocks(previousState)
+    }
+  }, [history, historyIndex])
+  
+  // Redo function
+  const redo = useCallback(() => {
+    if (historyIndex < history.length - 1) {
+      isUndoRedoRef.current = true
+      const newIndex = historyIndex + 1
+      setHistoryIndex(newIndex)
+      const nextState = JSON.parse(JSON.stringify(history[newIndex]))
+      setBlocks(nextState)
+    }
+  }, [history, historyIndex])
+  
+  // Handle keyboard shortcuts for undo/redo
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+        e.preventDefault()
+        if (e.shiftKey) {
+          redo()
+        } else {
+          undo()
+        }
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'y') {
+        e.preventDefault()
+        redo()
+      }
+    }
+    
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [undo, redo])
 
-  // Sync blocks to parent
+  // Sync blocks to parent and save to history
   useEffect(() => {
     onChange(blocks)
-  }, [blocks, onChange])
+    // Debounce history save to avoid too many entries
+    const timeoutId = setTimeout(() => {
+      saveToHistory(blocks)
+    }, 500)
+    return () => clearTimeout(timeoutId)
+  }, [blocks, onChange, saveToHistory])
 
   const addBlock = (type: BlockType, position: number) => {
     blockCounterRef.current += 1
@@ -270,10 +348,48 @@ export function BlockEditor({ value, onChange }: BlockEditorProps) {
     )
   }
 
+  const canUndo = historyIndex > 0
+  const canRedo = historyIndex < history.length - 1
+
   return (
-    <div className="border rounded-lg p-6 bg-white min-h-[600px]" onClick={() => setSelectedBlockId(null)}>
+    <div className="border rounded-lg bg-white min-h-[600px]" onClick={() => setSelectedBlockId(null)}>
+      {/* Undo/Redo Toolbar */}
+      <div className="flex items-center gap-2 p-2 border-b bg-muted/30">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation()
+            undo()
+          }}
+          disabled={!canUndo}
+          title="Hoàn tác (Ctrl+Z)"
+          className="h-8 px-2"
+        >
+          <Undo2 className="w-4 h-4 mr-1" />
+          <span className="text-xs">Hoàn tác</span>
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation()
+            redo()
+          }}
+          disabled={!canRedo}
+          title="Làm lại (Ctrl+Shift+Z hoặc Ctrl+Y)"
+          className="h-8 px-2"
+        >
+          <Redo2 className="w-4 h-4 mr-1" />
+          <span className="text-xs">Làm lại</span>
+        </Button>
+        <span className="text-xs text-muted-foreground ml-2">
+          {historyIndex + 1} / {history.length}
+        </span>
+      </div>
+      
       {/* Blocks - Always render since we always have at least one block */}
-      <div className="space-y-4 pl-10">{blocks.map((block, index) => renderBlock(block, index))}</div>
+      <div className="p-6 space-y-4 pl-10">{blocks.map((block, index) => renderBlock(block, index))}</div>
 
       {/* Block Menu */}
       {showBlockMenu && (
