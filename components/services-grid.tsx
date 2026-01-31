@@ -6,45 +6,45 @@ import { ArrowRight } from "lucide-react"
 const services = [
   {
     image: "/fda-food-safety-inspection-laboratory-professional.jpg",
-    title: "Đăng ký FDA 24h",
+    title: "Đăng ký FDA nhanh",
     description:
-      "Xuất khẩu thực phẩm, mỹ phẩm sang Mỹ bắt buộc phải đăng ký FDA (21 CFR Part 1). Không có FDA Registration, hàng sẽ bị giữ l���i tại cảng Mỹ ngay. Chúng tôi hiểu rõ quy trình FDA, hướng dẫn chuẩn bị hồ sơ đầy đủ, đăng ký đúng cách, tránh bị từ chối.",
+      "Xuất khẩu thực phẩm, mỹ phẩm sang Mỹ bắt buộc phải có FDA Registration. Thiếu giấy tờ này, hàng hóa sẽ bị giữ lại ngay tại cảng. Chúng tôi hỗ trợ toàn bộ quy trình từ chuẩn bị hồ sơ đến đăng ký thành công, giúp doanh nghiệp yên tâm xuất khẩu.",
     link: "/services/fda",
   },
   {
     image: "/china-customs-port-container-shipping-trade.jpg",
-    title: "Tư vãn Mã GACC",
+    title: "Tư vấn Mã GACC",
     description:
-      "Từ năm 2021, xuất khẩu nông sản, thủy sản sang Trung Quốc bắt buộc phải có Mã GACC (Decree 248/249). Thiếu mã này, container sẽ bị từ chối nhập cảng. Chúng tôi hỗ trợ toàn bộ thủ tục đăng ký mã GACC, theo dõi tiến độ, cập nhật yêu cầu mới của Hải quan TQ.",
+      "Từ 2021, xuất khẩu nông sản, thủy sản sang Trung Quốc bắt buộc phải có mã GACC. Không có mã này, container sẽ bị từ chối nhập cảng. Chúng tôi đồng hành cùng bạn trong toàn bộ quy trình đăng ký, cập nhật kịp thời các yêu cầu mới của Hải quan Trung Quốc.",
     link: "/services/gacc",
   },
   {
     image: "/korean-cosmetics-health-products-laboratory-qualit.jpg",
-    title: "Giấy phép MFDS - Hàn Quốc",
+    title: "Tư vấn Giấy phép MFDS",
     description:
-      "Xuất khẩu mỹ phẩm, thực phẩm chức năng sang Hàn Quốc cần giấy phép từ MFDS. Hồ sơ phức tạp, yêu cầu nghiêm ngặt về thành phần, nhãn mác. Chúng tôi hướng dẫn chuẩn bị hồ sơ, kiểm tra kỹ trước khi nộp, giúp tăng cơ hội được chấp thuận.",
+      "Xuất khẩu mỹ phẩm, thực phẩm chức năng sang Hàn Quốc cần giấy phép MFDS với yêu cầu rất nghiêm ngặt. Hồ sơ phức tạp, dễ bị từ chối nếu thiếu kinh nghiệm. Chúng tôi kiểm tra kỹ từng chi tiết, đảm bảo hồ sơ đạt chuẩn trước khi nộp.",
     link: "/services/mfds",
   },
   {
     image: "/us-customs-broker-agent-import-export-documentatio.jpg",
     title: "Dịch vụ US Agent",
     description:
-      "FDA quy định các cơ sở sản xuất thực phẩm nước ngoài phải có US Agent (21 CFR 1.33) - người đại diện pháp lý tại Mỹ. US Agent nhận thông báo từ FDA khi có vấn đề. Chúng tôi cung cấp dịch vụ US Agent đầy đủ, hỗ trợ xử lý nếu có phát sinh.",
+      "FDA yêu cầu các nhà sản xuất nước ngoài phải có đại diện pháp lý tại Mỹ (US Agent). Đây là người liên hệ chính khi FDA có thông báo hoặc thanh tra. Chúng tôi cung cấp dịch vụ US Agent chuyên nghiệp, sẵn sàng hỗ trợ 24/7 khi cần thiết.",
     link: "/services/us-agent",
   },
   {
     image: "/ai-technology-blockchain-supply-chain-digital-trac.jpg",
-    title: "Nền tảng truy xuất nguồn gốc",
+    title: "Hệ thống Truy xuất nguồn gốc",
     description:
-      "FDA yêu cầu truy xuất nguồn gốc từ 01/2026 (FSMA Rule 204). Hệ thống của chúng tôi giúp doanh nghiệp ghi nhận đầy đủ thông tin từ nguyên liệu đến thành phẩm, sử dụng công nghệ blockchain bảo mật. Tuân thủ quy định FDA, EU, Trung Quốc về traceability.",
+      "FDA yêu cầu truy xuất nguồn gốc từ 01/2026 theo quy định FSMA 204. Hệ thống của chúng tôi sử dụng công nghệ blockchain, giúp ghi nhận đầy đủ hành trình từ nguyên liệu đến thành phẩm. Tuân thủ quy định của FDA, EU và Trung Quốc về traceability.",
     link: "/services/ai-traceability",
     badge: "Công nghệ mới",
   },
   {
     image: "/international-trade-export-logistics-cargo-shippin.jpg",
-    title: "Ủy thác xuất khẩu",
+    title: "Dịch vụ Ủy thác xuất khẩu",
     description:
-      "Doanh nghiệp chưa có giấy phép xuất nhập khẩu vẫn có thể xuất hàng thông qua hình thức ủy thác (Nghị định 69/2018/NĐ-CP). Vexim Global có đầy đủ giấy phép, đảm bảo tuân thủ quy định Hải quan, thuế VAT, giúp bạn xuất khẩu hợp pháp và an toàn.",
+      "Doanh nghiệp chưa có giấy phép xuất nhập khẩu vẫn có thể xuất hàng hợp pháp qua hình thức ủy thác. Vexim Global có đầy đủ giấy phép và kinh nghiệm, đảm bảo tuân thủ quy định Hải quan, xử lý đúng thuế VAT, giúp bạn xuất khẩu an toàn.",
     link: "/services/export-delegation",
   },
 ]
@@ -55,10 +55,10 @@ export function ServicesGrid() {
       <div className="container mx-auto px-4">
         <div className="text-center mb-12 md:mb-16">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-primary mb-4 text-balance">
-            Dịch vụ tư vấn pháp lý xuất nhập khẩu
+            Giải pháp xuất khẩu toàn diện
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            Giúp doanh nghiệp Việt Nam xuất khẩu đúng luật, tránh rủi ro bị giữ hàng
+            Đồng hành cùng doanh nghiệp Việt xuất khẩu an toàn, tuân thủ đầy đủ quy định quốc tế
           </p>
         </div>
 

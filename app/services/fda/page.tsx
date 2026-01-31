@@ -8,7 +8,7 @@ import { ConsultationDialog } from "@/components/consultation-dialog"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Đăng ký FDA (Mỹ)",
+  title: "Đăng ký FDA",
   description:
     "Dịch vụ tư vấn và đăng ký FDA cho thực phẩm, mỹ phẩm, thiết bị y tế xuất khẩu sang Hoa Kỳ. Quy trình chuyên nghiệp, đảm bảo tuân thủ.",
   keywords: [
@@ -17,14 +17,14 @@ export const metadata: Metadata = {
     "xuất khẩu Mỹ",
     "FDA thực phẩm",
     "FDA mỹ phẩm",
-    "FDA thiết bị y t���",
-    "tư v��n FDA",
+    "FDA thiết bị y tế",
+    "tư vấn FDA",
   ],
   alternates: {
     canonical: "/services/fda",
   },
   openGraph: {
-    title: "Đăng ký FDA (Mỹ) - Vexim Global",
+    title: "Đăng ký FDA - Vexim Global",
     description:
       "Dịch vụ tư vấn và đăng ký FDA cho thực phẩm, mỹ phẩm, thiết bị y tế xuất khẩu sang Hoa Kỳ. Quy trình chuyên nghiệp, đảm bảo tuân thủ.",
     url: "/services/fda",
@@ -46,12 +46,11 @@ export default function FDAPage() {
                 Thị trường Hoa Kỳ
               </div>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-primary mb-6 text-balance">
-                Đăng ký FDA (Mỹ)
+                Đăng ký FDA
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed">
-                Cửa ngõ pháp lý để sản phẩm của bạn tiếp cận thị trường Hoa Kỳ. Chúng tôi đồng hành cùng doanh nghiệp từ
-                khâu tư vấn đến hoàn tất đăng ký FDA, đảm bảo tuân thủ đầy đủ quy định của cơ quan quản lý thực phẩm và
-                dược phẩm Hoa Kỳ.
+                Mở cửa thị trường Mỹ cho sản phẩm của bạn. Chúng tôi đồng hành từ tư vấn ban đầu đến khi hoàn tất đăng 
+                ký FDA, đảm bảo tuân thủ đầy đủ quy định của cơ quan quản lý thực phẩm và dược phẩm Hoa Kỳ.
               </p>
               <ConsultationDialog
                 trigger={
@@ -78,12 +77,11 @@ export default function FDAPage() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-primary mb-4 text-balance">
-              Tại sao đăng ký FDA là bắt buộc?
+              Tại sao cần đăng ký FDA?
             </h2>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              FDA (Food and Drug Administration) là cơ quan quản lý chặt chẽ nhất thế giới. Đăng ký FDA không chỉ là yêu
-              cầu pháp lý mà còn là lá chắn bảo vệ doanh nghiệp khỏi rủi ro bị từ chối nhập khẩu, phạt tiền và mất uy
-              tín.
+              FDA là cơ quan quản lý chặt chẽ nhất thế giới về an toàn thực phẩm và dược phẩm. Đăng ký FDA không chỉ 
+              là yêu cầu pháp lý, mà còn là lá chắn bảo vệ doanh nghiệp khỏi rủi ro lớn khi xuất khẩu sang Mỹ.
             </p>
           </div>
 
@@ -92,10 +90,10 @@ export default function FDAPage() {
               <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center mb-4">
                 <Shield className="w-6 h-6 text-accent" />
               </div>
-              <h3 className="text-xl font-bold text-primary mb-3">Yêu cầu pháp lý bắt buộc</h3>
+              <h3 className="text-xl font-bold text-primary mb-3">Bắt buộc theo luật</h3>
               <p className="text-muted-foreground leading-relaxed">
-                Theo Food Safety Modernization Act (FSMA), tất cả cơ sở sản xuất, chế biến, đóng gói thực phẩm phải đăng
-                ký với FDA trước khi xuất khẩu.
+                Theo Food Safety Modernization Act (FSMA), tất cả cơ sở sản xuất, chế biến, đóng gói thực phẩm 
+                phải đăng ký FDA trước khi xuất khẩu sang Mỹ.
               </p>
             </Card>
 
@@ -103,10 +101,10 @@ export default function FDAPage() {
               <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center mb-4">
                 <FileCheck className="w-6 h-6 text-accent" />
               </div>
-              <h3 className="text-xl font-bold text-primary mb-3">Tránh container bị giữ</h3>
+              <h3 className="text-xl font-bold text-primary mb-3">Tránh bị giữ hàng</h3>
               <p className="text-muted-foreground leading-relaxed">
-                Không có FDA registration hợp lệ, hàng hóa sẽ bị customs (hải quan Mỹ) từ chối nhập khẩu ngay tại cảng,
-                gây thiệt hại lớn.
+                Thiếu FDA Registration, hàng hóa sẽ bị Hải quan Mỹ từ chối nhập khẩu ngay tại cảng, gây tổn thất 
+                lớn về chi phí và uy tín.
               </p>
             </Card>
 
@@ -114,10 +112,10 @@ export default function FDAPage() {
               <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center mb-4">
                 <CheckCircle2 className="w-6 h-6 text-accent" />
               </div>
-              <h3 className="text-xl font-bold text-primary mb-3">Tăng uy tín thương hiệu</h3>
+              <h3 className="text-xl font-bold text-primary mb-3">Tăng độ tin cậy</h3>
               <p className="text-muted-foreground leading-relaxed">
-                FDA registration là dấu hiệu chất lượng được nhà nhập khẩu Mỹ tin tưởng, giúp tăng cơ hội hợp tác và mở
-                rộng thị trường.
+                FDA Registration là dấu hiệu chất lượng được nhà nhập khẩu Mỹ tin tưởng, giúp mở rộng cơ hội 
+                hợp tác và thị trường.
               </p>
             </Card>
 
@@ -127,8 +125,8 @@ export default function FDAPage() {
               </div>
               <h3 className="text-xl font-bold text-primary mb-3">Tiết kiệm thời gian</h3>
               <p className="text-muted-foreground leading-relaxed">
-                Quy trình đăng ký phức tạp với nhiều biểu mẫu và yêu cầu kỹ thuật. Chuyên gia của chúng tôi giúp bạn
-                hoàn tất nhanh chóng, chính xác.
+                Quy trình phức tạp với nhiều biểu mẫu và yêu cầu kỹ thuật. Chuyên gia của chúng tôi giúp bạn 
+                hoàn tất nhanh, chính xác.
               </p>
             </Card>
           </div>
@@ -143,7 +141,7 @@ export default function FDAPage() {
               Các nhóm sản phẩm cần đăng ký FDA
             </h2>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Vexim Global có chuyên môn sâu trong đăng ký FDA cho đa dạng ngành hàng xuất khẩu
+              Chúng tôi có kinh nghiệm đăng ký FDA cho đa dạng ngành hàng xuất khẩu
             </p>
           </div>
 
@@ -228,7 +226,7 @@ export default function FDAPage() {
               Quy trình đăng ký FDA cùng Vexim Global
             </h2>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Chúng tôi đơn giản hóa quy trình phức tạp thành 5 bước rõ ràng
+              Quy trình phức tạp được chúng tôi đơn giản hóa thành 5 bước rõ ràng
             </p>
           </div>
 
@@ -236,38 +234,38 @@ export default function FDAPage() {
             {[
               {
                 step: "01",
-                title: "Tư vấn & Đánh giá hồ sơ",
+                title: "Tư vấn & Đánh giá sơ bộ",
                 description:
-                  "Chuyên gia pháp lý phân tích sản phẩm, xác định loại đăng ký FDA cần thiết (Facility Registration, Product Listing, Prior Notice). Tư vấn U.S. Agent nếu cần.",
+                  "Chuyên gia phân tích sản phẩm, xác định loại đăng ký cần thiết (Facility Registration, Product Listing, Prior Notice). Tư vấn về dịch vụ US Agent nếu cần.",
                 duration: "1-2 ngày",
               },
               {
                 step: "02",
-                title: "Chuẩn bị hồ sơ & Tài liệu",
+                title: "Chuẩn bị hồ sơ đầy đủ",
                 description:
-                  "Thu thập thông tin doanh nghiệp, quy trình sản xuất, thành phần sản phẩm, nhãn mác. Chuẩn bị FDA Form 3537, 2250a, và các biểu mẫu khác theo yêu cầu.",
+                  "Thu thập thông tin doanh nghiệp, quy trình sản xuất, thành phần sản phẩm, nhãn mác. Chuẩn bị FDA Form 3537, 2250a và các biểu mẫu bổ sung theo yêu cầu.",
                 duration: "3-5 ngày",
               },
               {
                 step: "03",
-                title: "Nộp hồ sơ lên FDA Portal",
+                title: "Nộp hồ sơ lên hệ thống FDA",
                 description:
-                  "Đăng ký trên FDA Industry Systems và FDA Unified Registration & Listing System (FURLS). Theo dõi trạng thái xử lý và phản hồi yêu cầu bổ sung từ FDA.",
+                  "Đăng ký qua FDA Industry Systems và FDA Unified Registration & Listing System (FURLS). Theo dõi sát trạng thái xử lý, phản hồi kịp thời yêu cầu bổ sung từ FDA.",
                 duration: "5-10 ngày",
               },
               {
                 step: "04",
-                title: "Nhận FDA Registration Number",
+                title: "Nhận mã FDA Registration",
                 description:
-                  "FDA cấp Registration Number và Product Code. Hướng dẫn sử dụng Registration Number cho Prior Notice và nhãn mác sản phẩm.",
-                duration: "Tức thì sau phê duyệt",
+                  "FDA cấp Registration Number và Product Code. Hướng dẫn bạn sử dụng mã này cho Prior Notice và ghi trên nhãn mác sản phẩm.",
+                duration: "Ngay sau phê duyệt",
               },
               {
                 step: "05",
-                title: "Hỗ trợ gia hạn & Tuân thủ",
+                title: "Hỗ trợ gia hạn & Cập nhật",
                 description:
-                  "FDA registration phải gia hạn 2 năm/lần (1-31/10 năm chẵn). Chúng tôi nhắc nhở và hỗ trợ gia hạn, cập nhật thông tin khi có thay đổi.",
-                duration: "Suốt thời gian hợp tác",
+                  "FDA registration cần gia hạn 2 năm/lần (1-31/10 năm chẵn). Chúng tôi nhắc nhở và hỗ trợ gia hạn, cập nhật thông tin khi có thay đổi.",
+                duration: "Trong suốt hợp tác",
               },
             ].map((process, index) => (
               <Card key={index} className="p-6 hover:shadow-lg transition-shadow">
@@ -303,9 +301,9 @@ export default function FDAPage() {
           <div className="grid md:grid-cols-3 gap-6">
             <Card className="p-6 text-center hover:shadow-lg transition-shadow">
               <div className="text-4xl font-bold text-accent mb-2">98%</div>
-              <h3 className="text-xl font-bold text-primary mb-3">Tỷ lệ phê duyệt</h3>
+              <h3 className="text-xl font-bold text-primary mb-3">Tỷ lệ phê duyệt cao</h3>
               <p className="text-muted-foreground leading-relaxed">
-                Gần như tất cả hồ sơ của chúng tôi được FDA phê duyệt ngay lần đầu nhờ kinh nghiệm 10+ năm
+                Hầu hết hồ sơ được FDA phê duyệt ngay lần đầu nhờ kinh nghiệm 10+ năm và quy trình chuẩn mực
               </p>
             </Card>
 
@@ -313,15 +311,15 @@ export default function FDAPage() {
               <div className="text-4xl font-bold text-accent mb-2">500+</div>
               <h3 className="text-xl font-bold text-primary mb-3">Hồ sơ thành công</h3>
               <p className="text-muted-foreground leading-relaxed">
-                Đã hỗ trợ hơn 500 doanh nghiệp Việt Nam đăng ký FDA và xuất khẩu thành công sang Mỹ
+                Đã đồng hành cùng hơn 500 doanh nghiệp Việt Nam đăng ký FDA và xuất khẩu thành công sang Mỹ
               </p>
             </Card>
 
             <Card className="p-6 text-center hover:shadow-lg transition-shadow">
               <div className="text-4xl font-bold text-accent mb-2">24/7</div>
-              <h3 className="text-xl font-bold text-primary mb-3">Hỗ trợ khẩn cấp</h3>
+              <h3 className="text-xl font-bold text-primary mb-3">Hỗ trợ linh hoạt</h3>
               <p className="text-muted-foreground leading-relaxed">
-                Đội ngũ chuyên gia sẵn sàng hỗ trợ bạn mọi lúc, kể cả khi hàng đã đến cảng Mỹ
+                Đội ngũ chuyên gia sẵn sàng hỗ trợ khi bạn cần, kể cả trường hợp khẩn cấp khi hàng đã đến cảng Mỹ
               </p>
             </Card>
           </div>
@@ -333,7 +331,7 @@ export default function FDAPage() {
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-6 text-balance">Sẵn sàng đưa sản phẩm vào thị trường Mỹ?</h2>
           <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto leading-relaxed">
-            Liên hệ ngay với chuyên gia FDA của Vexim Global để được tư vấn miễn phí và báo giá chi tiết trong 24 giờ
+            Liên hệ ngay với chuyên gia FDA của Vexim Global để được tư vấn miễn phí và nhận báo giá chi tiết trong 24 giờ
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <ConsultationDialog

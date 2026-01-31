@@ -3,27 +3,27 @@ import { Users, Clock, DollarSign, Headphones } from "lucide-react"
 const benefits = [
   {
     icon: Users,
-    title: "Đội ngũ hiểu rõ quy định từng thị trường",
+    title: "Chuyên sâu từng thị trường",
     description:
-      "Chúng tôi chuyên nghiên cứu luật xuất nhập khẩu Mỹ, Trung Quốc, Hàn Quốc. Theo dõi sát những thay đổi mới nhất của FDA, GACC, MFDS để tư vấn chính xác cho doanh nghiệp Việt. Đội ngũ trẻ, nhiệt huyết, sẵn sàng học hỏi để phục vụ tốt nhất.",
+      "Chúng tôi không chỉ hiểu quy định, mà còn nắm rõ cách vận hành thực tế của FDA, GACC, MFDS. Theo dõi sát từng thay đổi pháp lý, cập nhật kinh nghiệm qua hàng trăm hồ sơ đã xử lý. Đội ngũ trẻ, nhiệt huyết, luôn học hỏi để đồng hành tốt nhất cùng doanh nghiệp Việt.",
   },
   {
     icon: Clock,
-    title: "Cam kết thời gian và quy trình rõ ràng",
+    title: "Quy trình minh bạch, tiến độ rõ ràng",
     description:
-      "FDA Registration: 5-10 ngày làm việc. GACC Code: 8-12 tuần. MFDS: 10-16 tuần (tùy sản phẩm). Thời gian phụ thuộc vào độ đầy đủ hồ sơ của bạn và tốc độ xử lý của cơ quan. Chúng tôi theo dõi sát từng bước, báo cáo tiến độ thường xuyên.",
+      "FDA Registration: 5-10 ngày làm việc. Mã GACC: 8-12 tuần. Giấy phép MFDS: 10-16 tuần tùy sản phẩm. Thời gian phụ thuộc độ đầy đủ của hồ sơ và tốc độ xử lý của cơ quan. Chúng tôi cập nhật tiến độ thường xuyên, không để bạn chờ đợi mơ hồ.",
   },
   {
     icon: DollarSign,
-    title: "Minh bạch chi phí ngay từ đầu",
+    title: "Báo giá rõ ràng, không phát sinh",
     description:
-      "Báo giá chi tiết từng hạng mục, không phát sinh thêm. Hợp đồng ghi rõ công việc cụ thể, thời gian hoàn thành, và quyền lợi của hai bên. Tuân thủ đầy đủ Luật Thương mại và Luật Bảo vệ Quyền lợi Người tiêu dùng.",
+      "Chi phí được tính từng hạng mục cụ thể, minh bạch ngay từ đầu. Hợp đồng ghi rõ phạm vi công việc, thời gian cam kết và quyền lợi của hai bên. Không có chi phí ẩn, không phát sinh bất ngờ. Tuân thủ đầy đủ pháp luật về thương mại và bảo vệ người tiêu dùng.",
   },
   {
     icon: Headphones,
-    title: "Cập nhật liên tục, hỗ trợ tận tâm",
+    title: "Hỗ trợ nhiệt tình, cập nhật kịp thời",
     description:
-      "Luật của FDA, GACC, MFDS thay đổi thường xuyên. Chúng tôi theo dõi cập nhật mỗi ngày để thông báo cho khách hàng kịp thời. Hỗ trợ tư vấn qua hotline, email, Zalo trong giờ hành chính. Đội ngũ luôn sẵn sàng giải đáp thắc mắc.",
+      "Quy định của FDA, GACC, MFDS thay đổi liên tục. Chúng tôi theo dõi hàng ngày để thông báo cho bạn kịp thời khi có điều chỉnh quan trọng. Luôn sẵn sàng tư vấn qua hotline, email, Zalo trong giờ làm việc. Đội ngũ nhiệt tình, giải đáp nhanh chóng.",
   },
 ]
 
@@ -36,10 +36,9 @@ export function WhyChooseUs() {
             Tại sao chọn Vexim Global?
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            Chúng tôi cam kết mang đến giá trị vượt trội cho mọi khách hàng
+            Đồng hành tin cậy, mang lại giá trị thực cho doanh nghiệp của bạn
           </p>
         </div>
-
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {benefits.map((benefit, index) => {
             const Icon = benefit.icon
