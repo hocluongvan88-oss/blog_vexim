@@ -41,13 +41,13 @@ Hệ thống quản lý đăng ký FDA được thiết kế để theo dõi và
 
 Hệ thống sử dụng **AES-256 encryption** thông qua PostgreSQL `pgcrypto` extension:
 
-```sql
+\`\`\`sql
 -- Mã hóa
 SELECT encrypt_fda_credential('sensitive_data', encryption_key);
 
 -- Giải mã (chỉ khi cần thiết)
 SELECT decrypt_fda_credential(encrypted_data, encryption_key);
-```
+\`\`\`
 
 #### Các biện pháp bảo mật:
 
@@ -82,12 +82,12 @@ SELECT decrypt_fda_credential(encrypted_data, encryption_key);
 
 #### Cron Job:
 
-```json
+\`\`\`json
 {
   "path": "/api/fda-registrations/send-reminders",
   "schedule": "0 9 * * *"
 }
-```
+\`\`\`
 
 Chạy **mỗi ngày lúc 9:00 AM** để:
 1. Generate reminders cho các registration sắp hết hạn
@@ -107,26 +107,26 @@ Hệ thống tự động cập nhật trạng thái registration dựa trên ng
 
 ### 1. Chạy migration SQL
 
-```bash
+\`\`\`bash
 # Tạo bảng và functions
 psql -h your_host -U your_user -d your_db -f scripts/022_create_fda_registrations.sql
-```
+\`\`\`
 
 Hoặc chạy qua Supabase SQL Editor.
 
 ### 2. Tạo Encryption Key
 
-```bash
+\`\`\`bash
 # Generate encryption key
 openssl rand -base64 32
-```
+\`\`\`
 
 Thêm vào `.env.local`:
 
-```env
+\`\`\`env
 FDA_ENCRYPTION_KEY=your_generated_32_byte_key_here
 CRON_SECRET=your_cron_secret_here
-```
+\`\`\`
 
 **⚠️ LƯU Ý**: 
 - KHÔNG commit encryption key vào Git
@@ -137,12 +137,12 @@ CRON_SECRET=your_cron_secret_here
 
 Cron job đã được thêm vào `vercel-cron.json`:
 
-```json
+\`\`\`json
 {
   "path": "/api/fda-registrations/send-reminders",
   "schedule": "0 9 * * *"
 }
-```
+\`\`\`
 
 Sau khi deploy, cron sẽ tự động chạy hàng ngày.
 
@@ -173,9 +173,9 @@ Truy cập: `/admin/fda-registrations`
 
 #### 1. Lấy danh sách registrations
 
-```bash
+\`\`\`bash
 GET /api/fda-registrations?status=active&search=company_name
-```
+\`\`\`
 
 **Query parameters**:
 - `status`: all | active | pending_renewal | expired | cancelled
@@ -183,7 +183,7 @@ GET /api/fda-registrations?status=active&search=company_name
 
 #### 2. Tạo registration mới
 
-```bash
+\`\`\`bash
 POST /api/fda-registrations
 Content-Type: application/json
 
@@ -201,21 +201,21 @@ Content-Type: application/json
   "agent_contract_years": 3,
   ...
 }
-```
+\`\`\`
 
 #### 3. Lấy chi tiết registration
 
-```bash
+\`\`\`bash
 # Không có credentials
 GET /api/fda-registrations/{id}
 
 # Có credentials (giải mã)
 GET /api/fda-registrations/{id}?credentials=true
-```
+\`\`\`
 
 #### 4. Cập nhật registration
 
-```bash
+\`\`\`bash
 PUT /api/fda-registrations/{id}
 Content-Type: application/json
 
@@ -224,20 +224,20 @@ Content-Type: application/json
   "fda_password": "new_password",
   ...
 }
-```
+\`\`\`
 
 #### 5. Xóa registration
 
-```bash
+\`\`\`bash
 DELETE /api/fda-registrations/{id}
-```
+\`\`\`
 
 #### 6. Gửi nhắc nhở (manual trigger)
 
-```bash
+\`\`\`bash
 POST /api/fda-registrations/send-reminders
 Authorization: Bearer YOUR_CRON_SECRET
-```
+\`\`\`
 
 ## Database Schema
 

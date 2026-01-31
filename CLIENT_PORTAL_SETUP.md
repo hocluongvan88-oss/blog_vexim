@@ -34,10 +34,10 @@ Hệ thống bao gồm 2 phần chính:
 
 ### 1. Chạy Migration
 
-```bash
+\`\`\`bash
 # Chạy script tạo client management system
 psql -h your-db-host -U your-user -d your-db -f scripts/023_create_client_accounts.sql
-```
+\`\`\`
 
 ### 2. Admin Functions
 
@@ -45,7 +45,7 @@ psql -h your-db-host -U your-user -d your-db -f scripts/023_create_client_accoun
 
 Admin có thể tạo client account thông qua trang `/admin/clients`:
 
-```
+\`\`\`
 POST /api/clients
 {
   "email": "client@example.com",
@@ -55,13 +55,13 @@ POST /api/clients
   "phone": "+84123456789",
   "address": "123 Main St, Ho Chi Minh City"
 }
-```
+\`\`\`
 
 #### Liên kết FDA Registration với Client
 
 Khi tạo hoặc cập nhật FDA registration, thêm `client_id`:
 
-```
+\`\`\`
 POST /api/fda-registrations
 {
   "client_id": "uuid-of-client",
@@ -69,7 +69,7 @@ POST /api/fda-registrations
   "fda_registration_number": "12345678",
   // ... other fields
 }
-```
+\`\`\`
 
 ### 3. Client Portal Access
 
@@ -78,7 +78,7 @@ POST /api/fda-registrations
 Khách hàng truy cập: `https://www.veximglobal.com/client-portal/login`
 
 API:
-```
+\`\`\`
 POST /api/client-auth/login
 {
   "email": "client@example.com",
@@ -95,7 +95,7 @@ Response:
   },
   "token": "session_token"
 }
-```
+\`\`\`
 
 Session token được lưu trong HTTP-only cookie và expire sau 7 ngày.
 
