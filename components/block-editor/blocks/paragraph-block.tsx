@@ -11,9 +11,10 @@ interface ParagraphBlockProps {
   onEnter?: () => void
   onBackspace?: () => void
   onPasteSplit?: (lines: string[]) => void
+  onSlashCommand?: () => void
 }
 
-export function ParagraphBlock({ data, onChange, onEnter, onBackspace, onPasteSplit }: ParagraphBlockProps) {
+export function ParagraphBlock({ data, onChange, onEnter, onBackspace, onPasteSplit, onSlashCommand }: ParagraphBlockProps) {
   const { text = "", align = "justify" } = data
   const editorRef = useRef<HTMLParagraphElement>(null)
   const isComposingRef = useRef(false)
@@ -68,6 +69,16 @@ export function ParagraphBlock({ data, onChange, onEnter, onBackspace, onPasteSp
   }, [text])
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLParagraphElement>) => {
+    // Slash command - open block menu when typing "/" at start of empty block
+    if (e.key === "/" && !isComposingRef.current) {
+      const currentText = e.currentTarget.textContent?.trim() || ""
+      if (!currentText && onSlashCommand) {
+        e.preventDefault()
+        onSlashCommand()
+        return
+      }
+    }
+
     // Enter key - create new paragraph block below
     if (e.key === "Enter" && !e.shiftKey && !isComposingRef.current) {
       e.preventDefault()

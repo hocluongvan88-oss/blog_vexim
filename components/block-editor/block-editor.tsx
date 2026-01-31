@@ -11,6 +11,7 @@ import { HeadingBlock } from "./blocks/heading-block"
 import { ParagraphBlock } from "./blocks/paragraph-block"
 import { ImageBlock } from "./blocks/image-block"
 import { QuoteBlock } from "./blocks/quote-block"
+import { ListBlock } from "./blocks/list-block"
 import { TableBlock } from "./blocks/table-block"
 import type { Block, BlockType } from "./types"
 
@@ -36,54 +37,61 @@ export function BlockEditor({ value, onChange }: BlockEditorProps) {
   const [insertPosition, setInsertPosition] = useState<number>(0)
   const blockCounterRef = useRef(0)
   
-  // Undo/Redo history
-  const [history, setHistory] = useState<Block[][]>([initialBlocks])
-  const [historyIndex, setHistoryIndex] = useState(0)
-  const isUndoRedoRef = useRef(false)
+  // Undo/Redo history - using refs to avoid dependency issues
+  const historyRef = useRef<Block[][]>([JSON.parse(JSON.stringify(initialBlocks))])
+  const historyIndexRef = useRef(0)
+  const [, forceUpdate] = useState({}) // For re-rendering UI buttons
+  const isUndoRedoActionRef = useRef(false)
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   
-  // Save to history with debounce
+  // Save to history - stable function that doesn't change
   const saveToHistory = useCallback((newBlocks: Block[]) => {
-    if (isUndoRedoRef.current) {
-      isUndoRedoRef.current = false
+    if (isUndoRedoActionRef.current) {
+      isUndoRedoActionRef.current = false
       return
     }
     
-    setHistory(prev => {
-      // Remove any future history if we're not at the end
-      const newHistory = prev.slice(0, historyIndex + 1)
-      // Add new state
-      newHistory.push(JSON.parse(JSON.stringify(newBlocks)))
-      // Limit history size
-      if (newHistory.length > MAX_HISTORY_SIZE) {
-        newHistory.shift()
-        return newHistory
-      }
-      return newHistory
-    })
-    setHistoryIndex(prev => Math.min(prev + 1, MAX_HISTORY_SIZE - 1))
-  }, [historyIndex])
+    // Deep compare to avoid duplicate entries
+    const lastEntry = historyRef.current[historyIndexRef.current]
+    const newBlocksStr = JSON.stringify(newBlocks)
+    if (lastEntry && JSON.stringify(lastEntry) === newBlocksStr) {
+      return
+    }
+    
+    // Remove any future history if we're not at the end
+    historyRef.current = historyRef.current.slice(0, historyIndexRef.current + 1)
+    // Add new state
+    historyRef.current.push(JSON.parse(newBlocksStr))
+    // Limit history size
+    if (historyRef.current.length > MAX_HISTORY_SIZE) {
+      historyRef.current.shift()
+    } else {
+      historyIndexRef.current += 1
+    }
+    forceUpdate({})
+  }, [])
   
-  // Undo function
+  // Undo function - stable
   const undo = useCallback(() => {
-    if (historyIndex > 0) {
-      isUndoRedoRef.current = true
-      const newIndex = historyIndex - 1
-      setHistoryIndex(newIndex)
-      const previousState = JSON.parse(JSON.stringify(history[newIndex]))
+    if (historyIndexRef.current > 0) {
+      isUndoRedoActionRef.current = true
+      historyIndexRef.current -= 1
+      const previousState = JSON.parse(JSON.stringify(historyRef.current[historyIndexRef.current]))
       setBlocks(previousState)
+      forceUpdate({})
     }
-  }, [history, historyIndex])
+  }, [])
   
-  // Redo function
+  // Redo function - stable
   const redo = useCallback(() => {
-    if (historyIndex < history.length - 1) {
-      isUndoRedoRef.current = true
-      const newIndex = historyIndex + 1
-      setHistoryIndex(newIndex)
-      const nextState = JSON.parse(JSON.stringify(history[newIndex]))
+    if (historyIndexRef.current < historyRef.current.length - 1) {
+      isUndoRedoActionRef.current = true
+      historyIndexRef.current += 1
+      const nextState = JSON.parse(JSON.stringify(historyRef.current[historyIndexRef.current]))
       setBlocks(nextState)
+      forceUpdate({})
     }
-  }, [history, historyIndex])
+  }, [])
   
   // Handle keyboard shortcuts for undo/redo
   useEffect(() => {
@@ -106,14 +114,25 @@ export function BlockEditor({ value, onChange }: BlockEditorProps) {
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [undo, redo])
 
-  // Sync blocks to parent and save to history
+  // Sync blocks to parent and save to history with debounce
   useEffect(() => {
     onChange(blocks)
-    // Debounce history save to avoid too many entries
-    const timeoutId = setTimeout(() => {
+    
+    // Clear previous timeout
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current)
+    }
+    
+    // Debounce history save
+    saveTimeoutRef.current = setTimeout(() => {
       saveToHistory(blocks)
-    }, 500)
-    return () => clearTimeout(timeoutId)
+    }, 800)
+    
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+      }
+    }
   }, [blocks, onChange, saveToHistory])
 
   const addBlock = (type: BlockType, position: number) => {
@@ -149,6 +168,8 @@ export function BlockEditor({ value, onChange }: BlockEditorProps) {
         return { url: "", caption: "", align: "center", width: "100%" }
       case "quote":
         return { text: "", author: "", align: "left" }
+      case "list":
+        return { style: "unordered", items: [""], align: "left" }
       case "table":
         return { rows: 2, cols: 2, content: [["", ""], ["", ""]], align: "left" }
       default:
@@ -304,27 +325,53 @@ export function BlockEditor({ value, onChange }: BlockEditorProps) {
               onChange={(data) => updateBlock(block.id, data)}
               onEnter={() => addBlock("paragraph", index + 1)}
               onBackspace={() => deleteBlock(block.id)}
+              onSlashCommand={() => {
+                setInsertPosition(index)
+                setShowBlockMenu(true)
+              }}
               onPasteSplit={(lines) => {
-                // Update current block with first line
-                updateBlock(block.id, { text: lines[0] })
-                
-                // Create and populate new blocks for remaining lines
-                const newBlocks = [...blocks]
-                lines.slice(1).forEach((line, i) => {
-                  blockCounterRef.current += 1
-                  const newBlock: Block = {
-                    id: `block_${blockCounterRef.current}_paste`,
-                    type: "paragraph",
-                    data: { text: line, align: "justify" },
+                // Use functional update to ensure we have the latest blocks state
+                setBlocks(currentBlocks => {
+                  const blockIndex = currentBlocks.findIndex(b => b.id === block.id)
+                  if (blockIndex === -1) return currentBlocks
+                  
+                  // Create new blocks array
+                  const newBlocks = [...currentBlocks]
+                  
+                  // Update current block with first line
+                  newBlocks[blockIndex] = {
+                    ...newBlocks[blockIndex],
+                    data: { ...newBlocks[blockIndex].data, text: lines[0] }
                   }
-                  newBlocks.splice(index + 1 + i, 0, newBlock)
+                  
+                  // Insert new blocks for remaining lines
+                  const newParagraphs = lines.slice(1).map((line, i) => {
+                    blockCounterRef.current += 1
+                    return {
+                      id: `block_${blockCounterRef.current}_paste_${i}`,
+                      type: "paragraph" as BlockType,
+                      data: { text: line, align: "justify" },
+                    }
+                  })
+                  
+                  // Insert after current block
+                  newBlocks.splice(blockIndex + 1, 0, ...newParagraphs)
+                  
+                  return newBlocks
                 })
-                setBlocks(newBlocks)
               }}
             />
           )}
           {block.type === "image" && <ImageBlock data={block.data} onChange={(data) => updateBlock(block.id, data)} />}
           {block.type === "quote" && <QuoteBlock data={block.data} onChange={(data) => updateBlock(block.id, data)} />}
+          {block.type === "list" && (
+            <ListBlock
+              data={block.data}
+              onChange={(data) => updateBlock(block.id, data)}
+              onEnter={() => addBlock("paragraph", index + 1)}
+              onBackspace={() => deleteBlock(block.id)}
+            />
+          )}
           {block.type === "table" && <TableBlock data={block.data} onChange={(data) => updateBlock(block.id, data)} />}
         </div>
 
@@ -348,8 +395,8 @@ export function BlockEditor({ value, onChange }: BlockEditorProps) {
     )
   }
 
-  const canUndo = historyIndex > 0
-  const canRedo = historyIndex < history.length - 1
+  const canUndo = historyIndexRef.current > 0
+  const canRedo = historyIndexRef.current < historyRef.current.length - 1
 
   return (
     <div className="border rounded-lg bg-white min-h-[600px]" onClick={() => setSelectedBlockId(null)}>
@@ -384,7 +431,7 @@ export function BlockEditor({ value, onChange }: BlockEditorProps) {
           <span className="text-xs">Làm lại</span>
         </Button>
         <span className="text-xs text-muted-foreground ml-2">
-          {historyIndex + 1} / {history.length}
+          {historyIndexRef.current + 1} / {historyRef.current.length}
         </span>
       </div>
       
@@ -411,11 +458,15 @@ export function BlockEditor({ value, onChange }: BlockEditorProps) {
               </Button>
               <Button variant="outline" className="h-20 flex-col bg-transparent" onClick={() => addBlock("quote", insertPosition)}>
                 <span className="text-lg mb-1">"</span>
-                <span className="text-xs">Trích dẫn</span>
+                <span className="text-xs">Trich dan</span>
+              </Button>
+              <Button variant="outline" className="h-20 flex-col bg-transparent" onClick={() => addBlock("list", insertPosition)}>
+                <span className="text-lg mb-1">•</span>
+                <span className="text-xs">Danh sach</span>
               </Button>
               <Button variant="outline" className="h-20 flex-col bg-transparent" onClick={() => addBlock("table", insertPosition)}>
                 <span className="text-lg mb-1">⊞</span>
-                <span className="text-xs">Bảng</span>
+                <span className="text-xs">Bang</span>
               </Button>
             </div>
           </div>

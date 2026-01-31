@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react"
+import React, { useRef, useEffect } from "react"
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import type { HeadingData } from "../types"
@@ -15,6 +15,9 @@ interface HeadingBlockProps {
 
 export function HeadingBlock({ data, onChange, onEnter, onBackspace }: HeadingBlockProps) {
   const { level = 2, text = "", align = "left" } = data
+  const editorRef = useRef<HTMLHeadingElement>(null)
+  const lastTextRef = useRef(text)
+  const isComposingRef = useRef(false)
 
   const HeadingTag = `h${level}` as keyof JSX.IntrinsicElements
 
@@ -24,24 +27,76 @@ export function HeadingBlock({ data, onChange, onEnter, onBackspace }: HeadingBl
     right: "text-right",
   }[align]
 
+  // Initialize content on mount
+  useEffect(() => {
+    if (editorRef.current && editorRef.current.textContent === "") {
+      editorRef.current.textContent = text
+      lastTextRef.current = text
+    }
+  }, [])
+
+  // Only update content from props if it changed externally
+  useEffect(() => {
+    if (text !== lastTextRef.current && editorRef.current) {
+      const selection = window.getSelection()
+      const isEditorFocused = document.activeElement === editorRef.current
+      
+      let savedRange: Range | null = null
+      if (isEditorFocused && selection && selection.rangeCount > 0) {
+        savedRange = selection.getRangeAt(0).cloneRange()
+      }
+
+      editorRef.current.textContent = text
+      lastTextRef.current = text
+
+      if (savedRange && isEditorFocused && selection) {
+        try {
+          selection.removeAllRanges()
+          selection.addRange(savedRange)
+        } catch {
+          const range = document.createRange()
+          range.selectNodeContents(editorRef.current)
+          range.collapse(false)
+          selection.removeAllRanges()
+          selection.addRange(range)
+        }
+      }
+    }
+  }, [text])
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLHeadingElement>) => {
-    // Enter key - create new paragraph block below
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey && !isComposingRef.current) {
       e.preventDefault()
       const currentText = e.currentTarget.textContent || ""
       onChange({ text: currentText })
       onEnter?.()
+      return
     }
 
-    // Backspace on empty block - delete this block
-    if (e.key === "Backspace" && !e.currentTarget.textContent?.trim()) {
-      e.preventDefault()
-      onBackspace?.()
+    if (e.key === "Backspace" && !isComposingRef.current) {
+      const currentText = e.currentTarget.textContent?.trim() || ""
+      if (!currentText) {
+        e.preventDefault()
+        onBackspace?.()
+      }
     }
   }
 
   const handleInput = (e: React.FormEvent<HTMLHeadingElement>) => {
-    onChange({ text: e.currentTarget.textContent || "" })
+    const newText = e.currentTarget.textContent || ""
+    lastTextRef.current = newText
+    onChange({ text: newText })
+  }
+
+  const handleCompositionStart = () => {
+    isComposingRef.current = true
+  }
+
+  const handleCompositionEnd = (e: React.CompositionEvent<HTMLHeadingElement>) => {
+    isComposingRef.current = false
+    const newText = e.currentTarget.textContent || ""
+    lastTextRef.current = newText
+    onChange({ text: newText })
   }
 
   return (
@@ -52,19 +107,26 @@ export function HeadingBlock({ data, onChange, onEnter, onBackspace }: HeadingBl
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="2">Tiêu đề 2</SelectItem>
-            <SelectItem value="3">Tiêu đề 3</SelectItem>
+            <SelectItem value="2">Tiêu de 2</SelectItem>
+            <SelectItem value="3">Tiêu de 3</SelectItem>
           </SelectContent>
         </Select>
       </div>
       <HeadingTag
+        ref={editorRef as any}
         contentEditable
         suppressContentEditableWarning
-        className={`${alignClass} ${level === 2 ? "text-3xl" : "text-2xl"} font-bold text-primary outline-none`}
+        className={`${alignClass} ${level === 2 ? "text-3xl" : "text-2xl"} font-bold text-primary outline-none empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground`}
+        data-placeholder="Nhap tieu de..."
         onKeyDown={handleKeyDown}
         onInput={handleInput}
-        onBlur={(e) => onChange({ text: e.currentTarget.textContent || "" })}
-        dangerouslySetInnerHTML={{ __html: text || "Nhập tiêu đề..." }}
+        onCompositionStart={handleCompositionStart}
+        onCompositionEnd={handleCompositionEnd}
+        onBlur={(e) => {
+          const newText = e.currentTarget.textContent || ""
+          lastTextRef.current = newText
+          onChange({ text: newText })
+        }}
       />
     </div>
   )
