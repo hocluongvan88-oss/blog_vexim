@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
 import {
   LayoutDashboard,
@@ -159,15 +160,16 @@ export function AdminSidebar({ adminUser }: AdminSidebarProps) {
   return (
     <aside className="w-64 bg-white border-r min-h-screen flex flex-col sticky top-0">
       {/* Logo */}
-      <div className="p-6 border-b">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-            <Globe className="w-6 h-6 text-primary-foreground" />
-          </div>
-          <div>
-            <span className="text-xl font-bold text-primary block">Vexim Global</span>
-            <span className="text-xs text-muted-foreground">Admin Panel</span>
-          </div>
+      <div className="p-4 border-b">
+        <Link href="/" className="flex items-center gap-3">
+          <Image
+            src="/vexim-logo.png"
+            alt="Vexim Global"
+            width={120}
+            height={40}
+            className="h-10 w-auto object-contain"
+          />
+          <span className="text-xs text-muted-foreground">Admin Panel</span>
         </Link>
       </div>
 

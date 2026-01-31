@@ -19,6 +19,7 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 import Link from "next/link"
+import Image from "next/image"
 
 interface ClientData {
   id: string
@@ -312,10 +313,13 @@ export default function ClientPortal() {
             {/* Mobile logo */}
             <div className="lg:hidden mb-8 text-center">
               <Link href="/" className="inline-block">
-                <span className="text-2xl font-bold">
-                  <span className="text-gray-900">VEXIM</span>
-                  <span className="text-emerald-600 ml-1">GLOBAL</span>
-                </span>
+                <Image
+                  src="/vexim-logo.png"
+                  alt="Vexim Global"
+                  width={140}
+                  height={50}
+                  className="h-12 w-auto object-contain"
+                />
               </Link>
             </div>
 
