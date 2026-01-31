@@ -12,6 +12,8 @@ import { ParagraphBlock } from "./blocks/paragraph-block"
 import { ImageBlock } from "./blocks/image-block"
 import { QuoteBlock } from "./blocks/quote-block"
 import { TableBlock } from "./blocks/table-block"
+import { ListBlock } from "./blocks/list-block"
+import { InlineToolbar } from "./inline-toolbar"
 import type { Block, BlockType } from "./types"
 
 interface BlockEditorProps {
@@ -32,11 +34,71 @@ export function BlockEditor({ value, onChange }: BlockEditorProps) {
   const [showBlockMenu, setShowBlockMenu] = useState(false)
   const [insertPosition, setInsertPosition] = useState<number>(0)
   const blockCounterRef = useRef(0)
+  
+  // Undo/Redo state
+  const [history, setHistory] = useState<Block[][]>([initialBlocks])
+  const [historyIndex, setHistoryIndex] = useState(0)
+  const isUndoingRef = useRef(false)
 
   // Sync blocks to parent
   useEffect(() => {
     onChange(blocks)
   }, [blocks, onChange])
+  
+  // Track history for undo/redo
+  useEffect(() => {
+    if (!isUndoingRef.current) {
+      // Only save to history if blocks actually changed
+      const lastHistory = history[historyIndex]
+      const hasChanged = JSON.stringify(lastHistory) !== JSON.stringify(blocks)
+      
+      if (hasChanged) {
+        // Remove any "future" history and add new state
+        const newHistory = history.slice(0, historyIndex + 1)
+        newHistory.push(blocks)
+        
+        // Limit history to last 50 states
+        if (newHistory.length > 50) {
+          newHistory.shift()
+        } else {
+          setHistoryIndex(historyIndex + 1)
+        }
+        
+        setHistory(newHistory)
+      }
+    }
+    isUndoingRef.current = false
+  }, [blocks])
+  
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ctrl+Z / Cmd+Z - Undo
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault()
+        if (historyIndex > 0) {
+          isUndoingRef.current = true
+          const previousState = history[historyIndex - 1]
+          setBlocks(previousState)
+          setHistoryIndex(historyIndex - 1)
+        }
+      }
+      
+      // Ctrl+Y / Cmd+Shift+Z - Redo
+      if (((e.ctrlKey || e.metaKey) && e.key === 'y') || ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'z')) {
+        e.preventDefault()
+        if (historyIndex < history.length - 1) {
+          isUndoingRef.current = true
+          const nextState = history[historyIndex + 1]
+          setBlocks(nextState)
+          setHistoryIndex(historyIndex + 1)
+        }
+      }
+    }
+    
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [history, historyIndex])
 
   const addBlock = (type: BlockType, position: number) => {
     blockCounterRef.current += 1
@@ -73,6 +135,8 @@ export function BlockEditor({ value, onChange }: BlockEditorProps) {
         return { text: "", author: "", align: "left" }
       case "table":
         return { rows: 2, cols: 2, content: [["", ""], ["", ""]], align: "left" }
+      case "list":
+        return { style: "unordered", items: [""], align: "left" }
       default:
         return {}
     }
@@ -248,6 +312,14 @@ export function BlockEditor({ value, onChange }: BlockEditorProps) {
           {block.type === "image" && <ImageBlock data={block.data} onChange={(data) => updateBlock(block.id, data)} />}
           {block.type === "quote" && <QuoteBlock data={block.data} onChange={(data) => updateBlock(block.id, data)} />}
           {block.type === "table" && <TableBlock data={block.data} onChange={(data) => updateBlock(block.id, data)} />}
+          {block.type === "list" && (
+            <ListBlock
+              data={block.data}
+              onChange={(data) => updateBlock(block.id, data)}
+              onEnter={() => addBlock("paragraph", index + 1)}
+              onBackspace={() => deleteBlock(block.id)}
+            />
+          )}
         </div>
 
         {/* Insert Block Button Below */}
@@ -301,10 +373,21 @@ export function BlockEditor({ value, onChange }: BlockEditorProps) {
                 <span className="text-lg mb-1">⊞</span>
                 <span className="text-xs">Bảng</span>
               </Button>
+              <Button variant="outline" className="h-20 flex-col bg-transparent" onClick={() => addBlock("list", insertPosition)}>
+                <span className="text-lg mb-1">≡</span>
+                <span className="text-xs">Danh sách</span>
+              </Button>
             </div>
           </div>
         </div>
       )}
+      
+      {/* Inline Formatting Toolbar */}
+      <InlineToolbar
+        onFormat={(command, value) => {
+          document.execCommand(command, false, value)
+        }}
+      />
     </div>
   )
 }

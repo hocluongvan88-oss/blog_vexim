@@ -17,8 +17,8 @@ export const metadata: Metadata = {
     "xuất khẩu Mỹ",
     "FDA thực phẩm",
     "FDA mỹ phẩm",
-    "FDA thiết bị y tế",
-    "tư vấn FDA",
+    "FDA thiết bị y t���",
+    "tư v��n FDA",
   ],
   alternates: {
     canonical: "/services/fda",

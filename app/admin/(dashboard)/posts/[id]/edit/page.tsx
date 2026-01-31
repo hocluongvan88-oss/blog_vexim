@@ -17,6 +17,7 @@ import Link from "next/link"
 import { ImageUploader } from "@/components/image-uploader"
 import { AIWritingAssistant } from "@/components/admin/ai-writing-assistant"
 import { HTMLPasteDialog } from "@/components/admin/html-paste-dialog"
+import { PostPreviewDialog } from "@/components/admin/post-preview-dialog"
 import type { Block } from "@/components/block-editor/types"
 
 export default function EditPostPage({ params }: { params: Promise<{ id: string }> }) {
@@ -36,6 +37,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
   const [previewImage, setPreviewImage] = useState<string | null>(null)
   const [status, setStatus] = useState<"draft" | "published">("draft")
   const [selectedText, setSelectedText] = useState("")
+  const [showPreview, setShowPreview] = useState(false)
 
   useEffect(() => {
     const loadPost = async () => {
@@ -332,10 +334,9 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
               </Button>
 
               <Button
-                onClick={() => alert("Tính năng xem trước đang phát triển")}
+                onClick={() => setShowPreview(true)}
                 variant="outline"
-                disabled
-                className="w-full opacity-50 cursor-not-allowed"
+                className="w-full"
               >
                 <Eye className="w-4 h-4 mr-2" />
                 Xem trước
@@ -353,6 +354,18 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
           </Card>
         </div>
       </div>
+      
+      {/* Preview Dialog */}
+      <PostPreviewDialog
+        open={showPreview}
+        onOpenChange={setShowPreview}
+        title={title}
+        category={category}
+        excerpt={excerpt}
+        blocks={blocks}
+        featuredImage={featuredImage}
+        previewImage={previewImage}
+      />
     </div>
   )
 }

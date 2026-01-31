@@ -469,7 +469,7 @@ Tiêu đề: ${article.title}
 URL: ${article.url}
 
 Quy tắc lọc 3 lớp:
-- Lớp 1 (BẮT BUỘC): Phải chứa ít nhất 1 từ khóa về thực phẩm, xuất khẩu, nhập khẩu, FDA, GACC, MFDS, chứng nhận, an toàn thực phẩm
+- Lớp 1 (BẮT BUỘC): Phải chứa ít nhất 1 từ khóa về thực phẩm, xuất khẩu, nhập khẩu, FDA, GACC, MFDS, chứng nhận, an toàn th��c phẩm
 - Lớp 2 (NÊN CÓ): Nên có từ khóa về nông sản, thủy sản, chế biến, đóng gói, nhãn mác, Process Filing
 - Lớp 3 (LOẠI TRỪ): Không được là dược phẩm, thiết bị y tế, mỹ phẩm không liên quan thực phẩm
 

@@ -16,6 +16,7 @@ import { SEOChecker } from "@/components/seo-checker"
 import { ImageUploader } from "@/components/image-uploader"
 import { AIWritingAssistant } from "@/components/admin/ai-writing-assistant"
 import { HTMLPasteDialog } from "@/components/admin/html-paste-dialog"
+import { PostPreviewDialog } from "@/components/admin/post-preview-dialog"
 import type { Block } from "@/components/block-editor/types"
 
 export default function NewPostPage() {
@@ -32,6 +33,7 @@ export default function NewPostPage() {
   const [featuredImage, setFeaturedImage] = useState("")
   const [previewImage, setPreviewImage] = useState<string | null>(null)
   const [selectedText, setSelectedText] = useState("")
+  const [showPreview, setShowPreview] = useState(false)
 
   // Generate text content from blocks for SEO checker and AI
   const getTextContent = () => {
@@ -277,13 +279,13 @@ export default function NewPostPage() {
               </Button>
 
               <Button
-                onClick={() => handleSubmit("published")}
-                className="bg-accent hover:bg-accent/90 w-full"
-                disabled={isLoading}
+                onClick={() => setShowPreview(true)}
+                variant="outline"
+                className="w-full"
                 type="button"
               >
-                {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
-                Xuất bản
+                <Eye className="w-4 h-4 mr-2" />
+                Xem trước
               </Button>
             </div>
           </Card>

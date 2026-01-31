@@ -240,7 +240,7 @@ export default async function sitemap() {
 
 ---
 
-## 🔧 Troubleshooting
+## ��� Troubleshooting
 
 ### Lỗi: "posts table does not exist"
 

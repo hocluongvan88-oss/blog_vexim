@@ -90,7 +90,7 @@ Mỗi bài viết sẽ có các field:
 | `category` | Danh mục (từ WordPress) |
 | `status` | Trạng thái: "published" |
 | `published_at` | Ngày xuất bản |
-| `wordpress_url` | URL gốc từ WordPress |
+| `wordpress_url` | URL gốc t��� WordPress |
 | `meta_title` | SEO title (copy từ title) |
 | `meta_description` | SEO description (copy từ excerpt) |
 

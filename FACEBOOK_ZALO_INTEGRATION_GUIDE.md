@@ -30,7 +30,7 @@ Hệ thống chatbot đã được xây dựng sẵn với các tính năng:
 │   • Load AI Config        • Search Knowledge Base         │
 │   • Generate Response     • Analyze Intent                │
 │   • Decision: AI vs Agent Handover                        │
-└───────────────┬───────────────────────────────────────────┘
+└───────────────┬───────────────────────���───────────────────┘
                 │
                 ▼
 ┌───────────────────────────────────────────────────────────┐

@@ -8,7 +8,7 @@ const services = [
     image: "/fda-food-safety-inspection-laboratory-professional.jpg",
     title: "Đăng ký FDA 24h",
     description:
-      "Xuất khẩu thực phẩm, mỹ phẩm sang Mỹ bắt buộc phải đăng ký FDA (21 CFR Part 1). Không có FDA Registration, hàng sẽ bị giữ lại tại cảng Mỹ ngay. Chúng tôi hiểu rõ quy trình FDA, hướng dẫn chuẩn bị hồ sơ đầy đủ, đăng ký đúng cách, tránh bị từ chối.",
+      "Xuất khẩu thực phẩm, mỹ phẩm sang Mỹ bắt buộc phải đăng ký FDA (21 CFR Part 1). Không có FDA Registration, hàng sẽ bị giữ l���i tại cảng Mỹ ngay. Chúng tôi hiểu rõ quy trình FDA, hướng dẫn chuẩn bị hồ sơ đầy đủ, đăng ký đúng cách, tránh bị từ chối.",
     link: "/services/fda",
   },
   {

@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
           console.error("[v0] Error parsing PDF:", error)
           return NextResponse.json(
             { 
-              error: "Không thể đọc file PDF. Vui lòng kiểm tra file có hợp lệ không.",
+              error: "Không thể ��ọc file PDF. Vui lòng kiểm tra file có hợp lệ không.",
               details: error instanceof Error ? error.message : "PDF parsing failed"
             },
             { status: 400 }

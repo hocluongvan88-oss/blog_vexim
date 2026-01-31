@@ -13,7 +13,7 @@ const faqs = [
   {
     question: "Tôi cần chuẩn bị những gì khi đăng ký FDA cho sản phẩm thực phẩm?",
     answer:
-      "Để đăng ký FDA, bạn cần chuẩn bị: (1) Giấy phép kinh doanh và các giấy tờ pháp lý của công ty, (2) Thông tin chi tiết về sản phẩm (thành phần, quy trình sản xuất, nhãn mác), (3) Chứng nhận ATTP hoặc các giấy chứng nhận chất lượng liên quan, (4) Thông tin nhà máy sản xuất. Đội ngũ Vexim sẽ hướng dẫn chi tiết và hỗ trợ hoàn thiện toàn bộ hồ sơ.",
+      "Để đăng ký FDA, bạn cần chuẩn bị: (1) Giấy phép kinh doanh và các giấy tờ pháp lý của công ty, (2) Thông tin chi tiết về sản phẩm (thành phần, quy trình s���n xuất, nhãn mác), (3) Chứng nhận ATTP hoặc các giấy chứng nhận chất lượng liên quan, (4) Thông tin nhà máy sản xuất. Đội ngũ Vexim sẽ hướng dẫn chi tiết và hỗ trợ hoàn thiện toàn bộ hồ sơ.",
   },
   {
     question: "Nền tảng truy xuất nguồn gốc tích hợp AI của Vexim hoạt động như thế nào?",

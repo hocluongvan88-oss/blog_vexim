@@ -36,7 +36,7 @@ UPDATE fda_subscriptions
 SET token_expires_at = NOW() - INTERVAL '1 hour' 
 WHERE email = 'test@example.com';
 
-# Click verify link → "Không tìm thấy đăng ký" error
+# Click verify link → "Không tìm th��y đăng ký" error
 \`\`\`
 
 ---

@@ -26,10 +26,10 @@ export function ParagraphBlock({ data, onChange, onEnter, onBackspace, onPasteSp
     justify: "text-justify md:text-justify",
   }[align]
 
-  // Initialize content on mount
+  // Initialize content on mount - support HTML formatting
   useEffect(() => {
-    if (editorRef.current && editorRef.current.textContent === "") {
-      editorRef.current.textContent = text
+    if (editorRef.current && editorRef.current.innerHTML === "") {
+      editorRef.current.innerHTML = text
       lastTextRef.current = text
     }
   }, [])
@@ -46,8 +46,8 @@ export function ParagraphBlock({ data, onChange, onEnter, onBackspace, onPasteSp
         savedRange = selection.getRangeAt(0).cloneRange()
       }
 
-      // Update content
-      editorRef.current.textContent = text
+      // Update content - use innerHTML to preserve formatting
+      editorRef.current.innerHTML = text
       lastTextRef.current = text
 
       // Restore cursor position if was focused
@@ -90,67 +90,67 @@ export function ParagraphBlock({ data, onChange, onEnter, onBackspace, onPasteSp
   const handlePaste = (e: React.ClipboardEvent<HTMLParagraphElement>) => {
     e.preventDefault()
     
+    // Try to get HTML first for formatting preservation
+    const pastedHTML = e.clipboardData.getData("text/html")
     const pastedText = e.clipboardData.getData("text/plain")
     
-    // More robust line splitting - handles various line break formats
-    // Split by double newlines first (paragraph breaks), then single newlines
-    let lines: string[] = []
+    // Split by newlines to detect multi-line paste
+    const lines = pastedText.split(/\r?\n/)
     
-    // First try splitting by double newlines (clear paragraph separators)
-    const paragraphs = pastedText.split(/\n\s*\n|\r\n\s*\r\n/)
+    // Filter out completely empty lines but preserve line structure
+    const processedLines = lines.map(line => line.trim()).filter(line => line.length > 0)
     
-    if (paragraphs.length > 1) {
-      // Multiple paragraphs detected
-      lines = paragraphs
-        .map(p => p.trim())
-        .filter(p => p.length > 0)
-    } else {
-      // Fall back to single newline splitting
-      lines = pastedText
-        .split(/\r?\n/)
-        .map(line => line.trim())
-        .filter(line => line.length > 0)
+    if (processedLines.length > 1 && onPasteSplit) {
+      // Multiple non-empty lines - create multiple paragraph blocks
+      onPasteSplit(processedLines)
+      return
     }
     
-    // If we have multiple lines and the callback exists, split into blocks
-    if (lines.length > 1 && onPasteSplit) {
-      onPasteSplit(lines)
-    } else if (lines.length === 1) {
-      // Single line/paragraph - insert as normal text
-      const textToInsert = lines[0]
-      const selection = window.getSelection()
-      if (selection && selection.rangeCount > 0) {
-        const range = selection.getRangeAt(0)
-        range.deleteContents()
-        const textNode = document.createTextNode(textToInsert)
-        range.insertNode(textNode)
-        range.setStartAfter(textNode)
-        range.setEndAfter(textNode)
-        selection.removeAllRanges()
-        selection.addRange(range)
+    // Single line or no split handler - insert with formatting
+    const selection = window.getSelection()
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0)
+      range.deleteContents()
+      
+      // Try to preserve basic HTML formatting (bold, italic, links)
+      if (pastedHTML && pastedHTML.includes("<")) {
+        // Create temporary element to parse HTML
+        const temp = document.createElement("div")
+        temp.innerHTML = pastedHTML
+        
+        // Extract formatted content
+        const fragment = document.createDocumentFragment()
+        while (temp.firstChild) {
+          fragment.appendChild(temp.firstChild)
+        }
+        range.insertNode(fragment)
+      } else {
+        // Plain text - preserve line breaks as <br>
+        const textWithBreaks = pastedText.split(/\r?\n/).join("<br>")
+        const temp = document.createElement("div")
+        temp.innerHTML = textWithBreaks
+        
+        const fragment = document.createDocumentFragment()
+        while (temp.firstChild) {
+          fragment.appendChild(temp.firstChild)
+        }
+        range.insertNode(fragment)
       }
-      onChange({ text: e.currentTarget.textContent || "" })
-    } else if (pastedText.trim()) {
-      // Fallback - just insert the trimmed text
-      const selection = window.getSelection()
-      if (selection && selection.rangeCount > 0) {
-        const range = selection.getRangeAt(0)
-        range.deleteContents()
-        const textNode = document.createTextNode(pastedText.trim())
-        range.insertNode(textNode)
-        range.setStartAfter(textNode)
-        range.setEndAfter(textNode)
-        selection.removeAllRanges()
-        selection.addRange(range)
-      }
-      onChange({ text: e.currentTarget.textContent || "" })
+      
+      // Move cursor to end of inserted content
+      range.collapse(false)
+      selection.removeAllRanges()
+      selection.addRange(range)
+      
+      // Update with innerHTML to preserve formatting
+      onChange({ text: e.currentTarget.innerHTML || "" })
     }
   }
 
   const handleInput = (e: React.FormEvent<HTMLParagraphElement>) => {
-    const newText = e.currentTarget.textContent || ""
-    lastTextRef.current = newText
-    onChange({ text: newText })
+    const newHTML = e.currentTarget.innerHTML || ""
+    lastTextRef.current = newHTML
+    onChange({ text: newHTML })
   }
 
   const handleCompositionStart = () => {
@@ -159,9 +159,9 @@ export function ParagraphBlock({ data, onChange, onEnter, onBackspace, onPasteSp
 
   const handleCompositionEnd = (e: React.CompositionEvent<HTMLParagraphElement>) => {
     isComposingRef.current = false
-    const newText = e.currentTarget.textContent || ""
-    lastTextRef.current = newText
-    onChange({ text: newText })
+    const newHTML = e.currentTarget.innerHTML || ""
+    lastTextRef.current = newHTML
+    onChange({ text: newHTML })
   }
 
   return (
@@ -177,9 +177,9 @@ export function ParagraphBlock({ data, onChange, onEnter, onBackspace, onPasteSp
       onCompositionStart={handleCompositionStart}
       onCompositionEnd={handleCompositionEnd}
       onBlur={(e) => {
-        const newText = e.currentTarget.textContent || ""
-        lastTextRef.current = newText
-        onChange({ text: newText })
+        const newHTML = e.currentTarget.innerHTML || ""
+        lastTextRef.current = newHTML
+        onChange({ text: newHTML })
       }}
     />
   )

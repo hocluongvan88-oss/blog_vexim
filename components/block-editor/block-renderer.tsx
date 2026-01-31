@@ -74,6 +74,26 @@ export function BlockRenderer({ blocks }: BlockRendererProps) {
         )
       }
 
+      case "list": {
+        const ListTag = data.style === "ordered" ? "ol" : "ul"
+        const listClass = data.style === "ordered" ? "list-decimal" : "list-disc"
+        
+        return (
+          <ListTag
+            key={block.id}
+            className={`${listClass} pl-6 space-y-2 my-4 ${alignmentClass[data.align || "left"]}`}
+          >
+            {(data.items || []).map((item: string, index: number) => (
+              <li
+                key={index}
+                className="leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: item }}
+              />
+            ))}
+          </ListTag>
+        )
+      }
+
       case "table": {
         return (
           <div key={block.id} className="my-6 overflow-x-auto">

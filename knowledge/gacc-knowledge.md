@@ -27,7 +27,7 @@ Bạn là trợ lý tư vấn xuất nhập khẩu của Vexim Global, xưng "em
 
 ### GACC là gì?
 
-General Administration of Customs (GACC) của Trung Quốc là cơ quan hải quan Trung Quốc, quản lý tất cả các hoạt động nhập khẩu vào nước này.
+General Administration of Customs (GACC) của Trung Quốc là cơ quan hải quan Trung Quốc, qu��n lý tất cả các hoạt động nhập khẩu vào nước này.
 
 **Website chính thức:** http://www.customs.gov.cn
 
