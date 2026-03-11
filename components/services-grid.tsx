@@ -41,11 +41,12 @@ const services = [
     badge: "Công nghệ mới",
   },
   {
-    image: "/international-trade-export-logistics-cargo-shippin.jpg",
-    title: "Dịch vụ Ủy thác xuất khẩu",
+    image: "/ai-fda-label-compliance-check-scanner.jpg",
+    title: "Kiểm tra nhãn FDA bằng AI",
     description:
-      "Doanh nghiệp chưa có giấy phép xuất nhập khẩu vẫn có thể xuất hàng hợp pháp qua hình thức ủy thác. Vexim Global có đầy đủ giấy phép và kinh nghiệm, đảm bảo tuân thủ quy định Hải quan, xử lý đúng thuế VAT, giúp bạn xuất khẩu an toàn.",
-    link: "/services/export-delegation",
+      "Kiểm tra tuân thủ nhãn FDA theo 21 CFR chỉ trong 2 phút. AI đối soát với 5.346 vi phạm thực tế từ Warning Letters, phát hiện lỗi trước khi hàng rời cảng. Tỷ lệ thông quan 99,5% sau khi sửa theo hướng dẫn.",
+    link: "/services/fda-label-check",
+    badge: "AI Powered",
   },
 ]
 

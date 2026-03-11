@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { ArrowRight, FileCheck, Globe, Shield, Truck, Cpu, Package } from "lucide-react"
+import { ArrowRight, FileCheck, Globe, Shield, Cpu, Package, ScanLine } from "lucide-react"
 import { Card } from "@/components/ui/card"
 
 // Map categories to related services
@@ -15,6 +15,12 @@ const categoryToServices: Record<string, Array<{
       description: "Dịch vụ đăng ký FDA cho thực phẩm, dược phẩm xuất khẩu sang Mỹ",
       href: "/services/fda",
       icon: FileCheck,
+    },
+    {
+      title: "Kiểm tra nhãn FDA",
+      description: "AI kiểm tra tuân thủ nhãn theo 21 CFR, phát hiện lỗi trước khi xuất hàng",
+      href: "/services/fda-label-check",
+      icon: ScanLine,
     },
     {
       title: "US Agent",
@@ -55,10 +61,10 @@ const categoryToServices: Record<string, Array<{
   ],
   "Xuất nhập khẩu": [
     {
-      title: "Ủy thác xuất khẩu",
-      description: "Dịch vụ ủy thác xuất khẩu trọn gói cho doanh nghiệp",
-      href: "/services/export-delegation",
-      icon: Truck,
+      title: "Kiểm tra nhãn FDA",
+      description: "AI kiểm tra tuân thủ nhãn theo 21 CFR trong 2 phút",
+      href: "/services/fda-label-check",
+      icon: ScanLine,
     },
     {
       title: "Đăng ký FDA",
@@ -95,10 +101,10 @@ const categoryToServices: Record<string, Array<{
   ],
   "Tin tức thị trường": [
     {
-      title: "Ủy thác xuất khẩu",
-      description: "Dịch vụ ủy thác xuất khẩu trọn gói",
-      href: "/services/export-delegation",
-      icon: Truck,
+      title: "Kiểm tra nhãn FDA",
+      description: "AI kiểm tra tuân thủ nhãn theo 21 CFR",
+      href: "/services/fda-label-check",
+      icon: ScanLine,
     },
     {
       title: "AI Traceability",
@@ -124,10 +130,10 @@ const defaultServices = [
     icon: Globe,
   },
   {
-    title: "Ủy thác xuất khẩu",
-    description: "Dịch vụ xuất khẩu trọn gói",
-    href: "/services/export-delegation",
-    icon: Truck,
+    title: "Kiểm tra nhãn FDA",
+    description: "AI kiểm tra tuân thủ nhãn FDA",
+    href: "/services/fda-label-check",
+    icon: ScanLine,
   },
 ]
 

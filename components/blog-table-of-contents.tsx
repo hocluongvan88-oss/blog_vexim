@@ -72,7 +72,7 @@ export function BlogTableOfContents({ content }: { content: string }) {
 
   return (
     <nav className="hidden xl:block sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto">
-      <div className="bg-secondary/30 rounded-lg p-6 w-64">
+      <div className="bg-secondary/30 rounded-lg p-6 w-full">
         <h4 className="font-bold text-primary mb-4">Nội dung bài viết</h4>
         <ul className="space-y-1">
           {headings.map((heading) => (
@@ -85,7 +85,7 @@ export function BlogTableOfContents({ content }: { content: string }) {
               <button
                 onClick={() => scrollToHeading(heading.id)}
                 className={cn(
-                  "text-left transition-colors w-full leading-relaxed py-1",
+                  "text-left transition-colors w-full leading-relaxed py-1 break-words",
                   // H2 styling - prominent
                   heading.level === 2 && "text-sm font-semibold text-foreground/90 hover:text-primary",
                   // H3 styling - subtle  
