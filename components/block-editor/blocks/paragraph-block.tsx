@@ -94,10 +94,20 @@ export function ParagraphBlock({
     }
   }, [text])
 
+  // Decode HTML entities (e.g., &lt; -> <, &amp; -> &)
+  const decodeHTMLEntities = (html: string): string => {
+    const temp = document.createElement("textarea")
+    temp.innerHTML = html
+    return temp.value
+  }
+
   // HTML Sanitization - allow safe inline tags, prevent XSS
   const sanitizeHTML = (html: string): string => {
+    // First decode any HTML entities that might be double-encoded
+    const decodedHTML = decodeHTMLEntities(html)
+    
     const temp = document.createElement("div")
-    temp.innerHTML = html
+    temp.innerHTML = decodedHTML
     
     // Allow only safe inline formatting tags
     const allowedTags = ["strong", "b", "em", "i", "u", "a", "code", "br", "span"]
@@ -158,8 +168,11 @@ export function ParagraphBlock({
 
   // Clean HTML from Google Docs/Gemini - strip block tags but keep inline formatting
   const cleanInlineHTML = (html: string): string => {
+    // First decode any HTML entities
+    const decodedHTML = decodeHTMLEntities(html)
+    
     const temp = document.createElement("div")
-    temp.innerHTML = html
+    temp.innerHTML = decodedHTML
 
     // Convert styled spans to semantic tags
     temp.querySelectorAll("span").forEach((span) => {
