@@ -381,7 +381,7 @@ export function BlockEditor({ value, onChange }: BlockEditorProps) {
   }
 
   return (
-    <div className="border rounded-lg p-6 bg-white min-h-[600px]" onClick={() => setSelectedBlockId(null)}>
+    <div className="block-editor-container border rounded-lg p-6 bg-white min-h-[600px]" onClick={() => setSelectedBlockId(null)}>
       {/* Blocks - Always render since we always have at least one block */}
       <div className="space-y-4 pl-10">{blocks.map((block, index) => renderBlock(block, index))}</div>
 
