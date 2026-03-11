@@ -216,9 +216,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             </Link>
 
             {/* Grid layout with TOC, content and sidebar */}
-            <div className="grid grid-cols-1 xl:grid-cols-[250px_1fr_300px] lg:grid-cols-[1fr_300px] gap-8">
+            <div className="grid grid-cols-1 xl:grid-cols-[220px_minmax(0,1fr)_300px] lg:grid-cols-[minmax(0,1fr)_300px] gap-8">
               {/* Table of Contents - Left side on xl screens */}
-              <aside className="hidden xl:block">
+              <aside className="hidden xl:block overflow-hidden">
                 <BlogTableOfContents content={htmlContent} />
               </aside>
 
