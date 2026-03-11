@@ -74,14 +74,25 @@ export function BlogTableOfContents({ content }: { content: string }) {
     <nav className="hidden xl:block sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto">
       <div className="bg-secondary/30 rounded-lg p-6 w-64">
         <h4 className="font-bold text-primary mb-4">Nội dung bài viết</h4>
-        <ul className="space-y-2">
+        <ul className="space-y-1">
           {headings.map((heading) => (
-            <li key={heading.id} className={cn(heading.level === 3 && "ml-4")}>
+            <li 
+              key={heading.id} 
+              className={cn(
+                heading.level === 3 && "ml-4 border-l-2 border-muted pl-3"
+              )}
+            >
               <button
                 onClick={() => scrollToHeading(heading.id)}
                 className={cn(
-                  "text-left text-sm hover:text-accent transition-colors w-full text-muted-foreground leading-relaxed",
-                  activeId === heading.id && "text-accent font-medium",
+                  "text-left transition-colors w-full leading-relaxed py-1",
+                  // H2 styling - prominent
+                  heading.level === 2 && "text-sm font-semibold text-foreground/90 hover:text-primary",
+                  // H3 styling - subtle  
+                  heading.level === 3 && "text-xs text-muted-foreground hover:text-foreground/80",
+                  // Active state
+                  activeId === heading.id && heading.level === 2 && "text-primary font-bold",
+                  activeId === heading.id && heading.level === 3 && "text-primary/80 font-medium",
                 )}
               >
                 {heading.text}
