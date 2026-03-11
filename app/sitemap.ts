@@ -79,5 +79,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ]
 
-  return [...staticPages, ...blogPages]
+  // Category pages for better SEO indexation
+  const categories = [
+    "FDA",
+    "GACC", 
+    "MFDS",
+    "Truy xuất nguồn gốc",
+    "Tin tức thị trường",
+    "Xuất nhập khẩu",
+    "Kiến thức pháp lý",
+  ]
+
+  const categoryPages: MetadataRoute.Sitemap = categories.map((category) => ({
+    url: `${baseUrl}/blog/category/${encodeURIComponent(category)}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly" as const,
+    priority: 0.8,
+  }))
+
+  return [...staticPages, ...categoryPages, ...blogPages]
 }

@@ -5,11 +5,21 @@ import { BackToTop } from "@/components/back-to-top"
 import { Button } from "@/components/ui/button"
 import ConsultationDialog from "@/components/consultation-dialog"
 import { Calendar, User, ArrowLeft, Clock } from "lucide-react"
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
+  BreadcrumbPage,
+} from "@/components/ui/breadcrumb"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { BlogShareButtons } from "@/components/blog-share-buttons"
 import { RelatedPosts } from "@/components/related-posts"
 import BlogSidebar from "@/components/blog-sidebar"
+import { BlogTableOfContents } from "@/components/blog-table-of-contents"
+import { BlogInternalLinks } from "@/components/blog-internal-links"
 import { ViewTracker } from "@/components/view-tracker"
 import { blocksToHTML } from "@/lib/blocks-to-html"
 import type { Block } from "@/components/block-editor/types"
@@ -49,13 +59,19 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     }
   }
 
+  // Trim meta description to 160 characters for Google search results
+  const trimmedDescription = (text: string | null | undefined) => {
+    if (!text) return "Vexim Global - Tư vấn xuất nhập khẩu chuyên nghiệp"
+    return text.length > 160 ? text.substring(0, 157) + "..." : text
+  }
+
   return {
     title: post.meta_title || post.title,
-    description: post.meta_description || post.excerpt,
+    description: trimmedDescription(post.meta_description || post.excerpt),
     keywords: post.tags || [post.category],
     authors: [{ name: "Vexim Global" }],
     alternates: {
-      canonical: `https://vexim.vn/blog/${post.slug}`,
+      canonical: `https://www.veximglobal.com/blog/${post.slug}`,
     },
     openGraph: {
       title: post.meta_title || post.title,
@@ -139,19 +155,19 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     author: {
       "@type": "Organization",
       name: "Vexim Global",
-      url: "https://vexim.vn",
+      url: "https://www.veximglobal.com",
     },
     publisher: {
       "@type": "Organization",
       name: "Vexim Global",
       logo: {
         "@type": "ImageObject",
-        url: "https://vexim.vn/logo.png",
+        url: "https://www.veximglobal.com/logo.png",
       },
     },
     mainEntityOfPage: {
       "@type": "WebPage",
-      "@id": `https://vexim.vn/blog/${post.slug}`,
+      "@id": `https://www.veximglobal.com/blog/${post.slug}`,
     },
   }
 
@@ -163,19 +179,19 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         "@type": "ListItem",
         position: 1,
         name: "Trang chủ",
-        item: "https://vexim.vn",
+        item: "https://www.veximglobal.com",
       },
       {
         "@type": "ListItem",
         position: 2,
         name: "Blog",
-        item: "https://vexim.vn/blog",
+        item: "https://www.veximglobal.com/blog",
       },
       {
         "@type": "ListItem",
         position: 3,
         name: post.title,
-        item: `https://vexim.vn/blog/${post.slug}`,
+        item: `https://www.veximglobal.com/blog/${post.slug}`,
       },
     ],
   }
@@ -199,10 +215,38 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
               </Button>
             </Link>
 
-            {/* Grid layout with content and sidebar */}
-            <div className="grid grid-cols-1 lg:grid-cols-[1fr_350px] gap-8 xl:gap-12">
+            {/* Grid layout with TOC, content and sidebar */}
+            <div className="grid grid-cols-1 xl:grid-cols-[250px_1fr_300px] lg:grid-cols-[1fr_300px] gap-8">
+              {/* Table of Contents - Left side on xl screens */}
+              <aside className="hidden xl:block">
+                <BlogTableOfContents content={htmlContent} />
+              </aside>
+
               {/* Main Content */}
               <div className="min-w-0">
+                {/* Visible Breadcrumb Navigation - Good for SEO and UX */}
+                <div className="mb-6">
+                  <Breadcrumb>
+                    <BreadcrumbList>
+                      <BreadcrumbItem>
+                        <BreadcrumbLink href="/" className="text-muted-foreground hover:text-primary">
+                          Trang chủ
+                        </BreadcrumbLink>
+                      </BreadcrumbItem>
+                      <BreadcrumbSeparator />
+                      <BreadcrumbItem>
+                        <BreadcrumbLink href="/blog" className="text-muted-foreground hover:text-primary">
+                          Blog
+                        </BreadcrumbLink>
+                      </BreadcrumbItem>
+                      <BreadcrumbSeparator />
+                      <BreadcrumbItem>
+                        <BreadcrumbPage className="text-foreground">{post.title}</BreadcrumbPage>
+                      </BreadcrumbItem>
+                    </BreadcrumbList>
+                  </Breadcrumb>
+                </div>
+
                 <div className="mb-4">
                   <span className="inline-block bg-accent/10 text-accent px-4 py-1.5 rounded-full text-sm font-medium">
                     {post.category}
@@ -232,7 +276,10 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                   <div className="aspect-video overflow-hidden rounded-lg mb-12">
                     <img
                       src={post.featured_image || "/placeholder.svg"}
-                      alt={post.title}
+                      alt={`${post.title} - ${post.category} - Vexim Global`}
+                      width={1200}
+                      height={630}
+                      loading="eager"
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -242,6 +289,11 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                   className="prose prose-lg max-w-none prose-headings:text-primary prose-h2:text-3xl prose-h2:font-bold prose-h2:mb-4 prose-h2:mt-8 prose-h3:text-2xl prose-h3:font-bold prose-h3:mb-3 prose-h3:mt-6 prose-p:text-base prose-p:leading-relaxed prose-p:mb-4 prose-ul:my-4 prose-li:text-base prose-li:leading-relaxed prose-a:text-accent prose-a:underline hover:prose-a:opacity-80 prose-figure:my-8 prose-figcaption:text-center prose-figcaption:text-sm prose-figcaption:text-muted-foreground prose-figcaption:italic prose-figcaption:mt-3 prose-img:rounded-lg prose-img:shadow-md"
                   dangerouslySetInnerHTML={{ __html: htmlContent }}
                 />
+
+                {/* Internal Links to Related Services - Good for SEO */}
+                <div className="mt-12 lg:hidden">
+                  <BlogInternalLinks category={post.category} />
+                </div>
 
                 <div className="mt-16 p-8 bg-gradient-to-br from-primary to-primary/90 rounded-lg text-white text-center">
                   <h3 className="text-2xl font-bold mb-4">Cần tư vấn thêm về dịch vụ này?</h3>
@@ -260,8 +312,10 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
               </div>
 
               {/* Sidebar - Hidden on mobile, shown on large screens */}
-              <div className="hidden lg:block">
+              <div className="hidden lg:block space-y-6">
                 <BlogSidebar />
+                {/* Internal Links in Sidebar for desktop */}
+                <BlogInternalLinks category={post.category} />
               </div>
             </div>
           </div>

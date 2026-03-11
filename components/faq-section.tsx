@@ -3,7 +3,9 @@
 import { Card } from "@/components/ui/card"
 import { Plus, Minus } from "lucide-react"
 import { useState } from "react"
+import Script from "next/script"
 
+// FAQ data for both display and schema
 const faqs = [
   {
     question: "Vexim Global có bao nhiêu năm kinh nghiệm trong lĩnh vực xuất nhập khẩu?",
@@ -47,11 +49,32 @@ const faqs = [
   },
 ]
 
+// Generate FAQ Schema for Google Rich Results
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqs.map((faq) => ({
+    "@type": "Question",
+    name: faq.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: faq.answer,
+    },
+  })),
+}
+
 export function FAQSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(0)
 
   return (
     <section className="py-16 md:py-24 bg-secondary/30">
+      {/* FAQ Schema for Google Rich Results */}
+      <Script
+        id="faq-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+        strategy="beforeInteractive"
+      />
       <div className="container mx-auto px-4">
         <div className="text-center mb-12 md:mb-16">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-primary mb-4 text-balance">
