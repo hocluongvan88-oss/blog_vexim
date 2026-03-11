@@ -169,7 +169,7 @@ export function FDATrackerDashboard() {
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs sm:text-sm text-slate-600">Miễn phí</p>
+                    <p className="text-xs sm:text-sm text-slate-600">Đăng ký để nhận nhiều cảnh báo hơn</p>
                     <p className="text-xl sm:text-2xl font-bold text-blue-600">
                       {FREE_ITEMS_LIMIT}
                     </p>
