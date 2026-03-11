@@ -193,23 +193,31 @@ export function ParagraphBlock({
       el.replaceWith(...Array.from(el.childNodes))
     })
 
-    // Clean remaining attributes except on allowed inline tags
+    // Clean ALL attributes from ALL elements (including strong, em, etc.)
+    // This removes the massive inline styles from copy-pasted content
     temp.querySelectorAll("*").forEach((el) => {
       const tag = el.tagName.toLowerCase()
       const allowedTags = ["strong", "b", "em", "i", "u", "a", "code", "br"]
 
-      if (!allowedTags.includes(tag)) {
-        el.removeAttribute("class")
-        el.removeAttribute("style")
-        el.removeAttribute("dir")
-        el.removeAttribute("role")
-        el.removeAttribute("data-")
-      } else if (tag === "a") {
-        // Keep href for links, remove other attributes
+      if (tag === "a") {
+        // Keep only href for links
         const href = el.getAttribute("href") || ""
-        el.setAttribute("href", href)
-        el.removeAttribute("class")
-        el.removeAttribute("style")
+        // Remove ALL attributes first
+        while (el.attributes.length > 0) {
+          el.removeAttribute(el.attributes[0].name)
+        }
+        // Add back href if safe
+        if (href && !href.toLowerCase().startsWith("javascript:")) {
+          el.setAttribute("href", href)
+        }
+      } else if (allowedTags.includes(tag)) {
+        // Remove ALL attributes from allowed inline tags (strong, em, etc.)
+        while (el.attributes.length > 0) {
+          el.removeAttribute(el.attributes[0].name)
+        }
+      } else {
+        // Non-allowed tags - replace with their content
+        el.replaceWith(...Array.from(el.childNodes))
       }
     })
 
@@ -381,7 +389,8 @@ export function ParagraphBlock({
   }
 
   const handleInput = (e: React.FormEvent<HTMLParagraphElement>) => {
-    const newHTML = e.currentTarget.innerHTML || ""
+    // Get current HTML and sanitize it to remove any pasted inline styles
+    const newHTML = sanitizeHTML(e.currentTarget.innerHTML || "")
     lastTextRef.current = newHTML
     onChange({ text: newHTML })
   }
@@ -398,7 +407,8 @@ export function ParagraphBlock({
   }
 
   const handleBlur = (e: React.FocusEvent<HTMLParagraphElement>) => {
-    const newHTML = e.currentTarget.innerHTML || ""
+    // Sanitize on blur to ensure clean HTML is saved
+    const newHTML = sanitizeHTML(e.currentTarget.innerHTML || "")
     lastTextRef.current = newHTML
     onChange({ text: newHTML })
   }
