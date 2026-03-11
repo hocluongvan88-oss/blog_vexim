@@ -43,7 +43,7 @@ export default function BlogSidebar() {
     <aside className="h-full">
       {/* Wrapper group for sticky behavior - ensures all 3 cards stay together */}
       <div className="sticky top-24 space-y-6">
-        
+
         {/* CTA Card */}
         <Card className="p-6 bg-gradient-to-br from-primary to-primary/90 text-white">
           <div className="flex items-center gap-2 mb-4">
@@ -162,7 +162,7 @@ export default function BlogSidebar() {
               "Đăng ký FDA thực phẩm, mỹ phẩm, dược phẩm",
               "Đại lý chính thức tại Hoa Kỳ (US Agent)",
               "Tư vấn đăng ký GACC Trung Quốc",
-              "Kiểm tra nhãn FDA bằng AI (AI Label Pro)",
+              "Kiểm tra nhãn FDA",
             ].map((service, idx) => (
               <a
                 key={idx}

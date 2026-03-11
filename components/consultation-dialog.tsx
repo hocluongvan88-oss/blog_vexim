@@ -152,7 +152,7 @@ export function ConsultationDialog({ open, onOpenChange, children }: Consultatio
                   <option value="">Chọn dịch vụ</option>
                   <option value="fda">Đăng ký FDA</option>
                   <option value="gacc">Mã GACC</option>
-                  <option value="fda-label-check">Kiểm tra nhãn FDA bằng AI</option>
+                  <option value="fda-label-check">Check nhãn FDA</option>
                   <option value="agent-us">Dịch vụ Agent Hoa Kỳ</option>
                   <option value="other">Khác</option>
                 </select>
@@ -295,7 +295,7 @@ export function ConsultationDialog({ open, onOpenChange, children }: Consultatio
               <option value="">Chọn dịch vụ</option>
               <option value="fda">Đăng ký FDA</option>
               <option value="gacc">Mã GACC</option>
-              <option value="fda-label-check">Kiểm tra nhãn FDA bằng AI</option>
+              <option value="fda-label-check">Check nhãn FDA</option>
               <option value="agent-us">Dịch vụ Agent Hoa Kỳ</option>
               <option value="other">Khác</option>
             </select>

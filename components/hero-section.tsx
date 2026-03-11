@@ -192,10 +192,8 @@ export function HeroSection() {
                   <option value="">Chọn dịch vụ</option>
                   <option value="fda">Đăng ký FDA</option>
                   <option value="gacc">Mã GACC</option>
-                  <option value="mfds">Giấy phép MFDS - KOREA</option>
+                  <option value="fda-label-check">Check nhãn FDA</option>
                   <option value="agent-us">Dịch vụ Agent Hoa Kỳ</option>
-                  <option value="ai-traceability">Nền tảng truy xuất nguồn gốc tích hợp AI</option>
-                  <option value="delegation">Uỷ thác xuất nhập khẩu</option>
                   <option value="other">Khác</option>
                 </select>
               </div>
