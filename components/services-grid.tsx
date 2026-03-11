@@ -42,9 +42,9 @@ const services = [
   },
   {
     image: "/ai-fda-label-compliance-check-scanner.jpg",
-    title: "Kiểm tra nhãn FDA bằng AI",
+    title: "Kiểm tra nhãn FDA theo chuẩn 21CFR",
     description:
-      "Kiểm tra tuân thủ nhãn FDA theo 21 CFR chỉ trong 2 phút. AI đối soát với 5.346 vi phạm thực tế từ Warning Letters, phát hiện lỗi trước khi hàng rời cảng. Tỷ lệ thông quan 99,5% sau khi sửa theo hướng dẫn.",
+      "Kiểm tra tuân thủ nhãn FDA theo 21 CFR chỉ trong 2 phút. AI đối soát với 5.346 vi phạm thực tế từ Warning Letters, phát hiện lỗi trước khi hàng rời cảng. Kết hợp với đội ngũ chuyên gia phân tích, kết luận tăng tỷ lệ thông quan 99,5% sau khi sửa theo hướng dẫn.",
     link: "/services/fda-label-check",
     badge: "AI Powered",
   },
