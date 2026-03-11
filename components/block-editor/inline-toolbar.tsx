@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Bold, Italic, Underline, Link, Code } from "lucide-react"
+import { Bold, Italic, Underline, Link, Code, Unlink } from "lucide-react"
 import { Input } from "@/components/ui/input"
 
 interface InlineToolbarProps {
@@ -13,7 +13,9 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null)
   const [showLinkInput, setShowLinkInput] = useState(false)
   const [linkUrl, setLinkUrl] = useState("")
+  const [hasExistingLink, setHasExistingLink] = useState(false)
   const toolbarRef = useRef<HTMLDivElement>(null)
+  const savedRangeRef = useRef<Range | null>(null)
 
   useEffect(() => {
     const handleSelectionChange = () => {
@@ -75,8 +77,11 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
   const handleLinkClick = () => {
     const selection = window.getSelection()
     if (selection && selection.rangeCount > 0) {
-      // Check if selection already has a link
+      // Save the current selection/range so we can restore it later
       const range = selection.getRangeAt(0)
+      savedRangeRef.current = range.cloneRange()
+      
+      // Check if selection already has a link
       const commonAncestor = range.commonAncestorContainer
       let linkElement: HTMLAnchorElement | null = null
 
@@ -88,22 +93,48 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
 
       if (linkElement) {
         setLinkUrl(linkElement.href)
+        setHasExistingLink(true)
       } else {
         setLinkUrl("")
+        setHasExistingLink(false)
       }
     }
     setShowLinkInput(true)
   }
 
   const handleLinkSubmit = () => {
-    if (linkUrl) {
-      // Use setTimeout to ensure selection is maintained
-      setTimeout(() => {
-        onFormat("createLink", linkUrl)
-      }, 0)
+    if (linkUrl && savedRangeRef.current) {
+      // Restore the saved selection
+      const selection = window.getSelection()
+      if (selection) {
+        selection.removeAllRanges()
+        selection.addRange(savedRangeRef.current)
+        
+        // Now apply the link
+        document.execCommand("createLink", false, linkUrl)
+        
+        // Clear the saved range
+        savedRangeRef.current = null
+      }
     }
     setShowLinkInput(false)
     setLinkUrl("")
+    setHasExistingLink(false)
+  }
+
+  const handleRemoveLink = () => {
+    if (savedRangeRef.current) {
+      const selection = window.getSelection()
+      if (selection) {
+        selection.removeAllRanges()
+        selection.addRange(savedRangeRef.current)
+        document.execCommand("unlink", false)
+        savedRangeRef.current = null
+      }
+    }
+    setShowLinkInput(false)
+    setLinkUrl("")
+    setHasExistingLink(false)
   }
 
   if (!position) return null
@@ -182,6 +213,7 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
               } else if (e.key === "Escape") {
                 setShowLinkInput(false)
                 setLinkUrl("")
+                setHasExistingLink(false)
               }
             }}
             className="h-7 text-sm w-48"
@@ -190,6 +222,17 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
           <Button size="sm" className="h-7" onClick={handleLinkSubmit}>
             OK
           </Button>
+          {hasExistingLink && (
+            <Button 
+              size="sm" 
+              variant="destructive" 
+              className="h-7" 
+              onClick={handleRemoveLink}
+              title="Xóa link"
+            >
+              <Unlink className="w-3 h-3" />
+            </Button>
+          )}
         </div>
       )}
     </div>
