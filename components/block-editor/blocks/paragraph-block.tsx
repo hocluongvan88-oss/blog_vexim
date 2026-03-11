@@ -33,7 +33,6 @@ export function ParagraphBlock({
   const editorRef = useRef<HTMLParagraphElement>(null)
   const isComposingRef = useRef(false)
   const lastTextRef = useRef(text)
-  const isMountedRef = useRef(false)
 
   const alignClass = {
     left: "text-left",
@@ -44,21 +43,15 @@ export function ParagraphBlock({
 
   // Initialize content on mount - support HTML formatting
   useEffect(() => {
-    isMountedRef.current = true
-    if (editorRef.current && editorRef.current.textContent === "") {
-      const sanitizedText = sanitizeAndValidateHTML(text)
+    if (editorRef.current && editorRef.current.innerHTML === "") {
+      const sanitizedText = sanitizeHTML(text)
       editorRef.current.innerHTML = sanitizedText
       lastTextRef.current = sanitizedText
-    }
-
-    return () => {
-      isMountedRef.current = false
     }
   }, [])
 
   // Only update content from props if it changed externally (not from user input)
   useEffect(() => {
-    if (!isMountedRef.current) return
     if (text !== lastTextRef.current && editorRef.current) {
       const selection = window.getSelection()
       const isEditorFocused = document.activeElement === editorRef.current
@@ -74,7 +67,7 @@ export function ParagraphBlock({
       }
 
       // Update content - use innerHTML to preserve formatting
-      const sanitizedText = sanitizeAndValidateHTML(text)
+      const sanitizedText = sanitizeHTML(text)
       editorRef.current.innerHTML = sanitizedText
       lastTextRef.current = sanitizedText
 
@@ -101,83 +94,53 @@ export function ParagraphBlock({
     }
   }, [text])
 
-  // Validate and sanitize HTML - prevent XSS and double-escaping
-  const sanitizeAndValidateHTML = (html: string): string => {
-    if (!html || typeof html !== "string") {
-      return ""
-    }
-
-    // Check if HTML is already escaped (contains &lt; and &gt;)
-    // If so, unescape it first
-    const isEscaped = /&lt;|&gt;/.test(html)
-    let unescapedHTML = isEscaped ? unescapeHTML(html) : html
-
-    // Create a temporary element to validate
+  // HTML Sanitization - allow safe inline tags, prevent XSS
+  const sanitizeHTML = (html: string): string => {
     const temp = document.createElement("div")
-    temp.innerHTML = unescapedHTML
-
-    // Remove dangerous tags
-    temp.querySelectorAll("script, style, iframe, object, embed, meta, link").forEach((el) => {
+    temp.innerHTML = html
+    
+    // Allow only safe inline formatting tags
+    const allowedTags = ["strong", "b", "em", "i", "u", "a", "code", "br", "span"]
+    
+    // Remove scripts and dangerous elements
+    temp.querySelectorAll("script, iframe, object, embed, form, input, button").forEach((el) => {
       el.remove()
     })
-
-    // Remove dangerous event handlers and attributes from all elements
+    
+    // Clean attributes on allowed tags
     temp.querySelectorAll("*").forEach((el) => {
       const tag = el.tagName.toLowerCase()
-      const allowedTags = ["strong", "b", "em", "i", "u", "a", "code", "br", "span", "mark"]
-
-      // Remove event handlers
-      Array.from(el.attributes).forEach((attr) => {
-        if (attr.name.startsWith("on")) {
-          el.removeAttribute(attr.name)
-        }
-      })
-
-      // For allowed tags, keep only safe attributes
-      if (allowedTags.includes(tag)) {
-        if (tag === "a") {
-          // Keep href if it's safe
-          const href = el.getAttribute("href")
-          if (href && !href.includes("javascript:") && !href.includes("data:")) {
-            el.removeAttribute("href")
-            el.setAttribute("href", href)
-          } else {
-            el.removeAttribute("href")
-          }
-          // Remove class, style, id
-          el.removeAttribute("class")
-          el.removeAttribute("style")
-          el.removeAttribute("id")
-        } else {
-          // For other allowed tags, remove all attributes
-          Array.from(el.attributes).forEach((attr) => {
+      if (!allowedTags.includes(tag)) {
+        // Replace non-allowed elements with their text content
+        el.replaceWith(...Array.from(el.childNodes))
+      } else if (tag === "a") {
+        // Keep only href for links
+        const href = el.getAttribute("href") || ""
+        Array.from(el.attributes).forEach((attr) => {
+          if (attr.name !== "href") {
             el.removeAttribute(attr.name)
-          })
+          }
+        })
+        // Ensure href is safe (no javascript:)
+        if (href.toLowerCase().startsWith("javascript:")) {
+          el.removeAttribute("href")
         }
       } else {
-        // For non-allowed tags, remove all attributes except keep tag structure
+        // Remove all attributes from other allowed tags
         Array.from(el.attributes).forEach((attr) => {
           el.removeAttribute(attr.name)
         })
       }
     })
-
+    
     return temp.innerHTML
-  }
-
-  // Helper function to unescape HTML entities
-  const unescapeHTML = (html: string): string => {
-    const txt = document.createElement("textarea")
-    txt.innerHTML = html
-    return txt.value
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLParagraphElement>) => {
     // Enter key - create new paragraph block below
     if (e.key === "Enter" && !e.shiftKey && !isComposingRef.current) {
       e.preventDefault()
-      const currentText = e.currentTarget.innerHTML
-      lastTextRef.current = currentText
+      const currentText = e.currentTarget.textContent || ""
       onChange({ text: currentText })
       onEnter?.()
       return
@@ -195,17 +158,10 @@ export function ParagraphBlock({
 
   // Clean HTML from Google Docs/Gemini - strip block tags but keep inline formatting
   const cleanInlineHTML = (html: string): string => {
-    if (!html || typeof html !== "string") return ""
-
     const temp = document.createElement("div")
     temp.innerHTML = html
 
-    // Remove dangerous tags
-    temp.querySelectorAll("script, style, meta, link, iframe, object, embed").forEach((el) => {
-      el.remove()
-    })
-
-    // Convert styled spans to semantic tags - handle multiple styles
+    // Convert styled spans to semantic tags
     temp.querySelectorAll("span").forEach((span) => {
       const style = span.getAttribute("style") || ""
       const hasBold = /font-weight\s*:\s*(700|bold)/i.test(style)
@@ -213,14 +169,16 @@ export function ParagraphBlock({
       const hasUnderline = /text-decoration\s*:\s*underline/i.test(style)
 
       if (hasBold || hasItalic || hasUnderline) {
-        const wrapper = document.createElement("span")
+        const wrapper = document.createElement("div")
         wrapper.innerHTML = span.innerHTML
 
+        // Build formatted content
         let formattedHTML = wrapper.innerHTML
-        if (hasUnderline) formattedHTML = `<u>${formattedHTML}</u>`
-        if (hasItalic) formattedHTML = `<em>${formattedHTML}</em>`
         if (hasBold) formattedHTML = `<strong>${formattedHTML}</strong>`
+        if (hasItalic) formattedHTML = `<em>${formattedHTML}</em>`
+        if (hasUnderline) formattedHTML = `<u>${formattedHTML}</u>`
 
+        // Create new element with proper nesting
         const newEl = document.createElement("span")
         newEl.innerHTML = formattedHTML
         span.replaceWith(...Array.from(newEl.childNodes))
@@ -320,13 +278,15 @@ export function ParagraphBlock({
               })
             }
           } else if (tag === "br") {
-            // Skip line breaks
+            // Skip line breaks - they're handled within paragraphs
           } else if (["div", "section", "article", "span"].includes(tag)) {
+            // Check if this div/span has inline formatting (bold/italic)
             const style = el.getAttribute("style") || ""
             const hasBold = /font-weight\s*:\s*(700|bold)/i.test(style)
             const hasItalic = /font-style\s*:\s*italic/i.test(style)
 
             if ((hasBold || hasItalic) && el.children.length === 0) {
+              // Inline formatted text - add as paragraph with formatting
               const text = el.textContent?.trim() || ""
               if (text) {
                 let formattedText = cleanInlineHTML(el.innerHTML)
@@ -335,9 +295,11 @@ export function ParagraphBlock({
                 parsedBlocks.push({ type: "paragraph", text: formattedText })
               }
             } else {
+              // Container - recurse into children
               Array.from(el.childNodes).forEach(processNode)
             }
           } else {
+            // Unknown tag - try to get text content
             const text = el.textContent?.trim() || ""
             if (text && el.children.length === 0) {
               parsedBlocks.push({ type: "paragraph", text: cleanInlineHTML(el.innerHTML) })
@@ -362,6 +324,7 @@ export function ParagraphBlock({
         }
       } catch (error) {
         console.warn("Failed to parse HTML paste content:", error)
+        // Fallback to plain text handling
       }
     }
 
@@ -386,7 +349,8 @@ export function ParagraphBlock({
   const insertPasteContent = (content: string) => {
     const selection = window.getSelection()
     if (!selection || selection.rangeCount === 0) {
-      onChange({ text: (text + " " + content).trim() })
+      // If no selection, just append to current text
+      onChange({ text: (text + content).trim() })
       return
     }
 
@@ -394,12 +358,9 @@ export function ParagraphBlock({
       const range = selection.getRangeAt(0)
       range.deleteContents()
 
-      // Create a temporary container to parse the content
       const temp = document.createElement("div")
-      temp.innerHTML = content
+      temp.textContent = content
       const frag = document.createDocumentFragment()
-
-      // Append sanitized content
       while (temp.firstChild) {
         frag.appendChild(temp.firstChild)
       }
@@ -410,13 +371,12 @@ export function ParagraphBlock({
       selection.addRange(range)
 
       if (editorRef.current) {
-        const newHTML = editorRef.current.innerHTML
-        lastTextRef.current = newHTML
-        onChange({ text: newHTML })
+        onChange({ text: editorRef.current.innerHTML || "" })
       }
     } catch (error) {
       console.warn("Failed to insert paste content:", error)
-      onChange({ text: (text + " " + content).trim() })
+      // Fallback: append to text
+      onChange({ text: (text + content).trim() })
     }
   }
 
