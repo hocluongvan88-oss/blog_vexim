@@ -241,7 +241,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                       </BreadcrumbItem>
                       <BreadcrumbSeparator />
                       <BreadcrumbItem>
-                        <BreadcrumbPage className="text-foreground">{post.title}</BreadcrumbPage>
+                        <BreadcrumbPage className="text-foreground max-w-[300px] lg:max-w-[500px] truncate">
+                          {post.title}
+                        </BreadcrumbPage>
                       </BreadcrumbItem>
                     </BreadcrumbList>
                   </Breadcrumb>
