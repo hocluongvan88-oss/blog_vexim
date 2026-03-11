@@ -26,7 +26,7 @@ export function HTMLPasteDialog({ onImport }: HTMLPasteDialogProps) {
   const [isProcessing, setIsProcessing] = useState(false)
   const { toast } = useToast()
 
-  // Clean HTML: remove unwanted tags/attributes but keep formatting
+  // Clean HTML: remove block tags (p, div) but keep inline formatting (bold, italic, links)
   const cleanInlineHTML = (html: string): string => {
     const temp = document.createElement("div")
     temp.innerHTML = html
@@ -34,13 +34,12 @@ export function HTMLPasteDialog({ onImport }: HTMLPasteDialogProps) {
     // Remove script/style tags
     temp.querySelectorAll("script, style, meta, link").forEach((el) => el.remove())
 
-    // Remove Google Docs wrapper spans but keep their text content
+    // Convert styled spans to semantic tags
     temp.querySelectorAll("span").forEach((span) => {
-      // Keep spans that have bold/italic/underline inline styles
       const style = span.getAttribute("style") || ""
-      const hasBold = style.includes("font-weight:700") || style.includes("font-weight: 700") || style.includes("font-weight:bold")
-      const hasItalic = style.includes("font-style:italic") || style.includes("font-style: italic")
-      const hasUnderline = style.includes("text-decoration:underline") || style.includes("text-decoration: underline")
+      const hasBold = /font-weight\s*:\s*(700|bold)/i.test(style)
+      const hasItalic = /font-style\s*:\s*italic/i.test(style)
+      const hasUnderline = /text-decoration\s*:\s*underline/i.test(style)
 
       if (hasBold) {
         const strong = document.createElement("strong")
@@ -55,21 +54,28 @@ export function HTMLPasteDialog({ onImport }: HTMLPasteDialogProps) {
         u.innerHTML = span.innerHTML
         span.replaceWith(u)
       } else {
-        // Plain span - unwrap and keep children
         span.replaceWith(...Array.from(span.childNodes))
       }
     })
 
-    // Clean up class and style attributes from allowed tags (keep only formatting tags)
+    // Unwrap block-level tags (p, div) but keep their content - crucial for list items
+    temp.querySelectorAll("p, div").forEach((el) => {
+      el.replaceWith(...Array.from(el.childNodes))
+    })
+
+    // Clean attributes except on allowed inline tags
     temp.querySelectorAll("*").forEach((el) => {
-      if (!["strong", "b", "em", "i", "u", "a", "code", "br"].includes(el.tagName.toLowerCase())) {
+      const tag = el.tagName.toLowerCase()
+      if (!["strong", "b", "em", "i", "u", "a", "code", "br"].includes(tag)) {
         el.removeAttribute("class")
         el.removeAttribute("style")
         el.removeAttribute("id")
+        el.removeAttribute("dir")
+        el.removeAttribute("role")
       }
     })
 
-    return temp.innerHTML
+    return temp.innerHTML.trim()
   }
 
   const parseHTMLToBlocks = (html: string): Block[] => {
