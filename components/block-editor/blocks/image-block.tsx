@@ -1,119 +1,240 @@
 "use client"
 
-import React from "react"
-
-import { useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
+import { Bold, Italic, Underline, Link, Code, Unlink } from "lucide-react"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Upload, Link as LinkIcon } from "lucide-react"
-import type { ImageData } from "../types"
 
-interface ImageBlockProps {
-  data: ImageData
-  onChange: (data: Partial<ImageData>) => void
+interface InlineToolbarProps {
+  onFormat: (command: string, value?: string) => void
 }
 
-export function ImageBlock({ data, onChange }: ImageBlockProps) {
-  const { url = "", caption = "", align = "center", width = "100%" } = data
-  const [uploading, setUploading] = useState(false)
+export function InlineToolbar({ onFormat }: InlineToolbarProps) {
+  const [position, setPosition] = useState<{ top: number; left: number } | null>(null)
+  const [showLinkInput, setShowLinkInput] = useState(false)
+  const [linkUrl, setLinkUrl] = useState("")
+  const [hasExistingLink, setHasExistingLink] = useState(false)
+  const toolbarRef = useRef<HTMLDivElement>(null)
+  const savedRangeRef = useRef<Range | null>(null)
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    setUploading(true)
-    const formData = new FormData()
-    formData.append("file", file)
-
-    try {
-      const response = await fetch("/api/upload-image", {
-        method: "POST",
-        body: formData,
-      })
-      const data = await response.json()
-      if (data.url) {
-        onChange({ url: data.url })
+  useEffect(() => {
+    const handleSelectionChange = () => {
+      const selection = window.getSelection()
+      if (!selection || selection.isCollapsed || selection.rangeCount === 0) {
+        setPosition(null)
+        setShowLinkInput(false)
+        return
       }
-    } catch (error) {
-      console.error("Upload failed:", error)
-    } finally {
-      setUploading(false)
+
+      const range = selection.getRangeAt(0)
+      const rect = range.getBoundingClientRect()
+
+      // Check if selection is within a contenteditable element
+      let node = selection.anchorNode
+      let isInContentEditable = false
+      while (node) {
+        if ((node as HTMLElement).contentEditable === "true") {
+          isInContentEditable = true
+          break
+        }
+        node = node.parentNode
+      }
+
+      if (!isInContentEditable) {
+        setPosition(null)
+        return
+      }
+
+      // Position toolbar above the selection
+      setPosition({
+        top: rect.top + window.scrollY - 45,
+        left: rect.left + window.scrollX + rect.width / 2,
+      })
     }
+
+    document.addEventListener("selectionchange", handleSelectionChange)
+    return () => {
+      document.removeEventListener("selectionchange", handleSelectionChange)
+    }
+  }, [])
+
+  const handleFormat = (command: string) => {
+    onFormat(command)
+    // Keep selection after formatting
+    setTimeout(() => {
+      const selection = window.getSelection()
+      if (selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0)
+        const rect = range.getBoundingClientRect()
+        setPosition({
+          top: rect.top + window.scrollY - 45,
+          left: rect.left + window.scrollX + rect.width / 2,
+        })
+      }
+    }, 10)
   }
 
-  const alignClass = {
-    left: "justify-start",
-    center: "justify-center",
-    right: "justify-end",
-  }[align]
+  const handleLinkClick = () => {
+    const selection = window.getSelection()
+    if (selection && selection.rangeCount > 0) {
+      // Save the current selection/range so we can restore it later
+      const range = selection.getRangeAt(0)
+      savedRangeRef.current = range.cloneRange()
+      
+      // Check if selection already has a link
+      const commonAncestor = range.commonAncestorContainer
+      let linkElement: HTMLAnchorElement | null = null
 
-  const widthClass = width === "100%" ? "w-full" : width === "80%" ? "w-4/5" : "w-3/5"
+      if (commonAncestor.nodeType === Node.ELEMENT_NODE) {
+        linkElement = (commonAncestor as HTMLElement).closest("a")
+      } else if (commonAncestor.parentElement) {
+        linkElement = commonAncestor.parentElement.closest("a")
+      }
 
-  if (!url) {
-    return (
-      <div className="border-2 border-dashed rounded-lg p-8 text-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="flex gap-2">
-            <label htmlFor="file-upload">
-              <Button variant="outline" className="cursor-pointer bg-transparent" disabled={uploading} asChild>
-                <span>
-                  <Upload className="w-4 h-4 mr-2" />
-                  {uploading ? "Đang tải..." : "Tải ảnh lên"}
-                </span>
-              </Button>
-              <input
-                id="file-upload"
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleFileUpload}
-                disabled={uploading}
-              />
-            </label>
-          </div>
-          <div className="text-sm text-muted-foreground">hoặc</div>
-          <div className="w-full max-w-md">
-            <Input
-              placeholder="Dán URL hình ảnh..."
-              onBlur={(e) => onChange({ url: e.target.value })}
-              disabled={uploading}
-            />
-          </div>
-        </div>
-      </div>
-    )
+      if (linkElement) {
+        setLinkUrl(linkElement.href)
+        setHasExistingLink(true)
+      } else {
+        setLinkUrl("")
+        setHasExistingLink(false)
+      }
+    }
+    setShowLinkInput(true)
   }
+
+  const handleLinkSubmit = () => {
+    if (linkUrl && savedRangeRef.current) {
+      // Restore the saved selection
+      const selection = window.getSelection()
+      if (selection) {
+        selection.removeAllRanges()
+        selection.addRange(savedRangeRef.current)
+        
+        // Now apply the link
+        document.execCommand("createLink", false, linkUrl)
+        
+        // Clear the saved range
+        savedRangeRef.current = null
+      }
+    }
+    setShowLinkInput(false)
+    setLinkUrl("")
+    setHasExistingLink(false)
+  }
+
+  const handleRemoveLink = () => {
+    if (savedRangeRef.current) {
+      const selection = window.getSelection()
+      if (selection) {
+        selection.removeAllRanges()
+        selection.addRange(savedRangeRef.current)
+        document.execCommand("unlink", false)
+        savedRangeRef.current = null
+      }
+    }
+    setShowLinkInput(false)
+    setLinkUrl("")
+    setHasExistingLink(false)
+  }
+
+  if (!position) return null
 
   return (
-    <div className={`flex ${alignClass}`}>
-      <figure className={widthClass}>
-        <img src={url || "/placeholder.svg"} alt={caption} className="w-full rounded-lg shadow-md" />
-        <figcaption className="mt-2">
-          <Input
-            placeholder="Thêm chú thích cho ảnh (tùy chọn)..."
-            value={caption}
-            onChange={(e) => onChange({ caption: e.target.value })}
-            className="text-sm text-center italic"
-          />
-        </figcaption>
-        <div className="mt-2 flex items-center gap-2">
-          <Label className="text-xs">Kích thước:</Label>
-          <select
-            value={width}
-            onChange={(e) => onChange({ width: e.target.value })}
-            className="text-xs border rounded px-2 py-1"
+    <div
+      ref={toolbarRef}
+      className="fixed z-50 bg-popover border rounded-md shadow-lg p-1 flex items-center gap-1 animate-in fade-in-0 zoom-in-95"
+      style={{
+        top: `${position.top}px`,
+        left: `${position.left}px`,
+        transform: "translateX(-50%)",
+      }}
+      onMouseDown={(e) => e.preventDefault()}
+    >
+      {!showLinkInput ? (
+        <>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 bg-transparent"
+            onClick={() => handleFormat("bold")}
+            title="Bold (Ctrl+B)"
           >
-            <option value="100%">Toàn bộ (100%)</option>
-            <option value="80%">Lớn (80%)</option>
-            <option value="60%">Vừa (60%)</option>
-          </select>
-          <Button variant="ghost" size="sm" onClick={() => onChange({ url: "" })} className="text-xs">
-            Thay đổi ảnh
+            <Bold className="w-4 h-4" />
           </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 bg-transparent"
+            onClick={() => handleFormat("italic")}
+            title="Italic (Ctrl+I)"
+          >
+            <Italic className="w-4 h-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 bg-transparent"
+            onClick={() => handleFormat("underline")}
+            title="Underline (Ctrl+U)"
+          >
+            <Underline className="w-4 h-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 bg-transparent"
+            onClick={() => handleFormat("code")}
+            title="Code"
+          >
+            <Code className="w-4 h-4" />
+          </Button>
+          <div className="w-px h-6 bg-border mx-1" />
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 bg-transparent"
+            onClick={handleLinkClick}
+            title="Add Link"
+          >
+            <Link className="w-4 h-4" />
+          </Button>
+        </>
+      ) : (
+        <div className="flex items-center gap-2 px-2">
+          <Input
+            type="url"
+            placeholder="https://..."
+            value={linkUrl}
+            onChange={(e) => setLinkUrl(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault()
+                handleLinkSubmit()
+              } else if (e.key === "Escape") {
+                setShowLinkInput(false)
+                setLinkUrl("")
+                setHasExistingLink(false)
+              }
+            }}
+            className="h-7 text-sm w-48"
+            autoFocus
+          />
+          <Button size="sm" className="h-7" onClick={handleLinkSubmit}>
+            OK
+          </Button>
+          {hasExistingLink && (
+            <Button 
+              size="sm" 
+              variant="destructive" 
+              className="h-7" 
+              onClick={handleRemoveLink}
+              title="Xóa link"
+            >
+              <Unlink className="w-3 h-3" />
+            </Button>
+          )}
         </div>
-      </figure>
+      )}
     </div>
   )
 }
