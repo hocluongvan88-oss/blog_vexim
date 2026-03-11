@@ -223,33 +223,28 @@ export function HTMLPasteDialog({ onImport }: HTMLPasteDialogProps) {
           Dán từ Google Docs / Gemini
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
+      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle>Dán nội dung từ Google Docs / Gemini / Word</DialogTitle>
           <DialogDescription>
-            Copy nội dung từ Google Docs, Gemini Canvas, hoặc Word rồi dán vào đây. Hệ thống tự động giữ lại H1, H2, in đậm, in nghiêng, danh sách.
+            Hoặc bạn có thể paste trực tiếp vào ô nội dung bài viết (Ctrl+V) - hệ thống sẽ tự nhận diện H1, H2, bold, italic.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
-          <div className="bg-blue-50 border border-blue-200 rounded-md p-3 text-sm text-blue-800">
-            <p className="font-semibold mb-1">Hướng dẫn 3 bước:</p>
-            <ol className="list-decimal list-inside space-y-1 text-xs">
-              <li>Bôi chọn toàn bộ nội dung trong Google Docs / Gemini Canvas</li>
-              <li>Copy (<kbd className="bg-white border px-1 rounded text-xs">Ctrl+C</kbd>)</li>
-              <li>Dán vào ô bên dưới (<kbd className="bg-white border px-1 rounded text-xs">Ctrl+V</kbd>) rồi bấm Import</li>
-            </ol>
+        <div className="space-y-4 flex-1 overflow-hidden flex flex-col min-h-0">
+          <div className="bg-blue-50 border border-blue-200 rounded-md p-3 text-sm text-blue-800 flex-shrink-0">
+            <p className="font-semibold mb-1">Tip: Bạn cũng có thể paste trực tiếp vào editor!</p>
+            <p className="text-xs">Click vào ô paragraph trong bài viết, sau đó Ctrl+V - hệ thống sẽ tự tách H1/H2/paragraph/list.</p>
           </div>
-          <div>
+          <div className="flex-1 flex flex-col min-h-0">
             <Textarea
               placeholder="Dán nội dung vào đây (Ctrl+V)..."
               value={htmlContent}
               onChange={(e) => setHtmlContent(e.target.value)}
-              rows={12}
-              className="font-mono text-sm"
+              className="font-mono text-sm flex-1 min-h-[200px] max-h-[40vh] resize-none"
             />
-            <p className="text-xs text-muted-foreground mt-2">
-              Giữ nguyên định dạng: H1-H6, in đậm, in nghiêng, gạch chân, danh sách, bảng, trích dẫn
+            <p className="text-xs text-muted-foreground mt-2 flex-shrink-0">
+              Giữ nguyên: H1-H6, in đậm, in nghiêng, gạch chân, danh sách, bảng, trích dẫn
             </p>
           </div>
         </div>

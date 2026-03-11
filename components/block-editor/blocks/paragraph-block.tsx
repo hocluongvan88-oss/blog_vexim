@@ -131,6 +131,9 @@ export function ParagraphBlock({ data, onChange, onEnter, onBackspace, onPasteSp
     const pastedHTML = e.clipboardData.getData("text/html")
     const pastedText = e.clipboardData.getData("text/plain")
 
+    console.log("[v0] Paste detected - HTML length:", pastedHTML?.length || 0, "Text length:", pastedText?.length || 0)
+    console.log("[v0] Pasted HTML preview:", pastedHTML?.substring(0, 500))
+
     // If HTML content contains block-level tags (headings, paragraphs from Docs/Gemini)
     // parse into multiple blocks
     if (pastedHTML && onPasteBlocks) {
@@ -138,8 +141,20 @@ export function ParagraphBlock({ data, onChange, onEnter, onBackspace, onPasteSp
       const doc = parser.parseFromString(pastedHTML, "text/html")
       const parsedBlocks: ParsedBlock[] = []
 
-      const processEl = (el: Element) => {
+      const processNode = (node: Node) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          const text = node.textContent?.trim() || ""
+          if (text) {
+            parsedBlocks.push({ type: "paragraph", text })
+          }
+          return
+        }
+
+        if (node.nodeType !== Node.ELEMENT_NODE) return
+
+        const el = node as Element
         const tag = el.tagName.toLowerCase()
+
         if (["h1", "h2", "h3", "h4", "h5", "h6"].includes(tag)) {
           const text = el.textContent?.trim() || ""
           if (text) {
@@ -163,12 +178,42 @@ export function ParagraphBlock({ data, onChange, onEnter, onBackspace, onPasteSp
           if (items.length > 0) {
             parsedBlocks.push({ type: "list", text: "", style: tag === "ol" ? "ordered" : "unordered", items })
           }
-        } else if (["div", "section", "article", "body"].includes(tag)) {
-          Array.from(el.children).forEach(processEl)
+        } else if (tag === "br") {
+          // Skip line breaks - they're handled within paragraphs
+        } else if (["div", "section", "article", "span"].includes(tag)) {
+          // Check if this div/span has inline formatting (bold/italic)
+          const style = el.getAttribute("style") || ""
+          const hasBold = /font-weight\s*:\s*(700|bold)/i.test(style)
+          const hasItalic = /font-style\s*:\s*italic/i.test(style)
+          
+          if ((hasBold || hasItalic) && el.children.length === 0) {
+            // Inline formatted text - add as paragraph with formatting
+            const text = el.textContent?.trim() || ""
+            if (text) {
+              let formattedText = text
+              if (hasBold) formattedText = `<strong>${formattedText}</strong>`
+              if (hasItalic) formattedText = `<em>${formattedText}</em>`
+              parsedBlocks.push({ type: "paragraph", text: formattedText })
+            }
+          } else {
+            // Container - recurse into children
+            Array.from(el.childNodes).forEach(processNode)
+          }
+        } else {
+          // Unknown tag - try to get text content
+          const text = el.textContent?.trim() || ""
+          if (text && el.children.length === 0) {
+            parsedBlocks.push({ type: "paragraph", text: cleanInlineHTML(el.innerHTML) })
+          } else if (el.children.length > 0) {
+            Array.from(el.childNodes).forEach(processNode)
+          }
         }
       }
 
-      Array.from(doc.body.children).forEach(processEl)
+      Array.from(doc.body.childNodes).forEach(processNode)
+
+      console.log("[v0] Parsed blocks count:", parsedBlocks.length)
+      console.log("[v0] Parsed blocks:", JSON.stringify(parsedBlocks.slice(0, 5), null, 2))
 
       // If we detected multiple structured blocks, use them
       if (parsedBlocks.length > 1) {
