@@ -26,109 +26,146 @@ export function HTMLPasteDialog({ onImport }: HTMLPasteDialogProps) {
   const [isProcessing, setIsProcessing] = useState(false)
   const { toast } = useToast()
 
+  // Clean HTML: remove unwanted tags/attributes but keep formatting
+  const cleanInlineHTML = (html: string): string => {
+    const temp = document.createElement("div")
+    temp.innerHTML = html
+
+    // Remove script/style tags
+    temp.querySelectorAll("script, style, meta, link").forEach((el) => el.remove())
+
+    // Remove Google Docs wrapper spans but keep their text content
+    temp.querySelectorAll("span").forEach((span) => {
+      // Keep spans that have bold/italic/underline inline styles
+      const style = span.getAttribute("style") || ""
+      const hasBold = style.includes("font-weight:700") || style.includes("font-weight: 700") || style.includes("font-weight:bold")
+      const hasItalic = style.includes("font-style:italic") || style.includes("font-style: italic")
+      const hasUnderline = style.includes("text-decoration:underline") || style.includes("text-decoration: underline")
+
+      if (hasBold) {
+        const strong = document.createElement("strong")
+        strong.innerHTML = span.innerHTML
+        span.replaceWith(strong)
+      } else if (hasItalic) {
+        const em = document.createElement("em")
+        em.innerHTML = span.innerHTML
+        span.replaceWith(em)
+      } else if (hasUnderline) {
+        const u = document.createElement("u")
+        u.innerHTML = span.innerHTML
+        span.replaceWith(u)
+      } else {
+        // Plain span - unwrap and keep children
+        span.replaceWith(...Array.from(span.childNodes))
+      }
+    })
+
+    // Clean up class and style attributes from allowed tags (keep only formatting tags)
+    temp.querySelectorAll("*").forEach((el) => {
+      if (!["strong", "b", "em", "i", "u", "a", "code", "br"].includes(el.tagName.toLowerCase())) {
+        el.removeAttribute("class")
+        el.removeAttribute("style")
+        el.removeAttribute("id")
+      }
+    })
+
+    return temp.innerHTML
+  }
+
   const parseHTMLToBlocks = (html: string): Block[] => {
     const parser = new DOMParser()
     const doc = parser.parseFromString(html, "text/html")
     const blocks: Block[] = []
+    let counter = 0
 
-    // Process each element in the body
-    const elements = doc.body.children
-
-    for (let i = 0; i < elements.length; i++) {
-      const element = elements[i]
+    const processNode = (element: Element) => {
       const tagName = element.tagName.toLowerCase()
+      counter++
+      const blockId = `block-import-${Date.now()}-${counter}`
 
-      // Generate unique ID
-      const blockId = `block-${Date.now()}-${i}`
-
-      // Convert based on tag type
-      if (tagName === "h1" || tagName === "h2" || tagName === "h3" || tagName === "h4" || tagName === "h5" || tagName === "h6") {
+      if (["h1", "h2", "h3", "h4", "h5", "h6"].includes(tagName)) {
         const level = parseInt(tagName.charAt(1))
-        // Map h4-h6 to h3 since block editor only supports 1-3
         const mappedLevel = level > 3 ? 3 : (level as 1 | 2 | 3)
-
-        blocks.push({
-          id: blockId,
-          type: "heading",
-          data: {
-            text: element.textContent || "",
-            level: mappedLevel,
-          },
-        })
+        const text = element.textContent || ""
+        if (text.trim()) {
+          blocks.push({
+            id: blockId,
+            type: "heading",
+            data: { text: text.trim(), level: mappedLevel, align: "left" },
+          })
+        }
       } else if (tagName === "p") {
+        // Use innerHTML to preserve bold/italic/links inside paragraph
+        const innerHTML = cleanInlineHTML(element.innerHTML)
         const text = element.textContent || ""
         if (text.trim()) {
           blocks.push({
             id: blockId,
             type: "paragraph",
-            data: {
-              text,
-              alignment: "left",
-            },
+            data: { text: innerHTML, align: "justify" },
           })
         }
       } else if (tagName === "blockquote") {
-        blocks.push({
-          id: blockId,
-          type: "quote",
-          data: {
-            text: element.textContent || "",
-            author: "",
-          },
-        })
+        const innerHTML = cleanInlineHTML(element.innerHTML)
+        const text = element.textContent || ""
+        if (text.trim()) {
+          blocks.push({
+            id: blockId,
+            type: "quote",
+            data: { text: innerHTML, author: "" },
+          })
+        }
       } else if (tagName === "img") {
         const img = element as HTMLImageElement
-        blocks.push({
-          id: blockId,
-          type: "image",
-          data: {
-            url: img.src,
-            alt: img.alt || "",
-            caption: img.title || "",
-            width: "100%",
-          },
-        })
-      } else if (tagName === "table") {
-        // Basic table parsing
-        const rows: string[][] = []
-        const tableRows = element.querySelectorAll("tr")
-        
-        tableRows.forEach((tr) => {
-          const cells: string[] = []
-          const tableCells = tr.querySelectorAll("td, th")
-          tableCells.forEach((cell) => {
-            cells.push(cell.textContent || "")
+        if (img.src) {
+          blocks.push({
+            id: blockId,
+            type: "image",
+            data: { url: img.src, alt: img.alt || "", caption: img.title || "", width: "100%" },
           })
-          if (cells.length > 0) {
-            rows.push(cells)
-          }
+        }
+      } else if (tagName === "table") {
+        const rows: string[][] = []
+        element.querySelectorAll("tr").forEach((tr) => {
+          const cells: string[] = []
+          tr.querySelectorAll("td, th").forEach((cell) => {
+            // Keep inner HTML of cells for formatting
+            cells.push(cleanInlineHTML(cell.innerHTML))
+          })
+          if (cells.length > 0) rows.push(cells)
         })
-
         if (rows.length > 0) {
           blocks.push({
             id: blockId,
             type: "table",
-            data: {
-              rows,
-            },
+            data: { rows, cols: rows[0].length, content: rows, align: "left" },
           })
         }
       } else if (tagName === "ul" || tagName === "ol") {
-        // Convert lists to paragraphs with bullets
-        const items = element.querySelectorAll("li")
-        items.forEach((item, idx) => {
-          const prefix = tagName === "ul" ? "• " : `${idx + 1}. `
+        // Convert list to a proper list block, preserving item formatting
+        const items: string[] = []
+        element.querySelectorAll("li").forEach((item) => {
+          const text = item.textContent || ""
+          if (text.trim()) items.push(cleanInlineHTML(item.innerHTML))
+        })
+        if (items.length > 0) {
           blocks.push({
-            id: `${blockId}-${idx}`,
-            type: "paragraph",
+            id: blockId,
+            type: "list",
             data: {
-              text: prefix + (item.textContent || ""),
-              alignment: "left",
+              style: tagName === "ol" ? "ordered" : "unordered",
+              items,
+              align: "left",
             },
           })
-        })
+        }
+      } else if (tagName === "div" || tagName === "section" || tagName === "article") {
+        // Recurse into container elements (Google Docs wraps everything in divs)
+        Array.from(element.children).forEach(processNode)
       }
     }
+
+    Array.from(doc.body.children).forEach(processNode)
 
     return blocks
   }
@@ -183,28 +220,36 @@ export function HTMLPasteDialog({ onImport }: HTMLPasteDialogProps) {
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <FileCode className="w-4 h-4 mr-2" />
-          Import HTML
+          Dán từ Google Docs / Gemini
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Import từ HTML</DialogTitle>
+          <DialogTitle>Dán nội dung từ Google Docs / Gemini / Word</DialogTitle>
           <DialogDescription>
-            Dán HTML từ WordPress hoặc nguồn khác. Hệ thống sẽ tự động chuyển đổi sang các khối nội dung.
+            Copy nội dung từ Google Docs, Gemini Canvas, hoặc Word rồi dán vào đây. Hệ thống tự động giữ lại H1, H2, in đậm, in nghiêng, danh sách.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
+          <div className="bg-blue-50 border border-blue-200 rounded-md p-3 text-sm text-blue-800">
+            <p className="font-semibold mb-1">Hướng dẫn 3 bước:</p>
+            <ol className="list-decimal list-inside space-y-1 text-xs">
+              <li>Bôi chọn toàn bộ nội dung trong Google Docs / Gemini Canvas</li>
+              <li>Copy (<kbd className="bg-white border px-1 rounded text-xs">Ctrl+C</kbd>)</li>
+              <li>Dán vào ô bên dưới (<kbd className="bg-white border px-1 rounded text-xs">Ctrl+V</kbd>) rồi bấm Import</li>
+            </ol>
+          </div>
           <div>
             <Textarea
-              placeholder="Dán HTML vào đây..."
+              placeholder="Dán nội dung vào đây (Ctrl+V)..."
               value={htmlContent}
               onChange={(e) => setHtmlContent(e.target.value)}
               rows={12}
               className="font-mono text-sm"
             />
             <p className="text-xs text-muted-foreground mt-2">
-              Hỗ trợ: h1-h6, p, blockquote, img, table, ul, ol
+              Giữ nguyên định dạng: H1-H6, in đậm, in nghiêng, gạch chân, danh sách, bảng, trích dẫn
             </p>
           </div>
         </div>

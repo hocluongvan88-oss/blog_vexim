@@ -97,7 +97,10 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
 
   const handleLinkSubmit = () => {
     if (linkUrl) {
-      onFormat("createLink", linkUrl)
+      // Use setTimeout to ensure selection is maintained
+      setTimeout(() => {
+        onFormat("createLink", linkUrl)
+      }, 0)
     }
     setShowLinkInput(false)
     setLinkUrl("")

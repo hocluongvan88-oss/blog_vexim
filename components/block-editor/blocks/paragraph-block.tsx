@@ -5,15 +5,24 @@ import React from "react"
 import { useRef, useEffect } from "react"
 import type { ParagraphData } from "../types"
 
+interface ParsedBlock {
+  type: "heading" | "paragraph" | "quote" | "list"
+  text: string
+  level?: 1 | 2 | 3
+  style?: "ordered" | "unordered"
+  items?: string[]
+}
+
 interface ParagraphBlockProps {
   data: ParagraphData
   onChange: (data: Partial<ParagraphData>) => void
   onEnter?: () => void
   onBackspace?: () => void
   onPasteSplit?: (lines: string[]) => void
+  onPasteBlocks?: (blocks: ParsedBlock[]) => void
 }
 
-export function ParagraphBlock({ data, onChange, onEnter, onBackspace, onPasteSplit }: ParagraphBlockProps) {
+export function ParagraphBlock({ data, onChange, onEnter, onBackspace, onPasteSplit, onPasteBlocks }: ParagraphBlockProps) {
   const { text = "", align = "justify" } = data
   const editorRef = useRef<HTMLParagraphElement>(null)
   const isComposingRef = useRef(false)
@@ -87,62 +96,123 @@ export function ParagraphBlock({ data, onChange, onEnter, onBackspace, onPasteSp
     }
   }
 
+  // Clean span tags from Google Docs/Gemini but keep bold/italic/underline
+  const cleanInlineHTML = (html: string): string => {
+    const temp = document.createElement("div")
+    temp.innerHTML = html
+    temp.querySelectorAll("span").forEach((span) => {
+      const style = span.getAttribute("style") || ""
+      const hasBold = /font-weight\s*:\s*(700|bold)/i.test(style)
+      const hasItalic = /font-style\s*:\s*italic/i.test(style)
+      if (hasBold) {
+        const strong = document.createElement("strong")
+        strong.innerHTML = span.innerHTML
+        span.replaceWith(strong)
+      } else if (hasItalic) {
+        const em = document.createElement("em")
+        em.innerHTML = span.innerHTML
+        span.replaceWith(em)
+      } else {
+        span.replaceWith(...Array.from(span.childNodes))
+      }
+    })
+    temp.querySelectorAll("*").forEach((el) => {
+      if (!["strong", "b", "em", "i", "u", "a", "code", "br"].includes(el.tagName.toLowerCase())) {
+        el.removeAttribute("class")
+        el.removeAttribute("style")
+      }
+    })
+    return temp.innerHTML
+  }
+
   const handlePaste = (e: React.ClipboardEvent<HTMLParagraphElement>) => {
     e.preventDefault()
-    
-    // Try to get HTML first for formatting preservation
+
     const pastedHTML = e.clipboardData.getData("text/html")
     const pastedText = e.clipboardData.getData("text/plain")
-    
-    // Split by newlines to detect multi-line paste
-    const lines = pastedText.split(/\r?\n/)
-    
-    // Filter out completely empty lines but preserve line structure
-    const processedLines = lines.map(line => line.trim()).filter(line => line.length > 0)
-    
-    if (processedLines.length > 1 && onPasteSplit) {
-      // Multiple non-empty lines - create multiple paragraph blocks
-      onPasteSplit(processedLines)
+
+    // If HTML content contains block-level tags (headings, paragraphs from Docs/Gemini)
+    // parse into multiple blocks
+    if (pastedHTML && onPasteBlocks) {
+      const parser = new DOMParser()
+      const doc = parser.parseFromString(pastedHTML, "text/html")
+      const parsedBlocks: ParsedBlock[] = []
+
+      const processEl = (el: Element) => {
+        const tag = el.tagName.toLowerCase()
+        if (["h1", "h2", "h3", "h4", "h5", "h6"].includes(tag)) {
+          const text = el.textContent?.trim() || ""
+          if (text) {
+            const level = Math.min(parseInt(tag[1]), 3) as 1 | 2 | 3
+            parsedBlocks.push({ type: "heading", text, level })
+          }
+        } else if (tag === "p") {
+          const text = el.textContent?.trim() || ""
+          if (text) {
+            parsedBlocks.push({ type: "paragraph", text: cleanInlineHTML(el.innerHTML) })
+          }
+        } else if (tag === "blockquote") {
+          const text = el.textContent?.trim() || ""
+          if (text) parsedBlocks.push({ type: "quote", text: cleanInlineHTML(el.innerHTML) })
+        } else if (tag === "ul" || tag === "ol") {
+          const items: string[] = []
+          el.querySelectorAll("li").forEach((li) => {
+            const t = li.textContent?.trim() || ""
+            if (t) items.push(cleanInlineHTML(li.innerHTML))
+          })
+          if (items.length > 0) {
+            parsedBlocks.push({ type: "list", text: "", style: tag === "ol" ? "ordered" : "unordered", items })
+          }
+        } else if (["div", "section", "article", "body"].includes(tag)) {
+          Array.from(el.children).forEach(processEl)
+        }
+      }
+
+      Array.from(doc.body.children).forEach(processEl)
+
+      // If we detected multiple structured blocks, use them
+      if (parsedBlocks.length > 1) {
+        onPasteBlocks(parsedBlocks)
+        return
+      }
+
+      // Single block with HTML - insert inline with formatting preserved
+      if (parsedBlocks.length === 1 && parsedBlocks[0].type === "paragraph") {
+        const selection = window.getSelection()
+        if (selection && selection.rangeCount > 0) {
+          const range = selection.getRangeAt(0)
+          range.deleteContents()
+          const temp = document.createElement("div")
+          temp.innerHTML = parsedBlocks[0].text
+          const frag = document.createDocumentFragment()
+          while (temp.firstChild) frag.appendChild(temp.firstChild)
+          range.insertNode(frag)
+          range.collapse(false)
+          selection.removeAllRanges()
+          selection.addRange(range)
+          onChange({ text: e.currentTarget.innerHTML || "" })
+        }
+        return
+      }
+    }
+
+    // Fallback: plain text - split lines into blocks
+    const lines = pastedText.split(/\r?\n/).map((l) => l.trim()).filter((l) => l.length > 0)
+    if (lines.length > 1 && onPasteSplit) {
+      onPasteSplit(lines)
       return
     }
-    
-    // Single line or no split handler - insert with formatting
+
+    // Single plain text - insert at cursor
     const selection = window.getSelection()
     if (selection && selection.rangeCount > 0) {
       const range = selection.getRangeAt(0)
       range.deleteContents()
-      
-      // Try to preserve basic HTML formatting (bold, italic, links)
-      if (pastedHTML && pastedHTML.includes("<")) {
-        // Create temporary element to parse HTML
-        const temp = document.createElement("div")
-        temp.innerHTML = pastedHTML
-        
-        // Extract formatted content
-        const fragment = document.createDocumentFragment()
-        while (temp.firstChild) {
-          fragment.appendChild(temp.firstChild)
-        }
-        range.insertNode(fragment)
-      } else {
-        // Plain text - preserve line breaks as <br>
-        const textWithBreaks = pastedText.split(/\r?\n/).join("<br>")
-        const temp = document.createElement("div")
-        temp.innerHTML = textWithBreaks
-        
-        const fragment = document.createDocumentFragment()
-        while (temp.firstChild) {
-          fragment.appendChild(temp.firstChild)
-        }
-        range.insertNode(fragment)
-      }
-      
-      // Move cursor to end of inserted content
+      const textNode = document.createTextNode(pastedText)
+      range.insertNode(textNode)
       range.collapse(false)
       selection.removeAllRanges()
       selection.addRange(range)
-      
-      // Update with innerHTML to preserve formatting
       onChange({ text: e.currentTarget.innerHTML || "" })
     }
   }
@@ -169,8 +239,8 @@ export function ParagraphBlock({ data, onChange, onEnter, onBackspace, onPasteSp
       ref={editorRef}
       contentEditable
       suppressContentEditableWarning
-      className={`${alignClass} text-base leading-relaxed outline-none min-h-[50px] resize-none overflow-hidden empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground`}
-      data-placeholder="Nhập nội dung đoạn văn..."
+      className={`${alignClass} text-base leading-relaxed outline-none min-h-[50px] resize-none overflow-hidden empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground prose prose-sm max-w-none [&_a]:text-blue-600 [&_a]:underline [&_a]:cursor-pointer [&_a:hover]:text-blue-800`}
+      data-placeholder="Nhập nội dung đoạn văn... (Bôi đen text để thêm link, in đậm, in nghiêng)"
       onKeyDown={handleKeyDown}
       onPaste={handlePaste}
       onInput={handleInput}

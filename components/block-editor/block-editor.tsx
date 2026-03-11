@@ -291,10 +291,7 @@ export function BlockEditor({ value, onChange }: BlockEditorProps) {
               onEnter={() => addBlock("paragraph", index + 1)}
               onBackspace={() => deleteBlock(block.id)}
               onPasteSplit={(lines) => {
-                // Update current block with first line
                 updateBlock(block.id, { text: lines[0] })
-                
-                // Create and populate new blocks for remaining lines
                 const newBlocks = [...blocks]
                 lines.slice(1).forEach((line, i) => {
                   blockCounterRef.current += 1
@@ -305,6 +302,47 @@ export function BlockEditor({ value, onChange }: BlockEditorProps) {
                   }
                   newBlocks.splice(index + 1 + i, 0, newBlock)
                 })
+                setBlocks(newBlocks)
+              }}
+              onPasteBlocks={(parsedBlocks) => {
+                // Replace current block with first parsed block, insert rest after
+                const newBlocks = [...blocks]
+                // Remove current block
+                const currentIdx = newBlocks.findIndex((b) => b.id === block.id)
+                newBlocks.splice(currentIdx, 1)
+
+                parsedBlocks.forEach((pb, i) => {
+                  blockCounterRef.current += 1
+                  let newBlock: Block
+
+                  if (pb.type === "heading") {
+                    newBlock = {
+                      id: `block_${blockCounterRef.current}_paste`,
+                      type: "heading",
+                      data: { text: pb.text, level: pb.level ?? 2, align: "left" },
+                    }
+                  } else if (pb.type === "quote") {
+                    newBlock = {
+                      id: `block_${blockCounterRef.current}_paste`,
+                      type: "quote",
+                      data: { text: pb.text, author: "", align: "left" },
+                    }
+                  } else if (pb.type === "list") {
+                    newBlock = {
+                      id: `block_${blockCounterRef.current}_paste`,
+                      type: "list",
+                      data: { style: pb.style ?? "unordered", items: pb.items ?? [], align: "left" },
+                    }
+                  } else {
+                    newBlock = {
+                      id: `block_${blockCounterRef.current}_paste`,
+                      type: "paragraph",
+                      data: { text: pb.text, align: "justify" },
+                    }
+                  }
+                  newBlocks.splice(currentIdx + i, 0, newBlock)
+                })
+
                 setBlocks(newBlocks)
               }}
             />
