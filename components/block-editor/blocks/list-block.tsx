@@ -27,7 +27,8 @@ function ListItem({
   onRemove: (index: number) => void
 }) {
   const contentRef = useRef<HTMLDivElement>(null)
-  const lastValueRef = useRef<string>(item)
+  const lastValueRef = useRef<string>("") // Start empty so first render always sets content
+  const isFirstMount = useRef(true)
 
   // Decode HTML entities (e.g., &lt; -> <, &amp; -> &)
   const decodeHTMLEntities = useCallback((html: string): string => {
@@ -80,12 +81,16 @@ function ListItem({
     return temp.innerHTML
   }, [decodeHTMLEntities])
 
-  // Only update DOM when item prop changes from external source
+  // Set initial content on mount, and update when item changes externally
   useEffect(() => {
     if (contentRef.current) {
       const sanitized = sanitizeHTML(item)
-      // Only update if content is different from what user typed
-      if (sanitized !== lastValueRef.current && sanitized !== contentRef.current.innerHTML) {
+      // Always set on first mount, or when item changes from external source
+      if (isFirstMount.current) {
+        contentRef.current.innerHTML = sanitized
+        lastValueRef.current = sanitized
+        isFirstMount.current = false
+      } else if (sanitized !== lastValueRef.current && sanitized !== contentRef.current.innerHTML) {
         contentRef.current.innerHTML = sanitized
         lastValueRef.current = sanitized
       }
