@@ -160,10 +160,9 @@ export default function BlogSidebar() {
           <div className="space-y-3">
             {[
               "Đăng ký FDA thực phẩm, mỹ phẩm, dược phẩm",
-              "Đại lý chính thức tại Hoa Kỳ, không qua trung gian",
+              "Đại lý chính thức tại Hoa Kỳ (US Agent)",
               "Tư vấn đăng ký GACC Trung Quốc",
-              "Tư vấn chứng nhận MFDS Hàn Quốc",
-              "Nền tảng truy xuất nguồn gốc FSMA204",
+              "Kiểm tra nhãn FDA bằng AI (AI Label Pro)",
             ].map((service, idx) => (
               <a
                 key={idx}
