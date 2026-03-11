@@ -20,6 +20,7 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
   useEffect(() => {
     const handleSelectionChange = () => {
       const selection = window.getSelection()
+      
       if (!selection || selection.isCollapsed || selection.rangeCount === 0) {
         setPosition(null)
         setShowLinkInput(false)
@@ -29,18 +30,34 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
       const range = selection.getRangeAt(0)
       const rect = range.getBoundingClientRect()
 
-      // Check if selection is within a contenteditable element
-      let node = selection.anchorNode
-      let isInContentEditable = false
-      while (node) {
-        if ((node as HTMLElement).contentEditable === "true") {
-          isInContentEditable = true
-          break
+      // Get the element containing the selection
+      let anchorElement: HTMLElement | null = null
+      if (selection.anchorNode) {
+        if (selection.anchorNode.nodeType === Node.TEXT_NODE) {
+          anchorElement = selection.anchorNode.parentElement
+        } else {
+          anchorElement = selection.anchorNode as HTMLElement
         }
-        node = node.parentNode
       }
 
+      if (!anchorElement) {
+        setPosition(null)
+        return
+      }
+
+      // Check if selection is within a contenteditable element or within the block editor
+      const contentEditableParent = anchorElement.closest('[contenteditable="true"]')
+      const blockEditorParent = anchorElement.closest('.block-editor-container')
+      
+      const isInContentEditable = contentEditableParent !== null || blockEditorParent !== null
+
       if (!isInContentEditable) {
+        setPosition(null)
+        return
+      }
+
+      // Only show if rect has valid dimensions
+      if (rect.width === 0 || rect.height === 0) {
         setPosition(null)
         return
       }
@@ -53,8 +70,15 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
     }
 
     document.addEventListener("selectionchange", handleSelectionChange)
+    // Also listen to mouseup to catch selection after mouse drag
+    document.addEventListener("mouseup", handleSelectionChange)
+    // And keyup for keyboard selection (shift+arrows)
+    document.addEventListener("keyup", handleSelectionChange)
+    
     return () => {
       document.removeEventListener("selectionchange", handleSelectionChange)
+      document.removeEventListener("mouseup", handleSelectionChange)
+      document.removeEventListener("keyup", handleSelectionChange)
     }
   }, [])
 
