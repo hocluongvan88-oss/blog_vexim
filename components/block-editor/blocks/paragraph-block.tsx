@@ -96,10 +96,12 @@ export function ParagraphBlock({ data, onChange, onEnter, onBackspace, onPasteSp
     }
   }
 
-  // Clean span tags from Google Docs/Gemini but keep bold/italic/underline
+  // Clean HTML from Google Docs/Gemini - strip block tags but keep inline formatting
   const cleanInlineHTML = (html: string): string => {
     const temp = document.createElement("div")
     temp.innerHTML = html
+
+    // Convert styled spans to semantic tags
     temp.querySelectorAll("span").forEach((span) => {
       const style = span.getAttribute("style") || ""
       const hasBold = /font-weight\s*:\s*(700|bold)/i.test(style)
@@ -116,13 +118,24 @@ export function ParagraphBlock({ data, onChange, onEnter, onBackspace, onPasteSp
         span.replaceWith(...Array.from(span.childNodes))
       }
     })
+
+    // Unwrap block-level tags (p, div) but keep their content
+    temp.querySelectorAll("p, div").forEach((el) => {
+      el.replaceWith(...Array.from(el.childNodes))
+    })
+
+    // Clean remaining attributes except on allowed inline tags
     temp.querySelectorAll("*").forEach((el) => {
-      if (!["strong", "b", "em", "i", "u", "a", "code", "br"].includes(el.tagName.toLowerCase())) {
+      const tag = el.tagName.toLowerCase()
+      if (!["strong", "b", "em", "i", "u", "a", "code", "br"].includes(tag)) {
         el.removeAttribute("class")
         el.removeAttribute("style")
+        el.removeAttribute("dir")
+        el.removeAttribute("role")
       }
     })
-    return temp.innerHTML
+
+    return temp.innerHTML.trim()
   }
 
   const handlePaste = (e: React.ClipboardEvent<HTMLParagraphElement>) => {
@@ -131,8 +144,7 @@ export function ParagraphBlock({ data, onChange, onEnter, onBackspace, onPasteSp
     const pastedHTML = e.clipboardData.getData("text/html")
     const pastedText = e.clipboardData.getData("text/plain")
 
-    console.log("[v0] Paste detected - HTML length:", pastedHTML?.length || 0, "Text length:", pastedText?.length || 0)
-    console.log("[v0] Pasted HTML preview:", pastedHTML?.substring(0, 500))
+
 
     // If HTML content contains block-level tags (headings, paragraphs from Docs/Gemini)
     // parse into multiple blocks
@@ -173,7 +185,13 @@ export function ParagraphBlock({ data, onChange, onEnter, onBackspace, onPasteSp
           const items: string[] = []
           el.querySelectorAll("li").forEach((li) => {
             const t = li.textContent?.trim() || ""
-            if (t) items.push(cleanInlineHTML(li.innerHTML))
+            if (t) {
+              const rawHTML = li.innerHTML
+              const cleanedHTML = cleanInlineHTML(rawHTML)
+              console.log("[v0] List item RAW:", rawHTML.substring(0, 200))
+              console.log("[v0] List item CLEANED:", cleanedHTML.substring(0, 200))
+              items.push(cleanedHTML)
+            }
           })
           if (items.length > 0) {
             parsedBlocks.push({ type: "list", text: "", style: tag === "ol" ? "ordered" : "unordered", items })
@@ -212,8 +230,7 @@ export function ParagraphBlock({ data, onChange, onEnter, onBackspace, onPasteSp
 
       Array.from(doc.body.childNodes).forEach(processNode)
 
-      console.log("[v0] Parsed blocks count:", parsedBlocks.length)
-      console.log("[v0] Parsed blocks:", JSON.stringify(parsedBlocks.slice(0, 5), null, 2))
+
 
       // If we detected multiple structured blocks, use them
       if (parsedBlocks.length > 1) {
