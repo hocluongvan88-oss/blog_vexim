@@ -17,7 +17,6 @@ import {
   BadgeCheck,
   Sparkles,
 } from "lucide-react"
-import ConsultationDialog from "@/components/consultation-dialog"
 import Link from "next/link"
 
 const features = [
@@ -127,12 +126,12 @@ export default function FDALabelCheckPage() {
 
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-                <ConsultationDialog>
+                <Link href="https://ailabelpro.com/" target="_blank" rel="noopener noreferrer">
                   <Button size="lg" className="text-lg px-8 py-6 gap-2">
                     <ScanLine className="w-5 h-5" />
                     Kiểm tra nhãn ngay
                   </Button>
-                </ConsultationDialog>
+                </Link>
                 <Link href="/fda-tracker">
                   <Button size="lg" variant="outline" className="text-lg px-8 py-6 gap-2">
                     Xem vi phạm thực tế
@@ -277,12 +276,12 @@ export default function FDALabelCheckPage() {
                       </p>
                     </div>
 
-                    <ConsultationDialog>
+                    <Link href="https://ailabelpro.com/" target="_blank" rel="noopener noreferrer" className="block">
                       <Button size="lg" className="w-full text-lg py-6 gap-2">
                         <ScanLine className="w-5 h-5" />
                         Kiểm tra ngay
                       </Button>
-                    </ConsultationDialog>
+                    </Link>
 
                     <p className="text-xs text-muted-foreground text-center mt-4">
                       Không cần tạo tài khoản. Kết quả trong 2 phút.
@@ -354,12 +353,12 @@ export default function FDALabelCheckPage() {
                 Hơn 200 doanh nghiệp Việt Nam đã tin dùng AI Label Pro để bảo vệ lô hàng xuất khẩu.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <ConsultationDialog>
+                <Link href="https://ailabelpro.com/" target="_blank" rel="noopener noreferrer">
                   <Button size="lg" className="bg-white text-primary hover:bg-white/90 text-lg px-8 py-6 gap-2">
                     <ScanLine className="w-5 h-5" />
                     Kiểm tra nhãn miễn phí
                   </Button>
-                </ConsultationDialog>
+                </Link>
                 <Link href="/contact">
                   <Button
                     size="lg"

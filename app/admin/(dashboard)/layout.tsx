@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { AdminSidebar } from "@/components/admin-sidebar"
 import { MobileAdminHeader } from "@/components/admin/mobile-admin-header"
+import { Toaster } from "@/components/ui/toaster"
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 
@@ -73,6 +74,9 @@ export default async function AdminLayout({
         </div>
         <main className="flex-1 w-full">{children}</main>
       </div>
+      
+      {/* Toast Notifications */}
+      <Toaster />
     </div>
   )
 }

@@ -257,6 +257,16 @@ export default function NewPostPage() {
             <h3 className="text-lg font-bold text-primary mb-4">Hành động</h3>
             <div className="flex flex-col gap-3">
               <Button 
+                onClick={() => handleSubmit("published")} 
+                disabled={isLoading} 
+                className="w-full bg-primary hover:bg-primary/90"
+                type="button"
+              >
+                {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
+                Xuất bản
+              </Button>
+
+              <Button 
                 onClick={() => handleSubmit("draft")} 
                 variant="outline" 
                 disabled={isLoading} 
@@ -265,17 +275,6 @@ export default function NewPostPage() {
               >
                 {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
                 Lưu nháp
-              </Button>
-
-              <Button
-                onClick={() => alert("Tính năng xem trước đang phát triển")}
-                variant="outline"
-                disabled
-                className="w-full opacity-50 cursor-not-allowed"
-                type="button"
-              >
-                <Eye className="w-4 h-4 mr-2" />
-                Xem trước
               </Button>
 
               <Button
@@ -291,6 +290,18 @@ export default function NewPostPage() {
           </Card>
         </div>
       </div>
+      
+      {/* Preview Dialog */}
+      <PostPreviewDialog
+        open={showPreview}
+        onOpenChange={setShowPreview}
+        title={title}
+        category={category}
+        excerpt={excerpt}
+        blocks={blocks}
+        featuredImage={featuredImage}
+        previewImage={previewImage}
+      />
     </div>
   )
 }
