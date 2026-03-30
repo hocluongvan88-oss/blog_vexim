@@ -8,26 +8,26 @@ import { ConsultationDialog } from "./consultation-dialog"
 const workflowSteps = [
   {
     number: "01",
-    title: "Kiểm tra thành phần & Nhãn",
-    description: "Phân tích thành phần sản phẩm, kiểm tra tuân thủ 21 CFR, đề xuất sửa nhãn nếu cần.",
+    title: "Tiếp nhận & Tư vấn",
+    description: "Lắng nghe nhu cầu, phân tích tình hình doanh nghiệp và đề xuất giải pháp phù hợp nhất.",
     color: "from-blue-500 to-blue-600",
   },
   {
     number: "02",
-    title: "Đăng ký FDA / MoCRA",
-    description: "Đăng ký Facility cho thực phẩm hoặc Facility + Product Listing cho mỹ phẩm MoCRA.",
+    title: "Chuẩn bị hồ sơ",
+    description: "Thu thập, kiểm tra và hoàn thiện toàn bộ hồ sơ pháp lý theo quy định của từng thị trường.",
     color: "from-emerald-500 to-emerald-600",
   },
   {
     number: "03",
-    title: "Tìm US Agent & FSVP",
-    description: "Giới thiệu US Agent/Responsible Person uy tín, hỗ trợ FSVP Importer/Plan (thực phẩm).",
+    title: "Nộp hồ sơ & Theo dõi",
+    description: "Gửi hồ sơ đến cơ quan có thẩm quyền, theo dõi tiến độ và phối hợp giải quyết vướng mắc.",
     color: "from-blue-500 to-blue-600",
   },
   {
     number: "04",
-    title: "Prior Notice & Xuất khẩu",
-    description: "Khai báo trước khi hàng đến cảng Mỹ, hỗ trợ gia hạn FDA/MoCRA hàng năm.",
+    title: "Nhận kết quả & Hỗ trợ",
+    description: "Bàn giao giấy phép, hướng dẫn sử dụng và hỗ trợ duy trì tuân thủ lâu dài.",
     color: "from-emerald-500 to-emerald-600",
   },
 ]
@@ -40,10 +40,10 @@ export function WorkflowSection() {
       <div className="container mx-auto px-4">
         <div className="text-center mb-12 md:mb-16">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-primary mb-4 text-balance">
-            Hành trình xuất khẩu sang Hoa Kỳ
+            Quy trình làm việc chuyên nghiệp
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            4 bước chiến lược từ kiểm tra sản phẩm đến xuất khẩu thành công
+            4 bước đơn giản để đưa sản phẩm của bạn ra thị trường quốc tế
           </p>
         </div>
 
@@ -101,11 +101,11 @@ export function WorkflowSection() {
             <Card className="p-8 bg-gradient-to-br from-primary/5 to-accent/5 border-2 border-primary/20">
               <div className="flex items-center justify-center gap-2 mb-4">
                 <CheckCircle2 className="w-6 h-6 text-accent" />
-                <h3 className="text-xl font-bold text-primary">Hỗ trợ đầy đủ từ A đến Z</h3>
+                <h3 className="text-xl font-bold text-primary">Cam kết minh bạch trong từng bước</h3>
               </div>
               <p className="text-muted-foreground mb-6 max-w-2xl mx-auto leading-relaxed">
-                Từ kiểm tra thành phần, sửa nhãn, đăng ký FDA/MoCRA, tìm US Agent, đến Prior Notice và gia hạn hàng năm. 
-                Bạn sẽ được thông báo tiến độ thường xuyên và có thể liên hệ chuyên viên phụ trách bất cứ lúc nào.
+                Bạn sẽ được thông báo tiến độ thường xuyên và có thể liên hệ chuyên viên phụ trách bất cứ lúc nào trong
+                suốt quá trình.
               </p>
               <button
                 onClick={() => setIsDialogOpen(true)}

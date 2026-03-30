@@ -73,13 +73,13 @@ export function HeroSection() {
           {/* Left Content */}
           <div className="text-white">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-balance leading-tight">
-              Xuất khẩu sang Hoa Kỳ - Dễ dàng hơn với VEXIM
+              Đồng hành cùng doanh nghiệp
             </h1>
             <h2 className="text-2xl md:text-3xl font-bold mb-6 text-yellow-400 drop-shadow-lg">
-              Chuyên gia tư vấn quy định FDA & MoCRA cho thực phẩm và mỹ phẩm
+              Chinh phục những thị trường khó tính nhất
             </h2>
             <p className="text-lg md:text-xl mb-8 text-white/90 leading-relaxed">
-              Chúng tôi giúp doanh nghiệp Việt kinh tế chiến lược từ giai đoạn kiểm tra thành phần, sửa nhãn, đăng ký FDA, tìm US Agent/Responsible Person, đến FSVP, Prior Notice và gia hạn hàng năm. Với kinh nghiệm xử lý hàng trăm hồ sơ xuất khẩu, chúng tôi đảm bảo sản phẩm bạn vào thị trường Mỹ một cách nhanh chóng, hiệu quả và tuân thủ quy định.
+              Điểm khác biệt của chúng tôi là sự am hiểu sâu sắc về thị trường Mỹ, Trung Quốc và Hàn Quốc, kết hợp ứng dụng công nghệ trong việc cập nhật các quy định mới nhất, quản lý truy xuất nguồn gốc và tư vấn hồ sơ chính xác, chuẩn chỉnh. Nhờ đó, chúng tôi giúp doanh nghiệp rút ngắn thời gian, tối ưu chi phí, để bạn có thêm nguồn lực tập trung vào phát triển sản phẩm, mở rộng thị trường và nâng cao năng lực cạnh tranh bền vững.
             </p>
             <ul className="space-y-4 mb-8">
               <li className="flex items-center gap-3">
@@ -87,7 +87,7 @@ export function HeroSection() {
                   <Shield className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-white/90">
-                  Chuyên sâu FDA: Kiểm tra thành phần, sửa nhãn, đăng ký Facility, Prior Notice
+                  Hiểu rõ quy định FDA, GACC, MFDS - Cập nhật thay đổi mới nhất
                 </span>
               </li>
               <li className="flex items-center gap-3">
@@ -95,14 +95,14 @@ export function HeroSection() {
                   <FileCheck className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-white/90">
-                  Hỗ trợ MoCRA: Đăng ký mỹ phẩm, chỉ định Responsible Person, gia hạn hàng năm
+                  Kiểm tra hồ sơ kỹ lưỡng trước khi nộp, giảm thiểu rủi ro từ chối
                 </span>
               </li>
               <li className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
                   <Lock className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-white/90">Tìm US Agent/Importer FSVP - Kết nối nhân sự Mỹ uy tín</span>
+                <span className="text-white/90">Công nghệ bảo mật thông tin, hỗ trợ 24/7 khi cần</span>
               </li>
             </ul>
             <Button
@@ -190,13 +190,10 @@ export function HeroSection() {
                   disabled={isSubmitting}
                 >
                   <option value="">Chọn dịch vụ</option>
-                  <option value="ingredient-review">Kiểm tra thành phần</option>
-                  <option value="label-compliance">Sửa nhãn FDA</option>
-                  <option value="fda-registration">Đăng ký FDA</option>
-                  <option value="us-agent">US Agent/Responsible Person</option>
-                  <option value="fsvp">FSVP Importer/Plan</option>
-                  <option value="prior-notice">Prior Notice</option>
-                  <option value="renewal">Gia hạn FDA/MoCRA</option>
+                  <option value="fda">Đăng ký FDA</option>
+                  <option value="gacc">Mã GACC</option>
+                  <option value="fda-label-check">Check nhãn FDA</option>
+                  <option value="agent-us">Dịch vụ Agent Hoa Kỳ</option>
                   <option value="other">Khác</option>
                 </select>
               </div>
