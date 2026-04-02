@@ -2,18 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Menu, X, User, ChevronDown, Shield } from "lucide-react"
+import { Menu, X } from "lucide-react"
 import { ConsultationDialog } from "@/components/consultation-dialog"
 import Link from "next/link"
-import { BlogSearch } from "@/components/blog-search"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -57,19 +48,13 @@ export function Header() {
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-8">
               <Link href="/#services" className="text-foreground hover:text-primary transition-colors font-medium">
-                Dịch vụ
+                Dịch vụ FDA
               </Link>
-              <Link href="/fda-tracker" className="text-foreground hover:text-primary transition-colors font-medium">
-                FDA Tracker
-              </Link>
-              <Link href="/services/gacc/assessment" className="text-foreground hover:text-primary transition-colors font-medium">
-                Tra cứu GACC
+              <Link href="/blog" className="text-foreground hover:text-primary transition-colors font-medium">
+                Blog
               </Link>
               <Link href="/#about" className="text-foreground hover:text-primary transition-colors font-medium">
                 Giới thiệu
-              </Link>
-              <Link href="/blog" className="text-foreground hover:text-primary transition-colors font-medium">
-                Tin tức
               </Link>
               <Link href="/#contact" className="text-foreground hover:text-primary transition-colors font-medium">
                 Liên hệ
@@ -85,36 +70,6 @@ export function Header() {
               >
                 Yêu cầu tư vấn
               </Button>
-
-              {/* Profile Dropdown */}
-              {isMounted && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-gray-100 transition-colors">
-                      <Avatar className="w-9 h-9">
-                        <AvatarFallback className="bg-emerald-600 text-white text-sm font-semibold">
-                          AD
-                        </AvatarFallback>
-                      </Avatar>
-                      <ChevronDown className="w-4 h-4 text-muted-foreground" />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuItem asChild>
-                      <Link href="/client-portal" className="cursor-pointer">
-                        <User className="w-4 h-4 mr-2" />
-                        <span>Khách hàng</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/admin/login" className="cursor-pointer">
-                        <Shield className="w-4 h-4 mr-2" />
-                        <span>Quản trị viên</span>
-                      </Link>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
             </div>
 
             {/* Mobile Menu Button */}
@@ -131,29 +86,19 @@ export function Header() {
           {isMobileMenuOpen && (
             <nav className="md:hidden py-4 border-t">
               <div className="flex flex-col gap-4">
-                <div className="pb-2">
-                  <BlogSearch />
-                </div>
                 <Link
                   href="/#services"
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="text-left text-foreground hover:text-primary transition-colors font-medium"
                 >
-                  Dịch vụ
+                  Dịch vụ FDA
                 </Link>
                 <Link
-                  href="/fda-tracker"
+                  href="/blog"
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="text-left text-foreground hover:text-primary transition-colors font-medium"
                 >
-                  FDA Tracker
-                </Link>
-                <Link
-                  href="/services/gacc/assessment"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-left text-foreground hover:text-primary transition-colors font-medium"
-                >
-                  Tra cứu GACC
+                  Blog
                 </Link>
                 <Link
                   href="/#about"
@@ -163,13 +108,6 @@ export function Header() {
                   Giới thiệu
                 </Link>
                 <Link
-                  href="/blog"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-left text-foreground hover:text-primary transition-colors font-medium"
-                >
-                  Tin tức
-                </Link>
-                <Link
                   href="/#contact"
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="text-left text-foreground hover:text-primary transition-colors font-medium"
@@ -177,32 +115,16 @@ export function Header() {
                   Liên hệ
                 </Link>
                 <div className="pt-2 border-t">
-                  <Link
-                    href="/client-portal"
-                    className="text-left text-muted-foreground hover:text-primary transition-colors flex items-center gap-2 mb-3"
-                    onClick={() => setIsMobileMenuOpen(false)}
+                  <Button
+                    onClick={() => {
+                      setIsDialogOpen(true)
+                      setIsMobileMenuOpen(false)
+                    }}
+                    className="bg-accent text-accent-foreground hover:bg-accent/90 w-full"
                   >
-                    <User className="w-4 h-4" />
-                    <span>Đăng nhập Khách hàng</span>
-                  </Link>
-                  <Link
-                    href="/admin/login"
-                    className="text-left text-muted-foreground hover:text-primary transition-colors flex items-center gap-2"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <Shield className="w-4 h-4" />
-                    <span>Quản trị viên</span>
-                  </Link>
+                    Yêu cầu tư vấn
+                  </Button>
                 </div>
-                <Button
-                  onClick={() => {
-                    setIsDialogOpen(true)
-                    setIsMobileMenuOpen(false)
-                  }}
-                  className="bg-accent text-accent-foreground hover:bg-accent/90 w-full"
-                >
-                  Yêu cầu tư vấn
-                </Button>
               </div>
             </nav>
           )}
