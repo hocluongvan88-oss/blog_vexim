@@ -1,9 +1,11 @@
 import { Header } from "@/components/header"
 import { HeroSection } from "@/components/hero-section"
-import { ServicesGrid } from "@/components/services-grid"
+import { Statistics } from "@/components/statistics"
+import { CoreServices } from "@/components/core-services"
+import { FSVPFocus } from "@/components/fsvp-focus"
+import { USPresenceDUNS } from "@/components/us-presence-duns"
 import { WhyChooseUs } from "@/components/why-choose-us"
 import { WorkflowSection } from "@/components/workflow-section"
-import { Statistics } from "@/components/statistics"
 import { FAQSection } from "@/components/faq-section"
 import { NewsPreview } from "@/components/news-preview"
 import { Footer } from "@/components/footer"
@@ -12,9 +14,9 @@ import { FDAAlertBadge } from "@/components/fda/fda-alert-badge"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Vexim Global - Giải Pháp Xuất Nhập Khẩu Toàn Cầu",
+  title: "Vexim Global - Đưa hàng vào Mỹ đúng luật | FDA, DUNS, FSVP",
   description:
-    "Chuyên gia tư vấn pháp lý xuất nhập khẩu hàng đầu Việt Nam. Dịch vụ đăng ký FDA, GACC, MFDS, CE và giấy phép xuất khẩu quốc tế.",
+    "Chuyên gia tư vấn xuất khẩu hàng hóa sang Mỹ. Hỗ trợ đăng ký FDA, lấy mã DUNS, tìm US Agent, lập FSVP Plan, kiểm tra nhãn 21 CFR. Văn phòng tại New Jersey, hỗ trợ 24/7.",
   alternates: {
     canonical: "/",
   },
@@ -102,10 +104,12 @@ export default function Home() {
       <main className="min-h-screen">
         <Header />
         <HeroSection />
-        <ServicesGrid />
+        <Statistics />
+        <CoreServices />
+        <FSVPFocus />
+        <USPresenceDUNS />
         <WhyChooseUs />
         <WorkflowSection />
-        <Statistics />
         <FAQSection />
         <NewsPreview />
         <Footer />

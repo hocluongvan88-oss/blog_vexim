@@ -2,20 +2,20 @@ import { AlertCircle } from "lucide-react"
 
 const stats = [
   {
-    number: "200+",
-    label: "Doanh nghiệp đã hợp tác",
-  },
-  {
     number: "100%",
-    label: "Ứng dụng công nghệ vào quy trình",
-  },
-  {
-    number: "90%+",
-    label: "Khách hàng hài lòng*",
+    label: "Thành công trong đăng ký",
   },
   {
     number: "24/7",
-    label: "Hotline hỗ trợ",
+    label: "Hỗ trợ kỹ thuật",
+  },
+  {
+    number: "21 CFR",
+    label: "Chuẩn tuân thủ tuyệt đối",
+  },
+  {
+    number: "48h",
+    label: "Phản hồi mọi câu hỏi",
   },
 ]
 
