@@ -76,10 +76,10 @@ export function HeroSection() {
               Chuẩn hóa quốc tế cùng đội ngũ chuyên gia FDA hàng đầu
             </h1>
             <h2 className="text-2xl md:text-3xl font-bold mb-6 text-yellow-400 drop-shadow-lg">
-              Hợp tác cùng đội ngũ chuyên gia quốc tế với hơn 10 năm kinh nghiệm thực chiến tại Hoa Kỳ. 
+              Vượt mọi rào cản pháp lý bằng kinh nghiệm thực chiến từ chuyên gia bản địa. 
             </h2>
             <p className="text-lg md:text-xl mb-8 text-white/90 leading-relaxed">
-              Vexim quy tụ những chuyên gia FDA thực chiến với hàng chục năm kinh nghiệm tại thị trường Hoa Kỳ. Giải quyết triệt để rào cản kỹ thuật, tối ưu chi phí và đảm bảo lộ trình thông quan hàng hóa minh bạch, an toàn.
+              Vexim quy tụ đội ngũ cố vấn quốc tế am hiểu sâu sắc quy định FDA & MoCRA. chúng tôi trực tiếp xử lý hồ sơ, tối ưu hóa thành phần và nhãn mác, giúp sản phẩm của bạn thông quan an toàn và tự tin hiện diện tại các hệ thống bán lẻ lớn nhất Hoa Kỳ.
             </p>
             <ul className="space-y-4 mb-8">
               <li className="flex items-center gap-3">
