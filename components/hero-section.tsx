@@ -87,7 +87,7 @@ export function HeroSection() {
                   <Shield className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-white/90">
-                  Hiểu rõ quy định FDA - Cập nhật thay đổi mới nhất từ cơ quan Hoa Kỳ
+                  Cập nhật quy định mới nhất - Am hiểu tường tận mọi thay đổi từ FDA & MoCRA.
                 </span>
               </li>
               <li className="flex items-center gap-3">
@@ -95,14 +95,14 @@ export function HeroSection() {
                   <FileCheck className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-white/90">
-                  Kiểm tra hồ sơ kỹ lưỡng trước khi nộp, giảm thiểu rủi ro từ chối
+                  Kiểm soát rủi ro tuyệt đối - Rà soát hồ sơ và thành phần kỹ lưỡng, triệt tiêu nguy cơ bị giữ hàng tại cảng.
                 </span>
               </li>
               <li className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
                   <Lock className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-white/90">Công nghệ bảo mật thông tin, hỗ trợ 24/7 khi cần</span>
+                <span className="text-white/90">Hỗ trợ 24/7 - Kết nối không khoảng cách giữa doanh nghiệp Việt và mạng lưới chuyên gia tại Mỹ.</span>
               </li>
             </ul>
             <Button
