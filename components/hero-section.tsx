@@ -73,13 +73,13 @@ export function HeroSection() {
           {/* Left Content */}
           <div className="text-white">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-balance leading-tight">
-              Đồng hành cùng doanh nghiệp
+              Chuẩn hóa quốc tế cùng đội ngũ chuyên gia FDA hàng đầu
             </h1>
             <h2 className="text-2xl md:text-3xl font-bold mb-6 text-yellow-400 drop-shadow-lg">
-              Chinh phục những thị trường khó tính nhất
+              Hợp tác cùng đội ngũ chuyên gia quốc tế với hơn 10 năm kinh nghiệm thực chiến tại Hoa Kỳ. 
             </h2>
             <p className="text-lg md:text-xl mb-8 text-white/90 leading-relaxed">
-              Điểm khác biệt của chúng tôi là sự am hiểu sâu sắc về thị trường Hoa Kỳ, kết hợp ứng dụng công nghệ trong việc cập nhật các quy định FDA mới nhất, quản lý truy xuất nguồn gốc và tư vấn hồ sơ chính xác, chuẩn chỉnh. Nhờ đó, chúng tôi giúp doanh nghiệp rút ngắn thời gian, tối ưu chi phí, để bạn có thêm nguồn lực tập trung vào phát triển sản phẩm, mở rộng thị trường Mỹ và nâng cao năng lực cạnh tranh bền vững.
+              Vexim quy tụ những chuyên gia FDA thực chiến với hàng chục năm kinh nghiệm tại thị trường Hoa Kỳ. Giải quyết triệt để rào cản kỹ thuật, tối ưu chi phí và đảm bảo lộ trình thông quan hàng hóa minh bạch, an toàn.
             </p>
             <ul className="space-y-4 mb-8">
               <li className="flex items-center gap-3">
