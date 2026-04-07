@@ -58,7 +58,7 @@ export default function MoCRARegistrationPage() {
               <div className="flex flex-wrap gap-4 mb-8">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Clock className="w-4 h-4 text-accent" />
-                  <span>Thời gian xử lý: 3-5 tuần</span>
+                  <span>Thời gian xử lý: 3-5 ngày</span>
                 </div>
               </div>
               <ConsultationDialog
