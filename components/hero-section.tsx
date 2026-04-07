@@ -72,18 +72,14 @@ export function HeroSection() {
         <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
           {/* Left Content */}
           <div className="text-white">
-            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur px-4 py-2 rounded-full mb-6 border border-white/20">
-              <div className="w-2 h-2 bg-yellow-400 rounded-full" />
-              <span className="text-sm font-medium text-white/90">Xác nhận chuyên gia tuân thủ FDA</span>
-            </div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-balance leading-tight">
-              Đưa hàng vào Mỹ đúng luật
+              Đồng hành cùng doanh nghiệp
             </h1>
-            <p className="text-xl md:text-2xl font-semibold mb-8 text-yellow-300">
-              Từ DUNS, FDA, US Agent đến FSVP
-            </p>
+            <h2 className="text-2xl md:text-3xl font-bold mb-6 text-yellow-400 drop-shadow-lg">
+              Chinh phục những thị trường khó tính nhất
+            </h2>
             <p className="text-lg md:text-xl mb-8 text-white/90 leading-relaxed">
-              Chuyên gia tư vấn pháp lý xuất nhập khẩu hàng đầu Việt Nam. Chúng tôi có văn phòng tại Mỹ, DUNS chính thức, và kinh nghiệm 500+ doanh nghiệp thành công. Hỗ trợ từ việc đăng ký DUNS, xác nhận FDA, tìm US Agent, lập FSVP Plan đến kiểm tra nhãn 21 CFR.
+              Điểm khác biệt của chúng tôi là sự am hiểu sâu sắc về thị trường Hoa Kỳ, kết hợp ứng dụng công nghệ trong việc cập nhật các quy định FDA mới nhất, quản lý truy xuất nguồn gốc và tư vấn hồ sơ chính xác, chuẩn chỉnh. Nhờ đó, chúng tôi giúp doanh nghiệp rút ngắn thời gian, tối ưu chi phí, để bạn có thêm nguồn lực tập trung vào phát triển sản phẩm, mở rộng thị trường Mỹ và nâng cao năng lực cạnh tranh bền vững.
             </p>
             <ul className="space-y-4 mb-8">
               <li className="flex items-center gap-3">
@@ -91,7 +87,7 @@ export function HeroSection() {
                   <Shield className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-white/90">
-                  100% tuân thủ FDA, MoCRA, FSMA - Giảm rủi ro bị detention
+                  Hiểu rõ quy định FDA - Cập nhật thay đổi mới nhất từ cơ quan Hoa Kỳ
                 </span>
               </li>
               <li className="flex items-center gap-3">
@@ -99,37 +95,31 @@ export function HeroSection() {
                   <FileCheck className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-white/90">
-                  Có DUNS chính thức + Văn phòng tại New Jersey - Hỗ trợ US Agent
+                  Kiểm tra hồ sơ kỹ lưỡng trước khi nộp, giảm thiểu rủi ro từ chối
                 </span>
               </li>
               <li className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
                   <Lock className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-white/90">Phản hồi trong 48h, tư vấn 24/7 cho mọi vấn đề compliance</span>
+                <span className="text-white/90">Công nghệ bảo mật thông tin, hỗ trợ 24/7 khi cần</span>
               </li>
             </ul>
             <Button
               size="lg"
-              className="bg-blue-600 text-white hover:bg-blue-700 shadow-lg"
+              className="bg-red-600 text-white hover:bg-red-700 shadow-lg"
               onClick={() => setIsDialogOpen(true)}
             >
-              Nhận lộ trình tư vấn
+              Tư vấn miễn phí
               <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
-            <div className="flex items-center gap-4 mt-8 pt-8 border-t border-white/20">
-              <div>
-                <div className="text-3xl font-bold text-yellow-300">500+</div>
-                <div className="text-sm text-white/80">Dự án thành công</div>
-              </div>
-            </div>
           </div>
 
           {/* Right Content - Consultation Form */}
           <Card id="consultation-form" className="p-6 md:p-8 bg-white shadow-2xl">
-            <h3 className="text-2xl font-bold text-primary mb-2">Nhận lộ trình xuất khẩu</h3>
+            <h3 className="text-2xl font-bold text-primary mb-2">Tư vấn miễn phí - Nhận kết quả trong 24h</h3>
             <p className="text-muted-foreground mb-6">
-              <span className="text-accent font-semibold">Gửi thông tin ngay</span> để nhận tư vấn chuẩn hóa từ chuyên gia
+              <span className="text-accent font-semibold">Vui lòng gửi lại thông tin</span> chúng tôi sẽ liên hệ với bạn ngay!
             </p>
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Honeypot field ẩn */}
@@ -201,9 +191,10 @@ export function HeroSection() {
                 >
                   <option value="">Chọn dịch vụ</option>
                   <option value="fda">Đăng ký FDA</option>
-                  <option value="gacc">Mã GACC</option>
-                  <option value="fda-label-check">Check nhãn FDA</option>
-                  <option value="agent-us">Dịch vụ Agent Hoa Kỳ</option>
+                  <option value="fda-label-check">Kiểm tra nhãn FDA</option>
+                  <option value="fsvp">FSVP Compliance</option>
+                  <option value="agent-us">Dịch vụ US Agent</option>
+                  <option value="mocra">MOCRA Registration</option>
                   <option value="other">Khác</option>
                 </select>
               </div>

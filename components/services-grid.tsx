@@ -6,47 +6,75 @@ import { ArrowRight } from "lucide-react"
 const services = [
   {
     image: "/fda-food-safety-inspection-laboratory-professional.jpg",
-    title: "Đăng ký FDA nhanh",
+    title: "Đăng ký FDA & DUNS",
     description:
-      "Xuất khẩu thực phẩm, mỹ phẩm sang Mỹ bắt buộc phải có FDA Registration. Thiếu giấy tờ này, hàng hóa sẽ bị giữ lại ngay tại cảng. Chúng tôi hỗ trợ toàn bộ quy trình từ chuẩn bị hồ sơ đến đăng ký thành công, giúp doanh nghiệp yên tâm xuất khẩu.",
+      "Xuất khẩu thực phẩm sang Mỹ bắt buộc phải có FDA Registration và DUNS lâm định danh (UFI). Vexim hỗ trợ trong gói từ đăng ký mã DUNS đến hoàn tất hồ sơ FDA.",
+    items: [
+      "Đăng ký mã DUNS chuẩn xác",
+      "Food Facility Registration",
+      "Gia hạn FDA định kỳ"
+    ],
     link: "/services/fda",
   },
   {
-    image: "/china-customs-port-container-shipping-trade.jpg",
-    title: "Tư vấn Mã GACC",
+    image: "/mocra-cosmetics-fda-registration.jpg",
+    title: "Tuân thủ MoCRA",
     description:
-      "Từ 2021, xuất khẩu nông sản, thủy sản sang Trung Quốc bắt buộc phải có mã GACC. Không có mã này, container sẽ bị từ chối nhập cảng. Chúng tôi đồng hành cùng bạn trong toàn bộ quy trình đăng ký, cập nhật kịp thời các yêu cầu mới của Hải quan Trung Quốc.",
-    link: "/services/gacc",
-  },
-  {
-    image: "/korean-cosmetics-health-products-laboratory-qualit.jpg",
-    title: "Tư vấn Giấy phép MFDS",
-    description:
-      "Xuất khẩu mỹ phẩm, thực phẩm chức năng sang Hàn Quốc cần giấy phép MFDS với yêu cầu rất nghiêm ngặt. Hồ sơ phức tạp, dễ bị từ chối nếu thiếu kinh nghiệm. Chúng tôi kiểm tra kỹ từng chi tiết, đảm bảo hồ sơ đạt chuẩn trước khi nộp.",
-    link: "/services/mfds",
+      "Đáp ứng Đạo luật hiện đại hóa Mỹ phẩm (MoCRA) năm 2022. Thực hiện đăng ký cơ sở sản xuất và Listing sản phẩm bắt buộc lên hệ thống FDA Mỹ.",
+    items: [
+      "Cosmetic Product Listing",
+      "Đăng ký cơ sở Mỹ phẩm",
+      "Tư vấn Adverse Event"
+    ],
+    link: "/services/cosmetics/mocra-registration",
   },
   {
     image: "/us-customs-broker-agent-import-export-documentatio.jpg",
-    title: "Dịch vụ US Agent",
+    title: "US Agent & RP",
     description:
-      "FDA yêu cầu các nhà sản xuất nước ngoài phải có đại diện pháp lý tại Mỹ (US Agent). Đây là người liên hệ chính khi FDA có thông báo hoặc thanh tra. Chúng tôi cung cấp dịch vụ US Agent chuyên nghiệp, sẵn sàng hỗ trợ 24/7 khi cần thiết.",
+      "Cung cấp đại diện pháp lý tại Mỹ cho thực phẩm (US Agent) và người chịu trách nhiệm cho mỹ phẩm (Responsible Person) theo đúng quy định liên bang.",
+    items: [
+      "Đại diện liên lạc 24/7",
+      "Phản hồi thông báo từ FDA",
+      "Hỗ trợ thanh tra cơ sở"
+    ],
     link: "/services/us-agent",
   },
   {
-    image: "/ai-technology-blockchain-supply-chain-digital-trac.jpg",
-    title: "Hệ thống Truy xuất nguồn gốc",
+    image: "/korean-cosmetics-health-products-laboratory-qualit.jpg",
+    title: "Kiểm tra Nhãn & Thành phần",
     description:
-      "FDA yêu cầu truy xuất nguồn gốc từ 01/2026 theo quy định FSMA 204. Hệ thống của chúng tôi sử dụng công nghệ blockchain, giúp ghi nhận đầy đủ hành trình từ nguyên liệu đến thành phẩm. Tuân thủ quy định của FDA, EU và Trung Quốc về traceability.",
-    link: "/services/ai-traceability",
-    badge: "Công nghệ mới",
+      "Rà soát bảng thành phần (Ingredients) và thiết kế nhãn (Nutrition Facts) theo chuẩn 21 CFR. Tránh rủi ro hàng sẽ bị giữ lại tại cảng do lỗi trình bày.",
+    items: [
+      "Review Ingredients chuyên sâu",
+      "Sửa nhãn chuẩn 21 CFR",
+      "Kiểm soát Health Claims"
+    ],
+    link: "/services/fda-label-check",
   },
   {
-    image: "/ai-fda-label-compliance-check-scanner.jpg",
-    title: "Kiểm tra nhãn FDA theo chuẩn 21CFR",
+    image: "/fsvp-compliance-food-import.jpg",
+    title: "FSVP Importer & Plan",
     description:
-      "Kiểm tra tuân thủ nhãn FDA theo 21 CFR chỉ trong 2 phút. AI đối soát với 5.346 vi phạm thực tế từ Warning Letters, phát hiện lỗi trước khi hàng rời cảng. Kết hợp với đội ngũ chuyên gia phân tích, kết luận tăng tỷ lệ thông quan 99,5% sau khi sửa theo hướng dẫn.",
-    link: "/services/fda-label-check",
-    badge: "AI Powered",
+      "Đóng vai trò là đơn vị nhập khẩu FSVP tại Mỹ, xây dựng kế hoạch kiểm soát nhà cung cấp nước ngoài đáp ứng quy định khắt khe của FSMA.",
+    items: [
+      "Chỉ định FSVP Importer",
+      "Thiết lập FSVP Plan",
+      "Đánh giá nhà cung cấp"
+    ],
+    link: "/services/fsvp",
+  },
+  {
+    image: "/llc-formation-usa-business.jpg",
+    title: "Thành lập LLC & EIN",
+    description:
+      "Hỗ trợ thành lập công ty LLC tại Mỹ, xin mã số thuế EIN để doanh nghiệp tự đứng tên nhập khẩu và vận hành chuyên nghiệp, thời gian nhanh chóng.",
+    items: [
+      "Đăng ký công ty LLC",
+      "Xin mã số thuế EIN",
+      "Mở tài khoản ngân hàng Mỹ"
+    ],
+    link: "/services/llc-ein",
   },
 ]
 
@@ -84,7 +112,14 @@ export function ServicesGrid() {
                   <h3 className="text-xl font-bold text-primary mb-3 group-hover:text-accent transition-colors">
                     {service.title}
                   </h3>
-                  <p className="text-muted-foreground mb-4 leading-relaxed">{service.description}</p>
+                  <p className="text-muted-foreground mb-4 leading-relaxed text-sm">{service.description}</p>
+                  <ul className="space-y-2 mb-4">
+                    {service.items.map((item, idx) => (
+                      <li key={idx} className="text-sm text-primary hover:text-accent transition-colors">
+                        <span className="inline-block mr-2">•</span>{item}
+                      </li>
+                    ))}
+                  </ul>
                   <div className="text-accent font-medium inline-flex items-center gap-2 group-hover:gap-3 transition-all">
                     Tìm hiểu thêm
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

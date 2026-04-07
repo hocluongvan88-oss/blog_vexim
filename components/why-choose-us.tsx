@@ -5,13 +5,13 @@ const benefits = [
     icon: Users,
     title: "Chuyên sâu từng thị trường",
     description:
-      "Chúng tôi không chỉ hiểu quy định, mà còn nắm rõ cách vận hành thực tế của FDA, GACC, MFDS. Theo dõi sát từng thay đổi pháp lý, cập nhật kinh nghiệm qua hàng trăm hồ sơ đã xử lý. Đội ngũ trẻ, nhiệt huyết, luôn học hỏi để đồng hành tốt nhất cùng doanh nghiệp Việt.",
+      "Chúng tôi không chỉ hiểu quy định, mà còn nắm rõ cách vận hành thực tế của FDA Hoa Kỳ. Theo dõi sát từng thay đổi pháp lý, cập nhật kinh nghiệm qua hàng trăm hồ sơ đã xử lý. Đội ngũ trẻ, nhiệt huyết, luôn học hỏi để đồng hành tốt nhất cùng doanh nghiệp Việt.",
   },
   {
     icon: Clock,
     title: "Quy trình minh bạch, tiến độ rõ ràng",
     description:
-      "FDA Registration: 5-10 ngày làm việc. Mã GACC: 8-12 tuần. Giấy phép MFDS: 10-16 tuần tùy sản phẩm. Thời gian phụ thuộc độ đầy đủ của hồ sơ và tốc độ xử lý của cơ quan. Chúng tôi cập nhật tiến độ thường xuyên, không để bạn chờ đợi mơ hồ.",
+      "FDA Registration: 5-10 ngày làm việc. FSVP Compliance: 2-4 tuần. MOCRA Registration: 3-6 tuần tùy sản phẩm. Thời gian phụ thuộc độ đầy đủ của hồ sơ và tốc độ xử lý của FDA. Chúng tôi cập nhật tiến độ thường xuyên, không để bạn chờ đợi mơ hồ.",
   },
   {
     icon: DollarSign,
@@ -23,7 +23,7 @@ const benefits = [
     icon: Headphones,
     title: "Hỗ trợ nhiệt tình, cập nhật kịp thời",
     description:
-      "Quy định của FDA, GACC, MFDS thay đổi liên tục. Chúng tôi theo dõi hàng ngày để thông báo cho bạn kịp thời khi có điều chỉnh quan trọng. Luôn sẵn sàng tư vấn qua hotline, email, Zalo trong giờ làm việc. Đội ngũ nhiệt tình, giải đáp nhanh chóng.",
+      "Quy định của FDA thay đổi liên tục. Chúng tôi theo dõi hàng ngày để thông báo cho bạn kịp thời khi có điều chỉnh quan trọng. Luôn sẵn sàng tư vấn qua hotline, email, Zalo trong giờ làm việc. Đội ngũ nhiệt tình, giải đáp nhanh chóng.",
   },
 ]
 

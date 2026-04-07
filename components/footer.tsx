@@ -52,23 +52,23 @@ export function Footer() {
             <h3 className="text-xl font-bold mb-4">Dịch vụ</h3>
             <ul className="space-y-2">
               <li>
-                <a href="#fda" className="text-white/80 hover:text-accent transition-colors">
+                <a href="/services/fda" className="text-white/80 hover:text-accent transition-colors">
                   Đăng ký FDA
                 </a>
               </li>
               <li>
-                <a href="#gacc" className="text-white/80 hover:text-accent transition-colors">
-                  Mã GACC
+                <a href="/services/food/fsvp-plan" className="text-white/80 hover:text-accent transition-colors">
+                  FSVP Compliance
                 </a>
               </li>
               <li>
-                <a href="#mfds" className="text-white/80 hover:text-accent transition-colors">
-                  Giấy phép MFDS
+                <a href="/services/cosmetics/mocra-registration" className="text-white/80 hover:text-accent transition-colors">
+                  MOCRA Registration
                 </a>
               </li>
               <li>
-                <a href="#ce" className="text-white/80 hover:text-accent transition-colors">
-                  Chứng nhận CE
+                <a href="/services/us-agent" className="text-white/80 hover:text-accent transition-colors">
+                  US Agent Services
                 </a>
               </li>
             </ul>
