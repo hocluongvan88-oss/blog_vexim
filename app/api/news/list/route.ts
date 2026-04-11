@@ -20,7 +20,7 @@ export async function GET(req: Request) {
       .order("published_date", { ascending: false })
 
     if (source) {
-      query = query.eq("source", source)
+      query = query.eq("source_name", source)
     }
 
     if (status) {
