@@ -242,8 +242,8 @@ export async function crawlNews(source: "FDA" | "GACC") {
       const filterResult = await filterArticleWithAI(fullArticle)
 
       if (filterResult.isRelevant) {
-        // Insert article into database
-        const { error: insertError } = await supabase.from("news_articles").insert({
+        // Insert or update article in database
+        const { error: insertError } = await supabase.from("news_articles").upsert({
           source_name: source,
           title: fullArticle.title,
           source_url: fullArticle.url,
@@ -254,6 +254,8 @@ export async function crawlNews(source: "FDA" | "GACC") {
           filter_layer: filterResult.filterLayer,
           tags: filterResult.keywords,
           status: "pending",
+        }, {
+          onConflict: "source_url"
         })
 
         if (insertError) {

@@ -217,7 +217,7 @@ export async function crawlFederalRegister(daysBack: number = 7) {
 
         // Only save documents with relevance score >= 50
         if (analysis.relevance_score >= 50) {
-          const { error: insertError } = await supabase.from("news_articles").insert({
+          const { error: insertError } = await supabase.from("news_articles").upsert({
             source_name: "FEDERAL_REGISTER",
             title: doc.title,
             source_url: doc.html_url,
@@ -228,6 +228,8 @@ export async function crawlFederalRegister(daysBack: number = 7) {
             filter_layer: "tier2",
             tags: analysis.keywords_vi || [],
             status: "pending",
+          }, {
+            onConflict: "source_url"
           })
 
           if (insertError) {
