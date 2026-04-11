@@ -246,16 +246,14 @@ export async function crawlNews(source: "FDA" | "GACC") {
         const { error: insertError } = await supabase.from("news_articles").insert({
           source_name: source,
           title: fullArticle.title,
-          url: fullArticle.url,
+          source_url: fullArticle.url,
           published_date: fullArticle.publishedDate,
           content: fullArticle.content,
           summary: filterResult.summary,
           category: filterResult.category,
-          relevance_score: filterResult.relevanceScore,
           filter_layer: filterResult.filterLayer,
-          keywords: filterResult.keywords,
+          tags: filterResult.keywords,
           status: "pending",
-          raw_html: fullArticle.rawHtml,
         })
 
         if (insertError) {
