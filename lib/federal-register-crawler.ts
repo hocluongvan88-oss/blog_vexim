@@ -220,26 +220,14 @@ export async function crawlFederalRegister(daysBack: number = 7) {
           const { error: insertError } = await supabase.from("news_articles").insert({
             source_name: "FEDERAL_REGISTER",
             title: doc.title,
-            url: doc.html_url,
+            source_url: doc.html_url,
             published_date: doc.publication_date,
             content: doc.abstract || doc.title,
             summary: analysis.summary_vi,
             category: `FDA - ${category}`,
-            relevance_score: analysis.relevance_score,
             filter_layer: "tier2",
-            keywords: analysis.keywords_vi || [],
+            tags: analysis.keywords_vi || [],
             status: "pending",
-            raw_html: JSON.stringify({
-              document_number: doc.document_number,
-              type: doc.type,
-              action: doc.action,
-              dates: doc.dates,
-              effective_on: doc.effective_on,
-              comments_close_on: doc.comments_close_on,
-              pdf_url: doc.pdf_url,
-              topics: doc.topics,
-              ai_analysis: analysis,
-            }),
           })
 
           if (insertError) {
