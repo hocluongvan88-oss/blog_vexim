@@ -225,7 +225,7 @@ export async function crawlNews(source: "FDA" | "GACC") {
 
     for (const article of articles) {
       // Check if article already exists
-      const { data: existing } = await supabase.from("news_articles").select("id").eq("source_url", article.url).single()
+      const { data: existing } = await supabase.from("news_articles").select("id").eq("url", article.url).single()
 
       if (existing) {
         console.log(`[v0] Article already exists: ${article.title}`)
@@ -244,18 +244,18 @@ export async function crawlNews(source: "FDA" | "GACC") {
       if (filterResult.isRelevant) {
         // Insert or update article in database
         const { error: insertError } = await supabase.from("news_articles").upsert({
-          source_name: source,
+          source: source,
           title: fullArticle.title,
-          source_url: fullArticle.url,
+          url: fullArticle.url,
           published_date: fullArticle.publishedDate,
           content: fullArticle.content,
           summary: filterResult.summary,
           category: filterResult.category,
           filter_layer: filterResult.filterLayer,
-          tags: filterResult.keywords,
+          keywords: filterResult.keywords,
           status: "pending",
         }, {
-          onConflict: "source_url"
+          onConflict: "url"
         })
 
         if (insertError) {
@@ -581,7 +581,7 @@ export async function getNewsArticles(filters?: {
   let query = supabase.from("news_articles").select("*").order("published_date", { ascending: false })
 
   if (filters?.source) {
-    query = query.eq("source_name", filters.source)
+    query = query.eq("source", filters.source)
   }
 
   if (filters?.status) {
