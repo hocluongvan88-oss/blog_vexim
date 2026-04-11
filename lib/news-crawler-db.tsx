@@ -225,7 +225,7 @@ export async function crawlNews(source: "FDA" | "GACC") {
 
     for (const article of articles) {
       // Check if article already exists
-      const { data: existing } = await supabase.from("news_articles").select("id").eq("url", article.url).single()
+      const { data: existing } = await supabase.from("news_articles").select("id").eq("source_url", article.url).single()
 
       if (existing) {
         console.log(`[v0] Article already exists: ${article.title}`)

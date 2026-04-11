@@ -5,22 +5,24 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Loader2, Play, RefreshCcw, CheckCircle, XCircle, FileText, Globe, Sparkles, ExternalLink } from "lucide-react"
+import { Loader2, Play, RefreshCcw, CheckCircle, XCircle, FileText, Globe, Sparkles, ExternalLink, ChevronLeft, ChevronRight } from "lucide-react"
+
+const ITEMS_PER_PAGE = 10
 
 interface Article {
   id: string
   source_name: string
   title: string
-  url: string
+  source_url: string
   published_date: string
   summary: string
   category: string
   relevance_score: number
   filter_layer: string
-  keywords: string[]
+  tags: string[]
   status: string
   created_at: string
-  raw_html?: string
+  content?: string
 }
 
 export function NewsCrawlerDashboard() {
@@ -30,6 +32,8 @@ export function NewsCrawlerDashboard() {
   const [articles, setArticles] = useState<Article[]>([])
   const [loadingArticles, setLoadingArticles] = useState(false)
   const [activeTab, setActiveTab] = useState("all")
+  const [currentPage, setCurrentPage] = useState(1)
+  const [updatingId, setUpdatingId] = useState<string | null>(null)
 
   useEffect(() => {
     loadArticles()
@@ -38,7 +42,7 @@ export function NewsCrawlerDashboard() {
   const loadArticles = async () => {
     setLoadingArticles(true)
     try {
-      const response = await fetch("/api/news/list?limit=50")
+      const response = await fetch("/api/news/list?limit=200")
       const data = await response.json()
       if (data.success) {
         setArticles(data.articles)
@@ -77,7 +81,11 @@ export function NewsCrawlerDashboard() {
     }
   }
 
-  const handleUpdateStatus = async (articleId: string, status: "approved" | "rejected" | "published") => {
+  const handleUpdateStatus = async (e: React.MouseEvent, articleId: string, status: "approved" | "rejected" | "published") => {
+    e.preventDefault()
+    e.stopPropagation()
+    
+    setUpdatingId(articleId)
     try {
       const response = await fetch("/api/news/update-status", {
         method: "POST",
@@ -88,9 +96,13 @@ export function NewsCrawlerDashboard() {
       const data = await response.json()
       if (data.success) {
         await loadArticles()
+      } else {
+        console.error("Failed to update status:", data.error)
       }
     } catch (error) {
       console.error("Error updating status:", error)
+    } finally {
+      setUpdatingId(null)
     }
   }
 
@@ -100,9 +112,19 @@ export function NewsCrawlerDashboard() {
     : articles.filter(a => a.source_name === activeTab)
 
   // Count by source
-  const federalRegisterCount = articles.filter(a => a.source === "FEDERAL_REGISTER").length
-  const fdaCount = articles.filter(a => a.source === "FDA").length
-  const gaccCount = articles.filter(a => a.source === "GACC").length
+  const federalRegisterCount = articles.filter(a => a.source_name === "FEDERAL_REGISTER").length
+  const fdaCount = articles.filter(a => a.source_name === "FDA").length
+  const gaccCount = articles.filter(a => a.source_name === "GACC").length
+
+  // Pagination
+  const totalPages = Math.ceil(filteredArticles.length / ITEMS_PER_PAGE)
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
+  const paginatedArticles = filteredArticles.slice(startIndex, startIndex + ITEMS_PER_PAGE)
+
+  // Reset page when tab changes
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [activeTab])
 
   // Get source badge color
   const getSourceColor = (source: string) => {
@@ -236,13 +258,9 @@ export function NewsCrawlerDashboard() {
                 </p>
               ) : (
                 <div className="space-y-3">
-                  {filteredArticles.map((article) => {
+                  {paginatedArticles.map((article) => {
                     const categoryBadge = getCategoryBadge(article.category)
-                    let aiAnalysis: any = null
-                    try {
-                      const rawData = typeof article.raw_html === 'string' ? JSON.parse(article.raw_html) : article.raw_html
-                      aiAnalysis = rawData?.ai_analysis
-                    } catch {}
+                    const isUpdating = updatingId === article.id
 
                     return (
                       <Card key={article.id} className="hover:shadow-md transition-shadow">
@@ -250,19 +268,21 @@ export function NewsCrawlerDashboard() {
                           <div className="flex items-start justify-between gap-4">
                             <div className="flex-1 space-y-2">
                               <div className="flex items-center gap-2 flex-wrap">
-                                <Badge className={getSourceColor(article.source)}>{article.source}</Badge>
+                                <Badge className={getSourceColor(article.source_name)}>{article.source_name}</Badge>
                                 <Badge className={categoryBadge.color}>{categoryBadge.label}</Badge>
-                                <Badge
-                                  variant={
-                                    article.relevance_score >= 80
-                                      ? "default"
-                                      : article.relevance_score >= 60
-                                        ? "secondary"
-                                        : "outline"
-                                  }
-                                >
-                                  {article.relevance_score}%
-                                </Badge>
+                                {article.relevance_score != null && (
+                                  <Badge
+                                    variant={
+                                      article.relevance_score >= 80
+                                        ? "default"
+                                        : article.relevance_score >= 60
+                                          ? "secondary"
+                                          : "outline"
+                                    }
+                                  >
+                                    {article.relevance_score}%
+                                  </Badge>
+                                )}
                                 <Badge
                                   variant={
                                     article.status === "approved"
@@ -283,10 +303,11 @@ export function NewsCrawlerDashboard() {
 
                               <h4 className="font-semibold text-sm leading-tight">
                                 <a 
-                                  href={article.url} 
+                                  href={article.source_url} 
                                   target="_blank" 
                                   rel="noopener noreferrer" 
-                                  className="hover:text-blue-600 flex items-start gap-1"
+                                  className="hover:text-blue-600 hover:underline inline-flex items-start gap-1"
+                                  onClick={(e) => e.stopPropagation()}
                                 >
                                   {article.title}
                                   <ExternalLink className="w-3 h-3 flex-shrink-0 mt-1" />
@@ -295,67 +316,51 @@ export function NewsCrawlerDashboard() {
 
                               <p className="text-sm text-muted-foreground">{article.summary}</p>
 
-                              {aiAnalysis && (
-                                <div className="bg-muted/50 rounded-lg p-3 space-y-2">
-                                  <div className="flex items-center gap-1 text-xs font-medium text-blue-600">
-                                    <Sparkles className="w-3 h-3" />
-                                    Phân tích AI
-                                  </div>
-                                  {aiAnalysis.key_points?.length > 0 && (
-                                    <ul className="text-xs space-y-1 list-disc list-inside text-muted-foreground">
-                                      {aiAnalysis.key_points.map((point: string, i: number) => (
-                                        <li key={i}>{point}</li>
-                                      ))}
-                                    </ul>
-                                  )}
-                                  {aiAnalysis.deadline && (
-                                    <p className="text-xs text-orange-600 font-medium">
-                                      Deadline: {aiAnalysis.deadline}
-                                    </p>
-                                  )}
-                                  {aiAnalysis.action_required && (
-                                    <p className="text-xs text-red-600">
-                                      Hành động: {aiAnalysis.action_required}
-                                    </p>
-                                  )}
+                              {article.tags && article.tags.length > 0 && (
+                                <div className="flex gap-1 flex-wrap">
+                                  {article.tags.slice(0, 5).map((kw: string, i: number) => (
+                                    <Badge key={i} variant="outline" className="text-xs">
+                                      {kw}
+                                    </Badge>
+                                  ))}
                                 </div>
                               )}
-
-                              <div className="flex gap-1 flex-wrap">
-                                {article.keywords?.slice(0, 5).map((kw: string, i: number) => (
-                                  <Badge key={i} variant="outline" className="text-xs">
-                                    {kw}
-                                  </Badge>
-                                ))}
-                              </div>
                             </div>
 
-                            <div className="flex flex-col gap-2">
+                            <div className="flex flex-col gap-2 flex-shrink-0">
                               {article.status === "pending" && (
                                 <>
                                   <Button
                                     size="sm"
                                     variant="default"
-                                    onClick={() => handleUpdateStatus(article.id, "approved")}
+                                    onClick={(e) => handleUpdateStatus(e, article.id, "approved")}
+                                    disabled={isUpdating}
                                     className="flex items-center gap-1"
                                   >
-                                    <CheckCircle className="w-3 h-3" />
+                                    {isUpdating ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />}
                                     Duyệt
                                   </Button>
                                   <Button
                                     size="sm"
                                     variant="destructive"
-                                    onClick={() => handleUpdateStatus(article.id, "rejected")}
+                                    onClick={(e) => handleUpdateStatus(e, article.id, "rejected")}
+                                    disabled={isUpdating}
                                     className="flex items-center gap-1"
                                   >
-                                    <XCircle className="w-3 h-3" />
+                                    {isUpdating ? <Loader2 className="w-3 h-3 animate-spin" /> : <XCircle className="w-3 h-3" />}
                                     Bỏ qua
                                   </Button>
                                 </>
                               )}
 
                               {article.status === "approved" && (
-                                <Button size="sm" variant="default" onClick={() => handleUpdateStatus(article.id, "published")}>
+                                <Button 
+                                  size="sm" 
+                                  variant="default" 
+                                  onClick={(e) => handleUpdateStatus(e, article.id, "published")}
+                                  disabled={isUpdating}
+                                >
+                                  {isUpdating ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
                                   Xuất bản
                                 </Button>
                               )}
@@ -365,6 +370,38 @@ export function NewsCrawlerDashboard() {
                       </Card>
                     )
                   })}
+
+                  {/* Pagination */}
+                  {totalPages > 1 && (
+                    <div className="flex items-center justify-between pt-4 border-t">
+                      <p className="text-sm text-muted-foreground">
+                        Hiển thị {startIndex + 1}-{Math.min(startIndex + ITEMS_PER_PAGE, filteredArticles.length)} / {filteredArticles.length} bài viết
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                          disabled={currentPage === 1}
+                        >
+                          <ChevronLeft className="w-4 h-4" />
+                          Trước
+                        </Button>
+                        <span className="text-sm px-2">
+                          Trang {currentPage} / {totalPages}
+                        </span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                          disabled={currentPage === totalPages}
+                        >
+                          Sau
+                          <ChevronRight className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </TabsContent>
