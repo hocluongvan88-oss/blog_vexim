@@ -176,7 +176,7 @@ export async function crawlFederalRegister(daysBack: number = 7) {
   const { data: logData, error: logError } = await supabase
     .from("crawl_logs")
     .insert({
-      source: "FEDERAL_REGISTER",
+      source_name: "FEDERAL_REGISTER",
       status: "running",
     })
     .select()
@@ -218,7 +218,7 @@ export async function crawlFederalRegister(daysBack: number = 7) {
         // Only save documents with relevance score >= 50
         if (analysis.relevance_score >= 50) {
           const { error: insertError } = await supabase.from("news_articles").insert({
-            source: "FEDERAL_REGISTER",
+            source_name: "FEDERAL_REGISTER",
             title: doc.title,
             url: doc.html_url,
             published_date: doc.publication_date,
@@ -309,7 +309,7 @@ export async function getFederalRegisterArticles(filters?: {
   let query = supabase
     .from("news_articles")
     .select("*")
-    .eq("source", "FEDERAL_REGISTER")
+    .eq("source_name", "FEDERAL_REGISTER")
     .order("published_date", { ascending: false })
 
   if (filters?.category) {

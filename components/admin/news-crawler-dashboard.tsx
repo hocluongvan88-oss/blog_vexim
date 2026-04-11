@@ -9,7 +9,7 @@ import { Loader2, Play, RefreshCcw, CheckCircle, XCircle, FileText, Globe, Spark
 
 interface Article {
   id: string
-  source: string
+  source_name: string
   title: string
   url: string
   published_date: string
@@ -97,7 +97,7 @@ export function NewsCrawlerDashboard() {
   // Filter articles by source
   const filteredArticles = activeTab === "all" 
     ? articles 
-    : articles.filter(a => a.source === activeTab)
+    : articles.filter(a => a.source_name === activeTab)
 
   // Count by source
   const federalRegisterCount = articles.filter(a => a.source === "FEDERAL_REGISTER").length

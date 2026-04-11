@@ -244,7 +244,7 @@ export async function crawlNews(source: "FDA" | "GACC") {
       if (filterResult.isRelevant) {
         // Insert article into database
         const { error: insertError } = await supabase.from("news_articles").insert({
-          source,
+          source_name: source,
           title: fullArticle.title,
           url: fullArticle.url,
           published_date: fullArticle.publishedDate,
@@ -581,7 +581,7 @@ export async function getNewsArticles(filters?: {
   let query = supabase.from("news_articles").select("*").order("published_date", { ascending: false })
 
   if (filters?.source) {
-    query = query.eq("source", filters.source)
+    query = query.eq("source_name", filters.source)
   }
 
   if (filters?.status) {
