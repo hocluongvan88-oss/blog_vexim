@@ -2,13 +2,13 @@
 
 import dynamic from "next/dynamic"
 
-const ChatWidget = dynamic(
-  () => import("@/components/chat-widget").then((mod) => ({ default: mod.ChatWidget })),
+const ZaloWidget = dynamic(
+  () => import("@/components/zalo-widget").then((mod) => ({ default: mod.ZaloWidget })),
   {
     ssr: false,
   }
 )
 
 export function ClientWidgets() {
-  return <ChatWidget />
+  return <ZaloWidget />
 }
