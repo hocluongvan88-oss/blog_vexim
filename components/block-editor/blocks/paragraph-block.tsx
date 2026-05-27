@@ -5,11 +5,18 @@ import { useRef, useEffect } from "react"
 import type { ParagraphData } from "../types"
 
 interface ParsedBlock {
-  type: "heading" | "paragraph" | "quote" | "list"
+  type: "heading" | "paragraph" | "quote" | "list" | "table"
   text: string
   level?: 1 | 2 | 3
   style?: "ordered" | "unordered"
   items?: string[]
+  // For table blocks
+  tableData?: {
+    rows: number
+    cols: number
+    content: string[][]
+    hasHeader: boolean
+  }
 }
 
 interface ParagraphBlockProps {
@@ -243,7 +250,20 @@ export function ParagraphBlock({
     const pastedHTML = e.clipboardData.getData("text/html")
     const pastedText = e.clipboardData.getData("text/plain")
 
-    // If HTML content contains block-level tags (headings, paragraphs from Docs/Gemini)
+    // First check for Markdown table format in plain text
+    if (pastedText && onPasteBlocks) {
+      const markdownBlocks = parseMarkdownContent(pastedText)
+      if (markdownBlocks.length > 0) {
+        // Check if any block is a table or we have multiple blocks
+        const hasTable = markdownBlocks.some(b => b.type === "table")
+        if (hasTable || markdownBlocks.length > 1) {
+          onPasteBlocks(markdownBlocks)
+          return
+        }
+      }
+    }
+
+    // If HTML content contains block-level tags (headings, paragraphs, tables from Docs/Gemini)
     // parse into multiple blocks
     if (pastedHTML && onPasteBlocks) {
       try {
@@ -270,6 +290,16 @@ export function ParagraphBlock({
             if (text) {
               const level = Math.min(parseInt(tag[1]), 3) as 1 | 2 | 3
               parsedBlocks.push({ type: "heading", text, level })
+            }
+          } else if (tag === "table") {
+            // Parse HTML table from Google Docs/Word/etc
+            const tableData = parseHTMLTable(el)
+            if (tableData) {
+              parsedBlocks.push({ 
+                type: "table", 
+                text: "",
+                tableData 
+              })
             }
           } else if (tag === "p") {
             const text = el.textContent?.trim() || ""
@@ -333,7 +363,7 @@ export function ParagraphBlock({
         Array.from(doc.body.childNodes).forEach(processNode)
 
         // If we detected multiple structured blocks, use them
-        if (parsedBlocks.length > 1) {
+        if (parsedBlocks.length > 1 || parsedBlocks.some(b => b.type === "table")) {
           onPasteBlocks(parsedBlocks)
           return
         }
@@ -364,6 +394,212 @@ export function ParagraphBlock({
     if (lines.length === 1) {
       insertPasteContent(lines[0])
     }
+  }
+
+  // Parse HTML table from Google Docs/Word
+  const parseHTMLTable = (tableEl: Element): ParsedBlock["tableData"] | null => {
+    const rows: string[][] = []
+    const trElements = tableEl.querySelectorAll("tr")
+    
+    if (trElements.length === 0) return null
+    
+    trElements.forEach((tr) => {
+      const cells: string[] = []
+      tr.querySelectorAll("td, th").forEach((cell) => {
+        cells.push(cell.textContent?.trim() || "")
+      })
+      if (cells.length > 0) {
+        rows.push(cells)
+      }
+    })
+    
+    if (rows.length === 0) return null
+    
+    // Normalize: make all rows have the same number of columns
+    const maxCols = Math.max(...rows.map(r => r.length))
+    const normalizedRows = rows.map(row => {
+      while (row.length < maxCols) {
+        row.push("")
+      }
+      return row
+    })
+    
+    // Detect if first row is header (has <th> elements)
+    const firstRowHasTh = tableEl.querySelector("tr:first-child th") !== null
+    
+    return {
+      rows: normalizedRows.length,
+      cols: maxCols,
+      content: normalizedRows,
+      hasHeader: firstRowHasTh || true, // Default to true
+    }
+  }
+
+  // Parse Markdown content including tables
+  const parseMarkdownContent = (text: string): ParsedBlock[] => {
+    const blocks: ParsedBlock[] = []
+    const lines = text.split(/\r?\n/)
+    let i = 0
+    
+    while (i < lines.length) {
+      const line = lines[i]
+      const trimmedLine = line.trim()
+      
+      // Skip empty lines
+      if (!trimmedLine) {
+        i++
+        continue
+      }
+      
+      // Check for Markdown table (starts with |)
+      if (trimmedLine.startsWith("|") && trimmedLine.endsWith("|")) {
+        const tableLines: string[] = [trimmedLine]
+        i++
+        
+        // Collect all table lines
+        while (i < lines.length) {
+          const nextLine = lines[i].trim()
+          if (nextLine.startsWith("|") && nextLine.endsWith("|")) {
+            tableLines.push(nextLine)
+            i++
+          } else if (nextLine === "" && i + 1 < lines.length && 
+                     lines[i + 1].trim().startsWith("|")) {
+            // Skip empty line within table
+            i++
+          } else {
+            break
+          }
+        }
+        
+        // Parse the table
+        if (tableLines.length >= 2) {
+          const tableData = parseMarkdownTable(tableLines)
+          if (tableData) {
+            blocks.push({ type: "table", text: "", tableData })
+            continue
+          }
+        }
+      }
+      
+      // Check for heading
+      const headingMatch = trimmedLine.match(/^(#{1,6})\s+(.+)$/)
+      if (headingMatch) {
+        const level = Math.min(headingMatch[1].length, 3) as 1 | 2 | 3
+        blocks.push({ type: "heading", text: headingMatch[2], level })
+        i++
+        continue
+      }
+      
+      // Check for blockquote
+      if (trimmedLine.startsWith(">")) {
+        const quoteText = trimmedLine.replace(/^>\s*/, "")
+        blocks.push({ type: "quote", text: quoteText })
+        i++
+        continue
+      }
+      
+      // Check for unordered list
+      if (/^[\*\-\+]\s+/.test(trimmedLine)) {
+        const items: string[] = []
+        while (i < lines.length && /^[\*\-\+]\s+/.test(lines[i].trim())) {
+          items.push(lines[i].trim().replace(/^[\*\-\+]\s+/, ""))
+          i++
+        }
+        blocks.push({ type: "list", text: "", style: "unordered", items })
+        continue
+      }
+      
+      // Check for ordered list
+      if (/^\d+\.\s+/.test(trimmedLine)) {
+        const items: string[] = []
+        while (i < lines.length && /^\d+\.\s+/.test(lines[i].trim())) {
+          items.push(lines[i].trim().replace(/^\d+\.\s+/, ""))
+          i++
+        }
+        blocks.push({ type: "list", text: "", style: "ordered", items })
+        continue
+      }
+      
+      // Check for horizontal rule
+      if (/^[-*_]{3,}$/.test(trimmedLine)) {
+        i++
+        continue
+      }
+      
+      // Default: paragraph with inline formatting
+      const formattedText = parseInlineMarkdown(trimmedLine)
+      blocks.push({ type: "paragraph", text: formattedText })
+      i++
+    }
+    
+    return blocks
+  }
+
+  // Parse Markdown table lines into table data
+  const parseMarkdownTable = (lines: string[]): ParsedBlock["tableData"] | null => {
+    if (lines.length < 2) return null
+    
+    const rows: string[][] = []
+    let separatorIndex = -1
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim()
+      
+      // Check if this is the separator row (|---|---|)
+      if (/^\|[\s\-:|\s]+\|$/.test(line) && line.includes("-")) {
+        separatorIndex = i
+        continue
+      }
+      
+      // Parse row cells
+      const cells = line
+        .split("|")
+        .slice(1, -1) // Remove empty first and last from split
+        .map(cell => cell.trim())
+      
+      if (cells.length > 0) {
+        rows.push(cells)
+      }
+    }
+    
+    if (rows.length === 0) return null
+    
+    // Normalize column count
+    const maxCols = Math.max(...rows.map(r => r.length))
+    const normalizedRows = rows.map(row => {
+      while (row.length < maxCols) {
+        row.push("")
+      }
+      return row
+    })
+    
+    return {
+      rows: normalizedRows.length,
+      cols: maxCols,
+      content: normalizedRows,
+      hasHeader: separatorIndex === 1, // Header exists if separator is after first row
+    }
+  }
+
+  // Parse inline Markdown formatting (bold, italic, links)
+  const parseInlineMarkdown = (text: string): string => {
+    let result = text
+    
+    // Bold: **text** or __text__
+    result = result.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    result = result.replace(/__(.+?)__/g, "<strong>$1</strong>")
+    
+    // Italic: *text* or _text_
+    result = result.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, "<em>$1</em>")
+    result = result.replace(/(?<!_)_(?!_)(.+?)(?<!_)_(?!_)/g, "<em>$1</em>")
+    
+    // Links: [text](url)
+    result = result.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
+    
+    // Inline code: `code`
+    result = result.replace(/`([^`]+)`/g, "<code>$1</code>")
+    
+    return result
   }
 
   // Helper function to insert pasted content at cursor

@@ -5,7 +5,7 @@ import { useRef } from "react"
 import React from "react"
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Plus, GripVertical } from "lucide-react"
+import { Plus, GripVertical, ClipboardPaste } from "lucide-react"
 import { BlockToolbar } from "./block-toolbar"
 import { HeadingBlock } from "./blocks/heading-block"
 import { ParagraphBlock } from "./blocks/paragraph-block"
@@ -15,10 +15,69 @@ import { TableBlock } from "./blocks/table-block"
 import { ListBlock } from "./blocks/list-block"
 import { InlineToolbar } from "./inline-toolbar"
 import type { Block, BlockType } from "./types"
+import { Textarea } from "@/components/ui/textarea"
 
 interface BlockEditorProps {
   value: Block[]
   onChange: (blocks: Block[]) => void
+}
+
+// Parse markdown table
+const parseMarkdownTable = (lines: string[]) => {
+  if (lines.length < 2) return null
+  
+  const rows: string[][] = []
+  let separatorIndex = -1
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim()
+    if (/^\|[\s\-:|\s]+\|$/.test(line) && line.includes("-")) {
+      separatorIndex = i
+      continue
+    }
+    const cells = line.split("|").slice(1, -1).map(cell => cell.trim())
+    if (cells.length > 0) rows.push(cells)
+  }
+  
+  if (rows.length === 0) return null
+  const maxCols = Math.max(...rows.map(r => r.length))
+  const normalizedRows = rows.map(row => {
+    while (row.length < maxCols) row.push("")
+    return row
+  })
+  
+  return {
+    rows: normalizedRows.length,
+    cols: maxCols,
+    content: normalizedRows,
+    hasHeader: separatorIndex === 1,
+  }
+}
+
+// Parse HTML table
+const parseHTMLTable = (tableEl: Element) => {
+  const rows: string[][] = []
+  tableEl.querySelectorAll("tr").forEach((tr) => {
+    const cells: string[] = []
+    tr.querySelectorAll("td, th").forEach((cell) => {
+      cells.push(cell.textContent?.trim() || "")
+    })
+    if (cells.length > 0) rows.push(cells)
+  })
+  
+  if (rows.length === 0) return null
+  const maxCols = Math.max(...rows.map(r => r.length))
+  const normalizedRows = rows.map(row => {
+    while (row.length < maxCols) row.push("")
+    return row
+  })
+  
+  return {
+    rows: normalizedRows.length,
+    cols: maxCols,
+    content: normalizedRows,
+    hasHeader: tableEl.querySelector("tr:first-child th") !== null || true,
+  }
 }
 
 export function BlockEditor({ value, onChange }: BlockEditorProps) {
@@ -332,6 +391,19 @@ export function BlockEditor({ value, onChange }: BlockEditorProps) {
                       id: `block_${blockCounterRef.current}_paste`,
                       type: "list",
                       data: { style: pb.style ?? "unordered", items: pb.items ?? [], align: "left" },
+                    }
+                  } else if (pb.type === "table" && pb.tableData) {
+                    // Handle pasted table from Google Docs/Word/Markdown
+                    newBlock = {
+                      id: `block_${blockCounterRef.current}_paste`,
+                      type: "table",
+                      data: {
+                        rows: pb.tableData.rows,
+                        cols: pb.tableData.cols,
+                        content: pb.tableData.content,
+                        hasHeader: pb.tableData.hasHeader,
+                        align: "left",
+                      },
                     }
                   } else {
                     newBlock = {

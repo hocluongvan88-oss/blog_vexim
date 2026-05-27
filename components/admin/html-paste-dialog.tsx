@@ -126,6 +126,202 @@ export function HTMLPasteDialog({ onImport }: HTMLPasteDialogProps) {
     return temp.innerHTML.trim()
   }
 
+  // Parse Markdown content (especially tables)
+  const parseMarkdownContent = (text: string): Block[] => {
+    const blocks: Block[] = []
+    const lines = text.split(/\r?\n/)
+    let i = 0
+    
+    while (i < lines.length) {
+      const line = lines[i]
+      const trimmedLine = line.trim()
+      
+      // Skip empty lines
+      if (!trimmedLine) {
+        i++
+        continue
+      }
+      
+      // Check for Markdown table (starts with |)
+      if (trimmedLine.startsWith("|") && trimmedLine.endsWith("|")) {
+        const tableLines: string[] = [trimmedLine]
+        i++
+        
+        // Collect all table lines
+        while (i < lines.length) {
+          const nextLine = lines[i].trim()
+          if (nextLine.startsWith("|") && nextLine.endsWith("|")) {
+            tableLines.push(nextLine)
+            i++
+          } else if (nextLine === "" && i + 1 < lines.length && 
+                     lines[i + 1].trim().startsWith("|")) {
+            i++
+          } else {
+            break
+          }
+        }
+        
+        // Parse the table
+        if (tableLines.length >= 2) {
+          const tableData = parseMarkdownTable(tableLines)
+          if (tableData) {
+            blocks.push({
+              id: generateBlockId(),
+              type: "table",
+              data: {
+                rows: tableData.rows,
+                cols: tableData.cols,
+                content: tableData.content,
+                hasHeader: tableData.hasHeader,
+                align: "left",
+              },
+            })
+            continue
+          }
+        }
+      }
+      
+      // Check for heading
+      const headingMatch = trimmedLine.match(/^(#{1,6})\s+(.+)$/)
+      if (headingMatch) {
+        const level = Math.min(headingMatch[1].length, 3) as 1 | 2 | 3
+        blocks.push({
+          id: generateBlockId(),
+          type: "heading",
+          data: { text: headingMatch[2], level, align: "left" },
+        })
+        i++
+        continue
+      }
+      
+      // Check for blockquote
+      if (trimmedLine.startsWith(">")) {
+        const quoteText = trimmedLine.replace(/^>\s*/, "")
+        blocks.push({
+          id: generateBlockId(),
+          type: "quote",
+          data: { text: quoteText, author: "", align: "left" },
+        })
+        i++
+        continue
+      }
+      
+      // Check for unordered list
+      if (/^[\*\-\+]\s+/.test(trimmedLine)) {
+        const items: string[] = []
+        while (i < lines.length && /^[\*\-\+]\s+/.test(lines[i].trim())) {
+          items.push(parseInlineMarkdown(lines[i].trim().replace(/^[\*\-\+]\s+/, "")))
+          i++
+        }
+        blocks.push({
+          id: generateBlockId(),
+          type: "list",
+          data: { style: "unordered", items, align: "left" },
+        })
+        continue
+      }
+      
+      // Check for ordered list
+      if (/^\d+\.\s+/.test(trimmedLine)) {
+        const items: string[] = []
+        while (i < lines.length && /^\d+\.\s+/.test(lines[i].trim())) {
+          items.push(parseInlineMarkdown(lines[i].trim().replace(/^\d+\.\s+/, "")))
+          i++
+        }
+        blocks.push({
+          id: generateBlockId(),
+          type: "list",
+          data: { style: "ordered", items, align: "left" },
+        })
+        continue
+      }
+      
+      // Check for horizontal rule
+      if (/^[-*_]{3,}$/.test(trimmedLine)) {
+        i++
+        continue
+      }
+      
+      // Default: paragraph with inline formatting
+      const formattedText = parseInlineMarkdown(trimmedLine)
+      blocks.push({
+        id: generateBlockId(),
+        type: "paragraph",
+        data: { text: formattedText, align: "justify" },
+      })
+      i++
+    }
+    
+    return blocks
+  }
+
+  // Parse Markdown table lines into table data
+  const parseMarkdownTable = (lines: string[]) => {
+    if (lines.length < 2) return null
+    
+    const rows: string[][] = []
+    let separatorIndex = -1
+    
+    for (let idx = 0; idx < lines.length; idx++) {
+      const line = lines[idx].trim()
+      
+      // Check if this is the separator row (|---|---|)
+      if (/^\|[\s\-:|\s]+\|$/.test(line) && line.includes("-")) {
+        separatorIndex = idx
+        continue
+      }
+      
+      // Parse row cells
+      const cells = line
+        .split("|")
+        .slice(1, -1) // Remove empty first and last from split
+        .map(cell => cell.trim())
+      
+      if (cells.length > 0) {
+        rows.push(cells)
+      }
+    }
+    
+    if (rows.length === 0) return null
+    
+    // Normalize column count
+    const maxCols = Math.max(...rows.map(r => r.length))
+    const normalizedRows = rows.map(row => {
+      while (row.length < maxCols) {
+        row.push("")
+      }
+      return row
+    })
+    
+    return {
+      rows: normalizedRows.length,
+      cols: maxCols,
+      content: normalizedRows,
+      hasHeader: separatorIndex === 1,
+    }
+  }
+
+  // Parse inline Markdown formatting (bold, italic, links)
+  const parseInlineMarkdown = (text: string): string => {
+    let result = text
+    
+    // Bold: **text** or __text__
+    result = result.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    result = result.replace(/__(.+?)__/g, "<strong>$1</strong>")
+    
+    // Italic: *text* or _text_ (not preceded/followed by another *)
+    result = result.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, "<em>$1</em>")
+    result = result.replace(/(?<!_)_(?!_)(.+?)(?<!_)_(?!_)/g, "<em>$1</em>")
+    
+    // Links: [text](url)
+    result = result.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
+    
+    // Inline code: `code`
+    result = result.replace(/`([^`]+)`/g, "<code>$1</code>")
+    
+    return result
+  }
+
   const parseHTMLToBlocks = (html: string): Block[] => {
     if (!html || typeof html !== "string") {
       throw new Error("Invalid HTML input")
@@ -307,7 +503,7 @@ export function HTMLPasteDialog({ onImport }: HTMLPasteDialogProps) {
     if (!htmlContent.trim()) {
       toast({
         title: "Chưa có nội dung",
-        description: "Vui lòng dán HTML vào trước khi import",
+        description: "Vui lòng dán nội dung vào trước khi import",
         variant: "destructive",
       })
       return
@@ -316,12 +512,27 @@ export function HTMLPasteDialog({ onImport }: HTMLPasteDialogProps) {
     setIsProcessing(true)
 
     try {
-      const blocks = parseHTMLToBlocks(htmlContent)
+      let blocks: Block[] = []
+      
+      // First, try to detect if this is Markdown content (contains | for tables or # for headings)
+      const hasMarkdownTable = /^\|.*\|$/m.test(htmlContent)
+      const hasMarkdownHeading = /^#{1,6}\s+/m.test(htmlContent)
+      const hasMarkdownList = /^[\*\-\+]\s+/m.test(htmlContent) || /^\d+\.\s+/m.test(htmlContent)
+      
+      if (hasMarkdownTable || hasMarkdownHeading || hasMarkdownList) {
+        // Try Markdown parsing first
+        blocks = parseMarkdownContent(htmlContent)
+      }
+      
+      // If no blocks from Markdown, try HTML parsing
+      if (blocks.length === 0) {
+        blocks = parseHTMLToBlocks(htmlContent)
+      }
 
       if (blocks.length === 0) {
         toast({
-          title: "Không tìm thấy nội dung",
-          description: "HTML không chứa các thẻ có thể chuyển đổi (H1-H6, p, table, list, blockquote)",
+          title: "Khong tim thay noi dung",
+          description: "Noi dung khong chua cac the co the chuyen doi (H1-H6, p, table, list, blockquote)",
           variant: "destructive",
         })
         setIsProcessing(false)
@@ -336,16 +547,16 @@ export function HTMLPasteDialog({ onImport }: HTMLPasteDialogProps) {
       setOpen(false)
 
       toast({
-        title: "Import thành công",
-        description: `Đã thêm ${blocks.length} khối từ HTML`,
+        title: "Import thanh cong",
+        description: `Da them ${blocks.length} khoi tu noi dung`,
       })
     } catch (error) {
-      console.error("Error parsing HTML:", error)
+      console.error("Error parsing content:", error)
       const errorMessage =
-        error instanceof Error ? error.message : "Không thể phân tích HTML. Vui lòng kiểm tra lại định dạng."
+        error instanceof Error ? error.message : "Khong the phan tich noi dung. Vui long kiem tra lai dinh dang."
 
       toast({
-        title: "Lỗi",
+        title: "Loi",
         description: errorMessage,
         variant: "destructive",
       })
@@ -364,10 +575,10 @@ export function HTMLPasteDialog({ onImport }: HTMLPasteDialogProps) {
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
         <DialogHeader className="flex-shrink-0">
-          <DialogTitle>Dán nội dung từ Google Docs / Gemini / Word</DialogTitle>
+          <DialogTitle>Dan noi dung tu Google Docs / Gemini / Markdown</DialogTitle>
           <DialogDescription>
-            Hoặc bạn có thể paste trực tiếp vào ô nội dung bài viết (Ctrl+V) - hệ thống sẽ tự nhận diện H1, H2, bold,
-            italic.
+            Ho tro: HTML tu Google Docs/Word, Markdown voi bang (| col1 | col2 |), headings, lists. 
+            Hoac ban co the paste truc tiep vao o noi dung bai viet (Ctrl+V).
           </DialogDescription>
         </DialogHeader>
 
