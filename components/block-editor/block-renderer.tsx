@@ -51,7 +51,11 @@ export function BlockRenderer({ blocks }: BlockRendererProps) {
         return (
           <div key={block.id} className={`flex ${imageAlign} my-8`}>
             <figure className={widthClass}>
-              <img src={data.url || "/placeholder.svg"} alt={data.caption || ""} className="w-full rounded-lg shadow-md" />
+              <img 
+                src={data.url || "/placeholder.svg"} 
+                alt={data.alt || data.caption || ""} 
+                className="w-full rounded-lg shadow-md" 
+              />
               {data.caption && (
                 <figcaption className="text-center text-sm text-muted-foreground italic mt-3">
                   {data.caption}
@@ -95,22 +99,34 @@ export function BlockRenderer({ blocks }: BlockRendererProps) {
       }
 
       case "table": {
+        const hasHeader = data.hasHeader !== false // Default to true
         return (
           <div key={block.id} className="my-6 overflow-x-auto">
             <table className="border-collapse w-full border">
+              {hasHeader && data.content.length > 0 && (
+                <thead>
+                  <tr>
+                    {data.content[0].map((cell: string, colIndex: number) => (
+                      <th
+                        key={colIndex}
+                        className="border p-3 bg-secondary font-semibold"
+                        scope="col"
+                        dangerouslySetInnerHTML={{ __html: cell }}
+                      />
+                    ))}
+                  </tr>
+                </thead>
+              )}
               <tbody>
-                {data.content.map((row: string[], rowIndex: number) => (
+                {data.content.slice(hasHeader ? 1 : 0).map((row: string[], rowIndex: number) => (
                   <tr key={rowIndex}>
-                    {row.map((cell: string, colIndex: number) => {
-                      const CellTag = rowIndex === 0 ? "th" : "td"
-                      return (
-                        <CellTag
-                          key={colIndex}
-                          className={`border p-3 ${rowIndex === 0 ? "bg-secondary font-semibold" : ""}`}
-                          dangerouslySetInnerHTML={{ __html: cell }}
-                        />
-                      )
-                    })}
+                    {row.map((cell: string, colIndex: number) => (
+                      <td
+                        key={colIndex}
+                        className="border p-3"
+                        dangerouslySetInnerHTML={{ __html: cell }}
+                      />
+                    ))}
                   </tr>
                 ))}
               </tbody>

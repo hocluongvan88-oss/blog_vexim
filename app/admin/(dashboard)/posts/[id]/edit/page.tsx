@@ -34,6 +34,8 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
   const [metaTitle, setMetaTitle] = useState("")
   const [metaDescription, setMetaDescription] = useState("")
   const [featuredImage, setFeaturedImage] = useState("")
+  const [featuredImageAlt, setFeaturedImageAlt] = useState("")
+  const [focusKeyword, setFocusKeyword] = useState("")
   const [previewImage, setPreviewImage] = useState<string | null>(null)
   const [status, setStatus] = useState<"draft" | "published">("draft")
   const [selectedText, setSelectedText] = useState("")
@@ -72,6 +74,8 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
         setMetaTitle(post.meta_title || "")
         setMetaDescription(post.meta_description || "")
         setFeaturedImage(post.featured_image || "")
+        setFeaturedImageAlt(post.featured_image_alt || "")
+        setFocusKeyword(post.focus_keyword || "")
         setPreviewImage(post.featured_image || null)
         setStatus(post.status)
       } catch (error) {
@@ -161,6 +165,8 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
           excerpt,
           content: contentJSON,
           featured_image: featuredImage,
+          featured_image_alt: featuredImageAlt,
+          focus_keyword: focusKeyword,
           meta_title: metaTitle || title,
           meta_description: metaDescription || excerpt,
           status: newStatus,
@@ -283,6 +289,25 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
 
               {/* Featured Image */}
               <ImageUploader value={featuredImage} onChange={setFeaturedImage} onPreviewChange={setPreviewImage} />
+              
+              {/* Featured Image Alt Text */}
+              {featuredImage && (
+                <div>
+                  <Label htmlFor="featuredImageAlt" className="text-base font-medium">
+                    Alt Text cho ảnh bìa <span className="text-red-500">(Quan trọng cho SEO)</span>
+                  </Label>
+                  <Input
+                    id="featuredImageAlt"
+                    placeholder="Mô tả ngắn về hình ảnh bìa..."
+                    value={featuredImageAlt}
+                    onChange={(e) => setFeaturedImageAlt(e.target.value)}
+                    className={`mt-2 ${!featuredImageAlt ? 'border-red-300' : 'border-green-300'}`}
+                  />
+                  {!featuredImageAlt && (
+                    <p className="text-xs text-red-500 mt-1">Alt text giúp Google hiểu nội dung ảnh bìa</p>
+                  )}
+                </div>
+              )}
             </div>
           </Card>
 
@@ -311,18 +336,76 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
             onGenerateMeta={handleGenerateMeta}
           />
 
-          {/* SEO Checker Card */}
+          {/* SEO Settings Card */}
           <Card className="p-6">
-            <h3 className="text-lg font-bold text-primary mb-4">Phân tích SEO</h3>
-            <SEOChecker
-              title={title}
-              excerpt={excerpt}
-              content={getTextContent()}
-              metaTitle={metaTitle}
-              metaDescription={metaDescription}
-              featuredImage={featuredImage}
-            />
+            <h3 className="text-lg font-bold text-primary mb-4">Cài đặt SEO</h3>
+            <div className="space-y-4">
+              {/* Focus Keyword */}
+              <div>
+                <Label htmlFor="focusKeyword" className="text-sm font-medium">
+                  Từ khóa trọng tâm
+                </Label>
+                <Input
+                  id="focusKeyword"
+                  placeholder="VD: đăng ký FDA, xuất khẩu Mỹ..."
+                  value={focusKeyword}
+                  onChange={(e) => setFocusKeyword(e.target.value)}
+                  className="mt-1"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Từ khóa chính bạn muốn bài viết xếp hạng trên Google
+                </p>
+              </div>
+              
+              {/* Meta Title */}
+              <div>
+                <Label htmlFor="metaTitle" className="text-sm font-medium">
+                  Meta Title <span className="text-muted-foreground">(Tùy chọn)</span>
+                </Label>
+                <Input
+                  id="metaTitle"
+                  placeholder="Để trống sẽ dùng tiêu đề bài viết"
+                  value={metaTitle}
+                  onChange={(e) => setMetaTitle(e.target.value)}
+                  className="mt-1"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  {(metaTitle || title).length}/60 ký tự
+                </p>
+              </div>
+              
+              {/* Meta Description */}
+              <div>
+                <Label htmlFor="metaDescription" className="text-sm font-medium">
+                  Meta Description <span className="text-muted-foreground">(Tùy chọn)</span>
+                </Label>
+                <Textarea
+                  id="metaDescription"
+                  placeholder="Để trống sẽ dùng mô tả ngắn"
+                  value={metaDescription}
+                  onChange={(e) => setMetaDescription(e.target.value)}
+                  rows={3}
+                  className="mt-1 resize-none"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  {(metaDescription || excerpt).length}/160 ký tự
+                </p>
+              </div>
+            </div>
           </Card>
+
+          {/* SEO Checker Card */}
+          <SEOChecker
+            title={title}
+            excerpt={excerpt}
+            content={getTextContent()}
+            metaTitle={metaTitle}
+            metaDescription={metaDescription}
+            featuredImage={featuredImage}
+            featuredImageAlt={featuredImageAlt}
+            focusKeyword={focusKeyword}
+            blocks={blocks}
+          />
 
           {/* Action Buttons Card */}
           <Card className="p-6 sticky top-24">

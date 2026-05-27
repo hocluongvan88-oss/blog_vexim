@@ -2,8 +2,16 @@
 
 import React, { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Bold, Italic, Underline, Link, Code, Unlink } from "lucide-react"
+import { Bold, Italic, Underline, Link, Code, Unlink, ExternalLink } from "lucide-react"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
+
+interface LinkOptions {
+  url: string
+  openInNewTab: boolean
+  noFollow: boolean
+}
 
 interface InlineToolbarProps {
   onFormat: (command: string, value?: string) => void
@@ -12,10 +20,26 @@ interface InlineToolbarProps {
 export function InlineToolbar({ onFormat }: InlineToolbarProps) {
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null)
   const [showLinkInput, setShowLinkInput] = useState(false)
-  const [linkUrl, setLinkUrl] = useState("")
+  const [linkOptions, setLinkOptions] = useState<LinkOptions>({
+    url: "",
+    openInNewTab: false,
+    noFollow: false,
+  })
   const [hasExistingLink, setHasExistingLink] = useState(false)
+  const [isExternalLink, setIsExternalLink] = useState(false)
   const toolbarRef = useRef<HTMLDivElement>(null)
   const savedRangeRef = useRef<Range | null>(null)
+
+  // Detect if URL is external
+  const checkIfExternal = (url: string) => {
+    if (!url) return false
+    try {
+      const urlObj = new URL(url, window.location.origin)
+      return urlObj.hostname !== window.location.hostname
+    } catch {
+      return false
+    }
+  }
 
   useEffect(() => {
     const handleSelectionChange = () => {
@@ -70,9 +94,7 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
     }
 
     document.addEventListener("selectionchange", handleSelectionChange)
-    // Also listen to mouseup to catch selection after mouse drag
     document.addEventListener("mouseup", handleSelectionChange)
-    // And keyup for keyboard selection (shift+arrows)
     document.addEventListener("keyup", handleSelectionChange)
     
     return () => {
@@ -84,7 +106,6 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
 
   const handleFormat = (command: string) => {
     onFormat(command)
-    // Keep selection after formatting
     setTimeout(() => {
       const selection = window.getSelection()
       if (selection && selection.rangeCount > 0) {
@@ -101,11 +122,9 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
   const handleLinkClick = () => {
     const selection = window.getSelection()
     if (selection && selection.rangeCount > 0) {
-      // Save the current selection/range so we can restore it later
       const range = selection.getRangeAt(0)
       savedRangeRef.current = range.cloneRange()
       
-      // Check if selection already has a link
       const commonAncestor = range.commonAncestorContainer
       let linkElement: HTMLAnchorElement | null = null
 
@@ -116,34 +135,102 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
       }
 
       if (linkElement) {
-        setLinkUrl(linkElement.href)
+        const href = linkElement.href
+        const isExternal = checkIfExternal(href)
+        setLinkOptions({
+          url: href,
+          openInNewTab: linkElement.target === "_blank",
+          noFollow: linkElement.rel?.includes("nofollow") || false,
+        })
+        setIsExternalLink(isExternal)
         setHasExistingLink(true)
       } else {
-        setLinkUrl("")
+        setLinkOptions({
+          url: "",
+          openInNewTab: false,
+          noFollow: false,
+        })
+        setIsExternalLink(false)
         setHasExistingLink(false)
       }
     }
     setShowLinkInput(true)
   }
 
+  const handleUrlChange = (url: string) => {
+    const isExternal = checkIfExternal(url)
+    setIsExternalLink(isExternal)
+    
+    // Auto-set options for external links
+    if (isExternal) {
+      setLinkOptions(prev => ({
+        ...prev,
+        url,
+        openInNewTab: true,
+        noFollow: prev.noFollow, // Keep noFollow as user set
+      }))
+    } else {
+      setLinkOptions(prev => ({
+        ...prev,
+        url,
+        openInNewTab: false,
+        noFollow: false,
+      }))
+    }
+  }
+
   const handleLinkSubmit = () => {
-    if (linkUrl && savedRangeRef.current) {
-      // Restore the saved selection
+    if (linkOptions.url && savedRangeRef.current) {
       const selection = window.getSelection()
       if (selection) {
         selection.removeAllRanges()
         selection.addRange(savedRangeRef.current)
         
-        // Now apply the link
-        document.execCommand("createLink", false, linkUrl)
+        // Create link
+        document.execCommand("createLink", false, linkOptions.url)
         
-        // Clear the saved range
+        // Find the newly created link and add attributes
+        const newSelection = window.getSelection()
+        if (newSelection && newSelection.rangeCount > 0) {
+          const range = newSelection.getRangeAt(0)
+          let linkElement: HTMLAnchorElement | null = null
+          
+          const ancestor = range.commonAncestorContainer
+          if (ancestor.nodeType === Node.ELEMENT_NODE) {
+            linkElement = (ancestor as HTMLElement).closest("a")
+          } else if (ancestor.parentElement) {
+            linkElement = ancestor.parentElement.closest("a")
+          }
+          
+          if (linkElement) {
+            // Set target
+            if (linkOptions.openInNewTab) {
+              linkElement.target = "_blank"
+            } else {
+              linkElement.removeAttribute("target")
+            }
+            
+            // Set rel attributes
+            const relParts: string[] = []
+            if (linkOptions.openInNewTab) {
+              relParts.push("noopener", "noreferrer")
+            }
+            if (linkOptions.noFollow) {
+              relParts.push("nofollow")
+            }
+            
+            if (relParts.length > 0) {
+              linkElement.rel = relParts.join(" ")
+            } else {
+              linkElement.removeAttribute("rel")
+            }
+          }
+        }
+        
         savedRangeRef.current = null
       }
     }
-    setShowLinkInput(false)
-    setLinkUrl("")
-    setHasExistingLink(false)
+    resetLinkState()
   }
 
   const handleRemoveLink = () => {
@@ -156,9 +243,14 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
         savedRangeRef.current = null
       }
     }
+    resetLinkState()
+  }
+
+  const resetLinkState = () => {
     setShowLinkInput(false)
-    setLinkUrl("")
+    setLinkOptions({ url: "", openInNewTab: false, noFollow: false })
     setHasExistingLink(false)
+    setIsExternalLink(false)
   }
 
   if (!position) return null
@@ -224,39 +316,92 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
           </Button>
         </>
       ) : (
-        <div className="flex items-center gap-2 px-2">
-          <Input
-            type="url"
-            placeholder="https://..."
-            value={linkUrl}
-            onChange={(e) => setLinkUrl(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault()
-                handleLinkSubmit()
-              } else if (e.key === "Escape") {
-                setShowLinkInput(false)
-                setLinkUrl("")
-                setHasExistingLink(false)
-              }
-            }}
-            className="h-7 text-sm w-48"
-            autoFocus
-          />
-          <Button size="sm" className="h-7" onClick={handleLinkSubmit}>
-            OK
-          </Button>
-          {hasExistingLink && (
+        <div className="flex flex-col gap-2 p-2 min-w-[280px]">
+          {/* URL Input */}
+          <div className="flex items-center gap-2">
+            <Input
+              type="url"
+              placeholder="https://..."
+              value={linkOptions.url}
+              onChange={(e) => handleUrlChange(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault()
+                  handleLinkSubmit()
+                } else if (e.key === "Escape") {
+                  resetLinkState()
+                }
+              }}
+              className="h-8 text-sm flex-1"
+              autoFocus
+            />
+            {isExternalLink && (
+              <ExternalLink className="w-4 h-4 text-blue-500" title="External link" />
+            )}
+          </div>
+          
+          {/* SEO Options */}
+          <div className="flex items-center gap-4 text-xs">
+            <div className="flex items-center gap-1.5">
+              <Checkbox
+                id="newTab"
+                checked={linkOptions.openInNewTab}
+                onCheckedChange={(checked) => 
+                  setLinkOptions(prev => ({ ...prev, openInNewTab: checked as boolean }))
+                }
+              />
+              <Label htmlFor="newTab" className="text-xs cursor-pointer">
+                Mở tab mới
+              </Label>
+            </div>
+            
+            <div className="flex items-center gap-1.5">
+              <Checkbox
+                id="noFollow"
+                checked={linkOptions.noFollow}
+                onCheckedChange={(checked) => 
+                  setLinkOptions(prev => ({ ...prev, noFollow: checked as boolean }))
+                }
+              />
+              <Label htmlFor="noFollow" className="text-xs cursor-pointer" title="Không truyền SEO juice cho link này">
+                NoFollow
+              </Label>
+            </div>
+          </div>
+          
+          {/* Helper text */}
+          {isExternalLink && (
+            <p className="text-xs text-muted-foreground">
+              Link ngoài: Tự động mở tab mới với rel=&quot;noopener noreferrer&quot;
+            </p>
+          )}
+          
+          {/* Action buttons */}
+          <div className="flex items-center gap-2">
+            <Button size="sm" className="h-7 flex-1" onClick={handleLinkSubmit}>
+              {hasExistingLink ? "Cập nhật" : "Thêm link"}
+            </Button>
+            {hasExistingLink && (
+              <Button 
+                size="sm" 
+                variant="destructive" 
+                className="h-7" 
+                onClick={handleRemoveLink}
+                title="Xóa link"
+              >
+                <Unlink className="w-3 h-3 mr-1" />
+                Xóa
+              </Button>
+            )}
             <Button 
               size="sm" 
-              variant="destructive" 
+              variant="outline" 
               className="h-7" 
-              onClick={handleRemoveLink}
-              title="Xóa link"
+              onClick={resetLinkState}
             >
-              <Unlink className="w-3 h-3" />
+              Hủy
             </Button>
-          )}
+          </div>
         </div>
       )}
     </div>
