@@ -21,6 +21,7 @@ export interface ParagraphData {
 
 export interface ImageData {
   url: string
+  alt: string
   caption: string
   align: "left" | "center" | "right"
   width: string
@@ -36,6 +37,7 @@ export interface TableData {
   rows: number
   cols: number
   content: string[][]
+  hasHeader: boolean
   align: "left" | "center" | "right"
 }
 

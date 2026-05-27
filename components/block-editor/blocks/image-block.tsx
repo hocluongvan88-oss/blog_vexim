@@ -16,7 +16,7 @@ interface ImageBlockProps {
 }
 
 export function ImageBlock({ data, onChange }: ImageBlockProps) {
-  const { url = "", caption = "", align = "center", width = "100%" } = data
+  const { url = "", alt = "", caption = "", align = "center", width = "100%" } = data
   const [uploading, setUploading] = useState(false)
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -89,15 +89,39 @@ export function ImageBlock({ data, onChange }: ImageBlockProps) {
   return (
     <div className={`flex ${alignClass}`}>
       <figure className={widthClass}>
-        <img src={url || "/placeholder.svg"} alt={caption} className="w-full rounded-lg shadow-md" />
-        <figcaption className="mt-2">
-          <Input
-            placeholder="Thêm chú thích cho ảnh (tùy chọn)..."
-            value={caption}
-            onChange={(e) => onChange({ caption: e.target.value })}
-            className="text-sm text-center italic"
-          />
-        </figcaption>
+        <img src={url || "/placeholder.svg"} alt={alt || caption} className="w-full rounded-lg shadow-md" />
+        
+        {/* Alt Text - Quan trọng cho SEO */}
+        <div className="mt-3 space-y-2">
+          <div>
+            <Label className="text-xs font-medium text-red-600">
+              Alt Text (Bắt buộc cho SEO) *
+            </Label>
+            <Input
+              placeholder="Mô tả hình ảnh cho search engines và người khiếm thị..."
+              value={alt}
+              onChange={(e) => onChange({ alt: e.target.value })}
+              className={`text-sm mt-1 ${!alt ? 'border-red-300 focus:border-red-500' : 'border-green-300'}`}
+            />
+            {!alt && (
+              <p className="text-xs text-red-500 mt-1">
+                Alt text giúp Google hiểu nội dung hình ảnh và cải thiện thứ hạng SEO
+              </p>
+            )}
+          </div>
+          
+          {/* Caption - Tùy chọn */}
+          <div>
+            <Label className="text-xs text-muted-foreground">Chú thích (Tùy chọn)</Label>
+            <Input
+              placeholder="Thêm chú thích hiển thị bên dưới ảnh..."
+              value={caption}
+              onChange={(e) => onChange({ caption: e.target.value })}
+              className="text-sm mt-1 italic"
+            />
+          </div>
+        </div>
+        
         <div className="mt-2 flex items-center gap-2">
           <Label className="text-xs">Kích thước:</Label>
           <select
