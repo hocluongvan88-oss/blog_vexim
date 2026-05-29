@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Plus, Minus, ClipboardPaste, Table2 } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -11,6 +11,45 @@ import type { TableData } from "../types"
 interface TableBlockProps {
   data: TableData
   onChange: (data: Partial<TableData>) => void
+}
+
+// Auto-resizing textarea cell - text wraps and cell grows vertically
+function CellTextarea({
+  value,
+  onChange,
+  align,
+  isHeader,
+  placeholder,
+}: {
+  value: string
+  onChange: (value: string) => void
+  align: string
+  isHeader?: boolean
+  placeholder: string
+}) {
+  const ref = useRef<HTMLTextAreaElement>(null)
+
+  // Auto-grow height to fit content
+  useEffect(() => {
+    const el = ref.current
+    if (el) {
+      el.style.height = "auto"
+      el.style.height = `${el.scrollHeight}px`
+    }
+  }, [value])
+
+  return (
+    <textarea
+      ref={ref}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      rows={1}
+      className={`${align} w-full outline-none bg-transparent resize-none overflow-hidden leading-relaxed ${
+        isHeader ? "font-semibold" : ""
+      }`}
+      placeholder={placeholder}
+    />
+  )
 }
 
 export function TableBlock({ data, onChange }: TableBlockProps) {
@@ -194,21 +233,21 @@ export function TableBlock({ data, onChange }: TableBlockProps) {
 
       {/* Table */}
       <div className="overflow-x-auto border rounded-lg">
-        <table className="border-collapse w-full">
+        <table className="border-collapse w-full table-fixed">
           {hasHeader && content.length > 0 && (
             <thead>
               <tr>
                 {content[0].map((cell, colIndex) => (
                   <th 
                     key={colIndex} 
-                    className="border-b border-r last:border-r-0 p-2 bg-secondary font-semibold"
+                    className="border-b border-r last:border-r-0 p-2 bg-secondary align-top"
                     scope="col"
                   >
-                    <input
-                      type="text"
+                    <CellTextarea
                       value={cell}
-                      onChange={(e) => updateCell(0, colIndex, e.target.value)}
-                      className={`${alignClass} w-full outline-none bg-transparent font-semibold`}
+                      onChange={(value) => updateCell(0, colIndex, value)}
+                      align={alignClass}
+                      isHeader
                       placeholder="Tiêu đề cột"
                     />
                   </th>
@@ -224,13 +263,12 @@ export function TableBlock({ data, onChange }: TableBlockProps) {
                   {row.map((cell, colIndex) => (
                     <td 
                       key={colIndex} 
-                      className="border-b border-r last:border-r-0 last:border-b-0 p-2"
+                      className="border-b border-r last:border-r-0 last:border-b-0 p-2 align-top"
                     >
-                      <input
-                        type="text"
+                      <CellTextarea
                         value={cell}
-                        onChange={(e) => updateCell(actualRowIndex, colIndex, e.target.value)}
-                        className={`${alignClass} w-full outline-none bg-transparent`}
+                        onChange={(value) => updateCell(actualRowIndex, colIndex, value)}
+                        align={alignClass}
                         placeholder="Nội dung"
                       />
                     </td>
