@@ -42,6 +42,13 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
   const toolbarRef = useRef<HTMLDivElement>(null)
   const savedRangeRef = useRef<Range | null>(null)
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Tracks whether the link panel is open, so selectionchange (triggered when the
+  // URL input steals focus and collapses the selection) does not auto-close it.
+  const showLinkInputRef = useRef(false)
+
+  useEffect(() => {
+    showLinkInputRef.current = showLinkInput
+  }, [showLinkInput])
 
   // Detect if URL is external
   const checkIfExternal = (url: string) => {
@@ -56,6 +63,12 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
 
   useEffect(() => {
     const handleSelectionChange = () => {
+      // Keep toolbar + link panel open while editing the link (the URL/search
+      // input focus collapses the document selection, which would otherwise hide it).
+      if (showLinkInputRef.current) {
+        return
+      }
+
       const selection = window.getSelection()
       
       if (!selection || selection.isCollapsed || selection.rangeCount === 0) {
