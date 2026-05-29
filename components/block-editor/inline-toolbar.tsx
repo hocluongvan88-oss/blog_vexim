@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Bold, Italic, Underline, Link, Code, Unlink, ExternalLink } from "lucide-react"
+import { Bold, Italic, Underline, Link, Code, Unlink, ExternalLink, Search, FileText, Loader2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -11,6 +11,13 @@ interface LinkOptions {
   url: string
   openInNewTab: boolean
   noFollow: boolean
+}
+
+interface PostResult {
+  id: string
+  title: string
+  slug: string
+  category?: string
 }
 
 interface InlineToolbarProps {
@@ -27,8 +34,14 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
   })
   const [hasExistingLink, setHasExistingLink] = useState(false)
   const [isExternalLink, setIsExternalLink] = useState(false)
+  // Internal post search
+  const [showPostSearch, setShowPostSearch] = useState(false)
+  const [postQuery, setPostQuery] = useState("")
+  const [postResults, setPostResults] = useState<PostResult[]>([])
+  const [searchingPosts, setSearchingPosts] = useState(false)
   const toolbarRef = useRef<HTMLDivElement>(null)
   const savedRangeRef = useRef<Range | null>(null)
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Detect if URL is external
   const checkIfExternal = (url: string) => {
@@ -86,10 +99,12 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
         return
       }
 
-      // Position toolbar above the selection
+      // Position toolbar above the selection.
+      // Toolbar uses position: fixed, so coordinates must be viewport-relative
+      // (do NOT add window.scrollY/scrollX or it goes off-screen when scrolled).
       setPosition({
-        top: rect.top + window.scrollY - 45,
-        left: rect.left + window.scrollX + rect.width / 2,
+        top: rect.top - 45,
+        left: rect.left + rect.width / 2,
       })
     }
 
@@ -112,8 +127,8 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
         const range = selection.getRangeAt(0)
         const rect = range.getBoundingClientRect()
         setPosition({
-          top: rect.top + window.scrollY - 45,
-          left: rect.left + window.scrollX + rect.width / 2,
+          top: rect.top - 45,
+          left: rect.left + rect.width / 2,
         })
       }
     }, 10)
@@ -155,6 +170,39 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
       }
     }
     setShowLinkInput(true)
+  }
+
+  const handlePostQueryChange = (value: string) => {
+    setPostQuery(value)
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current)
+
+    if (value.trim().length < 2) {
+      setPostResults([])
+      setSearchingPosts(false)
+      return
+    }
+
+    setSearchingPosts(true)
+    searchTimeoutRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/blog/search?q=${encodeURIComponent(value.trim())}`)
+        const data = await res.json()
+        setPostResults(Array.isArray(data?.results) ? data.results : [])
+      } catch {
+        setPostResults([])
+      } finally {
+        setSearchingPosts(false)
+      }
+    }, 300)
+  }
+
+  const handleSelectPost = (post: PostResult) => {
+    const internalUrl = `/blog/${post.slug}`
+    setLinkOptions((prev) => ({ ...prev, url: internalUrl, openInNewTab: false, noFollow: false }))
+    setIsExternalLink(false)
+    setShowPostSearch(false)
+    setPostQuery("")
+    setPostResults([])
   }
 
   const handleUrlChange = (url: string) => {
@@ -251,6 +299,9 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
     setLinkOptions({ url: "", openInNewTab: false, noFollow: false })
     setHasExistingLink(false)
     setIsExternalLink(false)
+    setShowPostSearch(false)
+    setPostQuery("")
+    setPostResults([])
   }
 
   if (!position) return null
@@ -339,6 +390,62 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
               <ExternalLink className="w-4 h-4 text-blue-500" title="External link" />
             )}
           </div>
+
+          {/* Toggle: chọn bài viết nội bộ */}
+          <button
+            type="button"
+            onClick={() => setShowPostSearch((v) => !v)}
+            className="flex items-center gap-1.5 text-xs text-primary hover:underline self-start"
+          >
+            <Search className="w-3 h-3" />
+            {showPostSearch ? "Ẩn tìm bài viết" : "Chọn bài viết nội bộ"}
+          </button>
+
+          {/* Ô tìm kiếm + danh sách bài viết */}
+          {showPostSearch && (
+            <div className="flex flex-col gap-1.5">
+              <div className="relative">
+                <Search className="w-3.5 h-3.5 absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Tìm theo tiêu đề bài viết..."
+                  value={postQuery}
+                  onChange={(e) => handlePostQueryChange(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Escape") resetLinkState()
+                  }}
+                  className="h-8 text-sm pl-7"
+                  autoFocus
+                />
+                {searchingPosts && (
+                  <Loader2 className="w-3.5 h-3.5 absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground animate-spin" />
+                )}
+              </div>
+
+              {postResults.length > 0 && (
+                <div className="max-h-44 overflow-y-auto border rounded-md divide-y">
+                  {postResults.map((post) => (
+                    <button
+                      key={post.id}
+                      type="button"
+                      onClick={() => handleSelectPost(post)}
+                      className="flex items-start gap-2 w-full text-left px-2 py-1.5 hover:bg-accent transition-colors"
+                    >
+                      <FileText className="w-3.5 h-3.5 mt-0.5 shrink-0 text-muted-foreground" />
+                      <div className="min-w-0">
+                        <p className="text-xs font-medium leading-snug line-clamp-2">{post.title}</p>
+                        <p className="text-[10px] text-muted-foreground truncate">/blog/{post.slug}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {!searchingPosts && postQuery.trim().length >= 2 && postResults.length === 0 && (
+                <p className="text-xs text-muted-foreground px-1">Không tìm thấy bài viết phù hợp.</p>
+              )}
+            </div>
+          )}
           
           {/* SEO Options */}
           <div className="flex items-center gap-4 text-xs">
