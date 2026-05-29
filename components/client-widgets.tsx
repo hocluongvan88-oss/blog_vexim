@@ -1,7 +1,7 @@
 "use client"
 
-// No floating chat widget is rendered for now.
-// The Zalo OA widget will be added here once provided.
+import { ZaloChatButton } from "@/components/zalo-chat-button"
+
 export function ClientWidgets() {
-  return null
+  return <ZaloChatButton />
 }
