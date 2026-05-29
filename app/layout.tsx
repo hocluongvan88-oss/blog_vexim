@@ -4,7 +4,6 @@ import { Be_Vietnam_Pro } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import { ClientWidgets } from "@/components/client-widgets"
-import { ChatWidget } from "@/components/chat-widget" // Declare the ChatWidget variable
 
 const beVietnamPro = Be_Vietnam_Pro({
   subsets: ["vietnamese", "latin"],

@@ -1,14 +1,7 @@
 "use client"
 
-import dynamic from "next/dynamic"
-
-const ChatWidget = dynamic(
-  () => import("@/components/chat-widget").then((mod) => ({ default: mod.ChatWidget })),
-  {
-    ssr: false,
-  }
-)
+import { ZaloChatButton } from "@/components/zalo-chat-button"
 
 export function ClientWidgets() {
-  return <ChatWidget />
+  return <ZaloChatButton />
 }
