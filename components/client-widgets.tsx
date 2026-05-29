@@ -1,15 +1,7 @@
 "use client"
 
-import dynamic from "next/dynamic"
-
-// Default AI chat widget is disabled — we only use the Zalo chat button now.
-const ZaloChatButton = dynamic(
-  () => import("@/components/zalo-chat-button").then((mod) => ({ default: mod.ZaloChatButton })),
-  {
-    ssr: false,
-  }
-)
-
+// No floating chat widget is rendered for now.
+// The Zalo OA widget will be added here once provided.
 export function ClientWidgets() {
-  return <ZaloChatButton />
+  return null
 }
