@@ -86,10 +86,12 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
         return
       }
 
-      // Position toolbar above the selection
+      // Position toolbar above the selection.
+      // Toolbar uses position: fixed, so coordinates must be viewport-relative
+      // (do NOT add window.scrollY/scrollX or it goes off-screen when scrolled).
       setPosition({
-        top: rect.top + window.scrollY - 45,
-        left: rect.left + window.scrollX + rect.width / 2,
+        top: rect.top - 45,
+        left: rect.left + rect.width / 2,
       })
     }
 
@@ -112,8 +114,8 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
         const range = selection.getRangeAt(0)
         const rect = range.getBoundingClientRect()
         setPosition({
-          top: rect.top + window.scrollY - 45,
-          left: rect.left + window.scrollX + rect.width / 2,
+          top: rect.top - 45,
+          left: rect.left + rect.width / 2,
         })
       }
     }, 10)
