@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description:
     "Form đánh giá hồ sơ đăng ký GACC cho sản phẩm thực phẩm xuất khẩu sang Trung Quốc. Đánh giá miễn phí bởi chuyên gia Vexim Global.",
   alternates: {
-    canonical: "https://vexim.vn/services/gacc/assessment",
+    canonical: "/services/gacc/assessment",
   },
 }
 
