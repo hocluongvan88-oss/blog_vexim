@@ -6,6 +6,9 @@ import Link from 'next/link';
 export const metadata = {
   title: 'Gia hạn MoCRA FDA | Dịch vụ Mỹ Phẩm | Vexim',
   description: 'Dịch vụ gia hạn đăng ký MoCRA hàng năm cho mỹ phẩm. Cập nhật Facility và Product Listing đúng hạn với FDA.',
+  alternates: {
+    canonical: '/services/cosmetics/mocra-renewal',
+  },
 };
 
 export default function MoCRARenewal() {

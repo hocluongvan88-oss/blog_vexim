@@ -279,7 +279,7 @@ export async function GET(request: Request) {
         <div class="container">
           <h1>❌ Lỗi hệ thống</h1>
           <p>Đã xảy ra lỗi khi xác thực email. Vui lòng thử lại sau.</p>
-          <p style="margin-top: 30px;"><a href="https://vexim.vn/fda-tracker">← Quay lại FDA Tracker</a></p>
+          <p style="margin-top: 30px;"><a href="https://www.veximglobal.com/fda-tracker">← Quay lại FDA Tracker</a></p>
         </div>
       </body>
       </html>

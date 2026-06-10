@@ -6,6 +6,9 @@ import Link from 'next/link';
 export const metadata = {
   title: 'Product Listing Mỹ Phẩm | MoCRA FDA | Vexim',
   description: 'Dịch vụ khai báo sản phẩm mỹ phẩm mới trên hệ thống Cosmetics Direct. Cập nhật Product Listing khi có sản phẩm mới.',
+  alternates: {
+    canonical: '/services/cosmetics/product-listing',
+  },
 };
 
 export default function ProductListing() {

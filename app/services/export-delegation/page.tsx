@@ -6,6 +6,16 @@ import { Card, CardContent } from "@/components/ui/card"
 import { CheckCircle2, TrendingUp, DollarSign, Clock, Shield, Globe, Package } from "lucide-react"
 import ConsultationDialog from "@/components/consultation-dialog"
 import Image from "next/image"
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Uỷ thác xuất nhập khẩu",
+  description:
+    "Dịch vụ uỷ thác xuất nhập khẩu trọn gói. Bạn tập trung sản xuất, Vexim Global lo toàn bộ thủ tục xuất khẩu, chứng từ và tuân thủ quốc tế.",
+  alternates: {
+    canonical: "/services/export-delegation",
+  },
+}
 
 export default function ExportDelegationPage() {
   return (

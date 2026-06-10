@@ -26,8 +26,8 @@ export default function Home() {
     "@type": "Organization",
     name: "Vexim Global",
     alternateName: "Vexim",
-    url: "https://vexim.vn",
-    logo: "https://vexim.vn/logo.png",
+    url: "https://www.veximglobal.com",
+    logo: "https://www.veximglobal.com/logo.png",
     description:
       "Chuyên gia tư vấn pháp lý xuất nhập khẩu hàng đầu Việt Nam. Dịch vụ đăng ký FDA, GACC, MFDS, CE và giấy phép xuất khẩu quốc tế.",
     address: {
@@ -51,12 +51,12 @@ export default function Home() {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: "Vexim Global",
-    url: "https://vexim.vn",
+    url: "https://www.veximglobal.com",
     potentialAction: {
       "@type": "SearchAction",
       target: {
         "@type": "EntryPoint",
-        urlTemplate: "https://vexim.vn/blog?search={search_term_string}",
+        urlTemplate: "https://www.veximglobal.com/blog?search={search_term_string}",
       },
       "query-input": "required name=search_term_string",
     },
@@ -66,9 +66,9 @@ export default function Home() {
     "@context": "https://schema.org",
     "@type": "ProfessionalService",
     name: "Vexim Global",
-    image: "https://vexim.vn/logo.png",
-    "@id": "https://vexim.vn",
-    url: "https://vexim.vn",
+    image: "https://www.veximglobal.com/logo.png",
+    "@id": "https://www.veximglobal.com",
+    url: "https://www.veximglobal.com",
     telephone: "+84-xxx-xxx-xxx",
     priceRange: "$$",
     address: {

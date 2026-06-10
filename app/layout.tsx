@@ -70,9 +70,6 @@ export const metadata: Metadata = {
       "Chuyên gia tư vấn pháp lý xuất nhập khẩu hàng đầu Việt Nam. Dịch vụ đăng ký FDA, GACC, MFDS, CE và giấy phép xuất khẩu quốc tế.",
     images: ["/og-image.jpg"],
   },
-  verification: {
-    google: "your-google-verification-code",
-  },
   alternates: {
     canonical: "https://www.veximglobal.com",
   },

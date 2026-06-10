@@ -21,13 +21,13 @@ export default function FDATrackerPage() {
         "@type": "ListItem",
         position: 1,
         name: "Trang chủ",
-        item: "https://vexim.vn",
+        item: "https://www.veximglobal.com",
       },
       {
         "@type": "ListItem",
         position: 2,
         name: "FDA Tracker",
-        item: "https://vexim.vn/fda-tracker",
+        item: "https://www.veximglobal.com/fda-tracker",
       },
     ],
   }
