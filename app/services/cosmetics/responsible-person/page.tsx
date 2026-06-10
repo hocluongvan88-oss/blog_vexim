@@ -6,6 +6,9 @@ import Link from 'next/link';
 export const metadata = {
   title: 'Responsible Person Mỹ Phẩm | Dịch vụ MoCRA FDA | Vexim',
   description: 'Dịch vụ chỉ định Responsible Person (RP) cho mỹ phẩm MoCRA. Đại diện pháp lý tại Mỹ để chịu trách nhiệm với FDA.',
+  alternates: {
+    canonical: '/services/cosmetics/responsible-person',
+  },
 };
 
 export default function ResponsiblePerson() {

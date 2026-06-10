@@ -18,6 +18,16 @@ import {
   Sparkles,
 } from "lucide-react"
 import Link from "next/link"
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Kiểm tra nhãn FDA bằng AI",
+  description:
+    "Dịch vụ kiểm tra nhãn mác sản phẩm theo tiêu chuẩn FDA bằng AI. Phát hiện lỗi nhãn, đảm bảo tuân thủ trước khi xuất khẩu sang Mỹ.",
+  alternates: {
+    canonical: "/services/fda-label-check",
+  },
+}
 
 const features = [
   {

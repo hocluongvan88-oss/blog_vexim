@@ -7,6 +7,16 @@ import { Badge } from "@/components/ui/badge"
 import { CheckCircle2, Sparkles, Zap, Shield, BarChart3, ArrowRight, Database, Network, Globe, Cpu } from "lucide-react"
 import ConsultationDialog from "@/components/consultation-dialog"
 import Image from "next/image"
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Truy xuất nguồn gốc bằng AI",
+  description:
+    "Giải pháp truy xuất nguồn gốc thông minh bằng AI cho chuỗi cung ứng xuất khẩu. Minh bạch, tuân thủ FSMA 204 và quy định FDA.",
+  alternates: {
+    canonical: "/services/ai-traceability",
+  },
+}
 
 export default function AITraceabilityPage() {
   return (
