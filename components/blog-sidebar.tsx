@@ -6,16 +6,19 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Mail, Phone, CheckCircle2, TrendingUp, Award, Clock } from "lucide-react"
+import { Mail, Phone, CheckCircle2, TrendingUp, Award, Clock, User } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { motion } from "framer-motion"
 import { useRef } from "react"
 
 export default function BlogSidebar() {
+  const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [phone, setPhone] = useState("")
+  const [honeypot, setHoneypot] = useState("")
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState("")
   const containerRef = useRef(null)
   const y1 = 0
   const y2 = 0
@@ -24,19 +27,44 @@ export default function BlogSidebar() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    setErrorMessage("")
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    try {
+      const response = await fetch("/api/consultation", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          phone,
+          email,
+          service: "",
+          product: "",
+          description: "Đăng ký từ form sidebar trang Blog",
+          honeypot,
+        }),
+      })
 
-    setSubmitted(true)
-    setLoading(false)
+      const data = await response.json()
 
-    // Reset after 3 seconds
-    setTimeout(() => {
-      setSubmitted(false)
-      setEmail("")
-      setPhone("")
-    }, 3000)
+      if (response.ok) {
+        setSubmitted(true)
+        // Reset after 4 seconds
+        setTimeout(() => {
+          setSubmitted(false)
+          setName("")
+          setEmail("")
+          setPhone("")
+        }, 4000)
+      } else {
+        setErrorMessage(data.error || "Có lỗi xảy ra. Vui lòng thử lại.")
+      }
+    } catch (error) {
+      setErrorMessage("Không thể kết nối. Vui lòng kiểm tra mạng và thử lại.")
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -61,6 +89,35 @@ export default function BlogSidebar() {
 
           {!submitted ? (
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Honeypot field - ẩn để bắt bot */}
+              <input
+                type="text"
+                name="website"
+                value={honeypot}
+                onChange={(e) => setHoneypot(e.target.value)}
+                style={{ position: "absolute", left: "-9999px" }}
+                tabIndex={-1}
+                autoComplete="off"
+              />
+
+              <div>
+                <Label htmlFor="sidebar-name" className="text-white mb-2 block text-sm">
+                  Họ và tên
+                </Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input
+                    id="sidebar-name"
+                    type="text"
+                    placeholder="Nguyễn Văn A"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="pl-10 bg-white border-0 text-black"
+                    required
+                  />
+                </div>
+              </div>
+
               <div>
                 <Label htmlFor="sidebar-email" className="text-white mb-2 block text-sm">
                   Email của bạn
@@ -96,6 +153,10 @@ export default function BlogSidebar() {
                   />
                 </div>
               </div>
+
+              {errorMessage && (
+                <p className="text-sm text-white bg-red-600/80 rounded-md px-3 py-2">{errorMessage}</p>
+              )}
 
               <Button
                 type="submit"
