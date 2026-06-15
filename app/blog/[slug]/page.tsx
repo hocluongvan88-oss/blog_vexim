@@ -65,7 +65,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     return text.length > 160 ? text.substring(0, 157) + "..." : text
   }
 
+  const baseUrl = new URL("https://www.veximglobal.com")
+
   return {
+    metadataBase: baseUrl,
     title: post.meta_title || post.title,
     description: trimmedDescription(post.meta_description || post.excerpt),
     keywords: post.tags || [post.category],

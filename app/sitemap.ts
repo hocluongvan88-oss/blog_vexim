@@ -20,7 +20,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           url: `${baseUrl}/blog/${post.slug}`,
           lastModified: new Date(post.updated_at || post.published_at),
           changeFrequency: "monthly" as const,
-          priority: 0.7,
+          priority: 0.8,
         })) || []
     } catch (error) {
       console.error("[v0] Error fetching posts for sitemap:", error)
@@ -32,14 +32,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     {
       url: baseUrl,
       lastModified: new Date(),
-      changeFrequency: "daily",
-      priority: 1,
+      changeFrequency: "weekly",
+      priority: 0.9,
     },
     {
       url: `${baseUrl}/blog`,
       lastModified: new Date(),
-      changeFrequency: "daily",
-      priority: 0.9,
+      changeFrequency: "weekly",
+      priority: 0.85,
     },
     {
       url: `${baseUrl}/services/fda`,
