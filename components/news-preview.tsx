@@ -58,7 +58,7 @@ export async function NewsPreview() {
                       <Calendar className="w-4 h-4" />
                       <span>{formatDate(article.published_at)}</span>
                     </div>
-                    <h3 className="text-xl font-bold text-primary mb-3 text-balance group-hover:text-accent transition-colors">
+                    <h3 className="text-xl font-bold text-primary mb-3 group-hover:text-accent transition-colors line-clamp-2">
                       {article.title}
                     </h3>
                     <p className="text-muted-foreground mb-4 leading-relaxed line-clamp-3 flex-1">{article.excerpt}</p>

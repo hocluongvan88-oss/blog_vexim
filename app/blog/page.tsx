@@ -135,7 +135,7 @@ export default async function BlogPage({ searchParams }: { searchParams: Promise
                         </div>
 
                         {/* Title */}
-                        <h3 className="text-xl font-bold text-primary mb-3 line-clamp-2 text-balance group-hover:text-accent transition-colors">
+                        <h3 className="text-xl font-bold text-primary mb-3 line-clamp-2 group-hover:text-accent transition-colors">
                           {post.title}
                         </h3>
 
