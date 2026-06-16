@@ -211,7 +211,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
                 </Breadcrumb>
               </div>
 
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-balance">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
                 {config.title}
               </h1>
               <p className="text-lg md:text-xl text-white/90 leading-relaxed mb-6">
@@ -307,7 +307,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
                         </div>
 
                         {/* Title */}
-                        <h2 className="text-xl font-bold text-primary mb-3 line-clamp-2 text-balance group-hover:text-accent transition-colors">
+                        <h2 className="text-xl font-bold text-primary mb-3 line-clamp-2 group-hover:text-accent transition-colors">
                           {post.title}
                         </h2>
 
