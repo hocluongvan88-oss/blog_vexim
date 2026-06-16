@@ -1,5 +1,6 @@
 import type { Block } from "./types"
 import { JSX } from "react";
+import { renderInlineMath } from "@/lib/blocks-to-html"
 
 interface BlockRendererProps {
   blocks: Block[]
@@ -24,7 +25,7 @@ export function BlockRenderer({ blocks }: BlockRendererProps) {
           <HeadingTag
             key={block.id}
             className={`${sizeClass} font-bold text-primary mb-4 ${alignmentClass[data.align || "left"]}`}
-            dangerouslySetInnerHTML={{ __html: data.text }}
+            dangerouslySetInnerHTML={{ __html: renderInlineMath(data.text) }}
           />
         )
       }
@@ -34,7 +35,7 @@ export function BlockRenderer({ blocks }: BlockRendererProps) {
           <p
             key={block.id}
             className={`text-base leading-relaxed mb-4 ${alignmentClass[data.align || "justify"]}`}
-            dangerouslySetInnerHTML={{ __html: data.text }}
+            dangerouslySetInnerHTML={{ __html: renderInlineMath(data.text) }}
           />
         )
       }
@@ -72,7 +73,7 @@ export function BlockRenderer({ blocks }: BlockRendererProps) {
             key={block.id}
             className={`border-l-4 border-primary pl-4 py-2 my-6 italic ${alignmentClass[data.align || "left"]}`}
           >
-            <p className="text-lg text-muted-foreground" dangerouslySetInnerHTML={{ __html: data.text }} />
+            <p className="text-lg text-muted-foreground" dangerouslySetInnerHTML={{ __html: renderInlineMath(data.text) }} />
             {data.author && <footer className="mt-2 text-sm font-semibold">— {data.author}</footer>}
           </blockquote>
         )
@@ -91,7 +92,7 @@ export function BlockRenderer({ blocks }: BlockRendererProps) {
               <li
                 key={index}
                 className="leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: item }}
+                dangerouslySetInnerHTML={{ __html: renderInlineMath(item) }}
               />
             ))}
           </ListTag>
@@ -111,7 +112,7 @@ export function BlockRenderer({ blocks }: BlockRendererProps) {
                         key={colIndex}
                         className="border p-3 bg-secondary font-semibold"
                         scope="col"
-                        dangerouslySetInnerHTML={{ __html: cell }}
+                        dangerouslySetInnerHTML={{ __html: renderInlineMath(cell) }}
                       />
                     ))}
                   </tr>
@@ -124,7 +125,7 @@ export function BlockRenderer({ blocks }: BlockRendererProps) {
                       <td
                         key={colIndex}
                         className="border p-3"
-                        dangerouslySetInnerHTML={{ __html: cell }}
+                        dangerouslySetInnerHTML={{ __html: renderInlineMath(cell) }}
                       />
                     ))}
                   </tr>
