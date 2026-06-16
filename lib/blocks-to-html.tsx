@@ -1,6 +1,114 @@
 import type { Block } from "@/components/block-editor/types"
 
 /**
+ * Map of common LaTeX commands to their Unicode equivalents.
+ * Used to display inline math symbols (e.g. "$\ge$ 98%") that appear in
+ * AI-generated content as proper characters instead of raw LaTeX source.
+ */
+const LATEX_SYMBOLS: Record<string, string> = {
+  ge: "≥",
+  geq: "≥",
+  le: "≤",
+  leq: "≤",
+  neq: "≠",
+  ne: "≠",
+  approx: "≈",
+  equiv: "≡",
+  times: "×",
+  div: "÷",
+  pm: "±",
+  mp: "∓",
+  cdot: "·",
+  ast: "∗",
+  star: "⋆",
+  bullet: "•",
+  infty: "∞",
+  partial: "∂",
+  nabla: "∇",
+  sum: "∑",
+  prod: "∏",
+  int: "∫",
+  sqrt: "√",
+  propto: "∝",
+  forall: "∀",
+  exists: "∃",
+  in: "∈",
+  notin: "∉",
+  subset: "⊂",
+  subseteq: "⊆",
+  supset: "⊃",
+  supseteq: "⊇",
+  cup: "∪",
+  cap: "∩",
+  emptyset: "∅",
+  rightarrow: "→",
+  Rightarrow: "⇒",
+  leftarrow: "←",
+  Leftarrow: "⇐",
+  leftrightarrow: "↔",
+  Leftrightarrow: "⇔",
+  uparrow: "↑",
+  downarrow: "↓",
+  degree: "°",
+  circ: "°",
+  percent: "%",
+  alpha: "α",
+  beta: "β",
+  gamma: "γ",
+  delta: "δ",
+  epsilon: "ε",
+  theta: "θ",
+  lambda: "λ",
+  mu: "µ",
+  pi: "π",
+  sigma: "σ",
+  phi: "φ",
+  omega: "ω",
+  Delta: "Δ",
+  Sigma: "Σ",
+  Omega: "Ω",
+  Phi: "Φ",
+  Pi: "Π",
+  ldots: "…",
+  dots: "…",
+  to: "→",
+  leq_slant: "⩽",
+}
+
+/**
+ * Replace LaTeX backslash commands within a string with Unicode characters.
+ */
+function replaceLatexCommands(input: string): string {
+  let result = input
+  // Replace \command (longest names first to avoid partial matches)
+  const names = Object.keys(LATEX_SYMBOLS).sort((a, b) => b.length - a.length)
+  for (const name of names) {
+    const re = new RegExp(`\\\\${name}\\b`, "g")
+    result = result.replace(re, LATEX_SYMBOLS[name])
+  }
+  // Remove any leftover LaTeX spacing/formatting helpers
+  result = result.replace(/\\,/g, " ").replace(/\\;/g, " ").replace(/\\!/g, "").replace(/\\ /g, " ")
+  // Strip a trailing/leading backslash that has no known command
+  return result
+}
+
+/**
+ * Convert inline ($...$) and display ($$...$$) LaTeX math expressions found in
+ * text content into readable Unicode. Falls back to stripping the delimiters
+ * so users never see raw "$\ge$" markup in the rendered article.
+ */
+export function renderInlineMath(text: string): string {
+  if (!text || text.indexOf("$") === -1) return text
+
+  // Display math: $$ ... $$
+  let result = text.replace(/\$\$([^$]+)\$\$/g, (_m, expr) => replaceLatexCommands(expr).trim())
+  // Inline math: $ ... $
+  result = result.replace(/\$([^$]+)\$/g, (_m, expr) => replaceLatexCommands(expr).trim())
+
+  return result
+}
+
+/**
  * Convert block editor blocks to HTML string for display
  */
 export function blocksToHTML(blocks: Block[]): string {
@@ -35,11 +143,11 @@ export function blocksToHTML(blocks: Block[]): string {
                       ? "text-lg md:text-xl"
                       : "text-base md:text-lg"
 
-          return `<h${level} class="${sizeClass} font-bold text-primary mb-4 mt-8 first:mt-0 ${alignmentClass}">${data.text || ""}</h${level}>`
+          return `<h${level} class="${sizeClass} font-bold text-primary mb-4 mt-8 first:mt-0 ${alignmentClass}">${renderInlineMath(data.text || "")}</h${level}>`
         }
 
         case "paragraph": {
-          return `<p class="text-base leading-relaxed mb-4 ${alignmentClass}">${data.text || ""}</p>`
+          return `<p class="text-base leading-relaxed mb-4 ${alignmentClass}">${renderInlineMath(data.text || "")}</p>`
         }
 
         case "image": {
@@ -62,12 +170,12 @@ export function blocksToHTML(blocks: Block[]): string {
             ? `<footer class="mt-2 text-sm font-semibold text-gray-700">— ${data.author}</footer>`
             : ""
 
-          return `<blockquote class="border-l-4 border-primary pl-4 py-2 my-6 italic ${alignmentClass}"><p class="text-lg text-gray-600">${data.text || ""}</p>${author}</blockquote>`
+          return `<blockquote class="border-l-4 border-primary pl-4 py-2 my-6 italic ${alignmentClass}"><p class="text-lg text-gray-600">${renderInlineMath(data.text || "")}</p>${author}</blockquote>`
         }
 
         case "list": {
           const items = (data.items || [])
-            .map((item: string) => `<li class="mb-2">${item}</li>`)
+            .map((item: string) => `<li class="mb-2">${renderInlineMath(item)}</li>`)
             .join("")
           
           const listTag = data.style === "ordered" ? "ol" : "ul"
@@ -89,7 +197,7 @@ export function blocksToHTML(blocks: Block[]): string {
                 .map((cell: string, colIndex: number) => {
                   const tag = rowIndex === 0 ? "th" : "td"
                   const className = rowIndex === 0 ? "border p-3 bg-gray-100 font-semibold" : "border p-3"
-                  return `<${tag} class="${className}">${cell}</${tag}>`
+                  return `<${tag} class="${className}">${renderInlineMath(cell)}</${tag}>`
                 })
                 .join("")
               return `<tr>${cells}</tr>`

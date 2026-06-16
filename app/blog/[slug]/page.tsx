@@ -21,7 +21,7 @@ import BlogSidebar from "@/components/blog-sidebar"
 import { BlogTableOfContents } from "@/components/blog-table-of-contents"
 import { BlogInternalLinks } from "@/components/blog-internal-links"
 import { ViewTracker } from "@/components/view-tracker"
-import { blocksToHTML } from "@/lib/blocks-to-html"
+import { blocksToHTML, renderInlineMath } from "@/lib/blocks-to-html"
 import type { Block } from "@/components/block-editor/types"
 
 export const revalidate = 60
@@ -134,8 +134,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     const blocks: Block[] = JSON.parse(post.content)
     htmlContent = blocksToHTML(blocks)
   } catch {
-    // If parsing fails, assume it's already HTML
-    htmlContent = post.content
+    // If parsing fails, assume it's already HTML. Still convert any inline
+    // LaTeX math (e.g. "$\ge$") so symbols render as proper characters.
+    htmlContent = renderInlineMath(post.content)
   }
 
   const calculateReadingTime = (content: string): number => {
