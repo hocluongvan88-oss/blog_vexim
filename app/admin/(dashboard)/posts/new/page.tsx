@@ -127,11 +127,10 @@ export default function NewPostPage() {
         description: status === "published" ? "Bài viết đã được xuất bản thành công" : "Bản nháp đã được lưu",
       })
 
-      if (status === "published") {
-        router.push(`/blog/${data.slug}`)
-      } else {
-        router.push("/admin/posts")
-      }
+      // Always return to the admin posts list so the editor stays in the dashboard.
+      // Opening the public blog page navigated the user out of the admin area.
+      router.push("/admin/posts")
+      router.refresh()
     } catch (error) {
       console.error("Error saving post:", error)
       toast({

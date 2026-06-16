@@ -184,11 +184,10 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
         description: newStatus === "published" ? "Bài viết đã được cập nhật và xuất bản" : "Bản nháp đã được lưu",
       })
 
-      if (newStatus === "published") {
-        router.push(`/blog/${data.slug}`)
-      } else {
-        router.push("/admin/posts")
-      }
+      // Stay in the admin dashboard after saving/publishing instead of leaving
+      // to the public blog page (which made the session feel "logged out").
+      router.push("/admin/posts")
+      router.refresh()
     } catch (error) {
       console.error("Error updating post:", error)
       toast({
