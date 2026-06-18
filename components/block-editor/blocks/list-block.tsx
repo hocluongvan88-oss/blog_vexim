@@ -54,11 +54,19 @@ function ListItem({
       
       if (tag === "a") {
         const href = el.getAttribute("href") || ""
+        const target = el.getAttribute("target") || ""
+        const rel = el.getAttribute("rel") || ""
         while (el.attributes.length > 0) {
           el.removeAttribute(el.attributes[0].name)
         }
         if (href && !href.toLowerCase().startsWith("javascript:")) {
           el.setAttribute("href", href)
+        }
+        if (target === "_blank") {
+          el.setAttribute("target", "_blank")
+        }
+        if (rel) {
+          el.setAttribute("rel", rel)
         }
       } else if (allowedTags.includes(tag)) {
         while (el.attributes.length > 0) {
@@ -106,14 +114,30 @@ function ListItem({
     }
   }, [index, onItemChange])
 
-  const handleBlur = useCallback(() => {
-    if (contentRef.current) {
-      // Sanitize on blur
-      const html = sanitizeHTML(contentRef.current.innerHTML || "")
-      lastValueRef.current = html
-      contentRef.current.innerHTML = html
-      onItemChange(index, html)
-    }
+  const handleBlur = useCallback((e: React.FocusEvent<HTMLDivElement>) => {
+    // Defer sanitize by one tick so that if focus is moving to the InlineToolbar
+    // (e.g. clicking the Link button), activeElement will have updated.
+    // This prevents destroying the saved selection range before execCommand runs.
+    const currentContent = contentRef.current
+    const currentHTML = currentContent?.innerHTML || ""
+
+    setTimeout(() => {
+      // If focus is now inside the inline toolbar, skip sanitize entirely.
+      const active = document.activeElement
+      if (
+        active &&
+        (active.closest('[data-inline-toolbar]') || active.closest('.inline-toolbar-root'))
+      ) {
+        return
+      }
+
+      if (currentContent) {
+        const html = sanitizeHTML(currentHTML)
+        lastValueRef.current = html
+        currentContent.innerHTML = html
+        onItemChange(index, html)
+      }
+    }, 0)
   }, [index, onItemChange, sanitizeHTML])
 
   const handleKeyDownInternal = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {

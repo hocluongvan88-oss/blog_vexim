@@ -289,6 +289,13 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
         }
         
         savedRangeRef.current = null
+
+        // Notify the contenteditable that owns this selection so it can sync
+        // its internal state (e.g. ListItem's onItemChange).
+        const activeEditable = linkElement?.closest('[contenteditable="true"]') as HTMLElement | null
+        if (activeEditable) {
+          activeEditable.dispatchEvent(new Event("input", { bubbles: true }))
+        }
       }
     }
     resetLinkState()
@@ -301,6 +308,20 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
         selection.removeAllRanges()
         selection.addRange(savedRangeRef.current)
         document.execCommand("unlink", false)
+
+        // Sync state back to the owning contenteditable after removing link.
+        const newSel = window.getSelection()
+        if (newSel && newSel.rangeCount > 0) {
+          const ancestor = newSel.getRangeAt(0).commonAncestorContainer
+          const editable = (ancestor.nodeType === Node.ELEMENT_NODE
+            ? (ancestor as HTMLElement)
+            : ancestor.parentElement
+          )?.closest('[contenteditable="true"]') as HTMLElement | null
+          if (editable) {
+            editable.dispatchEvent(new Event("input", { bubbles: true }))
+          }
+        }
+
         savedRangeRef.current = null
       }
     }
@@ -322,7 +343,8 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
   return (
     <div
       ref={toolbarRef}
-      className="fixed z-50 bg-popover border rounded-md shadow-lg p-1 flex items-center gap-1 animate-in fade-in-0 zoom-in-95"
+      data-inline-toolbar="true"
+      className="fixed z-50 bg-popover border rounded-md shadow-lg p-1 flex items-center gap-1 animate-in fade-in-0 zoom-in-95 inline-toolbar-root"
       style={{
         top: `${position.top}px`,
         left: `${position.left}px`,
@@ -455,7 +477,7 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
               )}
 
               {!searchingPosts && postQuery.trim().length >= 2 && postResults.length === 0 && (
-                <p className="text-xs text-muted-foreground px-1">Không tìm thấy bài viết phù hợp.</p>
+                <p className="text-xs text-muted-foreground px-1">Không tìm thấy bài viết phù h��p.</p>
               )}
             </div>
           )}
