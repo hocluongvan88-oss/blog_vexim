@@ -30,7 +30,7 @@ export function ExportSalesBookingButton({
       >
         {children || (
           <>
-            Đặt lịch tư vấn phòng sales
+            Đăng ký tư vấn Phòng Sale Xuất khẩu Vexim
             <ArrowRight className="w-4 h-4 ml-2" />
           </>
         )}
@@ -217,7 +217,7 @@ export function ExportSalesInlineForm() {
       <Button
         type="submit"
         size="lg"
-        className="w-full bg-accent text-accent-foreground hover:bg-accent/90 shadow-md font-semibold text-base py-6"
+        className="w-full bg-emerald-600 text-white hover:bg-emerald-700 shadow-md font-bold text-base py-6"
         disabled={isSubmitting}
       >
         {isSubmitting ? (
@@ -227,7 +227,7 @@ export function ExportSalesInlineForm() {
           </>
         ) : (
           <>
-            Nhận Đánh Giá Năng Lực & Đặt Lịch Tư Vấn 1:1
+            Đăng ký tư vấn Phòng Sale Xuất khẩu Vexim
             <ArrowRight className="w-5 h-5 ml-2" />
           </>
         )}
