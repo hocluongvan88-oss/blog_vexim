@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Eye, Save, Send, Loader2 } from "lucide-react"
+import { Eye, Save, Send, Loader2, RotateCcw, X } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { BlockEditor } from "@/components/block-editor/block-editor"
 import { SEOChecker } from "@/components/seo-checker"
@@ -18,6 +18,35 @@ import { AIWritingAssistant } from "@/components/admin/ai-writing-assistant"
 import { HTMLPasteDialog } from "@/components/admin/html-paste-dialog"
 import { PostPreviewDialog } from "@/components/admin/post-preview-dialog"
 import type { Block } from "@/components/block-editor/types"
+import {
+  blocksToPlainText,
+  generateBlockId,
+  parseInlineMarkdown,
+  parseMarkdownToBlocks,
+  parsedBlocksToBlocks,
+} from "@/lib/content-parsers"
+import { slugify } from "@/lib/post-payload"
+import { sanitizeInlineHtml } from "@/lib/sanitize"
+import { BLOG_CATEGORIES } from "@/lib/blog-categories"
+import { useDraftAutosave } from "@/hooks/use-draft-autosave"
+import { useDebouncedValue } from "@/hooks/use-debounced-value"
+import { PostSidebarTools } from "@/components/admin/post-sidebar-tools"
+
+const MIN_PUBLISH_LENGTH = 50
+const DRAFT_STORAGE_KEY = "vexim-blog-draft-new"
+
+interface DraftSnapshot {
+  title: string
+  slug: string
+  category: string
+  excerpt: string
+  blocks: Block[]
+  metaTitle: string
+  metaDescription: string
+  featuredImage: string
+  featuredImageAlt: string
+  focusKeyword: string
+}
 
 export default function NewPostPage() {
   const router = useRouter()
@@ -25,6 +54,8 @@ export default function NewPostPage() {
   const [isLoading, setIsLoading] = useState(false)
 
   const [title, setTitle] = useState("")
+  const [slug, setSlug] = useState("")
+  const [slugTouched, setSlugTouched] = useState(false)
   const [category, setCategory] = useState("")
   const [excerpt, setExcerpt] = useState("")
   const [blocks, setBlocks] = useState<Block[]>([])
@@ -37,32 +68,135 @@ export default function NewPostPage() {
   const [selectedText, setSelectedText] = useState("")
   const [showPreview, setShowPreview] = useState(false)
 
-  // Generate text content from blocks for SEO checker and AI
-  const getTextContent = () => {
-    return blocks
-      .map((block) => {
-        if (block.type === "heading" || block.type === "paragraph") return block.data.text
-        if (block.type === "quote") return block.data.text
-        return ""
-      })
-      .join(" ")
-  }
+  /** Khối đang chứa đoạn văn bản được bôi đen (để AI thay thế đúng chỗ). */
+  const selectionBlockIdRef = useRef<string | null>(null)
 
-  // Track text selection for AI assistant
-  const handleTextSelection = () => {
-    const selection = window.getSelection()
-    const text = selection?.toString() || ""
-    if (text.length > 0) {
-      setSelectedText(text)
+  /* ---------------------- Hỗ trợ phân tích SEO cho writer ---------------------- */
+
+  /** Danh sách bài khác (để phát hiện trùng chủ đề/self-cannibalization). */
+  const [otherPosts, setOtherPosts] = useState<Array<{ id?: string; title: string; focus_keyword?: string | null }>>([])
+
+  useEffect(() => {
+    let cancelled = false
+    const loadOtherPosts = async () => {
+      try {
+        const response = await fetch("/api/posts?status=published&limit=100")
+        if (!response.ok) return
+        const data = await response.json()
+        if (!cancelled && Array.isArray(data)) setOtherPosts(data)
+      } catch (error) {
+        console.warn("[blog] Không tải được danh sách bài viết để kiểm tra trùng chủ đề:", error)
+      }
     }
-  }
+    loadOtherPosts()
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
-  // Apply AI suggestion (add as new paragraph block)
+  /** Gộp dữ liệu cho SEO checker rồi debounce 400ms (tránh tính lại mỗi lần gõ phím). */
+  const seoInput = useMemo(
+    () => ({
+      title,
+      excerpt,
+      metaTitle,
+      metaDescription,
+      focusKeyword,
+      slug,
+      featuredImage,
+      featuredImageAlt,
+      blocks,
+    }),
+    [title, excerpt, metaTitle, metaDescription, focusKeyword, slug, featuredImage, featuredImageAlt, blocks],
+  )
+  const debouncedSeoInput = useDebouncedValue(seoInput, 400)
+
+  /** Cuộn tới khối cần sửa và làm nổi bật trong giây lát. */
+  const handleFocusBlock = useCallback((blockId: string) => {
+    const element = document.querySelector(`[data-block-id="${blockId}"]`)
+    if (!element) return
+    element.scrollIntoView({ behavior: "smooth", block: "center" })
+    element.classList.add("ring-2", "ring-amber-400", "rounded-lg")
+    window.setTimeout(() => element.classList.remove("ring-2", "ring-amber-400", "rounded-lg"), 1800)
+  }, [])
+
+  /** Panel gợi ý thêm block (câu hỏi, nguồn, liên kết nội bộ) vào cuối bài. */
+  const handleInsertBlocks = useCallback((newBlocks: Block[]) => {
+    if (newBlocks.length === 0) return
+    setBlocks((prev) => [...prev, ...newBlocks])
+  }, [])
+
+  // Slug tự sinh từ tiêu đề cho tới khi người dùng tự sửa
+  useEffect(() => {
+    if (!slugTouched) setSlug(slugify(title))
+  }, [title, slugTouched])
+
+  /** Theo dõi vùng chọn trong toàn trang (trước đây chỉ nghe sự kiện ở sidebar nên không bắt được). */
+  useEffect(() => {
+    const handler = () => {
+      const selection = window.getSelection()
+      const text = selection?.toString() || ""
+      if (!text.trim()) return
+
+      const node = selection?.anchorNode
+      const element =
+        node?.nodeType === Node.TEXT_NODE ? node.parentElement : ((node as HTMLElement | null) ?? null)
+      const blockElement = element?.closest?.("[data-block-id]") as HTMLElement | null
+
+      setSelectedText(text)
+      selectionBlockIdRef.current = blockElement?.getAttribute("data-block-id") ?? null
+    }
+
+    document.addEventListener("mouseup", handler)
+    document.addEventListener("keyup", handler)
+    return () => {
+      document.removeEventListener("mouseup", handler)
+      document.removeEventListener("keyup", handler)
+    }
+  }, [])
+
+  const getTextContent = useCallback(() => blocksToPlainText(blocks), [blocks])
+
+  /** Áp dụng kết quả AI vào khối đang chọn (hoặc thêm vào cuối bài). */
   const handleApplyAISuggestion = (newText: string) => {
-    toast({
-      title: "Áp dụng thành công",
-      description: "Vui lòng copy và paste vào khối đang chỉnh sửa hoặc tạo khối mới",
-    })
+    const text = (newText || "").trim()
+    if (!text) {
+      toast({ title: "Không có nội dung", description: "Kết quả AI đang trống", variant: "destructive" })
+      return
+    }
+
+    const targetId = selectionBlockIdRef.current
+    const targetIndex = targetId ? blocks.findIndex((block) => block.id === targetId) : -1
+    const target = targetIndex >= 0 ? blocks[targetIndex] : null
+    const canReplace = !!target && ["paragraph", "heading", "quote"].includes(target.type)
+
+    if (canReplace && target) {
+      const segments = text.split(/\n{2,}/).map((segment) => segment.trim()).filter(Boolean)
+
+      if (segments.length <= 1) {
+        const next = [...blocks]
+        next[targetIndex] = {
+          ...target,
+          data: { ...target.data, text: sanitizeInlineHtml(parseInlineMarkdown(text).replace(/\n/g, "<br />")) },
+        }
+        setBlocks(next)
+      } else {
+        const replacements: Block[] = segments.map((segment) => ({
+          ...target,
+          id: generateBlockId("block"),
+          data: { ...target.data, text: sanitizeInlineHtml(parseInlineMarkdown(segment).replace(/\n/g, "<br />")) },
+        }))
+        setBlocks([...blocks.slice(0, targetIndex), ...replacements, ...blocks.slice(targetIndex + 1)])
+      }
+
+      toast({ title: "Đã áp dụng", description: "Nội dung AI đã thay thế đoạn đang chọn" })
+    } else {
+      const newBlocks = parsedBlocksToBlocks(parseMarkdownToBlocks(text))
+      setBlocks([...blocks, ...newBlocks])
+      toast({ title: "Đã áp dụng", description: `Đã thêm ${newBlocks.length} khối vào cuối bài viết` })
+    }
+
+    selectionBlockIdRef.current = null
   }
 
   // Handle AI-generated meta
@@ -76,37 +210,96 @@ export default function NewPostPage() {
 
   // Handle HTML import
   const handleHTMLImport = (newBlocks: Block[]) => {
-    setBlocks([...blocks, ...newBlocks])
-    toast({
-      title: "Import thành công",
-      description: `Đã thêm ${newBlocks.length} blocks từ HTML`,
-    })
+    if (newBlocks.length === 0) return
+    setBlocks((prev) => [...prev, ...newBlocks])
+  }
+
+  /* ------------------------- Bản nháp tự động ------------------------- */
+  const draftSnapshot = useMemo<DraftSnapshot>(
+    () => ({
+      title,
+      slug,
+      category,
+      excerpt,
+      blocks,
+      metaTitle,
+      metaDescription,
+      featuredImage,
+      featuredImageAlt,
+      focusKeyword,
+    }),
+    [title, slug, category, excerpt, blocks, metaTitle, metaDescription, featuredImage, featuredImageAlt, focusKeyword],
+  )
+
+  const { pendingDraft, lastSavedAt, markSaved, restoreDraft, discardDraft } = useDraftAutosave(
+    DRAFT_STORAGE_KEY,
+    draftSnapshot,
+    {
+      isEmpty: (draft) => !draft.title.trim() && !draft.excerpt.trim() && blocksToPlainText(draft.blocks).length === 0,
+    },
+  )
+
+  const handleRestoreDraft = () => {
+    const draft = restoreDraft()
+    if (!draft) return
+    setTitle(draft.title)
+    setSlug(draft.slug)
+    setSlugTouched(true)
+    setCategory(draft.category)
+    setExcerpt(draft.excerpt)
+    setBlocks(draft.blocks)
+    setMetaTitle(draft.metaTitle)
+    setMetaDescription(draft.metaDescription)
+    setFeaturedImage(draft.featuredImage)
+    setFeaturedImageAlt(draft.featuredImageAlt)
+    setFocusKeyword(draft.focusKeyword)
+    setPreviewImage(draft.featuredImage || null)
+    toast({ title: "Đã khôi phục bản nháp", description: "Kiểm tra lại nội dung trước khi xuất bản" })
+  }
+
+  const validate = (status: "draft" | "published"): boolean => {
+    if (!title.trim() || !category || !excerpt.trim()) {
+      toast({
+        title: "Thiếu thông tin",
+        description: "Vui lòng điền tiêu đề, danh mục và mô tả ngắn",
+        variant: "destructive",
+      })
+      return false
+    }
+
+    const plainLength = blocksToPlainText(blocks).length
+    if (plainLength === 0) {
+      toast({ title: "Chưa có nội dung", description: "Vui lòng nhập nội dung bài viết", variant: "destructive" })
+      return false
+    }
+
+    if (status === "published" && plainLength < MIN_PUBLISH_LENGTH) {
+      toast({
+        title: "Nội dung quá ngắn",
+        description: `Cần tối thiểu ${MIN_PUBLISH_LENGTH} ký tự nội dung để xuất bản`,
+        variant: "destructive",
+      })
+      return false
+    }
+
+    return true
   }
 
   const handleSubmit = async (status: "draft" | "published") => {
-    if (!title || !category || !excerpt || blocks.length === 0) {
-      toast({
-        title: "Thiếu thông tin",
-        description: "Vui lòng điền đầy đủ các trường bắt buộc và thêm nội dung",
-        variant: "destructive",
-      })
-      return
-    }
+    if (!validate(status)) return
 
     setIsLoading(true)
 
     try {
-      // Serialize blocks to JSON string for storage
-      const contentJSON = JSON.stringify(blocks)
-
       const response = await fetch("/api/posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title,
+          slug: slug || slugify(title),
           category,
           excerpt,
-          content: contentJSON,
+          content: JSON.stringify(blocks),
           featured_image: featuredImage,
           featured_image_alt: featuredImageAlt,
           focus_keyword: focusKeyword,
@@ -122,17 +315,19 @@ export default function NewPostPage() {
         throw new Error(data.error || "Có lỗi xảy ra")
       }
 
+      markSaved()
+
       toast({
         title: status === "published" ? "Đã xuất bản!" : "Đã lưu nháp!",
-        description: status === "published" ? "Bài viết đã được xuất bản thành công" : "Bản nháp đã được lưu",
+        description:
+          status === "published" ? "Bài viết đã được xuất bản thành công" : "Bản nháp đã được lưu",
       })
 
-      // Always return to the admin posts list so the editor stays in the dashboard.
-      // Opening the public blog page navigated the user out of the admin area.
+      // Ở lại khu vực admin sau khi lưu
       router.push("/admin/posts")
       router.refresh()
     } catch (error) {
-      console.error("Error saving post:", error)
+      console.error("[blog] Lỗi lưu bài viết:", error)
       toast({
         title: "Lỗi",
         description: error instanceof Error ? error.message : "Không thể lưu bài viết",
@@ -143,12 +338,34 @@ export default function NewPostPage() {
     }
   }
 
+  const autoSavedLabel = lastSavedAt
+    ? `Đã tự lưu bản nháp lúc ${new Date(lastSavedAt).toLocaleTimeString("vi-VN")}`
+    : null
+
   return (
     <div className="p-8">
       <div className="mb-8">
         <h1 className="text-3xl md:text-4xl font-bold text-primary mb-2">Tạo bài viết mới</h1>
         <p className="text-muted-foreground">Thêm nội dung mới vào hệ thống blog của Vexim Global</p>
+        {autoSavedLabel && <p className="text-xs text-muted-foreground mt-1">{autoSavedLabel}</p>}
       </div>
+
+      {pendingDraft && (
+        <div className="mb-6 flex flex-wrap items-center gap-3 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+          <RotateCcw className="h-4 w-4" />
+          <span>
+            Có bản nháp tự động lưu lúc {new Date(pendingDraft.savedAt).toLocaleString("vi-VN")}. Bạn có muốn khôi phục?
+          </span>
+          <div className="flex gap-2">
+            <Button size="sm" onClick={handleRestoreDraft}>
+              Khôi phục
+            </Button>
+            <Button size="sm" variant="outline" onClick={discardDraft}>
+              <X className="h-4 w-4 mr-1" /> Bỏ
+            </Button>
+          </div>
+        </div>
+      )}
 
       <div className="grid lg:grid-cols-[4fr_1fr] gap-8">
         {/* Main Content - Left Side */}
@@ -170,6 +387,40 @@ export default function NewPostPage() {
                   onChange={(e) => setTitle(e.target.value)}
                   className="mt-2 text-lg"
                 />
+              </div>
+
+              {/* Slug */}
+              <div>
+                <Label htmlFor="slug" className="text-base font-medium">
+                  Đường dẫn (slug)
+                </Label>
+                <div className="mt-2 flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground whitespace-nowrap">/blog/</span>
+                  <Input
+                    id="slug"
+                    placeholder="duong-dan-bai-viet"
+                    value={slug}
+                    onChange={(e) => {
+                      setSlugTouched(true)
+                      setSlug(e.target.value)
+                    }}
+                    onBlur={() => setSlug(slugify(slug))}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setSlugTouched(false)
+                      setSlug(slugify(title))
+                    }}
+                  >
+                    Tạo lại
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Tự sinh từ tiêu đề. Có thể sửa — hệ thống sẽ tự thêm hậu tố nếu trùng.
+                </p>
               </div>
 
               {/* Excerpt */}
@@ -201,22 +452,18 @@ export default function NewPostPage() {
                     <SelectValue placeholder="Chọn danh mục..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="FDA">FDA (Mỹ)</SelectItem>
-                    <SelectItem value="GACC">GACC (Trung Quốc)</SelectItem>
-                    <SelectItem value="MFDS">MFDS (Hàn Quốc)</SelectItem>
-                    <SelectItem value="Dịch vụ Agent Hoa Kỳ">Dịch vụ Agent Hoa Kỳ</SelectItem>
-                    <SelectItem value="Truy xuất nguồn gốc">Truy xuất nguồn gốc</SelectItem>
-                    <SelectItem value="Ủy thác xuất nhập khẩu">Ủy thác XNK</SelectItem>
-                    <SelectItem value="Tin tức thị trường">Tin tức thị trường</SelectItem>
-                    <SelectItem value="Xuất nhập khẩu">Xuất nhập khẩu</SelectItem>
-                    <SelectItem value="Kiến thức pháp lý">Kiến thức pháp lý</SelectItem>
+                    {BLOG_CATEGORIES.map((item) => (
+                      <SelectItem key={item.slug} value={item.slug}>
+                        {item.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
 
               {/* Featured Image */}
               <ImageUploader value={featuredImage} onChange={setFeaturedImage} onPreviewChange={setPreviewImage} />
-              
+
               {/* Featured Image Alt Text */}
               {featuredImage && (
                 <div>
@@ -228,7 +475,7 @@ export default function NewPostPage() {
                     placeholder="Mô tả ngắn về hình ảnh bìa..."
                     value={featuredImageAlt}
                     onChange={(e) => setFeaturedImageAlt(e.target.value)}
-                    className={`mt-2 ${!featuredImageAlt ? 'border-red-300' : 'border-green-300'}`}
+                    className={`mt-2 ${!featuredImageAlt ? "border-red-300" : "border-green-300"}`}
                   />
                   {!featuredImageAlt && (
                     <p className="text-xs text-red-500 mt-1">Alt text giúp Google hiểu nội dung ảnh bìa</p>
@@ -254,7 +501,7 @@ export default function NewPostPage() {
         </div>
 
         {/* Sidebar - Right Side */}
-        <div className="space-y-6" onMouseUp={handleTextSelection}>
+        <div className="space-y-6">
           {/* AI Writing Assistant */}
           <AIWritingAssistant
             selectedText={selectedText}
@@ -283,7 +530,7 @@ export default function NewPostPage() {
                   Từ khóa chính bạn muốn bài viết xếp hạng trên Google
                 </p>
               </div>
-              
+
               {/* Meta Title */}
               <div>
                 <Label htmlFor="metaTitle" className="text-sm font-medium">
@@ -296,11 +543,9 @@ export default function NewPostPage() {
                   onChange={(e) => setMetaTitle(e.target.value)}
                   className="mt-1"
                 />
-                <p className="text-xs text-muted-foreground mt-1">
-                  {(metaTitle || title).length}/60 ký tự
-                </p>
+                <p className="text-xs text-muted-foreground mt-1">{(metaTitle || title).length}/60 ký tự</p>
               </div>
-              
+
               {/* Meta Description */}
               <div>
                 <Label htmlFor="metaDescription" className="text-sm font-medium">
@@ -321,26 +566,28 @@ export default function NewPostPage() {
             </div>
           </Card>
 
+          {/* Gợi ý bổ sung: câu hỏi, nguồn chính thống, liên kết nội bộ */}
+          <PostSidebarTools
+            category={category}
+            focusKeyword={focusKeyword}
+            title={title}
+            onInsertBlocks={handleInsertBlocks}
+          />
+
           {/* SEO Checker Card */}
           <SEOChecker
-            title={title}
-            excerpt={excerpt}
-            content={getTextContent()}
-            metaTitle={metaTitle}
-            metaDescription={metaDescription}
-            featuredImage={featuredImage}
-            featuredImageAlt={featuredImageAlt}
-            focusKeyword={focusKeyword}
-            blocks={blocks}
+            {...debouncedSeoInput}
+            otherPosts={otherPosts.filter((post) => post.title.trim() !== title.trim())}
+            onFocusBlock={handleFocusBlock}
           />
 
           {/* Action Buttons Card */}
           <Card className="p-6 sticky top-24">
             <h3 className="text-lg font-bold text-primary mb-4">Hành động</h3>
             <div className="flex flex-col gap-3">
-              <Button 
-                onClick={() => handleSubmit("published")} 
-                disabled={isLoading} 
+              <Button
+                onClick={() => handleSubmit("published")}
+                disabled={isLoading}
                 className="w-full bg-primary hover:bg-primary/90"
                 type="button"
               >
@@ -348,10 +595,10 @@ export default function NewPostPage() {
                 Xuất bản
               </Button>
 
-              <Button 
-                onClick={() => handleSubmit("draft")} 
-                variant="outline" 
-                disabled={isLoading} 
+              <Button
+                onClick={() => handleSubmit("draft")}
+                variant="outline"
+                disabled={isLoading}
                 className="w-full"
                 type="button"
               >
@@ -359,12 +606,7 @@ export default function NewPostPage() {
                 Lưu nháp
               </Button>
 
-              <Button
-                onClick={() => setShowPreview(true)}
-                variant="outline"
-                className="w-full"
-                type="button"
-              >
+              <Button onClick={() => setShowPreview(true)} variant="outline" className="w-full" type="button">
                 <Eye className="w-4 h-4 mr-2" />
                 Xem trước
               </Button>
@@ -372,7 +614,7 @@ export default function NewPostPage() {
           </Card>
         </div>
       </div>
-      
+
       {/* Preview Dialog */}
       <PostPreviewDialog
         open={showPreview}
@@ -383,6 +625,9 @@ export default function NewPostPage() {
         blocks={blocks}
         featuredImage={featuredImage}
         previewImage={previewImage}
+        metaTitle={metaTitle}
+        metaDescription={metaDescription}
+        slug={slug}
       />
     </div>
   )

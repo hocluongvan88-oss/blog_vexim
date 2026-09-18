@@ -3,43 +3,30 @@
 import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
 
-interface Heading {
+export interface TocHeading {
   id: string
   text: string
   level: number
 }
 
-export function BlogTableOfContents({ content }: { content: string }) {
-  const [headings, setHeadings] = useState<Heading[]>([])
+/**
+ * Mục lục bài viết.
+ *
+ * Trước đây component này nhận cả chuỗi `content`, tự parse bằng DOMParser rồi gán
+ * `heading-N` cho các thẻ heading SAU 100ms bằng JS. Ba hệ quả xấu:
+ * - id trong HTML không khớp id hiển thị trên mục lục (link không share được),
+ * - Google/AI đọc HTML không thấy anchor nào,
+ * - phụ thuộc hydration nên đôi lúc bấm mục lục không nhảy.
+ *
+ * Nay danh sách heading (kèm id thật) do server tính trong `ensureHeadingAnchors()`
+ * và truyền xuống qua props — mục lục chỉ còn việc hiển thị và cuộn tới `#id`.
+ */
+export function BlogTableOfContents({ headings }: { headings: TocHeading[] }) {
   const [activeId, setActiveId] = useState<string>("")
 
   useEffect(() => {
-    // Extract headings from HTML content
-    const parser = new DOMParser()
-    const doc = parser.parseFromString(content, "text/html")
-    const headingElements = doc.querySelectorAll("h2, h3")
+    if (headings.length === 0) return
 
-    const extractedHeadings: Heading[] = Array.from(headingElements).map((heading, index) => {
-      const id = `heading-${index}`
-      return {
-        id,
-        text: heading.textContent || "",
-        level: Number.parseInt(heading.tagName.substring(1)),
-      }
-    })
-
-    setHeadings(extractedHeadings)
-
-    // Add IDs to actual headings in the DOM
-    setTimeout(() => {
-      const actualHeadings = document.querySelectorAll("article h2, article h3")
-      actualHeadings.forEach((heading, index) => {
-        heading.id = `heading-${index}`
-      })
-    }, 100)
-  }, [content])
-
-  useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -64,9 +51,10 @@ export function BlogTableOfContents({ content }: { content: string }) {
   const scrollToHeading = (id: string) => {
     const element = document.getElementById(id)
     if (element) {
-      const offset = 100
-      const top = element.getBoundingClientRect().top + window.pageYOffset - offset
-      window.scrollTo({ top, behavior: "smooth" })
+      // `scrollIntoView` + class `scroll-mt-24` trên heading xử lý luôn phần bù header dính
+      element.scrollIntoView({ behavior: "smooth", block: "start" })
+      // Cập nhật URL để người đọc copy được link tới đúng mục
+      window.history.replaceState(null, "", `#${id}`)
     }
   }
 
@@ -76,11 +64,9 @@ export function BlogTableOfContents({ content }: { content: string }) {
         <h4 className="font-bold text-primary mb-4">Nội dung bài viết</h4>
         <ul className="space-y-1">
           {headings.map((heading) => (
-            <li 
-              key={heading.id} 
-              className={cn(
-                heading.level === 3 && "ml-4 border-l-2 border-muted pl-3"
-              )}
+            <li
+              key={heading.id}
+              className={cn(heading.level === 3 && "ml-4 border-l-2 border-muted pl-3")}
             >
               <button
                 onClick={() => scrollToHeading(heading.id)}
@@ -88,7 +74,7 @@ export function BlogTableOfContents({ content }: { content: string }) {
                   "text-left transition-colors w-full leading-relaxed py-1 break-words",
                   // H2 styling - prominent
                   heading.level === 2 && "text-sm font-semibold text-foreground/90 hover:text-primary",
-                  // H3 styling - subtle  
+                  // H3 styling - subtle
                   heading.level === 3 && "text-xs text-muted-foreground hover:text-foreground/80",
                   // Active state
                   activeId === heading.id && heading.level === 2 && "text-primary font-bold",

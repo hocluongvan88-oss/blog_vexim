@@ -11,11 +11,18 @@ export async function GET(request: Request) {
 
   const supabase = await createClient()
 
+  // Loại bỏ các ký tự có thể phá vỡ câu filter .or(...) của PostgREST (dấu phẩy, ngoặc, backslash)
+  const safeQuery = query.replace(/[,()\\]/g, " ").replace(/\s+/g, " ").trim().slice(0, 100)
+
+  if (safeQuery.length < 2) {
+    return NextResponse.json({ results: [] })
+  }
+
   const { data: posts, error } = await supabase
     .from("posts")
     .select("id, title, excerpt, slug, category, featured_image")
     .eq("status", "published")
-    .or(`title.ilike.%${query}%,excerpt.ilike.%${query}%,content.ilike.%${query}%,category.ilike.%${query}%`)
+    .or(`title.ilike.%${safeQuery}%,excerpt.ilike.%${safeQuery}%,content.ilike.%${safeQuery}%,category.ilike.%${safeQuery}%`)
     .order("published_at", { ascending: false })
     .limit(10)
 

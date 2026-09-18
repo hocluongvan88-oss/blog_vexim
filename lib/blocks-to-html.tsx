@@ -1,4 +1,9 @@
 import type { Block } from "@/components/block-editor/types"
+import { escapeAttr, escapeHtml, sanitizeInlineHtml, stripHtml } from "./sanitize"
+import { buildHeadingAnchors, injectHeadingAnchors } from "./heading-anchors"
+
+// Parse HTML -> blocks (dùng cho Import HTML & bài viết định dạng cũ)
+export { htmlToBlocks } from "./content-parsers"
 
 /**
  * Map of common LaTeX commands to their Unicode equivalents.
@@ -88,7 +93,6 @@ function replaceLatexCommands(input: string): string {
   }
   // Remove any leftover LaTeX spacing/formatting helpers
   result = result.replace(/\\,/g, " ").replace(/\\;/g, " ").replace(/\\!/g, "").replace(/\\ /g, " ")
-  // Strip a trailing/leading backslash that has no known command
   return result
 }
 
@@ -108,6 +112,55 @@ export function renderInlineMath(text: string): string {
   return result
 }
 
+const ALIGN_CLASSES: Record<string, string> = {
+  left: "text-left",
+  center: "text-center",
+  right: "text-right",
+  justify: "text-justify",
+}
+
+function alignmentClass(align: unknown, fallback = "left"): string {
+  const key = typeof align === "string" ? align : fallback
+  return ALIGN_CLASSES[key] ?? ALIGN_CLASSES[fallback]
+}
+
+/** Nội dung inline của khối: sanitize (whitelist) -> render công thức -> giữ HTML an toàn. */
+function renderInline(raw: unknown): string {
+  return renderInlineMath(sanitizeInlineHtml(raw))
+}
+
+/**
+ * Text thuần (không cho HTML): dùng cho thẻ `alt` của ảnh — trình đọc màn hình và
+ * Google đọc nguyên văn, nên nếu để lọt "<strong>" thì alt sẽ hiển thị thẻ.
+ */
+function renderPlainText(raw: unknown): string {
+  return renderInlineMath(stripHtml(String(raw ?? "")))
+}
+
+function safeUrl(url: unknown): string {
+  const value = String(url ?? "").trim()
+  if (!value) return ""
+  if (/^(https?:\/\/|\/|data:image\/|blob:)/i.test(value)) return value
+  return ""
+}
+
+function headingSizeClass(level: number): string {
+  switch (level) {
+    case 1:
+      return "text-4xl md:text-5xl"
+    case 2:
+      return "text-3xl md:text-4xl"
+    case 3:
+      return "text-2xl md:text-3xl"
+    case 4:
+      return "text-xl md:text-2xl"
+    case 5:
+      return "text-lg md:text-xl"
+    default:
+      return "text-base md:text-lg"
+  }
+}
+
 /**
  * Convert block editor blocks to HTML string for display
  */
@@ -116,74 +169,80 @@ export function blocksToHTML(blocks: Block[]): string {
     return ""
   }
 
-  return blocks
-    .map((block) => {
-      const { type, data } = block
+  // id cho từng heading (theo thứ tự xuất hiện) để có anchor/jump link trong HTML gốc
+  const anchorIds = buildHeadingAnchors(blocks)
 
-      const alignmentClass = {
-        left: "text-left",
-        center: "text-center",
-        right: "text-right",
-        justify: "text-justify",
-      }[data.align || "left"]
+  const html = blocks
+    .map((block) => {
+      const { type, data = {} } = block
+      const align = alignmentClass(data.align)
 
       switch (type) {
         case "heading": {
-          const level = data.level || 2
-          const sizeClass =
-            level === 1
-              ? "text-4xl md:text-5xl"
-              : level === 2
-                ? "text-3xl md:text-4xl"
-                : level === 3
-                  ? "text-2xl md:text-3xl"
-                  : level === 4
-                    ? "text-xl md:text-2xl"
-                    : level === 5
-                      ? "text-lg md:text-xl"
-                      : "text-base md:text-lg"
-
-          return `<h${level} class="${sizeClass} font-bold text-primary mb-4 mt-8 first:mt-0 ${alignmentClass}">${renderInlineMath(data.text || "")}</h${level}>`
+          const level = Math.min(Math.max(Number(data.level) || 2, 1), 6)
+          // id được gắn một lần ở cuối bằng injectHeadingAnchors() — tránh hai nguồn dữ liệu
+          // `scroll-mt-24`: bù cho header dính khi nhảy tới mục từ mục lục / link chia sẻ
+          return `<h${level} class="scroll-mt-24 ${headingSizeClass(level)} font-bold text-primary mb-4 mt-8 first:mt-0 ${align}">${renderInline(
+            data.text,
+          )}</h${level}>`
         }
 
         case "paragraph": {
-          return `<p class="text-base leading-relaxed mb-4 ${alignmentClass}">${renderInlineMath(data.text || "")}</p>`
+          return `<p class="text-base leading-relaxed mb-4 ${align}">${renderInline(data.text)}</p>`
         }
 
         case "image": {
-          const imageAlign = {
+          const imageAlign: Record<string, string> = {
             left: "justify-start",
             center: "justify-center",
             right: "justify-end",
-          }[data.align || "center"]
+          }
+          const justify = imageAlign[typeof data.align === "string" ? data.align : "center"] ?? "justify-center"
 
-          const widthClass =
-            data.width === "100%" ? "w-full" : data.width === "80%" ? "w-4/5 mx-auto" : "w-3/5 mx-auto"
+          const widthClass = data.width === "100%" ? "w-full" : data.width === "80%" ? "w-4/5 mx-auto" : "w-3/5 mx-auto"
 
-          const caption = data.caption ? `<figcaption class="text-center text-sm text-gray-600 italic mt-3">${data.caption}</figcaption>` : ""
+          const src = safeUrl(data.url)
+          if (!src) return ""
 
-          return `<figure class="${widthClass} my-8"><img src="${data.url || ""}" alt="${data.caption || ""}" class="w-full rounded-lg shadow-md" />${caption}</figure>`
+          const caption = String(data.caption ?? "").trim()
+          // Alt ưu tiên đúng trường `alt` của khối (trước đây bị lấy nhầm từ caption -> mất SEO)
+          const alt = renderPlainText(data.alt).trim() || caption
+
+          const captionHtml = caption
+            ? `<figcaption class="text-center text-sm text-gray-600 italic mt-3">${escapeHtml(caption)}</figcaption>`
+            : ""
+
+          // width/height (nếu có) giúp trình duyệt chừa sẵn chỗ -> giảm CLS
+          const width = Number(data.width_px) || 0
+          const height = Number(data.height_px) || 0
+          const sizeAttrs = width > 0 && height > 0 ? ` width="${width}" height="${height}"` : ""
+
+          return `<figure class="${widthClass} my-8"><img src="${escapeAttr(src)}" alt="${escapeAttr(
+            alt,
+          )}"${sizeAttrs} loading="lazy" decoding="async" class="w-full h-auto rounded-lg shadow-md" />${captionHtml}</figure>`
         }
 
         case "quote": {
-          const author = data.author
-            ? `<footer class="mt-2 text-sm font-semibold text-gray-700">— ${data.author}</footer>`
+          const author = String(data.author ?? "").trim()
+          const authorHtml = author
+            ? `<footer class="mt-2 text-sm font-semibold text-gray-700">— ${escapeHtml(author)}</footer>`
             : ""
 
-          return `<blockquote class="border-l-4 border-primary pl-4 py-2 my-6 italic ${alignmentClass}"><p class="text-lg text-gray-600">${renderInlineMath(data.text || "")}</p>${author}</blockquote>`
+          return `<blockquote class="border-l-4 border-primary pl-4 py-2 my-6 italic ${align}"><p class="text-lg text-gray-600">${renderInline(
+            data.text,
+          )}</p>${authorHtml}</blockquote>`
         }
 
         case "list": {
           const items = (data.items || [])
-            .map((item: string) => `<li class="mb-2">${renderInlineMath(item)}</li>`)
+            .map((item: string) => `<li class="mb-2">${renderInline(item)}</li>`)
             .join("")
-          
-          const listTag = data.style === "ordered" ? "ol" : "ul"
-          const listClass = data.style === "ordered" 
-            ? "list-decimal list-inside my-4 space-y-2" 
-            : "list-disc list-inside my-4 space-y-2"
-          
-          return `<${listTag} class="${listClass} ${alignmentClass}">${items}</${listTag}>`
+
+          const ordered = data.style === "ordered"
+          const listTag = ordered ? "ol" : "ul"
+          const listClass = ordered ? "list-decimal list-inside my-4 space-y-2" : "list-disc list-inside my-4 space-y-2"
+
+          return `<${listTag} class="${listClass} ${align}">${items}</${listTag}>`
         }
 
         case "table": {
@@ -191,203 +250,34 @@ export function blocksToHTML(blocks: Block[]): string {
             return ""
           }
 
-          const rows = data.content
-            .map((row: string[], rowIndex: number) => {
-              const cells = row
-                .map((cell: string, colIndex: number) => {
-                  const tag = rowIndex === 0 ? "th" : "td"
-                  const className = rowIndex === 0 ? "border p-3 bg-gray-100 font-semibold" : "border p-3"
-                  return `<${tag} class="${className}">${renderInlineMath(cell)}</${tag}>`
-                })
-                .join("")
-              return `<tr>${cells}</tr>`
-            })
-            .join("")
+          const rows: string[][] = data.content
+          // Tôn trọng cờ hasHeader (trước đây luôn coi hàng đầu là header)
+          const hasHeader = data.hasHeader !== false && rows.length > 0
+          const headerRow = hasHeader ? rows[0] : null
+          const bodyRows = hasHeader ? rows.slice(1) : rows
 
-          return `<div class="my-6 overflow-x-auto"><table class="border-collapse w-full border"><tbody>${rows}</tbody></table></div>`
+          const renderRow = (row: string[], cellTag: "th" | "td") =>
+            `<tr>${row
+              .map((cell) => {
+                const className = cellTag === "th" ? "border p-3 bg-gray-100 font-semibold" : "border p-3"
+                const scope = cellTag === "th" ? ' scope="col"' : ""
+                return `<${cellTag}${scope} class="${className}">${renderInline(cell)}</${cellTag}>`
+              })
+              .join("")}</tr>`
+
+          const thead = headerRow ? `<thead>${renderRow(headerRow, "th")}</thead>` : ""
+          const tbody = `<tbody>${bodyRows.map((row) => renderRow(row, "td")).join("")}</tbody>`
+
+          return `<div class="my-6 overflow-x-auto"><table class="border-collapse w-full border">${thead}${tbody}</table></div>`
         }
 
         default:
           return ""
       }
     })
+    .filter(Boolean)
     .join("\n")
-}
 
-/**
- * Parse HTML content and convert to blocks
- * Automatically detects H1-H6 headings and converts them to heading blocks
- */
-export function htmlToBlocks(html: string): Block[] {
-  const blocks: Block[] = []
-  const parser = new DOMParser()
-  const doc = parser.parseFromString(html, "text/html")
-
-  let blockCounter = 0
-
-  // Process all child nodes
-  const processNode = (node: Node) => {
-    if (node.nodeType === Node.ELEMENT_NODE) {
-      const element = node as HTMLElement
-      const tagName = element.tagName.toLowerCase()
-
-      // Check for headings H1-H6
-      const headingMatch = tagName.match(/^h([1-6])$/)
-      if (headingMatch) {
-        const level = Number.parseInt(headingMatch[1])
-        blocks.push({
-          id: `block_${blockCounter++}_${Math.random().toString(36).substr(2, 9)}`,
-          type: "heading",
-          data: {
-            level,
-            text: element.innerHTML,
-            align: "left",
-          },
-        })
-        return
-      }
-
-      // Check for paragraphs
-      if (tagName === "p") {
-        const text = element.innerHTML.trim()
-        if (text) {
-          blocks.push({
-            id: `block_${blockCounter++}_${Math.random().toString(36).substr(2, 9)}`,
-            type: "paragraph",
-            data: {
-              text,
-              align: "justify",
-            },
-          })
-        }
-        return
-      }
-
-      // Check for blockquote
-      if (tagName === "blockquote") {
-        blocks.push({
-          id: `block_${blockCounter++}_${Math.random().toString(36).substr(2, 9)}`,
-          type: "quote",
-          data: {
-            text: element.innerHTML,
-            author: "",
-            align: "left",
-          },
-        })
-        return
-      }
-
-      // Check for lists (ul/ol)
-      if (tagName === "ul" || tagName === "ol") {
-        const items: string[] = []
-        const lis = element.querySelectorAll("li")
-        lis.forEach((li) => {
-          const text = li.innerHTML.trim()
-          if (text) {
-            items.push(text)
-          }
-        })
-
-        if (items.length > 0) {
-          blocks.push({
-            id: `block_${blockCounter++}_${Math.random().toString(36).substr(2, 9)}`,
-            type: "list",
-            data: {
-              style: tagName === "ol" ? "ordered" : "unordered",
-              items,
-              align: "left",
-            },
-          })
-        }
-        return
-      }
-
-      // Check for images
-      if (tagName === "img") {
-        blocks.push({
-          id: `block_${blockCounter++}_${Math.random().toString(36).substr(2, 9)}`,
-          type: "image",
-          data: {
-            url: element.getAttribute("src") || "",
-            caption: element.getAttribute("alt") || "",
-            align: "center",
-            width: "100%",
-          },
-        })
-        return
-      }
-
-      // Check for tables
-      if (tagName === "table") {
-        const rows: string[][] = []
-        const trs = element.querySelectorAll("tr")
-        trs.forEach((tr) => {
-          const cells: string[] = []
-          const tds = tr.querySelectorAll("th, td")
-          tds.forEach((td) => {
-            cells.push(td.innerHTML)
-          })
-          if (cells.length > 0) {
-            rows.push(cells)
-          }
-        })
-
-        if (rows.length > 0) {
-          blocks.push({
-            id: `block_${blockCounter++}_${Math.random().toString(36).substr(2, 9)}`,
-            type: "table",
-            data: {
-              rows: rows.length,
-              cols: rows[0]?.length || 0,
-              content: rows,
-              align: "left",
-            },
-          })
-        }
-        return
-      }
-
-      // Process child nodes recursively
-      node.childNodes.forEach(processNode)
-    } else if (node.nodeType === Node.TEXT_NODE) {
-      const text = node.textContent?.trim()
-      if (text) {
-        // Create paragraph for standalone text
-        blocks.push({
-          id: `block_${blockCounter++}_${Math.random().toString(36).substr(2, 9)}`,
-          type: "paragraph",
-          data: {
-            text,
-            align: "justify",
-          },
-        })
-      }
-    }
-  }
-
-  // Start processing from body
-  doc.body.childNodes.forEach(processNode)
-
-  // If no blocks were created, fallback to plain text paragraphs
-  if (blocks.length === 0) {
-    const text = html.trim()
-    if (text) {
-      const lines = text.split(/\n+/)
-      lines.forEach((line) => {
-        const trimmed = line.trim()
-        if (trimmed) {
-          blocks.push({
-            id: `block_${blockCounter++}_${Math.random().toString(36).substr(2, 9)}`,
-            type: "paragraph",
-            data: {
-              text: trimmed,
-              align: "justify",
-            },
-          })
-        }
-      })
-    }
-  }
-
-  return blocks
+  // Gắn id vào chuỗi HTML theo thứ tự để mục lục và link chia sẻ hoạt động không cần JS
+  return injectHeadingAnchors(html, anchorIds)
 }

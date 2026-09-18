@@ -25,6 +25,9 @@ export interface ImageData {
   caption: string
   align: "left" | "center" | "right"
   width: string
+  /** Kích thước thật của ảnh — render thành width/height để chống nhảy layout (CLS) */
+  width_px?: number
+  height_px?: number
 }
 
 export interface QuoteData {

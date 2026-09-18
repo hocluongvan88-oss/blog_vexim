@@ -400,7 +400,9 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
               autoFocus
             />
             {isExternalLink && (
-              <ExternalLink className="w-4 h-4 text-blue-500" title="External link" />
+              <span title="External link" aria-label="External link">
+                <ExternalLink className="w-4 h-4 text-blue-500" />
+              </span>
             )}
           </div>
 
