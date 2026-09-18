@@ -17,26 +17,30 @@ export function useImageDimensions(url: string | null | undefined): ImageDimensi
   const [dimensions, setDimensions] = useState<ImageDimensions | null>(null)
 
   useEffect(() => {
-    if (!url) {
+    if (!url || typeof window === "undefined" || !window.Image) {
       setDimensions(null)
       return
     }
 
     let cancelled = false
-    const image = new window.Image()
+    try {
+      const image = new window.Image()
 
-    image.onload = () => {
-      if (!cancelled) setDimensions({ width: image.naturalWidth, height: image.naturalHeight })
-    }
-    image.onerror = () => {
-      if (!cancelled) setDimensions(null)
-    }
-    image.src = url
+      image.onload = () => {
+        if (!cancelled) setDimensions({ width: image.naturalWidth, height: image.naturalHeight })
+      }
+      image.onerror = () => {
+        if (!cancelled) setDimensions(null)
+      }
+      image.src = url
 
-    return () => {
-      cancelled = true
-      image.onload = null
-      image.onerror = null
+      return () => {
+        cancelled = true
+        image.onload = null
+        image.onerror = null
+      }
+    } catch {
+      setDimensions(null)
     }
   }, [url])
 

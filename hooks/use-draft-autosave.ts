@@ -42,10 +42,13 @@ export function useDraftAutosave<T extends object>(key: string, snapshot: T, opt
   useEffect(() => {
     if (!enabled) return
     try {
+      if (typeof window === "undefined" || !window.localStorage) return
       const raw = window.localStorage.getItem(key)
       if (!raw) return
       const parsed = JSON.parse(raw) as PendingDraft<T>
-      if (parsed && parsed.data) setPendingDraft(parsed)
+      if (parsed && parsed.data && typeof parsed.savedAt === "number") {
+        setPendingDraft(parsed)
+      }
     } catch (error) {
       console.warn("[blog] Không đọc được bản nháp đã lưu:", error)
     }
@@ -76,6 +79,7 @@ export function useDraftAutosave<T extends object>(key: string, snapshot: T, opt
       if (json === lastSavedJsonRef.current) return
 
       try {
+        if (typeof window === "undefined" || !window.localStorage) return
         window.localStorage.setItem(key, JSON.stringify({ savedAt: Date.now(), data }))
         lastSavedJsonRef.current = json
         isDirtyRef.current = true
@@ -90,6 +94,7 @@ export function useDraftAutosave<T extends object>(key: string, snapshot: T, opt
 
   // Cảnh báo khi rời trang mà còn thay đổi chưa lưu
   useEffect(() => {
+    if (typeof window === "undefined") return
     const handler = (event: BeforeUnloadEvent) => {
       if (!isDirtyRef.current) return
       event.preventDefault()
@@ -107,7 +112,9 @@ export function useDraftAutosave<T extends object>(key: string, snapshot: T, opt
     setPendingDraft(null)
     setLastSavedAt(null)
     try {
-      window.localStorage.removeItem(key)
+      if (typeof window !== "undefined" && window.localStorage) {
+        window.localStorage.removeItem(key)
+      }
     } catch {
       /* ignore */
     }
@@ -123,7 +130,9 @@ export function useDraftAutosave<T extends object>(key: string, snapshot: T, opt
   const discardDraft = useCallback(() => {
     setPendingDraft(null)
     try {
-      window.localStorage.removeItem(key)
+      if (typeof window !== "undefined" && window.localStorage) {
+        window.localStorage.removeItem(key)
+      }
     } catch {
       /* ignore */
     }

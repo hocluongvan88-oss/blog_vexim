@@ -83,7 +83,10 @@ export default function NewPostPage() {
         const response = await fetch("/api/posts?status=published&limit=100")
         if (!response.ok) return
         const data = await response.json()
-        if (!cancelled && Array.isArray(data)) setOtherPosts(data)
+        if (!cancelled && Array.isArray(data)) {
+          const validPosts = data.filter((item) => item && typeof item.title === "string")
+          setOtherPosts(validPosts)
+        }
       } catch (error) {
         console.warn("[blog] Không tải được danh sách bài viết để kiểm tra trùng chủ đề:", error)
       }
@@ -235,24 +238,26 @@ export default function NewPostPage() {
     DRAFT_STORAGE_KEY,
     draftSnapshot,
     {
-      isEmpty: (draft) => !draft.title.trim() && !draft.excerpt.trim() && blocksToPlainText(draft.blocks).length === 0,
+      isEmpty: (draft) => !(draft?.title || "").trim() && !(draft?.excerpt || "").trim() && blocksToPlainText(draft?.blocks).length === 0,
     },
   )
 
   const handleRestoreDraft = () => {
     const draft = restoreDraft()
     if (!draft) return
-    setTitle(draft.title)
-    setSlug(draft.slug)
-    setSlugTouched(true)
-    setCategory(draft.category)
-    setExcerpt(draft.excerpt)
-    setBlocks(draft.blocks)
-    setMetaTitle(draft.metaTitle)
-    setMetaDescription(draft.metaDescription)
-    setFeaturedImage(draft.featuredImage)
-    setFeaturedImageAlt(draft.featuredImageAlt)
-    setFocusKeyword(draft.focusKeyword)
+    setTitle(draft.title || "")
+    setSlug(draft.slug || "")
+    setSlugTouched(Boolean(draft.slug))
+    setCategory(draft.category || "")
+    setExcerpt(draft.excerpt || "")
+    if (Array.isArray(draft.blocks) && draft.blocks.length > 0) {
+      setBlocks(draft.blocks)
+    }
+    setMetaTitle(draft.metaTitle || "")
+    setMetaDescription(draft.metaDescription || "")
+    setFeaturedImage(draft.featuredImage || "")
+    setFeaturedImageAlt(draft.featuredImageAlt || "")
+    setFocusKeyword(draft.focusKeyword || "")
     setPreviewImage(draft.featuredImage || null)
     toast({ title: "Đã khôi phục bản nháp", description: "Kiểm tra lại nội dung trước khi xuất bản" })
   }
@@ -354,7 +359,7 @@ export default function NewPostPage() {
         <div className="mb-6 flex flex-wrap items-center gap-3 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
           <RotateCcw className="h-4 w-4" />
           <span>
-            Có bản nháp tự động lưu lúc {new Date(pendingDraft.savedAt).toLocaleString("vi-VN")}. Bạn có muốn khôi phục?
+            Có bản nháp tự động lưu lúc {pendingDraft.savedAt ? new Date(pendingDraft.savedAt).toLocaleString("vi-VN") : "trước đó"}. Bạn có muốn khôi phục?
           </span>
           <div className="flex gap-2">
             <Button size="sm" onClick={handleRestoreDraft}>
@@ -543,7 +548,7 @@ export default function NewPostPage() {
                   onChange={(e) => setMetaTitle(e.target.value)}
                   className="mt-1"
                 />
-                <p className="text-xs text-muted-foreground mt-1">{(metaTitle || title).length}/60 ký tự</p>
+                <p className="text-xs text-muted-foreground mt-1">{(metaTitle || title || "").length}/60 ký tự</p>
               </div>
 
               {/* Meta Description */}
@@ -560,7 +565,7 @@ export default function NewPostPage() {
                   className="mt-1 resize-none"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  {(metaDescription || excerpt).length}/160 ký tự
+                  {(metaDescription || excerpt || "").length}/160 ký tự
                 </p>
               </div>
             </div>
@@ -577,7 +582,7 @@ export default function NewPostPage() {
           {/* SEO Checker Card */}
           <SEOChecker
             {...debouncedSeoInput}
-            otherPosts={otherPosts.filter((post) => post.title.trim() !== title.trim())}
+            otherPosts={otherPosts.filter((post) => typeof post?.title === "string" && post.title.trim() !== (title || "").trim())}
             onFocusBlock={handleFocusBlock}
           />
 
