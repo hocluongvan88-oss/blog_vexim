@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next"
 import { createStaticClient } from "@/lib/supabase/server"
+import { BLOG_CATEGORY_SLUGS } from "@/lib/blog-categories"
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://www.veximglobal.com"
@@ -79,18 +80,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ]
 
-  // Category pages for better SEO indexation
-  const categories = [
-    "FDA",
-    "GACC", 
-    "MFDS",
-    "Truy xuất nguồn gốc",
-    "Tin tức thị trường",
-    "Xuất nhập khẩu",
-    "Kiến thức pháp lý",
-  ]
-
-  const categoryPages: MetadataRoute.Sitemap = categories.map((category) => ({
+  // Category pages for better SEO indexation — lấy từ nguồn dùng chung để không bị thiếu danh mục
+  const categoryPages: MetadataRoute.Sitemap = BLOG_CATEGORY_SLUGS.map((category) => ({
     url: `${baseUrl}/blog/category/${encodeURIComponent(category)}`,
     lastModified: new Date(),
     changeFrequency: "weekly" as const,

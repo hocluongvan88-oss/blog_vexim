@@ -16,55 +16,23 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb"
+import { BLOG_CATEGORIES } from "@/lib/blog-categories"
 
-// Category configuration with SEO metadata
-const categoryConfig: Record<string, { 
-  title: string
-  description: string
-  keywords: string[]
-  relatedService?: string
-}> = {
-  "FDA": {
-    title: "Hướng dẫn đăng ký FDA",
-    description: "Tin tức, hướng dẫn chi tiết về đăng ký FDA cho thực phẩm, dược phẩm và thiết bị y tế xuất khẩu sang Mỹ.",
-    keywords: ["đăng ký FDA", "FDA Mỹ", "xuất khẩu thực phẩm Mỹ", "FDA registration"],
-    relatedService: "/services/fda"
-  },
-  "GACC": {
-    title: "Hướng dẫn đăng ký GACC",
-    description: "Cập nhật quy định GACC, hướng dẫn đăng ký xuất khẩu thực phẩm sang Trung Quốc theo Decree 248/249.",
-    keywords: ["đăng ký GACC", "xuất khẩu Trung Quốc", "Decree 248", "Decree 249"],
-    relatedService: "/services/gacc"
-  },
-  "MFDS": {
-    title: "Hướng dẫn đăng ký MFDS Hàn Quốc",
-    description: "Quy định và thủ tục đăng ký MFDS cho thực phẩm, mỹ phẩm xuất khẩu sang Hàn Quốc.",
-    keywords: ["đăng ký MFDS", "xuất khẩu Hàn Quốc", "MFDS Korea", "mỹ phẩm Hàn Quốc"],
-    relatedService: "/services/mfds"
-  },
-  "Truy xuất nguồn gốc": {
-    title: "Truy xuất nguồn gốc sản phẩm",
-    description: "Giải pháp truy xuất nguồn gốc bằng công nghệ AI và blockchain cho doanh nghiệp xuất khẩu.",
-    keywords: ["truy xuất nguồn gốc", "blockchain", "AI traceability", "supply chain"],
-    relatedService: "/services/ai-traceability"
-  },
-  "Tin tức thị trường": {
-    title: "Tin tức thị trường xuất nhập khẩu",
-    description: "Cập nhật tin tức mới nhất về thị trường xuất nhập khẩu quốc tế và chính sách thương mại.",
-    keywords: ["tin tức xuất nhập khẩu", "thị trường quốc tế", "chính sách thương mại"],
-  },
-  "Xuất nhập khẩu": {
-    title: "Kiến thức xuất nhập khẩu",
-    description: "Hướng dẫn chi tiết về quy trình xuất nhập khẩu, thủ tục hải quan và logistics quốc tế.",
-    keywords: ["xuất nhập khẩu", "thủ tục hải quan", "logistics", "vận chuyển quốc tế"],
-    relatedService: "/services/export-delegation"
-  },
-  "Kiến thức pháp lý": {
-    title: "Kiến thức pháp lý xuất nhập khẩu",
-    description: "Cập nhật quy định pháp lý, hiệp định thương mại và các yêu cầu tuân thủ trong xuất nhập khẩu.",
-    keywords: ["pháp lý xuất nhập khẩu", "hiệp định thương mại", "tuân thủ pháp luật"],
-  },
-}
+const POST_CARD_COLUMNS = "id, title, slug, excerpt, category, featured_image, published_at"
+
+// Danh mục lấy từ nguồn dùng chung (lib/blog-categories.ts) — tránh lệch giữa các trang
+const categoryConfig: Record<string, { title: string; description: string; keywords: string[]; relatedService?: string }> =
+  Object.fromEntries(
+    BLOG_CATEGORIES.map((category) => [
+      category.slug,
+      {
+        title: category.title,
+        description: category.description,
+        keywords: category.keywords,
+        relatedService: category.relatedService,
+      },
+    ]),
+  )
 
 export const revalidate = 60
 
@@ -116,7 +84,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
 
   const { data: posts, error } = await supabase
     .from("posts")
-    .select("*")
+    .select(POST_CARD_COLUMNS)
     .eq("status", "published")
     .eq("category", decodedCategory)
     .order("published_at", { ascending: false })

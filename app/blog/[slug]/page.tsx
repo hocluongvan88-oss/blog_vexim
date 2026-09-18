@@ -71,7 +71,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     metadataBase: baseUrl,
     title: post.meta_title || post.title,
     description: trimmedDescription(post.meta_description || post.excerpt),
-    keywords: post.tags || [post.category],
+    keywords: [post.focus_keyword, post.category].filter(Boolean),
     authors: [{ name: "Vexim Global" }],
     alternates: {
       canonical: `https://www.veximglobal.com/blog/${post.slug}`,
@@ -199,8 +199,6 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
       },
     ],
   }
-
-  const structuredData = { blogPostingSchema, breadcrumbSchema }
 
   return (
     <>

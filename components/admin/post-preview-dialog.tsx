@@ -1,10 +1,10 @@
 "use client"
 
-import React from "react"
+import React, { useMemo } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { BlockRenderer } from "@/components/block-editor/block-renderer"
 import type { Block } from "@/components/block-editor/types"
-import { Calendar, Tag } from "lucide-react"
+import { blocksToHTML } from "@/lib/blocks-to-html"
+import { Calendar, Tag, Search } from "lucide-react"
 
 interface PostPreviewDialogProps {
   open: boolean
@@ -15,6 +15,9 @@ interface PostPreviewDialogProps {
   blocks: Block[]
   featuredImage: string
   previewImage: string | null
+  metaTitle?: string
+  metaDescription?: string
+  slug?: string
 }
 
 export function PostPreviewDialog({
@@ -26,7 +29,19 @@ export function PostPreviewDialog({
   blocks,
   featuredImage,
   previewImage,
+  metaTitle,
+  metaDescription,
+  slug,
 }: PostPreviewDialogProps) {
+  /**
+   * Dùng chung `blocksToHTML` với trang public để bản xem trước đúng như bài thật
+   * (trước đây dùng BlockRenderer riêng nên cỡ heading / công thức hiển thị khác).
+   */
+  const htmlContent = useMemo(() => blocksToHTML(blocks), [blocks])
+
+  const displayTitle = metaTitle || title || "Tiêu đề bài viết"
+  const displayDescription = metaDescription || excerpt || "Mô tả ngắn của bài viết sẽ hiển thị ở đây."
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -35,14 +50,25 @@ export function PostPreviewDialog({
         </DialogHeader>
 
         <div className="space-y-6">
+          {/* Xem trước kết quả tìm kiếm */}
+          <div className="rounded-lg border bg-secondary/20 p-4">
+            <div className="mb-2 flex items-center gap-2 text-xs font-medium text-muted-foreground">
+              <Search className="h-3.5 w-3.5" />
+              Xem trước trên Google
+            </div>
+            <p className="text-xs text-green-700">
+              www.veximglobal.com › blog › {slug || "duong-dan-bai-viet"}
+            </p>
+            <p className="text-lg font-medium text-blue-800 line-clamp-2">{displayTitle}</p>
+            <p className="text-sm text-muted-foreground line-clamp-2">
+              {displayDescription.length > 160 ? `${displayDescription.slice(0, 157)}...` : displayDescription}
+            </p>
+          </div>
+
           {/* Featured Image */}
           {(previewImage || featuredImage) && (
-            <div className="relative w-full h-64 overflow-hidden rounded-lg">
-              <img
-                src={previewImage || featuredImage}
-                alt={title}
-                className="w-full h-full object-cover"
-              />
+            <div className="relative h-64 w-full overflow-hidden rounded-lg">
+              <img src={previewImage || featuredImage} alt={title} className="h-full w-full object-cover" />
             </div>
           )}
 
@@ -50,28 +76,31 @@ export function PostPreviewDialog({
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <div className="flex items-center gap-1">
               <Calendar className="w-4 h-4" />
-              <span>{new Date().toLocaleDateString("vi-VN")}</span>
+              <span>Ngày xuất bản: hôm nay</span>
             </div>
             <div className="flex items-center gap-1">
               <Tag className="w-4 h-4" />
-              <span>{category}</span>
+              <span>{category || "Chưa chọn danh mục"}</span>
             </div>
           </div>
 
           {/* Title */}
-          <h1 className="text-4xl font-bold text-primary">{title}</h1>
+          <h1 className="text-4xl font-bold text-primary">{title || "Tiêu đề bài viết"}</h1>
 
           {/* Excerpt */}
           {excerpt && (
-            <p className="text-lg text-muted-foreground italic border-l-4 border-primary pl-4">
-              {excerpt}
-            </p>
+            <p className="border-l-4 border-primary pl-4 text-lg italic text-muted-foreground">{excerpt}</p>
           )}
 
-          {/* Content */}
-          <div className="prose prose-lg max-w-none">
-            <BlockRenderer blocks={blocks} />
-          </div>
+          {/* Content — cùng class với trang blog công khai */}
+          {htmlContent ? (
+            <div
+              className="prose prose-lg max-w-none prose-headings:text-primary prose-h2:text-3xl prose-h2:font-bold prose-h2:mb-4 prose-h2:mt-8 prose-h3:text-2xl prose-h3:font-bold prose-h3:mb-3 prose-h3:mt-6 prose-p:text-base prose-p:leading-relaxed prose-p:mb-4 prose-ul:my-4 prose-li:text-base prose-li:leading-relaxed prose-a:text-accent prose-a:underline prose-figure:my-8 prose-figcaption:mt-3 prose-figcaption:text-center prose-figcaption:text-sm prose-figcaption:italic prose-figcaption:text-muted-foreground prose-img:rounded-lg prose-img:shadow-md"
+              dangerouslySetInnerHTML={{ __html: htmlContent }}
+            />
+          ) : (
+            <p className="text-sm text-muted-foreground">Chưa có nội dung để xem trước.</p>
+          )}
         </div>
       </DialogContent>
     </Dialog>

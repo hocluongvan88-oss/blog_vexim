@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { BlockEditor } from "@/components/block-editor/block-editor"
 import { SEOChecker } from "@/components/seo-checker"
-import { Eye, Save, Send, Loader2, ArrowLeft } from "lucide-react"
+import { Eye, Save, Send, Loader2, ArrowLeft, RotateCcw, X, AlertTriangle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
 import { ImageUploader } from "@/components/image-uploader"
@@ -19,6 +19,33 @@ import { AIWritingAssistant } from "@/components/admin/ai-writing-assistant"
 import { HTMLPasteDialog } from "@/components/admin/html-paste-dialog"
 import { PostPreviewDialog } from "@/components/admin/post-preview-dialog"
 import type { Block } from "@/components/block-editor/types"
+import {
+  blocksToPlainText,
+  generateBlockId,
+  htmlToBlocks,
+  parseInlineMarkdown,
+  parseMarkdownToBlocks,
+  parsedBlocksToBlocks,
+} from "@/lib/content-parsers"
+import { slugify } from "@/lib/post-payload"
+import { sanitizeInlineHtml } from "@/lib/sanitize"
+import { BLOG_CATEGORIES } from "@/lib/blog-categories"
+import { useDraftAutosave } from "@/hooks/use-draft-autosave"
+
+const MIN_PUBLISH_LENGTH = 50
+
+interface DraftSnapshot {
+  title: string
+  slug: string
+  category: string
+  excerpt: string
+  blocks: Block[]
+  metaTitle: string
+  metaDescription: string
+  featuredImage: string
+  featuredImageAlt: string
+  focusKeyword: string
+}
 
 export default function EditPostPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
@@ -26,8 +53,10 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
   const [isLoading, setIsLoading] = useState(false)
   const [isFetching, setIsFetching] = useState(true)
   const [postId, setPostId] = useState<string>("")
+  const [legacyFormat, setLegacyFormat] = useState(false)
 
   const [title, setTitle] = useState("")
+  const [slug, setSlug] = useState("")
   const [category, setCategory] = useState("")
   const [excerpt, setExcerpt] = useState("")
   const [blocks, setBlocks] = useState<Block[]>([])
@@ -41,6 +70,8 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
   const [selectedText, setSelectedText] = useState("")
   const [showPreview, setShowPreview] = useState(false)
 
+  const selectionBlockIdRef = useRef<string | null>(null)
+
   useEffect(() => {
     const loadPost = async () => {
       const { id } = await params
@@ -52,34 +83,43 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
 
         const post = await response.json()
 
-        setTitle(post.title)
-        setCategory(post.category)
-        setExcerpt(post.excerpt)
-        
-        // Parse content JSON to blocks
-        try {
-          const parsedBlocks = JSON.parse(post.content)
-          setBlocks(Array.isArray(parsedBlocks) ? parsedBlocks : [])
-        } catch {
-          // If content is not JSON (old format), create a single paragraph block
-          setBlocks([
-            {
-              id: "legacy_content",
-              type: "paragraph",
-              data: { text: post.content || "", align: "justify" },
-            },
-          ])
-        }
-        
+        setTitle(post.title || "")
+        setSlug(post.slug || "")
+        setCategory(post.category || "")
+        setExcerpt(post.excerpt || "")
         setMetaTitle(post.meta_title || "")
         setMetaDescription(post.meta_description || "")
         setFeaturedImage(post.featured_image || "")
         setFeaturedImageAlt(post.featured_image_alt || "")
         setFocusKeyword(post.focus_keyword || "")
         setPreviewImage(post.featured_image || null)
-        setStatus(post.status)
+        setStatus(post.status === "published" ? "published" : "draft")
+
+        // Nội dung có thể là JSON blocks (định dạng mới) hoặc HTML (bài cũ / WordPress)
+        let parsedBlocks: Block[] | null = null
+        try {
+          const parsed = JSON.parse(post.content)
+          if (Array.isArray(parsed) && parsed.length > 0) parsedBlocks = parsed as Block[]
+        } catch {
+          parsedBlocks = null
+        }
+
+        if (parsedBlocks) {
+          setBlocks(parsedBlocks)
+        } else if (post.content) {
+          // Chuyển HTML -> các khối (thay vì nhồi cả bài vào 1 đoạn văn làm hỏng cấu trúc)
+          const converted = htmlToBlocks(post.content)
+          setBlocks(converted)
+          setLegacyFormat(true)
+          toast({
+            title: "Bài viết định dạng cũ",
+            description: `Đã chuyển HTML sang ${converted.length} khối. Vui lòng kiểm tra lại bố cục trước khi lưu.`,
+          })
+        } else {
+          setBlocks([])
+        }
       } catch (error) {
-        console.error("Error loading post:", error)
+        console.error("[blog] Lỗi tải bài viết:", error)
         toast({
           title: "Lỗi",
           description: "Không thể tải bài viết",
@@ -94,32 +134,72 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
     loadPost()
   }, [params, router, toast])
 
-  // Generate text content from blocks for SEO checker and AI
-  const getTextContent = () => {
-    return blocks
-      .map((block) => {
-        if (block.type === "heading" || block.type === "paragraph") return block.data.text
-        if (block.type === "quote") return block.data.text
-        return ""
-      })
-      .join(" ")
-  }
+  // Theo dõi vùng chọn trong toàn trang để AI thay thế đúng khối
+  useEffect(() => {
+    const handler = () => {
+      const selection = window.getSelection()
+      const text = selection?.toString() || ""
+      if (!text.trim()) return
 
-  // Track text selection for AI assistant
-  const handleTextSelection = () => {
-    const selection = window.getSelection()
-    const text = selection?.toString() || ""
-    if (text.length > 0) {
+      const node = selection?.anchorNode
+      const element =
+        node?.nodeType === Node.TEXT_NODE ? node.parentElement : ((node as HTMLElement | null) ?? null)
+      const blockElement = element?.closest?.("[data-block-id]") as HTMLElement | null
+
       setSelectedText(text)
+      selectionBlockIdRef.current = blockElement?.getAttribute("data-block-id") ?? null
     }
-  }
 
-  // Apply AI suggestion
+    document.addEventListener("mouseup", handler)
+    document.addEventListener("keyup", handler)
+    return () => {
+      document.removeEventListener("mouseup", handler)
+      document.removeEventListener("keyup", handler)
+    }
+  }, [])
+
+  const getTextContent = useCallback(() => blocksToPlainText(blocks), [blocks])
+
+  /** Áp dụng kết quả AI vào khối đang chọn (hoặc thêm vào cuối bài). */
   const handleApplyAISuggestion = (newText: string) => {
-    toast({
-      title: "Áp dụng thành công",
-      description: "Vui lòng copy và paste vào khối đang chỉnh sửa hoặc tạo khối mới",
-    })
+    const text = (newText || "").trim()
+    if (!text) {
+      toast({ title: "Không có nội dung", description: "Kết quả AI đang trống", variant: "destructive" })
+      return
+    }
+
+    const targetId = selectionBlockIdRef.current
+    const targetIndex = targetId ? blocks.findIndex((block) => block.id === targetId) : -1
+    const target = targetIndex >= 0 ? blocks[targetIndex] : null
+    const canReplace = !!target && ["paragraph", "heading", "quote"].includes(target.type)
+
+    if (canReplace && target) {
+      const segments = text.split(/\n{2,}/).map((segment) => segment.trim()).filter(Boolean)
+
+      if (segments.length <= 1) {
+        const next = [...blocks]
+        next[targetIndex] = {
+          ...target,
+          data: { ...target.data, text: sanitizeInlineHtml(parseInlineMarkdown(text).replace(/\n/g, "<br />")) },
+        }
+        setBlocks(next)
+      } else {
+        const replacements: Block[] = segments.map((segment) => ({
+          ...target,
+          id: generateBlockId("block"),
+          data: { ...target.data, text: sanitizeInlineHtml(parseInlineMarkdown(segment).replace(/\n/g, "<br />")) },
+        }))
+        setBlocks([...blocks.slice(0, targetIndex), ...replacements, ...blocks.slice(targetIndex + 1)])
+      }
+
+      toast({ title: "Đã áp dụng", description: "Nội dung AI đã thay thế đoạn đang chọn" })
+    } else {
+      const newBlocks = parsedBlocksToBlocks(parseMarkdownToBlocks(text))
+      setBlocks([...blocks, ...newBlocks])
+      toast({ title: "Đã áp dụng", description: `Đã thêm ${newBlocks.length} khối vào cuối bài viết` })
+    }
+
+    selectionBlockIdRef.current = null
   }
 
   // Handle AI-generated meta
@@ -133,37 +213,93 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
 
   // Handle HTML import
   const handleHTMLImport = (newBlocks: Block[]) => {
-    setBlocks([...blocks, ...newBlocks])
-    toast({
-      title: "Import thành công",
-      description: `Đã thêm ${newBlocks.length} blocks từ HTML`,
-    })
+    if (newBlocks.length === 0) return
+    setBlocks((prev) => [...prev, ...newBlocks])
+  }
+
+  /* ------------------------- Bản nháp tự động ------------------------- */
+  const draftSnapshot = useMemo<DraftSnapshot>(
+    () => ({
+      title,
+      slug,
+      category,
+      excerpt,
+      blocks,
+      metaTitle,
+      metaDescription,
+      featuredImage,
+      featuredImageAlt,
+      focusKeyword,
+    }),
+    [title, slug, category, excerpt, blocks, metaTitle, metaDescription, featuredImage, featuredImageAlt, focusKeyword],
+  )
+
+  const draftKey = postId ? `vexim-blog-draft-${postId}` : "vexim-blog-draft-edit"
+  const { pendingDraft, lastSavedAt, markSaved, restoreDraft, discardDraft } = useDraftAutosave(draftKey, draftSnapshot, {
+    enabled: !isFetching,
+    isEmpty: (draft) => !draft.title.trim() && !draft.excerpt.trim() && blocksToPlainText(draft.blocks).length === 0,
+  })
+
+  const handleRestoreDraft = () => {
+    const draft = restoreDraft()
+    if (!draft) return
+    setTitle(draft.title)
+    setSlug(draft.slug)
+    setCategory(draft.category)
+    setExcerpt(draft.excerpt)
+    setBlocks(draft.blocks)
+    setMetaTitle(draft.metaTitle)
+    setMetaDescription(draft.metaDescription)
+    setFeaturedImage(draft.featuredImage)
+    setFeaturedImageAlt(draft.featuredImageAlt)
+    setFocusKeyword(draft.focusKeyword)
+    setPreviewImage(draft.featuredImage || null)
+    toast({ title: "Đã khôi phục bản nháp", description: "Kiểm tra lại nội dung trước khi lưu" })
+  }
+
+  const validate = (newStatus: "draft" | "published"): boolean => {
+    if (!title.trim() || !category || !excerpt.trim()) {
+      toast({
+        title: "Thiếu thông tin",
+        description: "Vui lòng điền tiêu đề, danh mục và mô tả ngắn",
+        variant: "destructive",
+      })
+      return false
+    }
+
+    const plainLength = blocksToPlainText(blocks).length
+    if (plainLength === 0) {
+      toast({ title: "Chưa có nội dung", description: "Vui lòng nhập nội dung bài viết", variant: "destructive" })
+      return false
+    }
+
+    if (newStatus === "published" && plainLength < MIN_PUBLISH_LENGTH) {
+      toast({
+        title: "Nội dung quá ngắn",
+        description: `Cần tối thiểu ${MIN_PUBLISH_LENGTH} ký tự nội dung để xuất bản`,
+        variant: "destructive",
+      })
+      return false
+    }
+
+    return true
   }
 
   const handleSubmit = async (newStatus: "draft" | "published") => {
-    if (!title || !category || !excerpt || blocks.length === 0) {
-      toast({
-        title: "Thiếu thông tin",
-        description: "Vui lòng điền đầy đủ các trường bắt buộc và thêm nội dung",
-        variant: "destructive",
-      })
-      return
-    }
+    if (!validate(newStatus)) return
 
     setIsLoading(true)
 
     try {
-      // Serialize blocks to JSON string for storage
-      const contentJSON = JSON.stringify(blocks)
-
       const response = await fetch(`/api/posts/${postId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title,
+          slug: slug || slugify(title),
           category,
           excerpt,
-          content: contentJSON,
+          content: JSON.stringify(blocks),
           featured_image: featuredImage,
           featured_image_alt: featuredImageAlt,
           focus_keyword: focusKeyword,
@@ -179,17 +315,19 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
         throw new Error(data.error || "Có lỗi xảy ra")
       }
 
+      if (typeof data.slug === "string") setSlug(data.slug)
+      markSaved()
+
       toast({
         title: newStatus === "published" ? "Đã cập nhật!" : "Đã lưu!",
-        description: newStatus === "published" ? "Bài viết đã được cập nhật và xuất bản" : "Bản nháp đã được lưu",
+        description:
+          newStatus === "published" ? "Bài viết đã được cập nhật và xuất bản" : "Bản nháp đã được lưu",
       })
 
-      // Stay in the admin dashboard after saving/publishing instead of leaving
-      // to the public blog page (which made the session feel "logged out").
       router.push("/admin/posts")
       router.refresh()
     } catch (error) {
-      console.error("Error updating post:", error)
+      console.error("[blog] Lỗi cập nhật bài viết:", error)
       toast({
         title: "Lỗi",
         description: error instanceof Error ? error.message : "Không thể cập nhật bài viết",
@@ -208,6 +346,10 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
     )
   }
 
+  const autoSavedLabel = lastSavedAt
+    ? `Đã tự lưu bản nháp lúc ${new Date(lastSavedAt).toLocaleTimeString("vi-VN")}`
+    : null
+
   return (
     <div className="p-8">
       <div className="mb-8 flex items-center gap-4">
@@ -219,8 +361,36 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
         <div>
           <h1 className="text-3xl md:text-4xl font-bold text-primary mb-2">Chỉnh sửa bài viết</h1>
           <p className="text-muted-foreground">Cập nhật nội dung bài viết của Vexim Global</p>
+          {autoSavedLabel && <p className="text-xs text-muted-foreground mt-1">{autoSavedLabel}</p>}
         </div>
       </div>
+
+      {legacyFormat && (
+        <div className="mb-6 flex items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+          <AlertTriangle className="h-4 w-4 mt-0.5" />
+          <span>
+            Bài viết này đang ở định dạng HTML cũ và đã được chuyển sang dạng khối. Hãy kiểm tra lại bố cục (tiêu đề,
+            danh sách, bảng) trước khi lưu — nội dung lưu lần này sẽ theo định dạng khối mới.
+          </span>
+        </div>
+      )}
+
+      {pendingDraft && (
+        <div className="mb-6 flex flex-wrap items-center gap-3 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+          <RotateCcw className="h-4 w-4" />
+          <span>
+            Có bản nháp tự động lưu lúc {new Date(pendingDraft.savedAt).toLocaleString("vi-VN")}. Bạn có muốn khôi phục?
+          </span>
+          <div className="flex gap-2">
+            <Button size="sm" onClick={handleRestoreDraft}>
+              Khôi phục
+            </Button>
+            <Button size="sm" variant="outline" onClick={discardDraft}>
+              <X className="h-4 w-4 mr-1" /> Bỏ
+            </Button>
+          </div>
+        </div>
+      )}
 
       <div className="grid lg:grid-cols-[4fr_1fr] gap-8">
         {/* Main Content - Left Side */}
@@ -242,6 +412,29 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
                   onChange={(e) => setTitle(e.target.value)}
                   className="mt-2 text-lg"
                 />
+              </div>
+
+              {/* Slug */}
+              <div>
+                <Label htmlFor="slug" className="text-base font-medium">
+                  Đường dẫn (slug)
+                </Label>
+                <div className="mt-2 flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground whitespace-nowrap">/blog/</span>
+                  <Input
+                    id="slug"
+                    placeholder="duong-dan-bai-viet"
+                    value={slug}
+                    onChange={(e) => setSlug(e.target.value)}
+                    onBlur={() => setSlug(slugify(slug))}
+                  />
+                  <Button type="button" variant="outline" size="sm" onClick={() => setSlug(slugify(title))}>
+                    Tạo lại
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Lưu ý: đổi slug sẽ làm thay đổi đường dẫn công khai của bài viết (ảnh hưởng SEO).
+                </p>
               </div>
 
               {/* Excerpt */}
@@ -273,22 +466,18 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
                     <SelectValue placeholder="Chọn danh mục..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="FDA">FDA (Mỹ)</SelectItem>
-                    <SelectItem value="GACC">GACC (Trung Quốc)</SelectItem>
-                    <SelectItem value="MFDS">MFDS (Hàn Quốc)</SelectItem>
-                    <SelectItem value="Dịch vụ Agent Hoa Kỳ">Dịch vụ Agent Hoa Kỳ</SelectItem>
-                    <SelectItem value="Truy xuất nguồn gốc">Truy xuất nguồn gốc</SelectItem>
-                    <SelectItem value="Ủy thác xuất nhập khẩu">Ủy thác XNK</SelectItem>
-                    <SelectItem value="Tin tức thị trường">Tin tức thị trường</SelectItem>
-                    <SelectItem value="Xuất nhập khẩu">Xuất nhập khẩu</SelectItem>
-                    <SelectItem value="Kiến thức pháp lý">Kiến thức pháp lý</SelectItem>
+                    {BLOG_CATEGORIES.map((item) => (
+                      <SelectItem key={item.slug} value={item.slug}>
+                        {item.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
 
               {/* Featured Image */}
               <ImageUploader value={featuredImage} onChange={setFeaturedImage} onPreviewChange={setPreviewImage} />
-              
+
               {/* Featured Image Alt Text */}
               {featuredImage && (
                 <div>
@@ -300,7 +489,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
                     placeholder="Mô tả ngắn về hình ảnh bìa..."
                     value={featuredImageAlt}
                     onChange={(e) => setFeaturedImageAlt(e.target.value)}
-                    className={`mt-2 ${!featuredImageAlt ? 'border-red-300' : 'border-green-300'}`}
+                    className={`mt-2 ${!featuredImageAlt ? "border-red-300" : "border-green-300"}`}
                   />
                   {!featuredImageAlt && (
                     <p className="text-xs text-red-500 mt-1">Alt text giúp Google hiểu nội dung ảnh bìa</p>
@@ -326,7 +515,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
         </div>
 
         {/* Sidebar - Right Side */}
-        <div className="space-y-6" onMouseUp={handleTextSelection}>
+        <div className="space-y-6">
           {/* AI Writing Assistant */}
           <AIWritingAssistant
             selectedText={selectedText}
@@ -355,7 +544,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
                   Từ khóa chính bạn muốn bài viết xếp hạng trên Google
                 </p>
               </div>
-              
+
               {/* Meta Title */}
               <div>
                 <Label htmlFor="metaTitle" className="text-sm font-medium">
@@ -368,11 +557,9 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
                   onChange={(e) => setMetaTitle(e.target.value)}
                   className="mt-1"
                 />
-                <p className="text-xs text-muted-foreground mt-1">
-                  {(metaTitle || title).length}/60 ký tự
-                </p>
+                <p className="text-xs text-muted-foreground mt-1">{(metaTitle || title).length}/60 ký tự</p>
               </div>
-              
+
               {/* Meta Description */}
               <div>
                 <Label htmlFor="metaDescription" className="text-sm font-medium">
@@ -415,11 +602,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
                 Lưu nháp
               </Button>
 
-              <Button
-                onClick={() => setShowPreview(true)}
-                variant="outline"
-                className="w-full"
-              >
+              <Button onClick={() => setShowPreview(true)} variant="outline" className="w-full">
                 <Eye className="w-4 h-4 mr-2" />
                 Xem trước
               </Button>
@@ -436,7 +619,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
           </Card>
         </div>
       </div>
-      
+
       {/* Preview Dialog */}
       <PostPreviewDialog
         open={showPreview}
@@ -447,6 +630,9 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
         blocks={blocks}
         featuredImage={featuredImage}
         previewImage={previewImage}
+        metaTitle={metaTitle}
+        metaDescription={metaDescription}
+        slug={slug}
       />
     </div>
   )

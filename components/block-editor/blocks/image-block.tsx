@@ -18,10 +18,23 @@ interface ImageBlockProps {
 export function ImageBlock({ data, onChange }: ImageBlockProps) {
   const { url = "", alt = "", caption = "", align = "center", width = "100%" } = data
   const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
+
+    setUploadError(null)
+
+    if (!file.type.startsWith("image/")) {
+      setUploadError("Vui lòng chọn file hình ảnh (JPG, PNG, WebP, GIF, AVIF)")
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setUploadError("Kích thước file không được vượt quá 5MB")
+      return
+    }
 
     setUploading(true)
     const formData = new FormData()
@@ -32,12 +45,16 @@ export function ImageBlock({ data, onChange }: ImageBlockProps) {
         method: "POST",
         body: formData,
       })
-      const data = await response.json()
-      if (data.url) {
-        onChange({ url: data.url })
+      const result = await response.json().catch(() => ({}))
+
+      if (!response.ok || !result?.url) {
+        throw new Error(result?.error || "Upload thất bại")
       }
+
+      onChange({ url: result.url })
     } catch (error) {
-      console.error("Upload failed:", error)
+      console.error("[blog] Upload failed:", error)
+      setUploadError(error instanceof Error ? error.message : "Không thể tải ảnh lên, vui lòng thử lại")
     } finally {
       setUploading(false)
     }

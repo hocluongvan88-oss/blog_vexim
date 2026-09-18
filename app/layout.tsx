@@ -4,6 +4,7 @@ import { Be_Vietnam_Pro } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import { ClientWidgets } from "@/components/client-widgets"
+import { Toaster } from "@/components/ui/sonner"
 
 const beVietnamPro = Be_Vietnam_Pro({
   subsets: ["vietnamese", "latin"],
@@ -104,6 +105,8 @@ export default function RootLayout({
       <body className={`${beVietnamPro.variable} font-sans antialiased`}>
         {children}
         <ClientWidgets />
+        {/* Toaster của sonner: trước đây không được mount nên mọi toast() đều bị "câm" */}
+        <Toaster richColors closeButton position="top-right" />
         <Analytics />
       </body>
     </html>
