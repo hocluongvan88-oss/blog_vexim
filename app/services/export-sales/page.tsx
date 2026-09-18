@@ -65,6 +65,21 @@ export const metadata: Metadata = {
     siteName: "Vexim Global",
     locale: "vi_VN",
     type: "website",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Vexim Global - Dịch vụ Phòng Sale Xuất Khẩu & Compliance",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Dịch Vụ Phòng Sale Xuất Khẩu Thuê Ngoài Sang Mỹ | Vexim Global",
+    description:
+      "Có sản phẩm tốt nhưng chưa có một đội ngũ sale đủ mạnh để tiếp cận buyer quốc tế? Vexim đại diện cho Supplier kết nối trực tiếp với buyer Mỹ dựa trên phân tích dữ liệu chuyên sâu.",
+    images: ["/og-image.jpg"],
   },
 }
 

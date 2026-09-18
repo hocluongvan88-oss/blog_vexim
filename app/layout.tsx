@@ -42,13 +42,13 @@ export const metadata: Metadata = {
     siteName: "Vexim Global",
     title: "Vexim Global - Giải Pháp Xuất Nhập Khẩu Toàn Cầu",
     description:
-      "Chuyên gia tư vấn pháp lý xuất nhập khẩu hàng đầu Việt Nam. Dịch vụ đăng ký FDA, GACC, MFDS, CE và giấy phép xuất khẩu quốc tế.",
+      "Chuyên gia tư vấn pháp lý xuất nhập khẩu hàng đầu Việt Nam. Dịch vụ đăng ký FDA, GACC, US Agent và phòng sale xuất khẩu quốc tế.",
     images: [
       {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "Vexim Global",
+        alt: "Vexim Global - Giải Pháp Xuất Nhập Khẩu Toàn Cầu",
       },
     ],
   },
@@ -56,7 +56,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Vexim Global - Giải Pháp Xuất Nhập Khẩu Toàn Cầu",
     description:
-      "Chuyên gia tư vấn pháp lý xuất nhập khẩu hàng đầu Việt Nam. Dịch vụ đăng ký FDA, GACC, MFDS, CE và giấy phép xuất khẩu quốc tế.",
+      "Chuyên gia tư vấn pháp lý xuất nhập khẩu hàng đầu Việt Nam. Dịch vụ đăng ký FDA, GACC, US Agent và phòng sale xuất khẩu quốc tế.",
     images: ["/og-image.jpg"],
   },
   alternates: {
