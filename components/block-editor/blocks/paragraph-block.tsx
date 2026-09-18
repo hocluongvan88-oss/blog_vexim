@@ -23,9 +23,14 @@ interface ParagraphBlockProps {
 
 /** Decode các entity bị mã hoá 2 lần (nội dung cũ trong DB). */
 function decodeHtmlEntities(html: string): string {
-  const temp = document.createElement("textarea")
-  temp.innerHTML = html
-  return temp.value
+  if (typeof document === "undefined") return html
+  try {
+    const temp = document.createElement("textarea")
+    temp.innerHTML = html
+    return temp.value
+  } catch {
+    return html
+  }
 }
 
 export function ParagraphBlock({

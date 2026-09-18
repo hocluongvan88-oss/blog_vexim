@@ -77,6 +77,7 @@ export function BlockEditor({ value, onChange }: BlockEditorProps) {
 
   /** Thông báo cho component cha mỗi khi nội dung đổi (cha là nguồn dữ liệu khi lưu). */
   useEffect(() => {
+    blocksRef.current = blocks
     onChangeRef.current(blocks)
   }, [blocks])
 
@@ -87,6 +88,11 @@ export function BlockEditor({ value, onChange }: BlockEditorProps) {
   useEffect(() => {
     if (!value) return
     if (value === blocksRef.current) return
+    // Tránh re-normalize khi value rỗng và editor đã có khối mặc định -> tránh vòng lặp vô tận
+    if (value.length === 0 && blocksRef.current.length <= 1) {
+      const currentText = String(blocksRef.current[0]?.data?.text ?? "").trim()
+      if (!currentText) return
+    }
     if (JSON.stringify(value) === JSON.stringify(blocksRef.current)) return
 
     const next = normalizeBlocks(value)

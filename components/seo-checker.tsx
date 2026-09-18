@@ -62,11 +62,11 @@ function IssueIcon({ severity }: { severity: IssueSeverity }) {
 }
 
 export function SEOChecker({
-  title,
-  excerpt,
-  metaTitle,
-  metaDescription,
-  featuredImage,
+  title = "",
+  excerpt = "",
+  metaTitle = "",
+  metaDescription = "",
+  featuredImage = "",
   featuredImageAlt = "",
   focusKeyword = "",
   slug = "",
@@ -76,38 +76,49 @@ export function SEOChecker({
   otherPosts = [],
   onFocusBlock,
 }: SEOCheckerProps) {
+  const safeTitle = title || ""
+  const safeExcerpt = excerpt || ""
+  const safeMetaTitle = metaTitle || ""
+  const safeMetaDescription = metaDescription || ""
+  const safeFeaturedImage = featuredImage || ""
+  const safeFeaturedImageAlt = featuredImageAlt || ""
+  const safeFocusKeyword = focusKeyword || ""
+  const safeSlug = slug || ""
+  const safeBlocks = Array.isArray(blocks) ? blocks : []
+  const safeOtherPosts = Array.isArray(otherPosts) ? otherPosts : []
+
   // Đo kích thước ảnh bìa để kiểm tra điều kiện Discover (≥1200px, >300.000 pixel)
-  const featuredImageDimensions = useImageDimensions(featuredImage)
+  const featuredImageDimensions = useImageDimensions(safeFeaturedImage)
 
   const analysis = useMemo(
     () =>
       analyzePostSeo({
-        title,
-        excerpt,
-        metaTitle,
-        metaDescription,
-        focusKeyword,
-        slug,
-        featuredImage,
-        featuredImageAlt,
-        blocks,
+        title: safeTitle,
+        excerpt: safeExcerpt,
+        metaTitle: safeMetaTitle,
+        metaDescription: safeMetaDescription,
+        focusKeyword: safeFocusKeyword,
+        slug: safeSlug,
+        featuredImage: safeFeaturedImage,
+        featuredImageAlt: safeFeaturedImageAlt,
+        blocks: safeBlocks,
         publishedAt,
         updatedAt,
-        otherPosts,
+        otherPosts: safeOtherPosts,
       }),
     [
-      title,
-      excerpt,
-      metaTitle,
-      metaDescription,
-      focusKeyword,
-      slug,
-      featuredImage,
-      featuredImageAlt,
-      blocks,
+      safeTitle,
+      safeExcerpt,
+      safeMetaTitle,
+      safeMetaDescription,
+      safeFocusKeyword,
+      safeSlug,
+      safeFeaturedImage,
+      safeFeaturedImageAlt,
+      safeBlocks,
       publishedAt,
       updatedAt,
-      otherPosts,
+      safeOtherPosts,
     ],
   )
 

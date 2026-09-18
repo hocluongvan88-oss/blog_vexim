@@ -41,16 +41,16 @@ const services = [
     link: "/services/us-agent",
   },
   {
-    image: "/korean-cosmetics-health-products-laboratory-qualit.jpg",
-    title: "Kiểm tra Nhãn & Thành phần",
+    image: "/landing/audience-team.jpg",
+    title: "Phòng Sale Xuất Khẩu",
     description:
-      "Rà soát bảng thành phần (Ingredients) và thiết kế nhãn (Nutrition Facts) theo chuẩn 21 CFR. Tránh rủi ro hàng sẽ bị giữ lại tại cảng do lỗi trình bày.",
+      "Phòng kinh doanh xuất khẩu thuê ngoài trọn gói cho nhà máy Việt sang Mỹ. Tìm buyer thẩm định, đàm phán thương mại và bảo đảm dòng tiền USD.",
     items: [
-      "Review Ingredients chuyên sâu",
-      "Sửa nhãn chuẩn 21 CFR",
-      "Kiểm soát Health Claims"
+      "Tiếp cận 50+ buyer Mỹ/tháng",
+      "Hoàn thiện FDA & đàm phán B2B",
+      "Xác thực SWIFT, tiền về an toàn"
     ],
-    link: "/services/fda-label-check",
+    link: "/services/export-sales",
   },
   {
     image: "/fsvp-compliance-food-import.jpg",

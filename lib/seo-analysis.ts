@@ -134,7 +134,7 @@ export function readingMinutes(wordCount: number): number {
 export function titleSimilarity(a: string, b: string): number {
   const tokenize = (text: string) =>
     new Set(
-      stripHtml(text)
+      stripHtml(text || "")
         .toLowerCase()
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
@@ -144,8 +144,8 @@ export function titleSimilarity(a: string, b: string): number {
         .filter((word) => word.length > 2),
     )
 
-  const setA = tokenize(a)
-  const setB = tokenize(b)
+  const setA = tokenize(a || "")
+  const setB = tokenize(b || "")
   if (setA.size === 0 || setB.size === 0) return 0
 
   let intersection = 0
@@ -164,7 +164,7 @@ const QUESTION_PATTERNS = [
 ]
 
 export function isQuestionHeading(text: string): boolean {
-  const plain = stripHtml(text).trim()
+  const plain = stripHtml(text || "").trim()
   if (!plain) return false
   return QUESTION_PATTERNS.some((pattern) => pattern.test(plain))
 }
@@ -176,12 +176,15 @@ interface Section {
   paragraphs: Array<{ blockId: string; text: string; type: Block["type"] }>
 }
 
-function groupIntoSections(blocks: Block[]): { intro: Section; sections: Section[] } {
+function groupIntoSections(blocks: Block[] = []): { intro: Section; sections: Section[] } {
   const intro: Section = { paragraphs: [] }
   const sections: Section[] = []
   let current: Section = intro
 
+  if (!Array.isArray(blocks)) return { intro, sections }
+
   for (const block of blocks) {
+    if (!block) continue
     if (block.type === "heading") {
       current = { headingBlockId: block.id, headingText: stripHtml(String(block.data?.text ?? "")), paragraphs: [] }
       sections.push(current)
@@ -227,10 +230,10 @@ function sectionIsAnswerFirst(section: Section): boolean {
  */
 export function analyzePostSeo(input: SeoAnalysisInput): SeoAnalysis {
   const {
-    title,
-    excerpt,
-    metaTitle,
-    metaDescription,
+    title = "",
+    excerpt = "",
+    metaTitle = "",
+    metaDescription = "",
     focusKeyword = "",
     slug = "",
     featuredImage = "",
@@ -240,14 +243,15 @@ export function analyzePostSeo(input: SeoAnalysisInput): SeoAnalysis {
     updatedAt = null,
     otherPosts = [],
     officialLinkDomains = DEFAULT_OFFICIAL_DOMAINS,
-  } = input
+  } = input || {}
 
   const issues: SeoIssue[] = []
   let technical = 100
   let readiness = 100
+  const safeBlocks = Array.isArray(blocks) ? blocks : []
 
   /* ---------------------------------- Title ---------------------------------- */
-  const metaTitleText = (metaTitle || title).trim()
+  const metaTitleText = (metaTitle || title || "").trim()
   const titleLength = metaTitleText.length
   const titlePixelWidth = estimatePixelWidth(metaTitleText, 20)
 
@@ -293,7 +297,7 @@ export function analyzePostSeo(input: SeoAnalysisInput): SeoAnalysis {
   }
 
   /* ------------------------------ Meta description ----------------------------- */
-  const desc = (metaDescription || excerpt).trim()
+  const desc = (metaDescription || excerpt || "").trim()
   const descriptionLength = desc.length
 
   if (!desc) {
@@ -329,7 +333,7 @@ export function analyzePostSeo(input: SeoAnalysisInput): SeoAnalysis {
   }
 
   /* --------------------------------- Nội dung --------------------------------- */
-  const plainParts = blocks.map((block) => ({
+  const plainParts = safeBlocks.map((block) => ({
     type: block.type,
     text:
       block.type === "paragraph" || block.type === "quote"
@@ -370,8 +374,8 @@ export function analyzePostSeo(input: SeoAnalysisInput): SeoAnalysis {
   }
 
   /* --------------------- Cấu trúc heading + answer-first (AI) --------------------- */
-  const headingBlocks = blocks.filter((block) => block.type === "heading")
-  const { intro, sections } = groupIntoSections(blocks)
+  const headingBlocks = safeBlocks.filter((block) => block.type === "heading")
+  const { intro, sections } = groupIntoSections(safeBlocks)
 
   const issueHeadings = headingBlocks
     .map((block) => ({ block, text: stripHtml(String(block.data?.text ?? "")) }))
@@ -460,8 +464,8 @@ export function analyzePostSeo(input: SeoAnalysisInput): SeoAnalysis {
   }
 
   /* --------------------------- Bảng / danh sách bước --------------------------- */
-  const tableCount = blocks.filter((block) => block.type === "table").length
-  const listBlocks = blocks.filter((block) => block.type === "list")
+  const tableCount = safeBlocks.filter((block) => block.type === "table").length
+  const listBlocks = safeBlocks.filter((block) => block.type === "list")
   const stepBlocks = listBlocks.filter((block) => block.data?.style === "ordered").length
 
   if (tableCount === 0 && stepBlocks === 0) {
@@ -497,7 +501,7 @@ export function analyzePostSeo(input: SeoAnalysisInput): SeoAnalysis {
 
   /* ---------------------------------- Links ---------------------------------- */
   // Link nằm trong HTML inline của block (text đã được sanitize nên chỉ còn href an toàn)
-  const rawContent = blocks.map((block) => JSON.stringify(block.data ?? {})).join(" ")
+  const rawContent = safeBlocks.map((block) => JSON.stringify(block.data ?? {})).join(" ")
   const hrefs: string[] = []
   const hrefRegex = /href=\\?"([^"\\]+)\\?"/gi
   let hrefMatch: RegExpExecArray | null
@@ -550,7 +554,7 @@ export function analyzePostSeo(input: SeoAnalysisInput): SeoAnalysis {
   }
 
   /* --------------------------------- Images --------------------------------- */
-  const imageBlocks = blocks.filter((block) => block.type === "image")
+  const imageBlocks = safeBlocks.filter((block) => block.type === "image")
   const imagesWithoutAlt = imageBlocks.filter((block) => {
     const data = block.data ?? {}
     return !String(data.alt ?? "").trim() && !String(data.caption ?? "").trim()
@@ -594,7 +598,7 @@ export function analyzePostSeo(input: SeoAnalysisInput): SeoAnalysis {
   } else {
     issues.push({ severity: "success", category: "image", message: "Đã có ảnh bìa" })
 
-    if (!featuredImageAlt.trim()) {
+    if (!(featuredImageAlt || "").trim()) {
       issues.push({
         severity: "warning",
         category: "image",
@@ -616,7 +620,7 @@ export function analyzePostSeo(input: SeoAnalysisInput): SeoAnalysis {
   }
 
   /* --------------------------- Từ khóa trọng tâm (vị trí) --------------------------- */
-  const keyword = focusKeyword.trim()
+  const keyword = (focusKeyword || "").trim()
   const keywordLower = keyword.toLowerCase()
   const introText = intro.paragraphs.map((item) => item.text).join(" ").toLowerCase()
   const headingTexts = headingBlocks.map((block) => stripHtml(String(block.data?.text ?? "")).toLowerCase())
@@ -683,8 +687,9 @@ export function analyzePostSeo(input: SeoAnalysisInput): SeoAnalysis {
   }
 
   /* ------------------------------ Trùng chủ đề ------------------------------ */
-  if (title.trim() && otherPosts.length > 0) {
+  if ((title || "").trim() && Array.isArray(otherPosts) && otherPosts.length > 0) {
     const duplicates = otherPosts
+      .filter((post) => typeof post?.title === "string" && post.title.trim().length > 0)
       .map((post) => ({ post, similarity: titleSimilarity(title, post.title) }))
       .filter((item) => item.similarity >= 0.6)
       .sort((a, b) => b.similarity - a.similarity)
@@ -753,8 +758,8 @@ export function analyzePostSeo(input: SeoAnalysisInput): SeoAnalysis {
 }
 
 /** Gợi ý câu hỏi để writer bổ sung (dựa trên từ khóa + danh mục). */
-export function suggestQuestions(focusKeyword: string, category = ""): string[] {
-  const keyword = focusKeyword.trim() || "chủ đề này"
+export function suggestQuestions(focusKeyword = "", category = ""): string[] {
+  const keyword = (focusKeyword || "").trim() || "chủ đề này"
   const base = [
     `${keyword} là gì?`,
     `${keyword} mất bao lâu?`,

@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -51,10 +51,12 @@ interface DraftSnapshot {
 
 export default function EditPostPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
+  const routeParams = useParams()
+  const routeId = (routeParams?.id as string) || ""
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
   const [isFetching, setIsFetching] = useState(true)
-  const [postId, setPostId] = useState<string>("")
+  const [postId, setPostId] = useState<string>(routeId)
   const [legacyFormat, setLegacyFormat] = useState(false)
   /** Ngày đăng / ngày cập nhật thật của bài — dùng cho SEO checker và bản xem trước */
   const [publishedAt, setPublishedAt] = useState<string | null>(null)
@@ -91,7 +93,10 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
         const response = await fetch("/api/posts?status=published&limit=100")
         if (!response.ok) return
         const data = await response.json()
-        if (!cancelled && Array.isArray(data)) setOtherPosts(data)
+        if (!cancelled && Array.isArray(data)) {
+          const validPosts = data.filter((item) => item && typeof item.title === "string")
+          setOtherPosts(validPosts)
+        }
       } catch (error) {
         console.warn("[blog] Không tải được danh sách bài viết để kiểm tra trùng chủ đề:", error)
       }
@@ -135,15 +140,27 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
   }, [])
 
   useEffect(() => {
+    let cancelled = false
     const loadPost = async () => {
-      const { id } = await params
-      setPostId(id)
+      let resolvedId = routeId
+      if (!resolvedId && params) {
+        try {
+          const resolved = await params
+          resolvedId = resolved?.id || ""
+        } catch {
+          resolvedId = ""
+        }
+      }
+      if (!resolvedId) return
+      setPostId(resolvedId)
+      setIsFetching(true)
 
       try {
-        const response = await fetch(`/api/posts/${id}`)
+        const response = await fetch(`/api/posts/${resolvedId}`)
         if (!response.ok) throw new Error("Failed to load post")
 
         const post = await response.json()
+        if (cancelled) return
 
         setTitle(post.title || "")
         setSlug(post.slug || "")
@@ -184,20 +201,27 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
           setBlocks([])
         }
       } catch (error) {
-        console.error("[blog] Lỗi tải bài viết:", error)
-        toast({
-          title: "Lỗi",
-          description: "Không thể tải bài viết",
-          variant: "destructive",
-        })
-        router.push("/admin/posts")
+        if (!cancelled) {
+          console.error("[blog] Lỗi tải bài viết:", error)
+          toast({
+            title: "Lỗi",
+            description: "Không thể tải bài viết",
+            variant: "destructive",
+          })
+          router.push("/admin/posts")
+        }
       } finally {
-        setIsFetching(false)
+        if (!cancelled) {
+          setIsFetching(false)
+        }
       }
     }
 
     loadPost()
-  }, [params, router, toast])
+    return () => {
+      cancelled = true
+    }
+  }, [routeId])
 
   // Theo dõi vùng chọn trong toàn trang để AI thay thế đúng khối
   useEffect(() => {
@@ -302,22 +326,24 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
   const draftKey = postId ? `vexim-blog-draft-${postId}` : "vexim-blog-draft-edit"
   const { pendingDraft, lastSavedAt, markSaved, restoreDraft, discardDraft } = useDraftAutosave(draftKey, draftSnapshot, {
     enabled: !isFetching,
-    isEmpty: (draft) => !draft.title.trim() && !draft.excerpt.trim() && blocksToPlainText(draft.blocks).length === 0,
+    isEmpty: (draft) => !(draft?.title || "").trim() && !(draft?.excerpt || "").trim() && blocksToPlainText(draft?.blocks).length === 0,
   })
 
   const handleRestoreDraft = () => {
     const draft = restoreDraft()
     if (!draft) return
-    setTitle(draft.title)
-    setSlug(draft.slug)
-    setCategory(draft.category)
-    setExcerpt(draft.excerpt)
-    setBlocks(draft.blocks)
-    setMetaTitle(draft.metaTitle)
-    setMetaDescription(draft.metaDescription)
-    setFeaturedImage(draft.featuredImage)
-    setFeaturedImageAlt(draft.featuredImageAlt)
-    setFocusKeyword(draft.focusKeyword)
+    setTitle(draft.title || "")
+    setSlug(draft.slug || "")
+    setCategory(draft.category || "")
+    setExcerpt(draft.excerpt || "")
+    if (Array.isArray(draft.blocks) && draft.blocks.length > 0) {
+      setBlocks(draft.blocks)
+    }
+    setMetaTitle(draft.metaTitle || "")
+    setMetaDescription(draft.metaDescription || "")
+    setFeaturedImage(draft.featuredImage || "")
+    setFeaturedImageAlt(draft.featuredImageAlt || "")
+    setFocusKeyword(draft.focusKeyword || "")
     setPreviewImage(draft.featuredImage || null)
     toast({ title: "Đã khôi phục bản nháp", description: "Kiểm tra lại nội dung trước khi lưu" })
   }
@@ -444,7 +470,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
         <div className="mb-6 flex flex-wrap items-center gap-3 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
           <RotateCcw className="h-4 w-4" />
           <span>
-            Có bản nháp tự động lưu lúc {new Date(pendingDraft.savedAt).toLocaleString("vi-VN")}. Bạn có muốn khôi phục?
+            Có bản nháp tự động lưu lúc {pendingDraft.savedAt ? new Date(pendingDraft.savedAt).toLocaleString("vi-VN") : "trước đó"}. Bạn có muốn khôi phục?
           </span>
           <div className="flex gap-2">
             <Button size="sm" onClick={handleRestoreDraft}>
@@ -635,7 +661,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
                   onChange={(e) => setMetaTitle(e.target.value)}
                   className="mt-1"
                 />
-                <p className="text-xs text-muted-foreground mt-1">{(metaTitle || title).length}/60 ký tự</p>
+                <p className="text-xs text-muted-foreground mt-1">{(metaTitle || title || "").length}/60 ký tự</p>
               </div>
 
               {/* Meta Description */}
@@ -652,7 +678,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
                   className="mt-1 resize-none"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  {(metaDescription || excerpt).length}/160 ký tự
+                  {(metaDescription || excerpt || "").length}/160 ký tự
                 </p>
               </div>
             </div>
@@ -670,7 +696,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
             {...debouncedSeoInput}
             publishedAt={publishedAt}
             updatedAt={updatedAt}
-            otherPosts={otherPosts.filter((post) => post.title.trim() !== title.trim())}
+            otherPosts={otherPosts.filter((post) => typeof post?.title === "string" && post.title.trim() !== (title || "").trim())}
             onFocusBlock={handleFocusBlock}
           />
 

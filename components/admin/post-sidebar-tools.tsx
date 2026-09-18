@@ -42,20 +42,24 @@ function headingBlock(text: string): Block {
  * Trước đây trình soạn thảo chỉ có ô tìm bài để chèn link thủ công; phần lớn tín hiệu
  * quan trọng (câu hỏi người đọc quan tâm, nguồn chính thống, bài liên quan) đều không có gợi ý.
  */
-export function PostSidebarTools({ category, focusKeyword, title, onInsertBlocks }: PostSidebarToolsProps) {
+export function PostSidebarTools({ category = "", focusKeyword = "", title = "", onInsertBlocks }: PostSidebarToolsProps) {
   const [results, setResults] = useState<SearchResult[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const [query, setQuery] = useState("")
 
-  const questions = useMemo(() => suggestQuestions(focusKeyword, category), [focusKeyword, category])
-  const sources = useMemo(() => getOfficialSources(category), [category])
+  const safeCategory = category || ""
+  const safeFocusKeyword = focusKeyword || ""
+  const safeTitle = title || ""
+
+  const questions = useMemo(() => suggestQuestions(safeFocusKeyword, safeCategory), [safeFocusKeyword, safeCategory])
+  const sources = useMemo(() => getOfficialSources(safeCategory), [safeCategory])
 
   // Từ khóa tìm kiếm mặc định: từ khóa trọng tâm, nếu chưa có thì lấy vài từ đầu của tiêu đề
   const defaultQuery = useMemo(() => {
-    const keyword = focusKeyword.trim()
+    const keyword = safeFocusKeyword.trim()
     if (keyword) return keyword
-    return title.trim().split(/\s+/).slice(0, 4).join(" ")
-  }, [focusKeyword, title])
+    return safeTitle.trim().split(/\s+/).slice(0, 4).join(" ")
+  }, [safeFocusKeyword, safeTitle])
 
   useEffect(() => {
     setQuery(defaultQuery)
@@ -79,7 +83,7 @@ export function PostSidebarTools({ category, focusKeyword, title, onInsertBlocks
         const items: SearchResult[] = Array.isArray(data?.results) ? data.results : []
         setResults(
           items
-            .filter((item) => item.title?.trim() !== title.trim())
+            .filter((item) => typeof item?.title === "string" && item.title.trim() !== safeTitle.trim())
             .slice(0, 4),
         )
       } catch (error) {
@@ -93,7 +97,7 @@ export function PostSidebarTools({ category, focusKeyword, title, onInsertBlocks
       cancelled = true
       window.clearTimeout(timer)
     }
-  }, [query, defaultQuery, title])
+  }, [query, defaultQuery, safeTitle])
 
   /** Thêm H2 dạng câu hỏi + khối trả lời gợi ý ngay bên dưới. */
   const addQuestionSection = (question: string) => {
@@ -117,7 +121,8 @@ export function PostSidebarTools({ category, focusKeyword, title, onInsertBlocks
 
   /** Chèn liên kết nội bộ với anchor text mô tả đích đến (không dùng "xem thêm"). */
   const insertInternalLink = (post: SearchResult) => {
-    const anchorText = post.title.replace(/[–—|].*$/, "").trim().slice(0, 70) || post.slug
+    const anchorText = String(post?.title || "").replace(/[–—|].*$/, "").trim().slice(0, 70) || String(post?.slug || "")
+    if (!anchorText) return
     onInsertBlocks([
       paragraphBlock(
         `Xem thêm: <a href="/blog/${escapeAttr(post.slug)}">${escapeHtml(anchorText)}</a>`,

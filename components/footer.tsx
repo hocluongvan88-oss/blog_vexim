@@ -8,7 +8,7 @@ export function Footer() {
     <footer id="contact" className="bg-primary text-white">
       <div className="container mx-auto px-4 py-12 md:py-16">
         {/* FDA Subscription Banner - Above Main Footer */}
-        <div className="mb-12 -mt-8">
+        <div className="mb-8 sm:mb-12 -mt-4 sm:-mt-8">
           <div className="bg-white rounded-xl shadow-2xl overflow-hidden">
             <FDASubscriptionInline variant="cta" className="border-0" />
           </div>
