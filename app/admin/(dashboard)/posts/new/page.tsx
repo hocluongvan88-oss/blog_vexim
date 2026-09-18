@@ -29,6 +29,8 @@ import { slugify } from "@/lib/post-payload"
 import { sanitizeInlineHtml } from "@/lib/sanitize"
 import { BLOG_CATEGORIES } from "@/lib/blog-categories"
 import { useDraftAutosave } from "@/hooks/use-draft-autosave"
+import { useDebouncedValue } from "@/hooks/use-debounced-value"
+import { PostSidebarTools } from "@/components/admin/post-sidebar-tools"
 
 const MIN_PUBLISH_LENGTH = 50
 const DRAFT_STORAGE_KEY = "vexim-blog-draft-new"
@@ -68,6 +70,61 @@ export default function NewPostPage() {
 
   /** Khối đang chứa đoạn văn bản được bôi đen (để AI thay thế đúng chỗ). */
   const selectionBlockIdRef = useRef<string | null>(null)
+
+  /* ---------------------- Hỗ trợ phân tích SEO cho writer ---------------------- */
+
+  /** Danh sách bài khác (để phát hiện trùng chủ đề/self-cannibalization). */
+  const [otherPosts, setOtherPosts] = useState<Array<{ id?: string; title: string; focus_keyword?: string | null }>>([])
+
+  useEffect(() => {
+    let cancelled = false
+    const loadOtherPosts = async () => {
+      try {
+        const response = await fetch("/api/posts?status=published&limit=100")
+        if (!response.ok) return
+        const data = await response.json()
+        if (!cancelled && Array.isArray(data)) setOtherPosts(data)
+      } catch (error) {
+        console.warn("[blog] Không tải được danh sách bài viết để kiểm tra trùng chủ đề:", error)
+      }
+    }
+    loadOtherPosts()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  /** Gộp dữ liệu cho SEO checker rồi debounce 400ms (tránh tính lại mỗi lần gõ phím). */
+  const seoInput = useMemo(
+    () => ({
+      title,
+      excerpt,
+      metaTitle,
+      metaDescription,
+      focusKeyword,
+      slug,
+      featuredImage,
+      featuredImageAlt,
+      blocks,
+    }),
+    [title, excerpt, metaTitle, metaDescription, focusKeyword, slug, featuredImage, featuredImageAlt, blocks],
+  )
+  const debouncedSeoInput = useDebouncedValue(seoInput, 400)
+
+  /** Cuộn tới khối cần sửa và làm nổi bật trong giây lát. */
+  const handleFocusBlock = useCallback((blockId: string) => {
+    const element = document.querySelector(`[data-block-id="${blockId}"]`)
+    if (!element) return
+    element.scrollIntoView({ behavior: "smooth", block: "center" })
+    element.classList.add("ring-2", "ring-amber-400", "rounded-lg")
+    window.setTimeout(() => element.classList.remove("ring-2", "ring-amber-400", "rounded-lg"), 1800)
+  }, [])
+
+  /** Panel gợi ý thêm block (câu hỏi, nguồn, liên kết nội bộ) vào cuối bài. */
+  const handleInsertBlocks = useCallback((newBlocks: Block[]) => {
+    if (newBlocks.length === 0) return
+    setBlocks((prev) => [...prev, ...newBlocks])
+  }, [])
 
   // Slug tự sinh từ tiêu đề cho tới khi người dùng tự sửa
   useEffect(() => {
@@ -509,17 +566,19 @@ export default function NewPostPage() {
             </div>
           </Card>
 
+          {/* Gợi ý bổ sung: câu hỏi, nguồn chính thống, liên kết nội bộ */}
+          <PostSidebarTools
+            category={category}
+            focusKeyword={focusKeyword}
+            title={title}
+            onInsertBlocks={handleInsertBlocks}
+          />
+
           {/* SEO Checker Card */}
           <SEOChecker
-            title={title}
-            excerpt={excerpt}
-            content={getTextContent()}
-            metaTitle={metaTitle}
-            metaDescription={metaDescription}
-            featuredImage={featuredImage}
-            featuredImageAlt={featuredImageAlt}
-            focusKeyword={focusKeyword}
-            blocks={blocks}
+            {...debouncedSeoInput}
+            otherPosts={otherPosts.filter((post) => post.title.trim() !== title.trim())}
+            onFocusBlock={handleFocusBlock}
           />
 
           {/* Action Buttons Card */}

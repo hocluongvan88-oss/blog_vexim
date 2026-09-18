@@ -4,7 +4,7 @@ import Footer from "@/components/footer"
 import { BackToTop } from "@/components/back-to-top"
 import { Button } from "@/components/ui/button"
 import ConsultationDialog from "@/components/consultation-dialog"
-import { Calendar, User, ArrowLeft, Clock } from "lucide-react"
+import { Calendar, User, ArrowLeft, Clock, RefreshCw } from "lucide-react"
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -22,6 +22,8 @@ import { BlogTableOfContents } from "@/components/blog-table-of-contents"
 import { BlogInternalLinks } from "@/components/blog-internal-links"
 import { ViewTracker } from "@/components/view-tracker"
 import { blocksToHTML, renderInlineMath } from "@/lib/blocks-to-html"
+import { ensureHeadingAnchors } from "@/lib/heading-anchors"
+import { POST_DETAIL_COLUMNS } from "@/lib/post-payload"
 import type { Block } from "@/components/block-editor/types"
 
 export const revalidate = 60
@@ -47,7 +49,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const supabase = await createClient()
   const { slug } = await params
 
-  const { data: post } = await supabase.from("posts").select("*").eq("slug", slug).single()
+  const { data: post } = await supabase.from("posts").select(POST_DETAIL_COLUMNS).eq("slug", slug).single()
 
   if (!post) {
     return {
@@ -59,37 +61,45 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     }
   }
 
-  // Trim meta description to 160 characters for Google search results
+  /**
+   * Rút mô tả quanh mốc ~158 ký tự nhưng cắt ở ranh giới từ
+   * (trước đây dùng substring(0,157) nên có thể cắt giữa từ).
+   */
   const trimmedDescription = (text: string | null | undefined) => {
     if (!text) return "Vexim Global - Tư vấn xuất nhập khẩu chuyên nghiệp"
-    return text.length > 160 ? text.substring(0, 157) + "..." : text
+    const normalized = text.replace(/\s+/g, " ").trim()
+    if (normalized.length <= 158) return normalized
+    const cut = normalized.slice(0, 158)
+    const lastSpace = cut.lastIndexOf(" ")
+    return `${(lastSpace > 100 ? cut.slice(0, lastSpace) : cut).trim()}…`
   }
 
   const baseUrl = new URL("https://www.veximglobal.com")
+
+  // Ảnh chia sẻ: dùng ảnh bìa, nếu bài chưa có thì rơi về ảnh OG mặc định của site
+  const shareImage = post.featured_image || "/og-image.jpg"
 
   return {
     metadataBase: baseUrl,
     title: post.meta_title || post.title,
     description: trimmedDescription(post.meta_description || post.excerpt),
-    keywords: [post.focus_keyword, post.category].filter(Boolean),
+    // KHÔNG xuất thẻ meta keywords: Google bỏ qua từ 2009, chỉ lộ danh sách từ khóa cho đối thủ
     authors: [{ name: "Vexim Global" }],
     alternates: {
       canonical: `https://www.veximglobal.com/blog/${post.slug}`,
     },
     openGraph: {
       title: post.meta_title || post.title,
-      description: post.meta_description || post.excerpt,
+      description: trimmedDescription(post.meta_description || post.excerpt),
       url: `/blog/${post.slug}`,
-      images: post.featured_image
-        ? [
-            {
-              url: post.featured_image,
-              width: 1200,
-              height: 630,
-              alt: post.title,
-            },
-          ]
-        : [],
+      images: [
+        {
+          url: shareImage,
+          width: 1200,
+          height: 630,
+          alt: post.featured_image_alt || post.title,
+        },
+      ],
       type: "article",
       publishedTime: post.published_at,
       modifiedTime: post.updated_at || post.published_at,
@@ -99,8 +109,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     twitter: {
       card: "summary_large_image",
       title: post.meta_title || post.title,
-      description: post.meta_description || post.excerpt,
-      images: post.featured_image ? [post.featured_image] : [],
+      description: trimmedDescription(post.meta_description || post.excerpt),
+      images: [shareImage],
     },
   }
 }
@@ -111,7 +121,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
   const { data: post, error } = await supabase
     .from("posts")
-    .select("*")
+    .select(POST_DETAIL_COLUMNS)
     .eq("slug", slug)
     .eq("status", "published")
     .single()
@@ -129,15 +139,19 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   }
 
   // Parse blocks from content (could be JSON blocks or HTML)
-  let htmlContent = ""
+  let rawHtml = ""
   try {
     const blocks: Block[] = JSON.parse(post.content)
-    htmlContent = blocksToHTML(blocks)
+    rawHtml = blocksToHTML(blocks)
   } catch {
     // If parsing fails, assume it's already HTML. Still convert any inline
     // LaTeX math (e.g. "$\ge$") so symbols render as proper characters.
-    htmlContent = renderInlineMath(post.content)
+    rawHtml = renderInlineMath(post.content)
   }
+
+  // id cho mọi heading + danh sách heading để render mục lục (server-side, khớp 100% với HTML)
+  const { html: htmlContent, headings } = ensureHeadingAnchors(rawHtml)
+  const tocHeadings = headings.filter((heading) => heading.level <= 3)
 
   const calculateReadingTime = (content: string): number => {
     const text = content.replace(/<[^>]*>/g, "")
@@ -148,14 +162,32 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
   const readingTime = calculateReadingTime(htmlContent)
 
+  // Chỉ hiện "Cập nhật lần cuối" khi bài được sửa sau khi đăng quá 1 ngày (tránh nhiễu)
+  const isUpdated =
+    !!post.updated_at &&
+    !!post.published_at &&
+    new Date(post.updated_at).getTime() - new Date(post.published_at).getTime() > 86400000
+
+  const pageUrl = `https://www.veximglobal.com/blog/${post.slug}`
+  const wordCount = htmlContent.replace(/<[^>]*>/g, " ").split(/\s+/).filter(Boolean).length
+
   const blogPostingSchema = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
+    "@id": `${pageUrl}#article`,
+    // headline phải khớp tiêu đề hiển thị (H1) của bài; bản SEO viết khác thì để ở alternativeHeadline
     headline: post.title,
-    description: post.excerpt,
-    image: post.featured_image,
+    alternativeHeadline: post.meta_title || undefined,
+    description: post.meta_description || post.excerpt,
+    image: [post.featured_image || "https://www.veximglobal.com/og-image.jpg"],
     datePublished: post.published_at,
+    // dateModified = ngày sửa thật (post.updated_at được trigger cập nhật mỗi lần lưu)
     dateModified: post.updated_at || post.published_at,
+    inLanguage: "vi-VN",
+    articleSection: post.category,
+    keywords: [post.focus_keyword, post.category].filter(Boolean).join(", "),
+    wordCount,
+    isAccessibleForFree: true,
     author: {
       "@type": "Organization",
       name: "Vexim Global",
@@ -163,17 +195,63 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     },
     publisher: {
       "@type": "Organization",
+      "@id": "https://www.veximglobal.com/#organization",
       name: "Vexim Global",
+      url: "https://www.veximglobal.com",
+      // File logo phải tồn tại thật và crawl được (trước đây trỏ /logo.png không có)
       logo: {
         "@type": "ImageObject",
         url: "https://www.veximglobal.com/logo.png",
+        width: 512,
+        height: 512,
       },
     },
     mainEntityOfPage: {
       "@type": "WebPage",
-      "@id": `https://www.veximglobal.com/blog/${post.slug}`,
+      "@id": pageUrl,
     },
   }
+
+  /**
+   * Trích các cặp H2/H3 dạng câu hỏi + đoạn trả lời ngay dưới để sinh FAQPage.
+   *
+   * Lưu ý: Google đã khai tử FAQ *rich result* từ 07/05/2026 (không còn hiện dropdown),
+   * nhưng vẫn dùng dữ liệu có cấu trúc để hiểu trang — và Q&A dạng chữ vẫn là phần
+   * được AI Overviews trích dẫn nhiều.
+   */
+  const faqSchema =
+    (() => {
+      const headingRegex = /<h([23])[^>]*>([\s\S]*?)<\/h\1>([\s\S]*?)(?=<h[23][\s>]|$)/gi
+      const entries: Array<{ question: string; answer: string }> = []
+      let match: RegExpExecArray | null
+
+      while ((match = headingRegex.exec(htmlContent)) !== null && entries.length < 10) {
+        const question = match[2].replace(/<[^>]*>/g, "").trim()
+        const answer = match[3]
+          .replace(/<[^>]*>/g, " ")
+          .replace(/\s+/g, " ")
+          .trim()
+          .slice(0, 500)
+
+        if (!question || !answer) continue
+        if (!/[?]$/.test(question) && !/(là gì|bao lâu|bao nhiêu|như thế nào|khi nào|tại sao|vì sao|có nên|được không|cần gì|gồm)/i.test(question))
+          continue
+
+        entries.push({ question, answer })
+      }
+
+      if (entries.length < 2) return null
+
+      return {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: entries.map((entry) => ({
+          "@type": "Question",
+          name: entry.question,
+          acceptedAnswer: { "@type": "Answer", text: entry.answer },
+        })),
+      }
+    })()
 
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -194,8 +272,14 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
       {
         "@type": "ListItem",
         position: 3,
+        name: post.category,
+        item: `https://www.veximglobal.com/blog/category/${encodeURIComponent(post.category)}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 4,
         name: post.title,
-        item: `https://www.veximglobal.com/blog/${post.slug}`,
+        item: pageUrl,
       },
     ],
   }
@@ -204,6 +288,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostingSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      {faqSchema && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      )}
       <ViewTracker postId={post.id} />
       <Header />
       <BlogShareButtons />
@@ -221,7 +308,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             <div className="grid grid-cols-1 xl:grid-cols-[220px_minmax(0,1fr)_300px] lg:grid-cols-[minmax(0,1fr)_300px] gap-8">
               {/* Table of Contents - Left side on xl screens */}
               <aside className="hidden xl:block overflow-hidden">
-                <BlogTableOfContents content={htmlContent} />
+                <BlogTableOfContents headings={tocHeadings} />
               </aside>
 
               {/* Main Content */}
@@ -268,8 +355,18 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                   </div>
                   <div className="flex items-center gap-2">
                     <Calendar className="w-5 h-5" />
-                    <span>{formatDate(post.published_at)}</span>
+                    <time dateTime={post.published_at || undefined}>{formatDate(post.published_at)}</time>
                   </div>
+                  {/* Ngày cập nhật thật: tín hiệu độ mới cho Google và thông tin cho người đọc */}
+                  {isUpdated && (
+                    <div className="flex items-center gap-2">
+                      <RefreshCw className="w-4 h-4" />
+                      <span>
+                        Cập nhật lần cuối:{" "}
+                        <time dateTime={post.updated_at || undefined}>{formatDate(post.updated_at)}</time>
+                      </span>
+                    </div>
+                  )}
                   <div className="flex items-center gap-2">
                     <Clock className="w-5 h-5" />
                     <span>{readingTime} phút đọc</span>
@@ -280,10 +377,11 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                   <div className="aspect-video overflow-hidden rounded-lg mb-12">
                     <img
                       src={post.featured_image || "/placeholder.svg"}
-                      alt={`${post.title} - ${post.category} - Vexim Global`}
+                      alt={post.featured_image_alt || `${post.title} - ${post.category} - Vexim Global`}
                       width={1200}
                       height={630}
                       loading="eager"
+                      fetchPriority="high"
                       className="w-full h-full object-cover"
                     />
                   </div>

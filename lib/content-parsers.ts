@@ -360,7 +360,7 @@ export function parseHtmlToParsedBlocks(html: string): ParsedBlock[] {
       text: "",
       imageData: {
         url: src,
-        alt: (img.getAttribute("alt") || "").trim(),
+        alt: stripHtml(img.getAttribute("alt") || "").trim(),
         caption: (img.getAttribute("title") || "").trim(),
         width: "100%",
       },

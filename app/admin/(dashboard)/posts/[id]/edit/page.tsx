@@ -31,6 +31,8 @@ import { slugify } from "@/lib/post-payload"
 import { sanitizeInlineHtml } from "@/lib/sanitize"
 import { BLOG_CATEGORIES } from "@/lib/blog-categories"
 import { useDraftAutosave } from "@/hooks/use-draft-autosave"
+import { useDebouncedValue } from "@/hooks/use-debounced-value"
+import { PostSidebarTools } from "@/components/admin/post-sidebar-tools"
 
 const MIN_PUBLISH_LENGTH = 50
 
@@ -54,6 +56,11 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
   const [isFetching, setIsFetching] = useState(true)
   const [postId, setPostId] = useState<string>("")
   const [legacyFormat, setLegacyFormat] = useState(false)
+  /** Ngày đăng / ngày cập nhật thật của bài — dùng cho SEO checker và bản xem trước */
+  const [publishedAt, setPublishedAt] = useState<string | null>(null)
+  const [updatedAt, setUpdatedAt] = useState<string | null>(null)
+  /** Slug lúc tải bài về — dùng để cảnh báo khi đổi đường dẫn của bài đã đăng */
+  const [originalSlug, setOriginalSlug] = useState<string>("")
 
   const [title, setTitle] = useState("")
   const [slug, setSlug] = useState("")
@@ -72,6 +79,61 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
 
   const selectionBlockIdRef = useRef<string | null>(null)
 
+  /* ---------------------- Hỗ trợ phân tích SEO cho writer ---------------------- */
+
+  /** Danh sách bài khác (để phát hiện trùng chủ đề/self-cannibalization). */
+  const [otherPosts, setOtherPosts] = useState<Array<{ id?: string; title: string; focus_keyword?: string | null }>>([])
+
+  useEffect(() => {
+    let cancelled = false
+    const loadOtherPosts = async () => {
+      try {
+        const response = await fetch("/api/posts?status=published&limit=100")
+        if (!response.ok) return
+        const data = await response.json()
+        if (!cancelled && Array.isArray(data)) setOtherPosts(data)
+      } catch (error) {
+        console.warn("[blog] Không tải được danh sách bài viết để kiểm tra trùng chủ đề:", error)
+      }
+    }
+    loadOtherPosts()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  /** Gộp dữ liệu cho SEO checker rồi debounce 400ms (tránh tính lại mỗi lần gõ phím). */
+  const seoInput = useMemo(
+    () => ({
+      title,
+      excerpt,
+      metaTitle,
+      metaDescription,
+      focusKeyword,
+      slug,
+      featuredImage,
+      featuredImageAlt,
+      blocks,
+    }),
+    [title, excerpt, metaTitle, metaDescription, focusKeyword, slug, featuredImage, featuredImageAlt, blocks],
+  )
+  const debouncedSeoInput = useDebouncedValue(seoInput, 400)
+
+  /** Cuộn tới khối cần sửa và làm nổi bật trong giây lát. */
+  const handleFocusBlock = useCallback((blockId: string) => {
+    const element = document.querySelector(`[data-block-id="${blockId}"]`)
+    if (!element) return
+    element.scrollIntoView({ behavior: "smooth", block: "center" })
+    element.classList.add("ring-2", "ring-amber-400", "rounded-lg")
+    window.setTimeout(() => element.classList.remove("ring-2", "ring-amber-400", "rounded-lg"), 1800)
+  }, [])
+
+  /** Panel gợi ý thêm block (câu hỏi, nguồn, liên kết nội bộ) vào cuối bài. */
+  const handleInsertBlocks = useCallback((newBlocks: Block[]) => {
+    if (newBlocks.length === 0) return
+    setBlocks((prev) => [...prev, ...newBlocks])
+  }, [])
+
   useEffect(() => {
     const loadPost = async () => {
       const { id } = await params
@@ -85,6 +147,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
 
         setTitle(post.title || "")
         setSlug(post.slug || "")
+        setOriginalSlug(post.slug || "")
         setCategory(post.category || "")
         setExcerpt(post.excerpt || "")
         setMetaTitle(post.meta_title || "")
@@ -94,6 +157,8 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
         setFocusKeyword(post.focus_keyword || "")
         setPreviewImage(post.featured_image || null)
         setStatus(post.status === "published" ? "published" : "draft")
+        setPublishedAt(post.published_at || null)
+        setUpdatedAt(post.updated_at || post.published_at || null)
 
         // Nội dung có thể là JSON blocks (định dạng mới) hoặc HTML (bài cũ / WordPress)
         let parsedBlocks: Block[] | null = null
@@ -432,9 +497,22 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
                     Tạo lại
                   </Button>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Lưu ý: đổi slug sẽ làm thay đổi đường dẫn công khai của bài viết (ảnh hưởng SEO).
-                </p>
+                {status === "published" && originalSlug && slug !== originalSlug ? (
+                  <div className="mt-2 flex items-start gap-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                    <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                    <span>
+                      Bài đã đăng và đang đổi đường dẫn. Địa chỉ cũ{" "}
+                      <code className="font-mono">/blog/{originalSlug}</code> sẽ trả lỗi 404 và mất toàn bộ
+                      tín hiệu SEO đã tích lũy. Hệ thống chưa có bảng chuyển hướng tự động, nên nếu buộc phải
+                      đổi hãy tạo chuyển hướng 301 từ địa chỉ cũ sang địa chỉ mới ở tầng hosting/CDN, rồi cập
+                      nhật các bài khác đang trỏ tới link cũ.
+                    </span>
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Lưu ý: đổi slug sẽ làm thay đổi đường dẫn công khai của bài viết (ảnh hưởng SEO).
+                  </p>
+                )}
               </div>
 
               {/* Excerpt */}
@@ -581,16 +659,19 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
           </Card>
 
           {/* SEO Checker Card */}
-          <SEOChecker
-            title={title}
-            excerpt={excerpt}
-            content={getTextContent()}
-            metaTitle={metaTitle}
-            metaDescription={metaDescription}
-            featuredImage={featuredImage}
-            featuredImageAlt={featuredImageAlt}
+          <PostSidebarTools
+            category={category}
             focusKeyword={focusKeyword}
-            blocks={blocks}
+            title={title}
+            onInsertBlocks={handleInsertBlocks}
+          />
+
+          <SEOChecker
+            {...debouncedSeoInput}
+            publishedAt={publishedAt}
+            updatedAt={updatedAt}
+            otherPosts={otherPosts.filter((post) => post.title.trim() !== title.trim())}
+            onFocusBlock={handleFocusBlock}
           />
 
           {/* Action Buttons Card */}
@@ -633,6 +714,8 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
         metaTitle={metaTitle}
         metaDescription={metaDescription}
         slug={slug}
+        publishedAt={publishedAt}
+        updatedAt={updatedAt}
       />
     </div>
   )

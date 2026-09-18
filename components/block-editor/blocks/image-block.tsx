@@ -2,13 +2,14 @@
 
 import React from "react"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Upload, Link as LinkIcon } from "lucide-react"
+import { Upload, Link as LinkIcon, AlertTriangle } from "lucide-react"
 import type { ImageData } from "../types"
+import { useImageDimensions } from "@/hooks/use-image-dimensions"
 
 interface ImageBlockProps {
   data: ImageData
@@ -16,9 +17,21 @@ interface ImageBlockProps {
 }
 
 export function ImageBlock({ data, onChange }: ImageBlockProps) {
-  const { url = "", alt = "", caption = "", align = "center", width = "100%" } = data
+  const { url = "", alt = "", caption = "", align = "center", width = "100%", width_px, height_px } = data
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
+
+  // Đo kích thước thật để (a) lưu width/height chống nhảy layout, (b) cảnh báo ảnh quá nhỏ
+  const dimensions = useImageDimensions(url)
+
+  useEffect(() => {
+    if (!dimensions) return
+    const currentWidth = Number(width_px) || 0
+    const currentHeight = Number(height_px) || 0
+    if (currentWidth === dimensions.width && currentHeight === dimensions.height) return
+    onChange({ width_px: dimensions.width, height_px: dimensions.height })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dimensions?.width, dimensions?.height])
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -106,7 +119,23 @@ export function ImageBlock({ data, onChange }: ImageBlockProps) {
   return (
     <div className={`flex ${alignClass}`}>
       <figure className={widthClass}>
-        <img src={url || "/placeholder.svg"} alt={alt || caption} className="w-full rounded-lg shadow-md" />
+        <img
+          src={url || "/placeholder.svg"}
+          alt={alt || caption}
+          width={width_px || undefined}
+          height={height_px || undefined}
+          className="w-full h-auto rounded-lg shadow-md"
+        />
+
+        {dimensions && dimensions.width < 1200 && (
+          <div className="mt-2 flex items-start gap-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+            <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+            <span>
+              Ảnh chỉ {dimensions.width}×{dimensions.height}px. Ảnh lớn (≥1200px ngang) đẹp hơn khi chia sẻ
+              Facebook/Zalo và đủ điều kiện hiện thẻ lớn trên Google Discover.
+            </span>
+          </div>
+        )}
         
         {/* Alt Text - Quan trọng cho SEO */}
         <div className="mt-3 space-y-2">

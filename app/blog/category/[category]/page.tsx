@@ -59,7 +59,6 @@ export async function generateMetadata({ params }: { params: Promise<{ category:
   return {
     title: `${config.title} | Blog Vexim Global`,
     description: config.description,
-    keywords: config.keywords,
     alternates: {
       canonical: `https://www.veximglobal.com/blog/category/${encodeURIComponent(decodedCategory)}`,
     },

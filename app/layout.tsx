@@ -21,18 +21,6 @@ export const metadata: Metadata = {
   },
   description:
     "Chuyên gia tư vấn pháp lý xuất nhập khẩu hàng đầu Việt Nam. Dịch vụ đăng ký FDA, GACC, MFDS, CE và giấy phép xuất khẩu quốc tế.",
-  keywords: [
-    "xuất nhập khẩu",
-    "FDA",
-    "GACC",
-    "MFDS",
-    "tư vấn xuất khẩu",
-    "đăng ký xuất khẩu",
-    "giấy phép xuất khẩu",
-    "xuất khẩu thực phẩm",
-    "US Agent",
-    "truy xuất nguồn gốc",
-  ],
   authors: [{ name: "Vexim Global" }],
   creator: "Vexim Global",
   publisher: "Vexim Global",
@@ -95,6 +83,61 @@ export const metadata: Metadata = {
   generator: 'v0.app'
 }
 
+/**
+ * Đồ thị thực thể toàn site (Organization + WebSite).
+ *
+ * Đặt ở layout để MỌI trang — kể cả bài blog — đều có node Organization với @id cố định.
+ * Nhờ đó BlogPosting.publisher trỏ "@id": ".../#organization" sẽ phân giải được,
+ * và Google có tín hiệu E-E-A-T cấp tổ chức (logo, địa chỉ, kênh chính thức) ở mọi URL.
+ */
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "@id": "https://www.veximglobal.com/#organization",
+  name: "Vexim Global",
+  alternateName: "Vexim",
+  url: "https://www.veximglobal.com",
+  logo: {
+    "@type": "ImageObject",
+    "@id": "https://www.veximglobal.com/#logo",
+    url: "https://www.veximglobal.com/logo.png",
+    width: 512,
+    height: 512,
+  },
+  description:
+    "Chuyên gia tư vấn pháp lý xuất nhập khẩu hàng đầu Việt Nam. Dịch vụ đăng ký FDA, GACC, MFDS, CE và giấy phép xuất khẩu quốc tế.",
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: "Hồ Chí Minh",
+    addressCountry: "VN",
+  },
+  contactPoint: {
+    "@type": "ContactPoint",
+    contactType: "Customer Service",
+    availableLanguage: ["Vietnamese", "English"],
+  },
+  sameAs: [
+    "https://www.facebook.com/veximglobal",
+    "https://www.linkedin.com/company/veximglobal",
+    "https://zalo.me/veximglobal",
+  ],
+}
+
+/**
+ * WebSite node CHỈ để định danh website.
+ * Đã bỏ "potentialAction": SearchAction — Google khai tử sitelinks search box từ 2024
+ * và site không có endpoint tìm kiếm dạng ?search=.
+ */
+const websiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "@id": "https://www.veximglobal.com/#website",
+  name: "Vexim Global",
+  url: "https://www.veximglobal.com",
+  inLanguage: "vi-VN",
+  publisher: { "@id": "https://www.veximglobal.com/#organization" },
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -103,6 +146,11 @@ export default function RootLayout({
   return (
     <html lang="vi">
       <body className={`${beVietnamPro.variable} font-sans antialiased`}>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }} />
         {children}
         <ClientWidgets />
         {/* Toaster của sonner: trước đây không được mount nên mọi toast() đều bị "câm" */}

@@ -1,5 +1,6 @@
 import type { Block } from "@/components/block-editor/types"
-import { escapeAttr, escapeHtml, sanitizeInlineHtml } from "./sanitize"
+import { escapeAttr, escapeHtml, sanitizeInlineHtml, stripHtml } from "./sanitize"
+import { buildHeadingAnchors, injectHeadingAnchors } from "./heading-anchors"
 
 // Parse HTML -> blocks (dùng cho Import HTML & bài viết định dạng cũ)
 export { htmlToBlocks } from "./content-parsers"
@@ -128,6 +129,14 @@ function renderInline(raw: unknown): string {
   return renderInlineMath(sanitizeInlineHtml(raw))
 }
 
+/**
+ * Text thuần (không cho HTML): dùng cho thẻ `alt` của ảnh — trình đọc màn hình và
+ * Google đọc nguyên văn, nên nếu để lọt "<strong>" thì alt sẽ hiển thị thẻ.
+ */
+function renderPlainText(raw: unknown): string {
+  return renderInlineMath(stripHtml(String(raw ?? "")))
+}
+
 function safeUrl(url: unknown): string {
   const value = String(url ?? "").trim()
   if (!value) return ""
@@ -160,7 +169,10 @@ export function blocksToHTML(blocks: Block[]): string {
     return ""
   }
 
-  return blocks
+  // id cho từng heading (theo thứ tự xuất hiện) để có anchor/jump link trong HTML gốc
+  const anchorIds = buildHeadingAnchors(blocks)
+
+  const html = blocks
     .map((block) => {
       const { type, data = {} } = block
       const align = alignmentClass(data.align)
@@ -168,7 +180,9 @@ export function blocksToHTML(blocks: Block[]): string {
       switch (type) {
         case "heading": {
           const level = Math.min(Math.max(Number(data.level) || 2, 1), 6)
-          return `<h${level} class="${headingSizeClass(level)} font-bold text-primary mb-4 mt-8 first:mt-0 ${align}">${renderInline(
+          // id được gắn một lần ở cuối bằng injectHeadingAnchors() — tránh hai nguồn dữ liệu
+          // `scroll-mt-24`: bù cho header dính khi nhảy tới mục từ mục lục / link chia sẻ
+          return `<h${level} class="scroll-mt-24 ${headingSizeClass(level)} font-bold text-primary mb-4 mt-8 first:mt-0 ${align}">${renderInline(
             data.text,
           )}</h${level}>`
         }
@@ -192,15 +206,20 @@ export function blocksToHTML(blocks: Block[]): string {
 
           const caption = String(data.caption ?? "").trim()
           // Alt ưu tiên đúng trường `alt` của khối (trước đây bị lấy nhầm từ caption -> mất SEO)
-          const alt = String(data.alt ?? "").trim() || caption
+          const alt = renderPlainText(data.alt).trim() || caption
 
           const captionHtml = caption
             ? `<figcaption class="text-center text-sm text-gray-600 italic mt-3">${escapeHtml(caption)}</figcaption>`
             : ""
 
+          // width/height (nếu có) giúp trình duyệt chừa sẵn chỗ -> giảm CLS
+          const width = Number(data.width_px) || 0
+          const height = Number(data.height_px) || 0
+          const sizeAttrs = width > 0 && height > 0 ? ` width="${width}" height="${height}"` : ""
+
           return `<figure class="${widthClass} my-8"><img src="${escapeAttr(src)}" alt="${escapeAttr(
             alt,
-          )}" loading="lazy" decoding="async" class="w-full rounded-lg shadow-md" />${captionHtml}</figure>`
+          )}"${sizeAttrs} loading="lazy" decoding="async" class="w-full h-auto rounded-lg shadow-md" />${captionHtml}</figure>`
         }
 
         case "quote": {
@@ -258,4 +277,7 @@ export function blocksToHTML(blocks: Block[]): string {
     })
     .filter(Boolean)
     .join("\n")
+
+  // Gắn id vào chuỗi HTML theo thứ tự để mục lục và link chia sẻ hoạt động không cần JS
+  return injectHeadingAnchors(html, anchorIds)
 }

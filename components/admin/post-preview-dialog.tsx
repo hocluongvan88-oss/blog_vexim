@@ -18,6 +18,8 @@ interface PostPreviewDialogProps {
   metaTitle?: string
   metaDescription?: string
   slug?: string
+  publishedAt?: string | null
+  updatedAt?: string | null
 }
 
 export function PostPreviewDialog({
@@ -32,6 +34,8 @@ export function PostPreviewDialog({
   metaTitle,
   metaDescription,
   slug,
+  publishedAt = null,
+  updatedAt = null,
 }: PostPreviewDialogProps) {
   /**
    * Dùng chung `blocksToHTML` với trang public để bản xem trước đúng như bài thật
@@ -72,12 +76,30 @@ export function PostPreviewDialog({
             </div>
           )}
 
-          {/* Meta Info */}
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          {/* Meta Info — dùng ngày thật của bài (trước đây luôn hiển thị "hôm nay") */}
+          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
             <div className="flex items-center gap-1">
               <Calendar className="w-4 h-4" />
-              <span>Ngày xuất bản: hôm nay</span>
+              <span>
+                Ngày xuất bản:{" "}
+                {publishedAt
+                  ? new Date(publishedAt).toLocaleDateString("vi-VN", { year: "numeric", month: "long", day: "numeric" })
+                  : "chưa xuất bản"}
+              </span>
             </div>
+            {updatedAt && publishedAt && updatedAt !== publishedAt && (
+              <div className="flex items-center gap-1">
+                <Calendar className="w-4 h-4" />
+                <span>
+                  Cập nhật:{" "}
+                  {new Date(updatedAt).toLocaleDateString("vi-VN", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </span>
+              </div>
+            )}
             <div className="flex items-center gap-1">
               <Tag className="w-4 h-4" />
               <span>{category || "Chưa chọn danh mục"}</span>

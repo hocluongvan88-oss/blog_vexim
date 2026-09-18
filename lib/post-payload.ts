@@ -73,6 +73,13 @@ function safeImageUrl(value: unknown): string {
   return ""
 }
 
+/** Ép về số nguyên trong khoảng cho phép (dùng cho width/height của ảnh). */
+function clampInt(value: unknown, min: number, max: number): number {
+  const num = Math.round(Number(value))
+  if (!Number.isFinite(num) || num <= 0) return 0
+  return Math.min(Math.max(num, min), max)
+}
+
 function sanitizeBlockData(type: BlockType, data: Record<string, unknown>): Record<string, unknown> {
   switch (type) {
     case "heading":
@@ -112,6 +119,9 @@ function sanitizeBlockData(type: BlockType, data: Record<string, unknown>): Reco
         alt: asPlainText(data?.alt),
         caption: asPlainText(data?.caption),
         width: WIDTHS.includes(asString(data?.width)) ? asString(data?.width) : "100%",
+        // Kích thước thật của ảnh -> render thành width/height để chống nhảy layout (CLS)
+        width_px: clampInt(data?.width_px, 0, 20000),
+        height_px: clampInt(data?.height_px, 0, 20000),
         align: asAlign(data?.align, "center"),
       }
     default:

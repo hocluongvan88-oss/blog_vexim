@@ -14,14 +14,6 @@ const POST_CARD_COLUMNS = "id, title, slug, excerpt, category, featured_image, p
 export const metadata = {
   title: "Blog - Kiến thức xuất nhập khẩu",
   description: "Cập nhật tin tức, kiến thức pháp lý và hướng dẫn về xuất nhập khẩu quốc tế từ chuyên gia Vexim Global.",
-  keywords: [
-    "blog xuất nhập khẩu",
-    "kiến thức xuất khẩu",
-    "tin tức thương mại",
-    "hướng dẫn FDA",
-    "hướng dẫn GACC",
-    "pháp lý xuất khẩu",
-  ],
   alternates: {
     canonical: "https://www.veximglobal.com/blog",
   },
