@@ -94,32 +94,32 @@ export function FDASubscriptionInline({ variant = "default", className = "" }: F
 
   if (variant === "cta") {
     return (
-      <Card className={`p-6 bg-gradient-to-r from-blue-50 to-emerald-50 border-2 border-blue-200 ${className}`}>
-        <div className="flex items-start gap-4">
-          <div className="flex-shrink-0 p-3 bg-blue-600 rounded-lg">
-            <AlertTriangle className="w-6 h-6 text-white" />
+      <Card className={`p-4 sm:p-6 bg-gradient-to-r from-blue-50 to-emerald-50 border-2 border-blue-200 ${className}`}>
+        <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
+          <div className="flex-shrink-0 p-2.5 sm:p-3 bg-blue-600 rounded-lg">
+            <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
           </div>
-          <div className="flex-1">
-            <h3 className="text-xl font-bold text-slate-900 mb-2">Nhận cảnh báo FDA qua email</h3>
-            <p className="text-slate-600 mb-4">
+          <div className="flex-1 w-full min-w-0">
+            <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-1.5 sm:mb-2">Nhận cảnh báo FDA qua email</h3>
+            <p className="text-xs sm:text-sm md:text-base text-slate-600 mb-3 sm:mb-4">
               Theo dõi realtime thu hồi thực phẩm, dược phẩm, mỹ phẩm từ FDA. Miễn phí và hủy bất cứ lúc nào.
             </p>
             {success ? (
               <div className="flex items-center gap-2 text-green-700">
                 <CheckCircle2 className="w-5 h-5" />
-                <span className="font-medium">Đăng ký thành công! Kiểm tra email của bạn.</span>
+                <span className="font-medium text-sm sm:text-base">Đăng ký thành công! Kiểm tra email của bạn.</span>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="flex gap-2">
+              <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2 w-full">
                 <Input
                   type="email"
                   placeholder="email@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="flex-1"
+                  className="flex-1 min-w-0 bg-white"
                   disabled={loading}
                 />
-                <Button type="submit" disabled={loading} className="bg-blue-600 hover:bg-blue-700">
+                <Button type="submit" disabled={loading} className="bg-blue-600 hover:bg-blue-700 whitespace-nowrap">
                   {loading ? (
                     "Đang xử lý..."
                   ) : (

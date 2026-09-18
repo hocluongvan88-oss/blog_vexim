@@ -266,14 +266,14 @@ export default function ExportSalesServicePage() {
       />
       <Header />
 
-      <main className="min-h-screen bg-background">
+      <main className="min-h-screen bg-background w-full max-w-full overflow-x-hidden">
         {/* ========================================================= */}
         {/* 1. HEADER / HERO SECTION — NỀN SÁNG, TƯƠNG PHẢN RÕ RÀNG */}
         {/* ========================================================= */}
-        <section className="pt-28 md:pt-36 pb-16 md:pb-20 bg-gradient-to-b from-slate-50 via-white to-background border-b border-border/70">
+        <section className="pt-20 sm:pt-28 md:pt-36 pb-12 sm:pb-16 md:pb-20 bg-gradient-to-b from-slate-50 via-white to-background border-b border-border/70 overflow-hidden">
           <div className="container mx-auto px-4 max-w-6xl">
             {/* Breadcrumb / Category Tag */}
-            <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs text-muted-foreground mb-3 sm:mb-4">
               <Link href="/" className="hover:text-primary transition-colors">
                 Trang chủ
               </Link>
@@ -287,16 +287,16 @@ export default function ExportSalesServicePage() {
 
             {/* VÙNG TIÊU ĐỀ RIÊNG BIỆT — TƯƠNG PHẢN CAO, KHÔNG PHỦ BANNER XANH */}
             <div className="text-center max-w-4xl mx-auto">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 text-xs md:text-sm font-bold uppercase tracking-wider mb-6">
-                <Sparkles className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 sm:px-4 sm:py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 text-[11px] sm:text-xs md:text-sm font-bold uppercase tracking-wider mb-4 sm:mb-6">
+                <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600 dark:text-emerald-400" />
                 DỊCH VỤ PHÒNG SALE XUẤT KHẨU
               </div>
 
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight leading-tight md:leading-tight mb-6 text-balance">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight leading-snug sm:leading-tight mb-4 sm:mb-6 text-balance">
                 Có sản phẩm tốt nhưng chưa có một đội ngũ sale đủ mạnh để tiếp cận buyer quốc tế?
               </h1>
 
-              <p className="text-lg md:text-xl text-slate-700 dark:text-slate-300 leading-relaxed font-medium mb-8 max-w-3xl mx-auto text-balance">
+              <p className="text-sm sm:text-base md:text-xl text-slate-700 dark:text-slate-300 leading-relaxed font-medium mb-6 sm:mb-8 max-w-3xl mx-auto text-balance">
                 <strong className="text-emerald-700 dark:text-emerald-400 font-bold">
                   Vexim trở thành phòng sale xuất khẩu thuê ngoài
                 </strong>
@@ -304,50 +304,50 @@ export default function ExportSalesServicePage() {
               </p>
 
               {/* Highlight callout box */}
-              <div className="max-w-2xl mx-auto p-4 md:p-5 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border-2 border-amber-300 dark:border-amber-800 text-amber-950 dark:text-amber-200 text-sm md:text-base font-semibold shadow-xs mb-8 flex items-center justify-center gap-3">
-                <span className="text-2xl">💡</span>
+              <div className="max-w-2xl mx-auto p-3.5 sm:p-4 md:p-5 rounded-xl sm:rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-300 sm:border-2 sm:border-amber-400 text-amber-950 dark:text-amber-200 text-xs sm:text-sm md:text-base font-semibold shadow-xs mb-6 sm:mb-8 flex items-start sm:items-center justify-center gap-2.5 sm:gap-3 text-left sm:text-center">
+                <span className="text-xl sm:text-2xl shrink-0">💡</span>
                 <span>
                   Chi phí vận hành chỉ tương đương một nhân sự văn phòng — nhưng Supplier có cả một hệ thống phía sau.
                 </span>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 w-full max-w-md sm:max-w-none mx-auto">
                 <ExportSalesBookingButton
                   size="lg"
-                  className="w-full sm:w-auto bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg text-base px-8 py-6 font-bold"
+                  className="w-full sm:w-auto bg-emerald-600 text-white hover:bg-emerald-700 shadow-md text-sm sm:text-base px-5 sm:px-8 py-3 sm:py-4 h-auto font-bold whitespace-normal leading-snug text-center"
                 >
-                  Đăng ký tư vấn Phòng Sale Xuất khẩu
-                  <ArrowRight className="w-5 h-5 ml-2" />
+                  <span>Đăng ký tư vấn Phòng Sale Xuất khẩu</span>
+                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2 shrink-0" />
                 </ExportSalesBookingButton>
 
                 <Button
                   asChild
                   size="lg"
                   variant="outline"
-                  className="w-full sm:w-auto border-slate-300 hover:bg-slate-100 text-slate-800 dark:text-slate-200 dark:border-slate-700 text-base py-6"
+                  className="w-full sm:w-auto border-slate-300 hover:bg-slate-100 text-slate-800 dark:text-slate-200 dark:border-slate-700 text-sm sm:text-base px-5 sm:px-8 py-3 sm:py-4 h-auto whitespace-normal font-semibold text-center"
                 >
                   <a href="#quy-trinh">Xem 8 bước quy trình</a>
                 </Button>
               </div>
 
               {/* Quick trust metrics */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12 pt-8 border-t border-slate-200 dark:border-slate-800 text-left">
-                <div className="p-3">
-                  <div className="text-2xl md:text-3xl font-black text-slate-900 dark:text-slate-100">100%</div>
-                  <div className="text-xs text-muted-foreground mt-1">Dữ liệu hải quan Bill of Lading thực</div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-4 mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-slate-200 dark:border-slate-800 text-left">
+                <div className="p-2.5 sm:p-3 rounded-xl bg-slate-100/60 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800">
+                  <div className="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 dark:text-slate-100">100%</div>
+                  <div className="text-[11px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1 leading-tight">Dữ liệu hải quan Bill of Lading thực</div>
                 </div>
-                <div className="p-3">
-                  <div className="text-2xl md:text-3xl font-black text-emerald-600">7 Tiêu chí</div>
-                  <div className="text-xs text-muted-foreground mt-1">Sàng lọc buyer trước khi tiếp cận</div>
+                <div className="p-2.5 sm:p-3 rounded-xl bg-slate-100/60 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800">
+                  <div className="text-xl sm:text-2xl md:text-3xl font-black text-emerald-600">7 Tiêu chí</div>
+                  <div className="text-[11px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1 leading-tight">Sàng lọc buyer trước khi tiếp cận</div>
                 </div>
-                <div className="p-3">
-                  <div className="text-2xl md:text-3xl font-black text-slate-900 dark:text-slate-100">Hàng tuần</div>
-                  <div className="text-xs text-muted-foreground mt-1">Báo cáo tiến độ tập trung minh bạch</div>
+                <div className="p-2.5 sm:p-3 rounded-xl bg-slate-100/60 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800">
+                  <div className="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 dark:text-slate-100">Hàng tuần</div>
+                  <div className="text-[11px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1 leading-tight">Báo cáo tiến độ tập trung minh bạch</div>
                 </div>
-                <div className="p-3">
-                  <div className="text-2xl md:text-3xl font-black text-amber-600">Hoa Kỳ</div>
-                  <div className="text-xs text-muted-foreground mt-1">Chuyên gia tuân thủ nhập khẩu tại Mỹ</div>
+                <div className="p-2.5 sm:p-3 rounded-xl bg-slate-100/60 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800">
+                  <div className="text-xl sm:text-2xl md:text-3xl font-black text-amber-600">Hoa Kỳ</div>
+                  <div className="text-[11px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1 leading-tight">Chuyên gia tuân thủ nhập khẩu tại Mỹ</div>
                 </div>
               </div>
             </div>
@@ -357,38 +357,38 @@ export default function ExportSalesServicePage() {
         {/* ========================================================= */}
         {/* 2. VẤN ĐỀ CỦA SUPPLIER (PAIN POINTS) */}
         {/* ========================================================= */}
-        <section className="py-16 md:py-24 bg-slate-50/60 dark:bg-slate-900/40 border-b border-border/70">
+        <section className="py-12 sm:py-16 md:py-24 bg-slate-50/60 dark:bg-slate-900/40 border-b border-border/70 overflow-hidden">
           <div className="container mx-auto px-4 max-w-6xl">
-            <div className="max-w-3xl mx-auto text-center mb-12 md:mb-16">
-              <Badge variant="outline" className="mb-3 text-red-600 border-red-300 bg-red-50/60 font-semibold px-3 py-1">
+            <div className="max-w-3xl mx-auto text-center mb-8 sm:mb-12 md:mb-16">
+              <Badge variant="outline" className="mb-2.5 sm:mb-3 text-red-600 border-red-300 bg-red-50/60 font-semibold px-2.5 sm:px-3 py-1 text-xs sm:text-sm">
                 Thực trạng doanh nghiệp
               </Badge>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
+              <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight leading-snug">
                 Vấn đề của Supplier khi tìm đường xuất khẩu
               </h2>
-              <p className="text-muted-foreground mt-3 text-base md:text-lg">
+              <p className="text-muted-foreground mt-2.5 sm:mt-3 text-sm sm:text-base md:text-lg leading-relaxed">
                 Những nút thắt lớn nhất khiến nhà sản xuất Việt Nam dù có hàng tốt vẫn loay hoay chưa thể bước chân vào thị trường quốc tế.
               </p>
             </div>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-6">
               {SUPPLIER_PROBLEMS.map((prob) => (
                 <Card
                   key={prob.num}
                   className="border border-border/80 bg-card hover:border-red-300 hover:shadow-md transition-all duration-200"
                 >
-                  <CardContent className="p-6 flex flex-col justify-between h-full">
+                  <CardContent className="p-4 sm:p-6 flex flex-col justify-between h-full">
                     <div>
-                      <div className="flex items-center justify-between mb-4">
-                        <span className="w-9 h-9 rounded-lg bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 flex items-center justify-center font-bold text-sm">
+                      <div className="flex items-center justify-between mb-3 sm:mb-4">
+                        <span className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 flex items-center justify-center font-bold text-xs sm:text-sm">
                           {prob.num}
                         </span>
-                        <XCircle className="w-5 h-5 text-red-400" />
+                        <XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-400" />
                       </div>
-                      <h3 className="text-base md:text-lg font-bold text-slate-900 dark:text-slate-100 mb-2 leading-snug">
+                      <h3 className="text-sm sm:text-base md:text-lg font-bold text-slate-900 dark:text-slate-100 mb-1.5 sm:mb-2 leading-snug">
                         {prob.title}
                       </h3>
-                      <p className="text-sm text-muted-foreground leading-relaxed">
+                      <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                         {prob.desc}
                       </p>
                     </div>
@@ -402,49 +402,49 @@ export default function ExportSalesServicePage() {
         {/* ========================================================= */}
         {/* 3. GIẢI PHÁP CỦA VEXIM & 7 TIÊU CHÍ PHÂN TÍCH BUYER */}
         {/* ========================================================= */}
-        <section className="py-16 md:py-24 bg-white dark:bg-background border-b border-border/70">
+        <section className="py-12 sm:py-16 md:py-24 bg-white dark:bg-background border-b border-border/70 overflow-hidden">
           <div className="container mx-auto px-4 max-w-6xl">
-            <div className="max-w-3xl mx-auto text-center mb-12 md:mb-16">
-              <Badge variant="outline" className="mb-3 text-emerald-700 border-emerald-300 bg-emerald-50/60 font-semibold px-3 py-1">
+            <div className="max-w-3xl mx-auto text-center mb-8 sm:mb-12 md:mb-16">
+              <Badge variant="outline" className="mb-2.5 sm:mb-3 text-emerald-700 border-emerald-300 bg-emerald-50/60 font-semibold px-2.5 sm:px-3 py-1 text-xs sm:text-sm">
                 Giải pháp toàn diện
               </Badge>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
+              <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight leading-snug">
                 Giải pháp của Vexim Global
               </h2>
-              <p className="text-slate-700 dark:text-slate-300 mt-3 text-base md:text-lg font-medium leading-relaxed">
+              <p className="text-slate-700 dark:text-slate-300 mt-2.5 sm:mt-3 text-sm sm:text-base md:text-lg font-medium leading-relaxed">
                 Vexim trở thành <strong className="text-emerald-700 dark:text-emerald-400">phòng sale xuất khẩu thuê ngoài</strong>, 
                 đại diện cho Supplier tiếp cận và kết nối trực tiếp với buyer tại thị trường Mỹ.
               </p>
             </div>
 
             {/* Core Methodology Highlight */}
-            <div className="rounded-2xl border-2 border-emerald-200 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-950/20 p-6 md:p-8 mb-12">
+            <div className="rounded-xl sm:rounded-2xl border border-emerald-200 sm:border-2 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-950/20 p-4 sm:p-6 md:p-8 mb-8 sm:mb-12">
               <div className="max-w-3xl mx-auto text-center">
-                <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-slate-100 mb-3">
+                <h3 className="text-base sm:text-xl md:text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2 sm:mb-3 leading-snug">
                   Không đơn thuần cung cấp danh sách buyer — Vexim phân tích và chọn lọc trước khi tiếp cận
                 </h3>
-                <p className="text-sm md:text-base text-slate-600 dark:text-slate-400 leading-relaxed">
+                <p className="text-xs sm:text-sm md:text-base text-slate-600 dark:text-slate-400 leading-relaxed">
                   Thay vì gửi hàng loạt email spam vào những địa chỉ vô giá trị, Vexim phân tích sâu từng buyer dựa trên 7 tiêu chí cốt lõi:
                 </p>
               </div>
             </div>
 
             {/* 7 Tiêu chí phân tích buyer */}
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-6 mb-8 sm:mb-16">
               {BUYER_CRITERIA.map((crit, idx) => {
                 const Icon = crit.icon
                 return (
                   <div
                     key={idx}
-                    className="p-5 rounded-xl border border-border bg-card shadow-xs hover:border-emerald-400 transition-colors"
+                    className="p-4 sm:p-5 rounded-xl border border-border bg-card shadow-xs hover:border-emerald-400 transition-colors"
                   >
-                    <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 flex items-center justify-center mb-3">
-                      <Icon className="w-5 h-5" />
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 flex items-center justify-center mb-2.5 sm:mb-3">
+                      <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                     </div>
-                    <h4 className="text-base font-bold text-slate-900 dark:text-slate-100 mb-1.5">
+                    <h4 className="text-sm sm:text-base font-bold text-slate-900 dark:text-slate-100 mb-1 leading-snug">
                       {crit.title}
                     </h4>
-                    <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">
+                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                       {crit.desc}
                     </p>
                   </div>
@@ -452,55 +452,55 @@ export default function ExportSalesServicePage() {
               })}
 
               {/* Card thứ 8: Tổng kết chi phí & sức mạnh */}
-              <div className="p-5 rounded-xl border-2 border-emerald-500/50 bg-gradient-to-br from-emerald-600 to-teal-700 text-white flex flex-col justify-between shadow-md">
+              <div className="p-4 sm:p-5 rounded-xl border border-emerald-500/50 sm:border-2 bg-gradient-to-br from-emerald-600 to-teal-700 text-white flex flex-col justify-between shadow-md">
                 <div>
-                  <div className="w-10 h-10 rounded-lg bg-white/20 text-white flex items-center justify-center mb-3">
-                    <Sparkles className="w-5 h-5" />
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-white/20 text-white flex items-center justify-center mb-2.5 sm:mb-3">
+                    <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
-                  <h4 className="text-base font-bold mb-1.5">Hệ thống phía sau Supplier</h4>
-                  <p className="text-xs md:text-sm text-white/90 leading-relaxed">
+                  <h4 className="text-sm sm:text-base font-bold mb-1 leading-snug">Hệ thống phía sau Supplier</h4>
+                  <p className="text-xs sm:text-sm text-white/90 leading-relaxed">
                     Chi phí vận hành chỉ tương đương một nhân sự văn phòng — nhưng bạn sở hữu cả một bộ máy dữ liệu và mạng lưới buyer chuyên nghiệp.
                   </p>
                 </div>
-                <div className="mt-4 pt-3 border-t border-white/20 text-xs font-bold text-emerald-200">
+                <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t border-white/20 text-[11px] sm:text-xs font-bold text-emerald-200">
                   Hiệu quả tối ưu · Rủi ro tối thiểu
                 </div>
               </div>
             </div>
 
             {/* 2 Trụ cột hỗ trợ: Quản lý tập trung & Chuyên gia tuân thủ tại Mỹ */}
-            <div className="grid md:grid-cols-2 gap-8">
-              <div className="p-6 md:p-8 rounded-2xl border border-border bg-slate-50 dark:bg-slate-900/50">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-11 h-11 rounded-xl bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300 flex items-center justify-center font-bold">
-                    <BarChart3 className="w-6 h-6" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
+              <div className="p-4 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl border border-border bg-slate-50 dark:bg-slate-900/50">
+                <div className="flex items-center gap-3 mb-3 sm:mb-4">
+                  <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300 flex items-center justify-center font-bold shrink-0">
+                    <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6" />
                   </div>
                   <div>
-                    <h4 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                    <h4 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 leading-snug">
                       Hệ thống quản lý & báo cáo tập trung
                     </h4>
-                    <p className="text-xs text-muted-foreground">Định kỳ cập nhật tiến độ hàng tuần</p>
+                    <p className="text-[11px] sm:text-xs text-muted-foreground">Định kỳ cập nhật tiến độ hàng tuần</p>
                   </div>
                 </div>
-                <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                   Đội ngũ vận hành của Vexim có kinh nghiệm thực chiến trong hoạt động sale xuất khẩu quốc tế.
                   Mọi hoạt động tiếp cận, phản hồi của buyer, báo giá và tiến độ deal đều được cập nhật minh bạch trên hệ thống để Supplier luôn nắm rõ bức tranh thực tế.
                 </p>
               </div>
 
-              <div className="p-6 md:p-8 rounded-2xl border border-border bg-slate-50 dark:bg-slate-900/50">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-11 h-11 rounded-xl bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300 flex items-center justify-center font-bold">
-                    <ShieldCheck className="w-6 h-6" />
+              <div className="p-4 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl border border-border bg-slate-50 dark:bg-slate-900/50">
+                <div className="flex items-center gap-3 mb-3 sm:mb-4">
+                  <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300 flex items-center justify-center font-bold shrink-0">
+                    <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6" />
                   </div>
                   <div>
-                    <h4 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                    <h4 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 leading-snug">
                       Đội ngũ chuyên gia tuân thủ tại Hoa Kỳ
                     </h4>
-                    <p className="text-xs text-muted-foreground">Pháp lý FDA, MoCRA & Tiêu chuẩn Mỹ</p>
+                    <p className="text-[11px] sm:text-xs text-muted-foreground">Pháp lý FDA, MoCRA & Tiêu chuẩn Mỹ</p>
                   </div>
                 </div>
-                <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                   Kết hợp cùng các chuyên gia tư vấn pháp lý xuất nhập khẩu bản địa tại Mỹ, giúp Supplier chuẩn bị hồ sơ tuân thủ, kiểm soát nhãn mác và giải trình kỹ thuật một cách bài bản, đáp ứng khắt khe các yêu cầu của thị trường.
                 </p>
               </div>
@@ -511,41 +511,41 @@ export default function ExportSalesServicePage() {
         {/* ========================================================= */}
         {/* 4. QUY TRÌNH VẬN HÀNH 8 BƯỚC */}
         {/* ========================================================= */}
-        <section id="quy-trinh" className="py-16 md:py-24 bg-slate-50/60 dark:bg-slate-900/40 border-b border-border/70 scroll-mt-20">
+        <section id="quy-trinh" className="py-12 sm:py-16 md:py-24 bg-slate-50/60 dark:bg-slate-900/40 border-b border-border/70 scroll-mt-20 overflow-hidden">
           <div className="container mx-auto px-4 max-w-6xl">
-            <div className="max-w-3xl mx-auto text-center mb-12 md:mb-16">
-              <Badge variant="outline" className="mb-3 text-blue-700 border-blue-300 bg-blue-50/60 font-semibold px-3 py-1">
+            <div className="max-w-3xl mx-auto text-center mb-8 sm:mb-12 md:mb-16">
+              <Badge variant="outline" className="mb-2.5 sm:mb-3 text-blue-700 border-blue-300 bg-blue-50/60 font-semibold px-2.5 sm:px-3 py-1 text-xs sm:text-sm">
                 Lộ trình bài bản
               </Badge>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
+              <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight leading-snug">
                 Quy trình vận hành 8 bước
               </h2>
-              <p className="text-muted-foreground mt-3 text-base md:text-lg">
+              <p className="text-muted-foreground mt-2.5 sm:mt-3 text-sm sm:text-base md:text-lg leading-relaxed">
                 Các bước triển khai chặt chẽ từ khâu phân tích dữ liệu đến khi đón tiếp và ký kết hợp đồng cùng buyer.
               </p>
             </div>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-6">
               {WORKFLOW_STEPS.map((step) => {
                 const Icon = step.icon
                 return (
                   <div
                     key={step.step}
-                    className="p-6 rounded-2xl border border-border bg-card shadow-xs hover:border-emerald-400 hover:shadow-md transition-all flex flex-col justify-between"
+                    className="p-4 sm:p-6 rounded-xl sm:rounded-2xl border border-border bg-card shadow-xs hover:border-emerald-400 hover:shadow-md transition-all flex flex-col justify-between"
                   >
                     <div>
-                      <div className="flex items-center justify-between mb-4">
-                        <span className="text-2xl font-black text-emerald-600 font-mono">
+                      <div className="flex items-center justify-between mb-3 sm:mb-4">
+                        <span className="text-xl sm:text-2xl font-black text-emerald-600 font-mono">
                           {step.step}
                         </span>
-                        <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-                          <Icon className="w-4 h-4" />
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                          <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                         </div>
                       </div>
-                      <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 mb-2 leading-snug">
+                      <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-slate-100 mb-1.5 leading-snug">
                         {step.title}
                       </h3>
-                      <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">
+                      <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                         {step.desc}
                       </p>
                     </div>
@@ -559,36 +559,36 @@ export default function ExportSalesServicePage() {
         {/* ========================================================= */}
         {/* 5. CƠ HỘI DÀNH CHO SUPPLIER */}
         {/* ========================================================= */}
-        <section className="py-16 md:py-24 bg-white dark:bg-background border-b border-border/70">
+        <section className="py-12 sm:py-16 md:py-24 bg-white dark:bg-background border-b border-border/70 overflow-hidden">
           <div className="container mx-auto px-4 max-w-6xl">
-            <div className="max-w-3xl mx-auto text-center mb-12 md:mb-16">
-              <Badge variant="outline" className="mb-3 text-emerald-700 border-emerald-300 bg-emerald-50/60 font-semibold px-3 py-1">
+            <div className="max-w-3xl mx-auto text-center mb-8 sm:mb-12 md:mb-16">
+              <Badge variant="outline" className="mb-2.5 sm:mb-3 text-emerald-700 border-emerald-300 bg-emerald-50/60 font-semibold px-2.5 sm:px-3 py-1 text-xs sm:text-sm">
                 Lợi thế bền vững
               </Badge>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
+              <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight leading-snug">
                 Cơ hội dành cho Supplier
               </h2>
-              <p className="text-slate-700 dark:text-slate-300 mt-3 text-base md:text-lg font-semibold">
+              <p className="text-slate-700 dark:text-slate-300 mt-2.5 sm:mt-3 text-sm sm:text-base md:text-lg font-semibold leading-relaxed">
                 Không cần tự xây dựng cả một phòng sale xuất khẩu.
               </p>
             </div>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-6">
               {SUPPLIER_OPPORTUNITIES.map((opp, idx) => {
                 const Icon = opp.icon
                 return (
                   <div
                     key={idx}
-                    className="p-6 rounded-2xl border border-border bg-card shadow-xs hover:border-emerald-300 transition-colors flex flex-col justify-between"
+                    className="p-4 sm:p-6 rounded-xl sm:rounded-2xl border border-border bg-card shadow-xs hover:border-emerald-300 transition-colors flex flex-col justify-between"
                   >
                     <div>
-                      <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 flex items-center justify-center mb-4">
-                        <Icon className="w-5 h-5" />
+                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 flex items-center justify-center mb-3 sm:mb-4">
+                        <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                       </div>
-                      <h3 className="text-base md:text-lg font-bold text-slate-900 dark:text-slate-100 mb-2 leading-snug">
+                      <h3 className="text-sm sm:text-base md:text-lg font-bold text-slate-900 dark:text-slate-100 mb-1.5 sm:mb-2 leading-snug">
                         {opp.title}
                       </h3>
-                      <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">
+                      <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                         {opp.desc}
                       </p>
                     </div>
@@ -602,13 +602,13 @@ export default function ExportSalesServicePage() {
         {/* ========================================================= */}
         {/* 6. FAQ (CÂU HỎI THƯỜNG GẶP) */}
         {/* ========================================================= */}
-        <section className="py-16 md:py-20 bg-slate-50/60 dark:bg-slate-900/40 border-b border-border/70">
+        <section className="py-12 sm:py-16 md:py-20 bg-slate-50/60 dark:bg-slate-900/40 border-b border-border/70 overflow-hidden">
           <div className="container mx-auto px-4 max-w-4xl">
-            <div className="text-center mb-12">
-              <Badge variant="outline" className="mb-3 text-slate-700 border-slate-300 font-semibold px-3 py-1">
+            <div className="text-center mb-8 sm:mb-12">
+              <Badge variant="outline" className="mb-2.5 sm:mb-3 text-slate-700 border-slate-300 font-semibold px-2.5 sm:px-3 py-1 text-xs sm:text-sm">
                 Giải đáp thắc mắc
               </Badge>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight leading-snug">
                 Câu hỏi thường gặp về dịch vụ phòng sale xuất khẩu
               </h2>
             </div>
@@ -620,47 +620,47 @@ export default function ExportSalesServicePage() {
         {/* ========================================================= */}
         {/* 7. CTA & FORM ĐĂNG KÝ TƯ VẤN (CALL TO ACTION) */}
         {/* ========================================================= */}
-        <section id="dang-ky" className="py-16 md:py-24 bg-white dark:bg-background">
+        <section id="dang-ky" className="py-12 sm:py-16 md:py-24 bg-white dark:bg-background overflow-hidden">
           <div className="container mx-auto px-4 max-w-5xl">
-            <div className="rounded-3xl border-2 border-emerald-300 dark:border-emerald-800 bg-gradient-to-br from-emerald-50/40 via-white to-slate-50 dark:from-slate-900 dark:to-slate-950 p-8 md:p-12 shadow-xl">
-              <div className="grid lg:grid-cols-12 gap-10 items-center">
+            <div className="rounded-2xl sm:rounded-3xl border border-emerald-200 sm:border-2 sm:border-emerald-300 dark:border-emerald-800 bg-gradient-to-br from-emerald-50/40 via-white to-slate-50 dark:from-slate-900 dark:to-slate-950 p-4 sm:p-6 md:p-10 shadow-lg sm:shadow-xl">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-10 items-center">
                 {/* Left: Message & Contact */}
-                <div className="lg:col-span-5 flex flex-col gap-5">
-                  <Badge className="bg-emerald-600 text-white font-bold w-fit text-xs px-3 py-1">
+                <div className="lg:col-span-5 flex flex-col gap-3.5 sm:gap-5">
+                  <Badge className="bg-emerald-600 text-white font-bold w-fit text-xs px-2.5 sm:px-3 py-1">
                     KẾT NỐI NGAY HÔM NAY
                   </Badge>
 
-                  <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight leading-snug">
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight leading-snug">
                     Bạn có sản phẩm tốt.
                     <span className="block text-emerald-700 dark:text-emerald-400 mt-1">
                       Vexim giúp bạn xây dựng hệ thống để đưa sản phẩm đó đến đúng buyer.
                     </span>
                   </h2>
 
-                  <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                     Hãy chia sẻ thông tin sản phẩm và năng lực cung ứng của nhà máy bạn. Đội ngũ chuyên gia Vexim Global sẽ phân tích dữ liệu thị trường và liên hệ tư vấn 1:1 trong 2–4 giờ làm việc.
                   </p>
 
-                  <div className="pt-2 space-y-3 border-t border-slate-200 dark:border-slate-800">
+                  <div className="pt-2 sm:pt-3 space-y-2.5 sm:space-y-3 border-t border-slate-200 dark:border-slate-800">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0">
+                      <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0">
                         <PhoneCall className="w-4 h-4" />
                       </div>
                       <div>
-                        <div className="text-xs text-muted-foreground">Hotline tư vấn xuất khẩu 24/7</div>
-                        <a href="tel:0373685634" className="text-sm font-bold text-slate-900 dark:text-slate-100 hover:text-emerald-600">
+                        <div className="text-[11px] sm:text-xs text-muted-foreground">Hotline tư vấn xuất khẩu 24/7</div>
+                        <a href="tel:0373685634" className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 hover:text-emerald-600">
                           0373 685 634
                         </a>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0">
+                      <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0">
                         <Clock className="w-4 h-4" />
                       </div>
                       <div>
-                        <div className="text-xs text-muted-foreground">Thời gian phản hồi</div>
-                        <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                        <div className="text-[11px] sm:text-xs text-muted-foreground">Thời gian phản hồi</div>
+                        <div className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100">
                           Trong 2–4 giờ làm việc (Thứ 2 – Thứ 7)
                         </div>
                       </div>
@@ -669,12 +669,12 @@ export default function ExportSalesServicePage() {
                 </div>
 
                 {/* Right: Inline Form */}
-                <div className="lg:col-span-7 bg-white dark:bg-slate-900 p-6 md:p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-md">
-                  <div className="mb-5 pb-3 border-b border-slate-100 dark:border-slate-800">
-                    <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                <div className="lg:col-span-7 bg-white dark:bg-slate-900 p-4 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm sm:shadow-md">
+                  <div className="mb-3.5 pb-2.5 sm:mb-5 sm:pb-3 border-b border-slate-100 dark:border-slate-800">
+                    <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 leading-snug">
                       Đăng ký tư vấn Phòng Sale Xuất khẩu Vexim
                     </h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">
+                    <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">
                       Vui lòng để lại thông tin để nhận đánh giá sơ bộ độ phù hợp với buyer Mỹ
                     </p>
                   </div>

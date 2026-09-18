@@ -77,10 +77,10 @@ export function ConsultationDialog({ open, onOpenChange, children }: Consultatio
       <>
         <div onClick={() => handleOpenChange(true)}>{children}</div>
         <Dialog open={dialogOpen} onOpenChange={handleOpenChange}>
-          <DialogContent className="sm:max-w-[500px]">
+          <DialogContent className="w-full max-w-[calc(100%-1.5rem)] sm:max-w-[500px] max-h-[92vh] overflow-y-auto p-4 sm:p-6">
             <DialogHeader>
-              <DialogTitle className="text-2xl font-bold text-primary">Đăng ký tư vấn miễn phí</DialogTitle>
-              <DialogDescription>Vui lòng để lại thông tin, chúng tôi sẽ liên hệ với bạn sớm nhất</DialogDescription>
+              <DialogTitle className="text-xl sm:text-2xl font-bold text-primary">Đăng ký tư vấn miễn phí</DialogTitle>
+              <DialogDescription className="text-xs sm:text-sm">Vui lòng để lại thông tin, chúng tôi sẽ liên hệ với bạn sớm nhất</DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4 mt-4">
               <input
@@ -220,10 +220,10 @@ export function ConsultationDialog({ open, onOpenChange, children }: Consultatio
   // Otherwise, render as controlled dialog
   return (
     <Dialog open={dialogOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="w-full max-w-[calc(100%-1.5rem)] sm:max-w-[500px] max-h-[92vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-primary">Đăng ký tư vấn miễn phí</DialogTitle>
-          <DialogDescription>Vui lòng để lại thông tin, chúng tôi sẽ liên hệ với bạn sớm nhất</DialogDescription>
+          <DialogTitle className="text-xl sm:text-2xl font-bold text-primary">Đăng ký tư vấn miễn phí</DialogTitle>
+          <DialogDescription className="text-xs sm:text-sm">Vui lòng để lại thông tin, chúng tôi sẽ liên hệ với bạn sớm nhất</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           <input

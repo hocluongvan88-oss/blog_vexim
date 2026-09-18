@@ -30,8 +30,8 @@ export function ExportSalesBookingButton({
       >
         {children || (
           <>
-            Đăng ký tư vấn Phòng Sale Xuất khẩu Vexim
-            <ArrowRight className="w-4 h-4 ml-2" />
+            <span>Đăng ký tư vấn Phòng Sale Xuất khẩu</span>
+            <ArrowRight className="w-4 h-4 ml-2 shrink-0" />
           </>
         )}
       </Button>
@@ -93,7 +93,7 @@ export function ExportSalesInlineForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-3.5 w-full">
       <input
         type="text"
         name="website"
@@ -104,9 +104,9 @@ export function ExportSalesInlineForm() {
         autoComplete="off"
       />
 
-      <div className="grid sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label htmlFor="form-name" className="block text-sm font-medium mb-1.5 text-foreground">
+          <label htmlFor="form-name" className="block text-xs sm:text-sm font-semibold mb-1 text-slate-800 dark:text-slate-200">
             Họ và tên <span className="text-destructive">*</span>
           </label>
           <Input
@@ -116,11 +116,11 @@ export function ExportSalesInlineForm() {
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             disabled={isSubmitting}
-            className="bg-background"
+            className="h-9 sm:h-10 text-xs sm:text-sm bg-background border-slate-300 dark:border-slate-700 focus:border-emerald-500"
           />
         </div>
         <div>
-          <label htmlFor="form-phone" className="block text-sm font-medium mb-1.5 text-foreground">
+          <label htmlFor="form-phone" className="block text-xs sm:text-sm font-semibold mb-1 text-slate-800 dark:text-slate-200">
             Số điện thoại / Zalo <span className="text-destructive">*</span>
           </label>
           <Input
@@ -131,14 +131,14 @@ export function ExportSalesInlineForm() {
             value={formData.phone}
             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
             disabled={isSubmitting}
-            className="bg-background"
+            className="h-9 sm:h-10 text-xs sm:text-sm bg-background border-slate-300 dark:border-slate-700 focus:border-emerald-500"
           />
         </div>
       </div>
 
-      <div className="grid sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label htmlFor="form-email" className="block text-sm font-medium mb-1.5 text-foreground">
+          <label htmlFor="form-email" className="block text-xs sm:text-sm font-semibold mb-1 text-slate-800 dark:text-slate-200">
             Email doanh nghiệp <span className="text-destructive">*</span>
           </label>
           <Input
@@ -149,16 +149,16 @@ export function ExportSalesInlineForm() {
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             disabled={isSubmitting}
-            className="bg-background"
+            className="h-9 sm:h-10 text-xs sm:text-sm bg-background border-slate-300 dark:border-slate-700 focus:border-emerald-500"
           />
         </div>
         <div>
-          <label htmlFor="form-industry" className="block text-sm font-medium mb-1.5 text-foreground">
+          <label htmlFor="form-industry" className="block text-xs sm:text-sm font-semibold mb-1 text-slate-800 dark:text-slate-200">
             Ngành hàng sản xuất
           </label>
           <select
             id="form-industry"
-            className="w-full px-3 py-2 border border-input rounded-md bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            className="w-full h-9 sm:h-10 px-3 py-1.5 border border-slate-300 dark:border-slate-700 rounded-md bg-background text-xs sm:text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             value={formData.service}
             onChange={(e) => setFormData({ ...formData, service: e.target.value })}
             disabled={isSubmitting}
@@ -173,69 +173,68 @@ export function ExportSalesInlineForm() {
       </div>
 
       <div>
-        <label htmlFor="form-product" className="block text-sm font-medium mb-1.5 text-foreground">
-          Sản phẩm chủ lực & Công suất hàng tháng
+        <label htmlFor="form-product" className="block text-xs sm:text-sm font-semibold mb-1 text-slate-800 dark:text-slate-200">
+          Sản phẩm chủ lực & Công suất tháng
         </label>
         <Input
           id="form-product"
-          placeholder="VD: Hạt điều rang muối 50 tấn/tháng, Cà phê Robusta 100 tấn/tháng..."
+          placeholder="VD: Hạt điều rang muối 50 tấn/tháng, Cà phê Robusta..."
           value={formData.product}
           onChange={(e) => setFormData({ ...formData, product: e.target.value })}
           disabled={isSubmitting}
-          className="bg-background"
+          className="h-9 sm:h-10 text-xs sm:text-sm bg-background border-slate-300 dark:border-slate-700 focus:border-emerald-500"
         />
       </div>
 
       <div>
-        <label htmlFor="form-desc" className="block text-sm font-medium mb-1.5 text-foreground">
-          Hiện trạng hồ sơ xuất khẩu & Nhu cầu cụ thể
+        <label htmlFor="form-desc" className="block text-xs sm:text-sm font-semibold mb-1 text-slate-800 dark:text-slate-200">
+          Hiện trạng hồ sơ & Nhu cầu cụ thể
         </label>
         <Textarea
           id="form-desc"
-          rows={3}
-          placeholder="VD: Đã có ISO 22000, chưa có FDA; cần tìm buyer siêu thị Mỹ; mong muốn đưa hàng vào California..."
+          rows={2}
+          placeholder="VD: Đã có ISO 22000, chưa có FDA; cần tìm buyer siêu thị Mỹ..."
           value={formData.description}
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
           disabled={isSubmitting}
-          className="bg-background text-sm"
+          className="bg-background text-xs sm:text-sm py-2 min-h-[54px] border-slate-300 dark:border-slate-700 focus:border-emerald-500 resize-none"
         />
       </div>
 
       {submitMessage && (
         <div
-          className={`p-3 rounded-lg text-sm flex items-center gap-2 ${
+          className={`p-2.5 sm:p-3 rounded-lg text-xs sm:text-sm flex items-center gap-2 ${
             submitMessage.startsWith("✓")
               ? "bg-emerald-50 text-emerald-800 border border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-300 dark:border-emerald-800"
               : "bg-red-50 text-red-800 border border-red-200 dark:bg-red-950/30 dark:text-red-300 dark:border-red-800"
           }`}
         >
           {submitMessage.startsWith("✓") && <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />}
-          {submitMessage}
+          <span className="leading-snug">{submitMessage}</span>
         </div>
       )}
 
       <Button
         type="submit"
-        size="lg"
-        className="w-full bg-emerald-600 text-white hover:bg-emerald-700 shadow-md font-bold text-base py-6"
+        className="w-full h-11 sm:h-12 bg-emerald-600 text-white hover:bg-emerald-700 shadow-md font-bold text-sm sm:text-base rounded-xl transition-all flex items-center justify-center gap-2 whitespace-normal py-2 text-center"
         disabled={isSubmitting}
       >
         {isSubmitting ? (
           <>
-            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-            Đang xử lý yêu cầu...
+            <Loader2 className="w-4 h-4 mr-2 animate-spin shrink-0" />
+            <span>Đang gửi thông tin...</span>
           </>
         ) : (
           <>
-            Đăng ký tư vấn Phòng Sale Xuất khẩu Vexim
-            <ArrowRight className="w-5 h-5 ml-2" />
+            <span>Đăng ký tư vấn Phòng Sale Xuất khẩu</span>
+            <ArrowRight className="w-4 h-4 shrink-0" />
           </>
         )}
       </Button>
 
-      <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground pt-1">
-        <ShieldCheck className="w-4 h-4 text-emerald-600" />
-        <span>Bảo mật 100% dữ liệu sản phẩm & thông tin năng lực nhà máy</span>
+      <div className="flex items-center justify-center gap-1.5 text-[11px] sm:text-xs text-muted-foreground pt-0.5 text-center">
+        <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+        <span>Bảo mật 100% dữ liệu sản phẩm & thông tin nhà máy</span>
       </div>
     </form>
   )

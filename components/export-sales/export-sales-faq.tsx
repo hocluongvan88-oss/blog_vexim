@@ -40,17 +40,17 @@ export const FAQS = [
 
 export function ExportSalesFaq() {
   return (
-    <Accordion type="single" collapsible className="w-full space-y-4">
+    <Accordion type="single" collapsible className="w-full space-y-3 sm:space-y-4">
       {FAQS.map((faq, index) => (
         <AccordionItem
           key={index}
           value={`faq-${index}`}
-          className="border border-border/80 rounded-xl px-5 py-2 bg-card hover:border-primary/40 transition-colors shadow-xs"
+          className="border border-border/80 rounded-xl px-4 sm:px-5 py-1 sm:py-2 bg-card hover:border-primary/40 transition-colors shadow-xs"
         >
-          <AccordionTrigger className="text-left text-base font-semibold text-foreground hover:no-underline py-4">
+          <AccordionTrigger className="text-left text-sm sm:text-base font-semibold text-foreground hover:no-underline py-3.5 sm:py-4 leading-snug">
             {faq.q}
           </AccordionTrigger>
-          <AccordionContent className="text-sm leading-relaxed text-muted-foreground pt-1 pb-4">
+          <AccordionContent className="text-xs sm:text-sm leading-relaxed text-muted-foreground pt-1 pb-3.5 sm:pb-4">
             {faq.a}
           </AccordionContent>
         </AccordionItem>

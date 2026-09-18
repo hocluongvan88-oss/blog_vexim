@@ -34,7 +34,7 @@ export function BackToTop() {
   return (
     <Button
       onClick={scrollToTop}
-      className="fixed bottom-8 right-8 w-12 h-12 rounded-full bg-accent text-accent-foreground hover:bg-accent/90 shadow-lg z-40"
+      className="fixed bottom-5 right-5 sm:bottom-8 sm:right-8 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-accent text-accent-foreground hover:bg-accent/90 shadow-lg z-40"
       size="icon"
       aria-label="Quay lại đầu trang"
     >
