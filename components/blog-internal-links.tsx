@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { ArrowRight, FileCheck, Globe, Shield, Cpu, Package, ScanLine } from "lucide-react"
+import { ArrowRight, FileCheck, Globe, Shield, Cpu, Package, ScanLine, TrendingUp } from "lucide-react"
 import { Card } from "@/components/ui/card"
 
 // Map categories to related services
@@ -17,10 +17,10 @@ const categoryToServices: Record<string, Array<{
       icon: FileCheck,
     },
     {
-      title: "Kiểm tra nhãn FDA",
-      description: "AI kiểm tra tuân thủ nhãn theo 21 CFR, phát hiện lỗi trước khi xuất hàng",
-      href: "/services/fda-label-check",
-      icon: ScanLine,
+      title: "Phòng sale xuất khẩu",
+      description: "Đội ngũ sales xuất khẩu thuê ngoài, tiếp cận 50+ buyer Mỹ/tháng và thu USD",
+      href: "/services/export-sales",
+      icon: TrendingUp,
     },
     {
       title: "US Agent",
@@ -61,10 +61,10 @@ const categoryToServices: Record<string, Array<{
   ],
   "Xuất nhập khẩu": [
     {
-      title: "Kiểm tra nhãn FDA",
-      description: "AI kiểm tra tuân thủ nhãn theo 21 CFR trong 2 phút",
-      href: "/services/fda-label-check",
-      icon: ScanLine,
+      title: "Phòng sale xuất khẩu",
+      description: "Phòng kinh doanh xuất khẩu sang Mỹ trọn gói, tiếp cận 50+ buyer/tháng",
+      href: "/services/export-sales",
+      icon: TrendingUp,
     },
     {
       title: "Đăng ký FDA",
@@ -101,10 +101,10 @@ const categoryToServices: Record<string, Array<{
   ],
   "Tin tức thị trường": [
     {
-      title: "Kiểm tra nhãn FDA",
-      description: "AI kiểm tra tuân thủ nhãn theo 21 CFR",
-      href: "/services/fda-label-check",
-      icon: ScanLine,
+      title: "Phòng sale xuất khẩu",
+      description: "Đội ngũ sales chuyên trách đưa hàng vào chuỗi bán lẻ Mỹ",
+      href: "/services/export-sales",
+      icon: TrendingUp,
     },
     {
       title: "AI Traceability",
@@ -130,10 +130,10 @@ const defaultServices = [
     icon: Globe,
   },
   {
-    title: "Kiểm tra nhãn FDA",
-    description: "AI kiểm tra tuân thủ nhãn FDA",
-    href: "/services/fda-label-check",
-    icon: ScanLine,
+    title: "Phòng sale xuất khẩu",
+    description: "Phòng kinh doanh xuất khẩu thuê ngoài trọn gói sang Mỹ",
+    href: "/services/export-sales",
+    icon: TrendingUp,
   },
 ]
 

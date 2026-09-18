@@ -89,8 +89,11 @@ export async function POST(request: Request) {
     const serviceNames: Record<string, string> = {
       fda: "Đăng ký FDA (Mỹ)",
       gacc: "Mã GACC (Trung Quốc)",
-      "fda-label-check": "Check nhãn FDA",
+      "export-sales": "Phòng sale xuất khẩu (Mỹ)",
+      "fda-label-check": "Phòng sale xuất khẩu (Mỹ)",
       "agent-us": "Dịch vụ Agent Hoa Kỳ",
+      fsvp: "FSVP Compliance",
+      mocra: "MOCRA Registration",
       other: "Khác",
     }
     const serviceName = serviceNames[service] || service || "Chưa chọn"

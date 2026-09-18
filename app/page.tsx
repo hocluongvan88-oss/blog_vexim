@@ -8,7 +8,6 @@ import { NewsPreview } from "@/components/news-preview"
 import { Footer } from "@/components/footer"
 import { BackToTop } from "@/components/back-to-top"
 import { FDAAlertBadge } from "@/components/fda/fda-alert-badge"
-import { ExpertsSection } from "@/components/experts-section"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -62,7 +61,6 @@ export default function Home() {
         <HeroSection />
         <ServicesGrid />
         <WhyChooseUs />
-        <ExpertsSection />
         <WorkflowSection />
         <Statistics />
         <NewsPreview />
