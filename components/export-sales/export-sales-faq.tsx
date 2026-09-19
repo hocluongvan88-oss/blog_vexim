@@ -14,7 +14,7 @@ export const FAQS = [
   },
   {
     q: "Mất bao lâu để có đơn hàng đầu tiên? Vexim Global có cam kết không?",
-    a: "Dựa trên dữ liệu thực tế từ 180+ nhà máy trong hệ thống, thời gian trung bình từ khi ký hợp đồng đến khi có đơn hàng mẫu đầu tiên là 8–12 tuần. Vexim cam kết tiếp cận tối thiểu 50 buyer tiềm năng mỗi tháng, thẩm định hồ sơ hải quan kỹ lưỡng và báo cáo minh bạch cho doanh nghiệp. Nếu sau 4 tháng không có tiến triển thực chất, doanh nghiệp có quyền dừng hợp đồng theo điều khoản minh bạch đã ký.",
+    a: "Dựa trên dữ liệu thực tế từ 180+ nhà máy trong hệ thống, thời gian trung bình từ khi ký hợp đồng đến khi có đơn hàng mẫu đầu tiên là 8–12 tuần. Vexim không đưa ra con số buyer cam kết cố định, vì mỗi ngành nghề, sản phẩm có dung lượng thị trường khác nhau — danh mục buyer tiềm năng được xác định theo ngành hàng cụ thể, thẩm định hồ sơ hải quan kỹ lưỡng và báo cáo minh bạch cho doanh nghiệp. Nếu sau 4 tháng không có tiến triển thực chất, doanh nghiệp có quyền dừng hợp đồng theo điều khoản minh bạch đã ký.",
   },
   {
     q: "Làm thế nào để nhà máy kiểm soát công việc Vexim đang triển khai?",

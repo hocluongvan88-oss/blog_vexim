@@ -46,7 +46,7 @@ const services = [
     description:
       "Phòng kinh doanh xuất khẩu thuê ngoài trọn gói cho nhà máy Việt sang Mỹ. Tìm buyer thẩm định, đàm phán thương mại và hỗ trợ tuân thủ.",
     items: [
-      "Tiếp cận 50+ buyer/tháng",
+      "Tiếp cận buyer Mỹ phù hợp ngành hàng",
       "Hỗ trợ tuân thủ & đàm phán",
       "Tối ưu nguồn lực vận hành"
     ],
