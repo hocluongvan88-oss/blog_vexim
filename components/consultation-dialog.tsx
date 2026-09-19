@@ -197,7 +197,7 @@ export function ConsultationDialog({ open, onOpenChange, children }: Consultatio
 
               <Button
                 type="submit"
-                className="w-full bg-accent text-accent-foreground hover:bg-accent/90"
+                variant="cta" className="w-full"
                 size="lg"
                 disabled={isSubmitting}
               >
@@ -340,7 +340,7 @@ export function ConsultationDialog({ open, onOpenChange, children }: Consultatio
 
           <Button
             type="submit"
-            className="w-full bg-accent text-accent-foreground hover:bg-accent/90"
+            variant="cta" className="w-full"
             size="lg"
             disabled={isSubmitting}
           >

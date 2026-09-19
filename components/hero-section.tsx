@@ -55,8 +55,8 @@ export function HeroSection() {
   }
 
   return (
-    <section id="hero" className="relative pt-24 md:pt-32 pb-16 md:pb-24 overflow-hidden">
-      {/* Background Image */}
+    <section id="hero" className="relative pt-24 md:pt-32 pb-16 md:pb-24 overflow-hidden bg-navy-950">
+      {/* Background Image — logistics / cảng biển */}
       <div
         className="absolute inset-0 z-0"
         style={{
@@ -65,13 +65,32 @@ export function HeroSection() {
           backgroundPosition: "center",
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/95 via-primary/90 to-primary/80" />
+        {/* Lớp phủ navy đậm dần sang phải để ảnh vẫn lộ ra, không còn một màu xanh phẳng */}
+        <div className="absolute inset-0 bg-gradient-to-r from-navy-950/97 via-navy-900/92 to-navy-800/70" />
+      </div>
+
+      {/* Điểm nhấn xanh nhạt — glow + grid trang trí */}
+      <div className="pointer-events-none absolute inset-0 z-0" aria-hidden="true">
+        <div className="absolute -top-32 right-[-10%] w-[480px] h-[480px] rounded-full bg-sky-400/20 blur-[120px]" />
+        <div className="absolute bottom-[-20%] left-[15%] w-[420px] h-[420px] rounded-full bg-amber-400/10 blur-[120px]" />
+        <div
+          className="absolute inset-0 opacity-[0.07]"
+          style={{
+            backgroundImage:
+              "linear-gradient(to right, #7dd3fc 1px, transparent 1px), linear-gradient(to bottom, #7dd3fc 1px, transparent 1px)",
+            backgroundSize: "56px 56px",
+          }}
+        />
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
           {/* Left Content */}
           <div className="text-white">
+            <span className="inline-flex items-center gap-2 rounded-full border border-sky-300/30 bg-sky-400/10 px-4 py-1.5 text-sm font-medium text-sky-200 mb-6">
+              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+              Giải pháp xuất nhập khẩu toàn cầu
+            </span>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-balance leading-tight">
               Chuẩn hóa quốc tế cùng đội ngũ chuyên gia FDA hàng đầu
             </h1>
@@ -105,11 +124,7 @@ export function HeroSection() {
                 <span className="text-white/90">Hỗ trợ 24/7 - Kết nối không khoảng cách giữa doanh nghiệp Việt và mạng lưới chuyên gia tại Mỹ.</span>
               </li>
             </ul>
-            <Button
-              size="lg"
-              className="bg-red-600 text-white hover:bg-red-700 shadow-lg"
-              onClick={() => setIsDialogOpen(true)}
-            >
+            <Button variant="cta" size="lg" onClick={() => setIsDialogOpen(true)}>
               Tư vấn miễn phí
               <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
@@ -236,12 +251,7 @@ export function HeroSection() {
                 </div>
               )}
 
-              <Button
-                type="submit"
-                className="w-full bg-accent text-accent-foreground hover:bg-accent/90"
-                size="lg"
-                disabled={isSubmitting}
-              >
+              <Button type="submit" variant="cta" className="w-full" size="lg" disabled={isSubmitting}>
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

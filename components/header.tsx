@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Menu, X, User, ChevronDown, Shield } from "lucide-react"
+import { Menu, X, User, ChevronDown, Shield, Ship } from "lucide-react"
 import { ConsultationDialog } from "@/components/consultation-dialog"
 import Link from "next/link"
 import { BlogSearch } from "@/components/blog-search"
@@ -41,34 +41,44 @@ export function Header() {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled ? "bg-white shadow-md" : "bg-white/95 backdrop-blur-sm"
+        className={`fixed top-0 left-0 right-0 z-50 border-b border-transparent transition-all duration-300 ${
+          isScrolled ? "bg-white shadow-md border-border" : "bg-white/95 backdrop-blur-sm border-border/60"
         }`}
       >
+        {/* Accent line trên cùng — nhận diện thương hiệu */}
+        <div className="h-1 w-full bg-gradient-to-r from-navy-900 via-accent to-cta" />
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16 md:h-20">
-            <Link href="/" className="flex items-center gap-0 hover:opacity-80 transition-opacity group">
-              <span className="text-2xl md:text-3xl font-bold tracking-tight">
-                <span className="text-gray-900">VEXIM</span>
-                <span className="text-emerald-600 ml-1">GLOBAL</span>
+            <Link href="/" className="flex items-center gap-2.5 hover:opacity-90 transition-opacity group">
+              <span className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-gradient-to-br from-navy-800 to-navy-950 flex items-center justify-center shadow-md shadow-navy-900/20">
+                <Ship className="w-5 h-5 md:w-6 md:h-6 text-amber-400" />
+              </span>
+              <span className="leading-none">
+                <span className="block text-xl md:text-2xl font-bold tracking-tight">
+                  <span className="text-navy-900">VEXIM</span>
+                  <span className="text-accent ml-1.5">GLOBAL</span>
+                </span>
+                <span className="hidden md:block text-[11px] font-medium tracking-[0.18em] text-muted-foreground uppercase mt-1">
+                  Export · Compliance · Logistics
+                </span>
               </span>
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-8">
-              <Link href="/#services" className="text-foreground hover:text-primary transition-colors font-medium">
+            <nav className="hidden md:flex items-center gap-7">
+              <Link href="/#services" className="text-slate-700 hover:text-accent transition-colors font-medium">
                 Dịch vụ
               </Link>
-              <Link href="/fda-tracker" className="text-foreground hover:text-primary transition-colors font-medium">
+              <Link href="/fda-tracker" className="text-slate-700 hover:text-accent transition-colors font-medium">
                 FDA Tracker
               </Link>
-              <Link href="/#about" className="text-foreground hover:text-primary transition-colors font-medium">
+              <Link href="/#about" className="text-slate-700 hover:text-accent transition-colors font-medium">
                 Giới thiệu
               </Link>
-              <Link href="/blog" className="text-foreground hover:text-primary transition-colors font-medium">
+              <Link href="/blog" className="text-slate-700 hover:text-accent transition-colors font-medium">
                 Tin tức
               </Link>
-              <Link href="/#contact" className="text-foreground hover:text-primary transition-colors font-medium">
+              <Link href="/#contact" className="text-slate-700 hover:text-accent transition-colors font-medium">
                 Liên hệ
               </Link>
             </nav>
@@ -76,10 +86,7 @@ export function Header() {
             {/* Right side actions */}
             <div className="hidden md:flex items-center gap-3">
               {/* CTA Button */}
-              <Button
-                onClick={() => setIsDialogOpen(true)}
-                className="bg-accent text-accent-foreground hover:bg-accent/90"
-              >
+              <Button variant="cta" onClick={() => setIsDialogOpen(true)}>
                 Yêu cầu tư vấn
               </Button>
 
@@ -89,7 +96,7 @@ export function Header() {
                   <DropdownMenuTrigger asChild>
                     <button className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-gray-100 transition-colors">
                       <Avatar className="w-9 h-9">
-                        <AvatarFallback className="bg-emerald-600 text-white text-sm font-semibold">
+                        <AvatarFallback className="bg-navy-800 text-white text-sm font-semibold">
                           AD
                         </AvatarFallback>
                       </Avatar>
@@ -134,35 +141,35 @@ export function Header() {
                 <Link
                   href="/#services"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-left text-foreground hover:text-primary transition-colors font-medium"
+                  className="text-left text-slate-700 hover:text-accent transition-colors font-medium"
                 >
                   Dịch vụ
                 </Link>
                 <Link
                   href="/fda-tracker"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-left text-foreground hover:text-primary transition-colors font-medium"
+                  className="text-left text-slate-700 hover:text-accent transition-colors font-medium"
                 >
                   FDA Tracker
                 </Link>
                 <Link
                   href="/#about"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-left text-foreground hover:text-primary transition-colors font-medium"
+                  className="text-left text-slate-700 hover:text-accent transition-colors font-medium"
                 >
                   Giới thiệu
                 </Link>
                 <Link
                   href="/blog"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-left text-foreground hover:text-primary transition-colors font-medium"
+                  className="text-left text-slate-700 hover:text-accent transition-colors font-medium"
                 >
                   Tin tức
                 </Link>
                 <Link
                   href="/#contact"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-left text-foreground hover:text-primary transition-colors font-medium"
+                  className="text-left text-slate-700 hover:text-accent transition-colors font-medium"
                 >
                   Liên hệ
                 </Link>
@@ -189,7 +196,8 @@ export function Header() {
                     setIsDialogOpen(true)
                     setIsMobileMenuOpen(false)
                   }}
-                  className="bg-accent text-accent-foreground hover:bg-accent/90 w-full"
+                  variant="cta"
+                  className="w-full"
                 >
                   Yêu cầu tư vấn
                 </Button>

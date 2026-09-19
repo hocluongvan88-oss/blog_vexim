@@ -18,6 +18,7 @@ import { notFound } from "next/navigation"
 import { BlogShareButtons } from "@/components/blog-share-buttons"
 import { RelatedPosts } from "@/components/related-posts"
 import BlogSidebar from "@/components/blog-sidebar"
+import { PopularPosts } from "@/components/popular-posts"
 import { BlogTableOfContents } from "@/components/blog-table-of-contents"
 import { BlogInternalLinks } from "@/components/blog-internal-links"
 import { ViewTracker } from "@/components/view-tracker"
@@ -397,17 +398,22 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                   <BlogInternalLinks category={post.category} />
                 </div>
 
-                <div className="mt-16 p-8 bg-gradient-to-br from-primary to-primary/90 rounded-lg text-white text-center">
-                  <h3 className="text-2xl font-bold mb-4">Cần tư vấn thêm về dịch vụ này?</h3>
-                  <p className="text-white/90 mb-6 max-w-2xl mx-auto leading-relaxed">
-                    Đội ngũ chuyên gia của Vexim Global sẵn sàng hỗ trợ bạn với hơn 10 năm kinh nghiệm trong lĩnh vực
-                    xuất nhập khẩu
-                  </p>
-                  <ConsultationDialog>
-                    <Button size="lg" className="bg-red-600 hover:bg-red-700 text-white border-none">
-                      Liên hệ tư vấn miễn phí
-                    </Button>
-                  </ConsultationDialog>
+                <div className="relative mt-16 p-8 md:p-10 rounded-2xl bg-gradient-to-br from-navy-950 via-navy-900 to-navy-800 text-white text-center overflow-hidden">
+                  {/* Điểm nhấn xanh nhạt trang trí */}
+                  <div className="pointer-events-none absolute -top-16 -right-10 w-56 h-56 rounded-full bg-sky-400/20 blur-3xl" aria-hidden="true" />
+                  <div className="pointer-events-none absolute -bottom-20 -left-10 w-56 h-56 rounded-full bg-amber-400/10 blur-3xl" aria-hidden="true" />
+                  <div className="relative">
+                    <h3 className="text-2xl font-bold mb-4">Cần tư vấn thêm về dịch vụ này?</h3>
+                    <p className="text-white/85 mb-6 max-w-2xl mx-auto leading-relaxed">
+                      Đội ngũ chuyên gia của Vexim Global sẵn sàng hỗ trợ bạn với hơn 10 năm kinh nghiệm trong lĩnh vực
+                      xuất nhập khẩu
+                    </p>
+                    <ConsultationDialog>
+                      <Button variant="cta" size="lg">
+                        Liên hệ tư vấn miễn phí
+                      </Button>
+                    </ConsultationDialog>
+                  </div>
                 </div>
 
                 <RelatedPosts currentPostId={post.id} category={post.category} />
@@ -415,6 +421,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
               {/* Sidebar - Hidden on mobile, shown on large screens */}
               <div className="hidden lg:block space-y-6">
+                <PopularPosts />
                 <BlogSidebar />
                 {/* Internal Links in Sidebar for desktop */}
                 <BlogInternalLinks category={post.category} />

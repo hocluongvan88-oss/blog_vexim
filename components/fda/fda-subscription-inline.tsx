@@ -84,7 +84,7 @@ export function FDASubscriptionInline({ variant = "default", className = "" }: F
             className="flex-1"
             disabled={loading || success}
           />
-          <Button type="submit" disabled={loading || success} className="bg-blue-600 hover:bg-blue-700">
+          <Button type="submit" disabled={loading || success} variant="cta">
             {success ? <CheckCircle2 className="w-4 h-4" /> : <Mail className="w-4 h-4" />}
           </Button>
         </form>
@@ -94,9 +94,9 @@ export function FDASubscriptionInline({ variant = "default", className = "" }: F
 
   if (variant === "cta") {
     return (
-      <Card className={`p-4 sm:p-6 bg-gradient-to-r from-blue-50 to-emerald-50 border-2 border-blue-200 ${className}`}>
+      <Card className={`p-4 sm:p-6 bg-gradient-to-r from-sky-50 to-secondary border-2 border-sky-200 ${className}`}>
         <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
-          <div className="flex-shrink-0 p-2.5 sm:p-3 bg-blue-600 rounded-lg">
+          <div className="flex-shrink-0 p-2.5 sm:p-3 bg-navy-900 rounded-lg">
             <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
           </div>
           <div className="flex-1 w-full min-w-0">
@@ -119,7 +119,7 @@ export function FDASubscriptionInline({ variant = "default", className = "" }: F
                   className="flex-1 min-w-0 bg-white"
                   disabled={loading}
                 />
-                <Button type="submit" disabled={loading} className="bg-blue-600 hover:bg-blue-700 whitespace-nowrap">
+                <Button type="submit" disabled={loading} variant="cta" className="whitespace-nowrap">
                   {loading ? (
                     "Đang xử lý..."
                   ) : (
@@ -142,8 +142,8 @@ export function FDASubscriptionInline({ variant = "default", className = "" }: F
   return (
     <Card className={`p-6 ${className}`}>
       <div className="text-center max-w-md mx-auto">
-        <div className="inline-flex p-3 bg-blue-100 rounded-full mb-4">
-          <Mail className="w-6 h-6 text-blue-600" />
+        <div className="inline-flex p-3 bg-secondary rounded-full mb-4">
+          <Mail className="w-6 h-6 text-navy-800" />
         </div>
         <h3 className="text-xl font-bold text-slate-900 mb-2">Đăng ký nhận cảnh báo FDA</h3>
         <p className="text-slate-600 mb-6">
@@ -165,7 +165,7 @@ export function FDASubscriptionInline({ variant = "default", className = "" }: F
               className="w-full"
               disabled={loading}
             />
-            <Button type="submit" disabled={loading} className="w-full bg-blue-600 hover:bg-blue-700">
+            <Button type="submit" disabled={loading} variant="cta" className="w-full">
               {loading ? "Đang xử lý..." : "Đăng ký ngay"}
             </Button>
           </form>

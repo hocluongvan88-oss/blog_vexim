@@ -151,9 +151,35 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <Header />
       <main className="min-h-screen">
-        {/* Hero Section */}
-        <section className="relative bg-gradient-to-br from-primary via-primary/95 to-primary/90 text-white py-16 md:py-24">
-          <div className="container mx-auto px-4">
+        {/* Hero Section — navy đậm nhiều lớp, không phẳng một màu */}
+        <section className="relative bg-navy-950 text-white pt-32 md:pt-36 pb-14 md:pb-20 overflow-hidden">
+          {/* Ảnh nền logistics */}
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: "url(https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=2000)",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+            aria-hidden="true"
+          >
+            <div className="absolute inset-0 bg-gradient-to-b from-navy-950/95 via-navy-900/92 to-navy-950/97" />
+          </div>
+
+          {/* Điểm nhấn xanh nhạt + họa tiết */}
+          <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+            <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[560px] h-[280px] rounded-full bg-sky-400/15 blur-[110px]" />
+            <div
+              className="absolute inset-0 opacity-[0.06]"
+              style={{
+                backgroundImage:
+                  "linear-gradient(to right, #7dd3fc 1px, transparent 1px), linear-gradient(to bottom, #7dd3fc 1px, transparent 1px)",
+                backgroundSize: "56px 56px",
+              }}
+            />
+          </div>
+
+          <div className="container mx-auto px-4 relative">
             <div className="max-w-3xl mx-auto text-center">
               {/* Breadcrumb */}
               <div className="flex justify-center mb-6">
@@ -188,7 +214,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
               {/* Related Service Link */}
               {config.relatedService && (
                 <Link href={config.relatedService}>
-                  <Button variant="secondary" className="mb-6">
+                  <Button variant="cta" className="mb-6">
                     Xem dịch vụ {decodedCategory} của chúng tôi
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
@@ -204,11 +230,11 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
         </section>
 
         {/* Categories Filter */}
-        <section className="py-6 border-b bg-secondary/30">
+        <section className="py-6 border-b bg-white">
           <div className="container mx-auto px-4">
-            <div className="flex flex-wrap gap-2 justify-center">
+            <div className="flex flex-wrap gap-2.5 justify-center">
               <Link href="/blog">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="bg-white text-slate-600 border-border hover:border-navy-700 hover:text-navy-900">
                   Tất cả
                 </Button>
               </Link>
@@ -217,7 +243,11 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
                   <Button
                     variant={cat === decodedCategory ? "default" : "outline"}
                     size="sm"
-                    className={cat === decodedCategory ? "bg-accent hover:bg-accent/90" : ""}
+                    className={
+                      cat === decodedCategory
+                        ? "bg-navy-900 text-white shadow-md shadow-navy-900/20"
+                        : "bg-white text-slate-600 border-border hover:border-navy-700 hover:text-navy-900"
+                    }
                   >
                     {cat}
                   </Button>
@@ -250,31 +280,28 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
             {posts && posts.length > 0 ? (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {posts.map((post) => (
-                  <Link key={post.id} href={`/blog/${post.slug}`}>
-                    <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-2 cursor-pointer group p-0 h-full flex flex-col">
+                  <Link key={post.id} href={`/blog/${post.slug}`} className="block h-full">
+                    <Card className="overflow-hidden border-border/80 shadow-sm hover:shadow-xl hover:border-sky-200 transition-all duration-300 hover:-translate-y-1.5 cursor-pointer group p-0 h-full flex flex-col rounded-xl">
                       {/* Featured Image */}
-                      <div className="aspect-[16/10] overflow-hidden">
+                      <div className="aspect-[16/10] overflow-hidden relative">
                         <img
                           src={post.featured_image || "/placeholder.svg?height=400&width=600"}
                           alt={`${post.title} - ${decodedCategory} - Vexim Global`}
                           width={600}
                           height={375}
                           loading="lazy"
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300 rounded-t-lg"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
+                        {/* Category Badge trên thumbnail */}
+                        <span className="absolute top-3 left-3 inline-block bg-navy-900/90 backdrop-blur-sm text-sky-200 px-3 py-1 rounded-full text-xs font-semibold">
+                          {post.category}
+                        </span>
                       </div>
 
                       {/* Content */}
-                      <div className="p-6 flex-1 flex flex-col">
-                        {/* Category Badge */}
-                        <div className="mb-3">
-                          <span className="inline-block bg-accent/10 text-accent px-3 py-1 rounded-full text-sm font-medium">
-                            {post.category}
-                          </span>
-                        </div>
-
+                      <div className="p-5 md:p-6 flex-1 flex flex-col">
                         {/* Title */}
-                        <h2 className="text-xl font-bold text-primary mb-3 line-clamp-2 group-hover:text-accent transition-colors">
+                        <h2 className="text-lg md:text-xl font-bold text-navy-900 mb-2.5 line-clamp-2 group-hover:text-accent transition-colors">
                           {post.title}
                         </h2>
 
@@ -325,10 +352,10 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
 
         {/* Related Service CTA */}
         {config.relatedService && (
-          <section className="py-12 bg-primary/5">
+          <section className="py-12 bg-secondary/50">
             <div className="container mx-auto px-4">
               <div className="max-w-3xl mx-auto text-center">
-                <h2 className="text-2xl md:text-3xl font-bold text-primary mb-4">
+                <h2 className="text-2xl md:text-3xl font-bold text-navy-900 mb-4">
                   Cần hỗ trợ về {decodedCategory}?
                 </h2>
                 <p className="text-muted-foreground mb-6 leading-relaxed">
@@ -336,13 +363,13 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
                 </p>
                 <div className="flex flex-wrap gap-4 justify-center">
                   <Link href={config.relatedService}>
-                    <Button size="lg">
+                    <Button variant="cta" size="lg">
                       Tìm hiểu dịch vụ
                       <ArrowRight className="w-4 h-4 ml-2" />
                     </Button>
                   </Link>
                   <Link href="/#contact">
-                    <Button variant="outline" size="lg">
+                    <Button variant="outline" size="lg" className="border-navy-700/30 text-navy-900 hover:bg-secondary hover:text-navy-900">
                       Liên hệ tư vấn
                     </Button>
                   </Link>

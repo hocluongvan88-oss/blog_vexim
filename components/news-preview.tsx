@@ -44,14 +44,19 @@ export async function NewsPreview() {
         {news.length > 0 ? (
           <div className="grid md:grid-cols-3 gap-8">
             {news.map((article) => (
-              <Link key={article.id} href={`/blog/${article.slug}`} className="block group">
-                <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-2 p-0 h-full flex flex-col">
-                  <div className="aspect-video overflow-hidden">
+              <Link key={article.id} href={`/blog/${article.slug}`} className="block group h-full">
+                <Card className="overflow-hidden border-border/80 shadow-sm hover:shadow-xl hover:border-sky-200 transition-all duration-300 hover:-translate-y-1.5 p-0 h-full flex flex-col rounded-xl">
+                  <div className="aspect-video overflow-hidden relative">
                     <img
                       src={article.featured_image || "/placeholder.svg?height=400&width=600"}
                       alt={article.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300 rounded-t-lg"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
+                    {article.category && (
+                      <span className="absolute top-3 left-3 inline-block bg-navy-900/90 backdrop-blur-sm text-sky-200 px-3 py-1 rounded-full text-xs font-semibold">
+                        {article.category}
+                      </span>
+                    )}
                   </div>
                   <div className="p-6 flex-1 flex flex-col">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
@@ -81,7 +86,7 @@ export async function NewsPreview() {
         <div className="text-center mt-12">
           <Link
             href="/blog"
-            className="inline-flex items-center gap-2 bg-accent hover:bg-accent/90 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-navy-950 px-6 py-3 rounded-lg font-semibold shadow-md shadow-orange-500/25 transition-all"
           >
             Xem tất cả bài viết
             <ArrowRight className="w-5 h-5" />

@@ -25,21 +25,21 @@ export function Footer() {
             <div className="flex gap-4">
               <a
                 href="#"
-                className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-accent transition-colors"
+                className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-cta hover:text-cta-foreground transition-colors"
                 aria-label="Facebook"
               >
                 <Facebook className="w-5 h-5" />
               </a>
               <a
                 href="#"
-                className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-accent transition-colors"
+                className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-cta hover:text-cta-foreground transition-colors"
                 aria-label="LinkedIn"
               >
                 <Linkedin className="w-5 h-5" />
               </a>
               <a
                 href="#"
-                className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-accent transition-colors"
+                className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-cta hover:text-cta-foreground transition-colors"
                 aria-label="YouTube"
               >
                 <Youtube className="w-5 h-5" />
@@ -103,7 +103,7 @@ export function Footer() {
               <li>Thứ 2 - Thứ 6: 8:00 - 18:00</li>
               <li>Thứ 7: 8:00 - 12:00</li>
               <li>Chủ nhật: Nghỉ</li>
-              <li className="text-accent font-medium pt-2">Hỗ trợ khẩn cấp: 24/7</li>
+              <li className="text-amber-400 font-semibold pt-2">Hỗ trợ khẩn cấp: 24/7</li>
             </ul>
           </div>
         </div>
