@@ -18,8 +18,8 @@ self.addEventListener('push', (event) => {
   const title = data.title || 'Vexim Chat'
   const options = {
     body: data.body || 'Bạn có tin nhắn mới',
-    icon: '/icon-192.png',
-    badge: '/badge-72.png',
+    icon: '/logo.png',
+    badge: '/logo.png',
     tag: data.tag || 'vexim-notification',
     data: {
       url: data.url || '/admin/conversations',

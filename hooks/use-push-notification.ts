@@ -110,8 +110,8 @@ export function usePushNotification(): UsePushNotificationReturn {
     if (permission === "granted") {
       new Notification("Thông báo test", {
         body: "Đây là thông báo push test từ VEXIM GLOBAL",
-        icon: "/icon-192x192.png",
-        badge: "/badge-72x72.png",
+        icon: "/logo.png",
+        badge: "/logo.png",
         tag: "test-notification",
       })
     }

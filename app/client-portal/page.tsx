@@ -2,6 +2,7 @@
 
 import React from "react"
 import { useState, useEffect } from "react"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -312,10 +313,13 @@ export default function ClientPortal() {
             {/* Mobile logo */}
             <div className="lg:hidden mb-8 text-center">
               <Link href="/" className="inline-block">
-                <span className="text-2xl font-bold">
-                  <span className="text-gray-900">VEXIM</span>
-                  <span className="text-emerald-600 ml-1">GLOBAL</span>
-                </span>
+                <Image
+                  src="/logo.png"
+                  alt="Vexim Global"
+                  width={512}
+                  height={512}
+                  className="h-14 w-14 object-contain mx-auto"
+                />
               </Link>
             </div>
 
@@ -406,10 +410,13 @@ export default function ClientPortal() {
         {/* Logo */}
         <div className="p-6 border-b border-gray-100">
           <Link href="/" className="inline-block">
-            <span className="text-xl font-bold">
-              <span className="text-gray-900">VEXIM</span>
-              <span className="text-emerald-600 ml-1">GLOBAL</span>
-            </span>
+            <Image
+              src="/logo.png"
+              alt="Vexim Global"
+              width={512}
+              height={512}
+              className="h-12 w-12 object-contain"
+            />
           </Link>
         </div>
 
@@ -469,9 +476,14 @@ export default function ClientPortal() {
             <div className="flex items-center gap-4">
               {/* Mobile menu */}
               <div className="lg:hidden">
-                <Link href="/" className="text-lg font-bold">
-                  <span className="text-gray-900">VEXIM</span>
-                  <span className="text-emerald-600 ml-1">GLOBAL</span>
+                <Link href="/" className="inline-block">
+                  <Image
+                    src="/logo.png"
+                    alt="Vexim Global"
+                    width={512}
+                    height={512}
+                    className="h-9 w-9 object-contain"
+                  />
                 </Link>
               </div>
               <div className="hidden lg:block">

@@ -65,19 +65,17 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        url: "/icon-light-32x32.png",
-        media: "(prefers-color-scheme: light)",
+        url: "/logo.png",
+        type: "image/png",
+        sizes: "512x512",
       },
       {
-        url: "/icon-dark-32x32.png",
-        media: "(prefers-color-scheme: dark)",
-      },
-      {
-        url: "/icon.svg",
-        type: "image/svg+xml",
+        url: "/favicon.ico",
+        type: "image/x-icon",
+        sizes: "any",
       },
     ],
-    apple: "/apple-icon.png",
+    apple: "/logo.png",
   },
   manifest: "/manifest.json",
   generator: 'v0.app'

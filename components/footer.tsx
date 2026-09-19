@@ -1,6 +1,7 @@
 "use client"
 
 import { Mail, Phone, MapPin, Facebook, Linkedin, Youtube } from "lucide-react"
+import Image from "next/image"
 import { FDASubscriptionInline } from "@/components/fda/fda-subscription-inline"
 
 export function Footer() {
@@ -17,7 +18,17 @@ export function Footer() {
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           {/* Company Info */}
           <div>
-            <h3 className="text-xl font-bold mb-4">Vexim Global</h3>
+            <h3 className="mb-4">
+              <span className="inline-block bg-white rounded-lg p-2">
+                <Image
+                  src="/logo.png"
+                  alt="Vexim Global"
+                  width={512}
+                  height={512}
+                  className="h-12 w-12 object-contain"
+                />
+              </span>
+            </h3>
             <p className="text-white/80 leading-relaxed mb-4">
               Đối tác tin cậy trong lĩnh vực tư vấn pháp lý xuất nhập khẩu quốc tế. Chúng tôi cam kết mang đến giải pháp
               tối ưu nhất cho doanh nghiệp.

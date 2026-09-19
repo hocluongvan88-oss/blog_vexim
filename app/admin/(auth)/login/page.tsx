@@ -9,8 +9,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
-import { Globe, Lock } from "lucide-react"
+import { Lock } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState("")
@@ -64,11 +65,14 @@ export default function AdminLoginPage() {
         <div className="flex flex-col gap-6">
           {/* Logo */}
           <div className="flex flex-col items-center gap-2 mb-4">
-            <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center shadow-lg">
-              <Globe className="w-10 h-10 text-primary-foreground" />
-            </div>
+            <Image
+              src="/logo.png"
+              alt="Vexim Global"
+              width={512}
+              height={512}
+              className="w-20 h-20 object-contain rounded-2xl shadow-lg"
+            />
             <div className="text-center">
-              <h1 className="text-2xl font-bold text-primary">Vexim Global</h1>
               <p className="text-sm text-muted-foreground">Admin Panel</p>
             </div>
           </div>

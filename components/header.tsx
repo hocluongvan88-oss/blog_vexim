@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Menu, X, User, ChevronDown, Shield } from "lucide-react"
 import { ConsultationDialog } from "@/components/consultation-dialog"
 import Link from "next/link"
+import Image from "next/image"
 import { BlogSearch } from "@/components/blog-search"
 import {
   DropdownMenu,
@@ -47,11 +48,15 @@ export function Header() {
       >
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16 md:h-20">
-            <Link href="/" className="flex items-center gap-0 hover:opacity-80 transition-opacity group">
-              <span className="text-2xl md:text-3xl font-bold tracking-tight">
-                <span className="text-gray-900">VEXIM</span>
-                <span className="text-emerald-600 ml-1">GLOBAL</span>
-              </span>
+            <Link href="/" className="flex items-center gap-0 hover:opacity-80 transition-opacity group" aria-label="Vexim Global">
+              <Image
+                src="/logo.png"
+                alt="Vexim Global"
+                width={512}
+                height={512}
+                className="h-12 w-12 md:h-14 md:w-14 object-contain"
+                priority
+              />
             </Link>
 
             {/* Desktop Navigation */}

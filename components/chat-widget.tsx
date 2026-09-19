@@ -3,6 +3,7 @@
 import React from "react"
 
 import { useState, useRef, useEffect } from "react"
+import Image from "next/image"
 import { MessageCircle, X, Send, Minimize2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -287,8 +288,14 @@ export function ChatWidget() {
           <div className="flex items-center justify-between bg-gradient-to-r from-primary to-accent p-4 rounded-t-lg">
             <div className="flex items-center gap-3">
               <div className="relative">
-                <div className="h-10 w-10 rounded-full bg-white flex items-center justify-center">
-                  <MessageCircle className="h-5 w-5 text-primary" />
+                <div className="h-10 w-10 rounded-full bg-white flex items-center justify-center overflow-hidden">
+                  <Image
+                    src="/logo.png"
+                    alt="Vexim Global"
+                    width={512}
+                    height={512}
+                    className="h-8 w-8 object-contain"
+                  />
                 </div>
                 <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white"></span>
               </div>
