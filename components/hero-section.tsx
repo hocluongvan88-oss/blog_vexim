@@ -84,7 +84,7 @@ export function HeroSection() {
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
-        <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+        <div className="grid md:grid-cols-[1.1fr_0.9fr] lg:grid-cols-[1.15fr_0.85fr] gap-8 md:gap-10 items-center">
           {/* Left Content */}
           <div className="text-white">
             <span className="inline-flex items-center gap-2 rounded-full border border-sky-300/30 bg-sky-400/10 px-4 py-1.5 text-sm font-medium text-sky-200 mb-6">
@@ -133,12 +133,12 @@ export function HeroSection() {
           </div>
 
           {/* Right Content - Consultation Form */}
-          <Card id="consultation-form" className="p-6 md:p-8 bg-white shadow-2xl">
-            <h3 className="text-2xl font-bold text-primary mb-2">Tư vấn miễn phí - Nhận kết quả trong 24h</h3>
-            <p className="text-muted-foreground mb-6">
+          <Card id="consultation-form" className="p-5 md:p-6 bg-white shadow-2xl rounded-xl">
+            <h3 className="text-lg md:text-xl font-bold text-primary mb-1.5">Tư vấn miễn phí - Nhận kết quả trong 24h</h3>
+            <p className="text-sm text-muted-foreground mb-4">
               <span className="text-accent font-semibold">Vui lòng gửi lại thông tin</span> chúng tôi sẽ liên hệ với bạn ngay!
             </p>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-3">
               {/* Honeypot field ẩn */}
               <input
                 type="text"
@@ -150,9 +150,9 @@ export function HeroSection() {
                 autoComplete="off"
               />
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium mb-2">
+                  <label htmlFor="name" className="block text-[13px] font-medium mb-1">
                     Họ và tên <span className="text-destructive">*</span>
                   </label>
                   <Input
@@ -166,7 +166,7 @@ export function HeroSection() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="phone" className="block text-sm font-medium mb-2">
+                  <label htmlFor="phone" className="block text-[13px] font-medium mb-1">
                     Số điện thoại <span className="text-destructive">*</span>
                   </label>
                   <Input
@@ -182,7 +182,7 @@ export function HeroSection() {
               </div>
 
               <div>
-                <label htmlFor="email" className="block text-sm font-medium mb-2">
+                <label htmlFor="email" className="block text-[13px] font-medium mb-1">
                   Email <span className="text-destructive">*</span>
                 </label>
                 <Input
@@ -196,12 +196,12 @@ export function HeroSection() {
                 />
               </div>
               <div>
-                <label htmlFor="service" className="block text-sm font-medium mb-2">
+                <label htmlFor="service" className="block text-[13px] font-medium mb-1">
                   Loại dịch vụ quan tâm
                 </label>
                 <select
                   id="service"
-                  className="w-full px-3 py-2 border border-input rounded-md bg-background"
+                  className="w-full px-3 py-1.5 text-sm border border-input rounded-md bg-background"
                   value={formData.service}
                   onChange={(e) => setFormData({ ...formData, service: e.target.value })}
                   disabled={isSubmitting}
@@ -217,7 +217,7 @@ export function HeroSection() {
               </div>
 
               <div>
-                <label htmlFor="product" className="block text-sm font-medium mb-2">
+                <label htmlFor="product" className="block text-[13px] font-medium mb-1">
                   Sản phẩm cần đăng ký
                 </label>
                 <Input
@@ -231,7 +231,7 @@ export function HeroSection() {
               </div>
 
               <div>
-                <label htmlFor="description" className="block text-sm font-medium mb-2">
+                <label htmlFor="description" className="block text-[13px] font-medium mb-1">
                   Mô tả thêm (chứng chỉ, quy trình sản xuất...)
                 </label>
                 <textarea
@@ -240,8 +240,8 @@ export function HeroSection() {
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   disabled={isSubmitting}
-                  className="w-full px-3 py-2 border border-input rounded-md bg-background text-sm"
-                  rows={3}
+                  className="w-full px-3 py-1.5 border border-input rounded-md bg-background text-sm"
+                  rows={2}
                 />
               </div>
 
@@ -253,7 +253,7 @@ export function HeroSection() {
                 </div>
               )}
 
-              <Button type="submit" variant="cta" className="w-full" size="lg" disabled={isSubmitting}>
+              <Button type="submit" variant="cta" className="w-full" disabled={isSubmitting}>
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
