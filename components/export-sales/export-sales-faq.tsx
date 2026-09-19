@@ -30,7 +30,7 @@ export const FAQS = [
   },
   {
     q: "Mô hình phí của Vexim gồm những khoản nào? Có phát sinh chi phí ẩn không?",
-    a: "Mô hình hợp tác của Vexim gồm 3 phần minh bạch ghi rõ trong hợp đồng: (1) Phí khởi tạo một lần duy nhất (thẩm định nhà máy, hoàn thiện FDA, làm sales kit chuẩn buyer Mỹ); (2) Phí duy trì đội sales hàng tháng (được khấu trừ 50% vào hoa hồng đơn hàng đầu tiên); và (3) Hoa hồng thành công (% trên kim ngạch USD đã về tài khoản nhà máy). Không có bất kỳ chi phí ẩn nào.",
+    a: "Mô hình hợp tác của Vexim gồm 2 phần minh bạch ghi rõ trong hợp đồng: (1) Phí duy trì đội sales hàng tháng; và (2) Hoa hồng thành công (% trên kim ngạch USD đã về tài khoản nhà máy). Không có bất kỳ chi phí ẩn nào.",
   },
   {
     q: "Quy mô nhà máy nào phù hợp với dịch vụ phòng sales xuất khẩu?",
