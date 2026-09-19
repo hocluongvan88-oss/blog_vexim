@@ -1,0 +1,166 @@
+// Email templates for consultation requests (tư vấn từ website)
+// ============================================================
+// THIẾT KẾ THỐNG NHẤT VEXIM GLOBAL — TON MÀU VÀNG XANH
+// (cùng palette với lib/email-templates.tsx)
+// Trước đây nằm inline trong app/api/consultation/route.ts
+// ============================================================
+
+export interface ConsultationParams {
+  name: string
+  phone: string
+  email: string
+  serviceName: string
+  product?: string
+  description?: string
+}
+
+function escapeNewlines(text: string): string {
+  return text.replace(/\n/g, "<br>")
+}
+
+// Email 1: Xác nhận gửi cho khách hàng
+export function getConsultationCustomerHTML(params: ConsultationParams): string {
+  return `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác nhận đăng ký tư vấn</title>
+    <style>
+      body { font-family: 'Be Vietnam Pro', Arial, Helvetica, sans-serif; line-height: 1.6; color: #57534e; background-color: #f4f6ec; margin: 0; padding: 0; -webkit-text-size-adjust: 100%; }
+      .page { max-width: 640px; margin: 0 auto; padding: 24px 16px; }
+      .card { background: #ffffff; border: 1px solid #e6e9dd; border-radius: 14px; overflow: hidden; }
+      .accent-bar { height: 5px; background: linear-gradient(90deg, #facc15 0%, #a3e635 45%, #4d7c0f 100%); }
+      .header { background: linear-gradient(135deg, #84cc16 0%, #4d7c0f 100%); padding: 34px 32px; text-align: center; }
+      .header h1 { color: #ffffff; margin: 0; font-size: 28px; letter-spacing: 1px; }
+      .header p { color: #d9f99d; margin: 8px 0 0 0; font-size: 14px; }
+      .content { padding: 32px; background: #ffffff; }
+      .content p { color: #57534e; font-size: 15px; margin-bottom: 15px; }
+      .info-box { background: #f7fee7; border: 1px solid #d9f99d; border-left: 5px solid #84cc16; padding: 20px; border-radius: 10px; margin: 20px 0; }
+      .info-box h3 { color: #3f6212; margin: 0 0 10px 0; font-size: 17px; }
+      .info-box p { margin: 8px 0; font-size: 14px; color: #44403c; }
+      .list { color: #44403c; font-size: 14px; }
+      .list li { margin-bottom: 6px; }
+      .list a { color: #4d7c0f; font-weight: 600; }
+      .signature { margin-top: 28px; padding-top: 20px; border-top: 2px solid #e6e9dd; }
+      .signature p { color: #78716c; font-size: 14px; margin: 5px 0; }
+      .signature .name { color: #365314; font-weight: 700; }
+      .footer { text-align: center; padding: 20px; color: #a8a29e; font-size: 12px; background: #f8faf3; border-top: 1px solid #e6e9dd; }
+      .footer p { margin: 4px 0; }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="card">
+        <div class="accent-bar"></div>
+        <div class="header">
+          <h1>VEXIM GLOBAL</h1>
+          <p>Tận Tâm - Nhanh Chóng - Chính Xác</p>
+        </div>
+
+        <div class="content">
+          <h2 style="color: #3f6212; margin-top: 0; font-size: 21px;">Xin chào ${params.name},</h2>
+
+          <p>Cảm ơn bạn đã quan tâm đến dịch vụ của Vexim Global! Chúng tôi đã nhận được yêu cầu tư vấn của bạn.</p>
+
+          <div class="info-box">
+            <h3>📋 Thông tin đăng ký:</h3>
+            <p><strong>Họ tên:</strong> ${params.name}</p>
+            <p><strong>Số điện thoại:</strong> ${params.phone}</p>
+            <p><strong>Email:</strong> ${params.email}</p>
+            <p><strong>Dịch vụ quan tâm:</strong> ${params.serviceName}</p>
+            ${params.product ? `<p><strong>Sản phẩm cần đăng ký:</strong> ${params.product}</p>` : ""}
+            ${params.description ? `<p><strong>Mô tả thêm:</strong> ${escapeNewlines(params.description)}</p>` : ""}
+          </div>
+
+          <p><strong>Chuyên gia của chúng tôi sẽ liên hệ với bạn trong vòng 24 giờ</strong> để tư vấn chi tiết về giải pháp phù hợp nhất.</p>
+
+          <p>Trong thời gian chờ đợi, bạn có thể:</p>
+          <ul class="list">
+            <li>Tham khảo thêm các dịch vụ trên website: <a href="https://veximglobal.com">veximglobal.com</a></li>
+            <li>Liên hệ hotline: <strong style="color: #4d7c0f;">0373 685 634</strong> (8h-17h30 T2-T6)</li>
+            <li>Email: <a href="mailto:contact@veximglobal.com">contact@veximglobal.com</a></li>
+          </ul>
+
+          <div class="signature">
+            <p>Trân trọng,</p>
+            <p class="name">Đội ngũ Vexim Global</p>
+          </div>
+        </div>
+
+        <div class="footer">
+          <p>© 2026 Vexim Global. Bản quyền thuộc về Vexim Global.</p>
+          <p>Số 25/6/52 Ngoa Long, Tay Tuu, Ha Noi</p>
+        </div>
+      </div>
+    </div>
+  </body>
+  </html>
+  `
+}
+
+// Email 2: Thông báo lead mới gửi cho admin
+export function getConsultationAdminHTML(params: ConsultationParams): string {
+  const time = new Date().toLocaleString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" })
+
+  return `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lead mới từ website</title>
+    <style>
+      body { font-family: 'Be Vietnam Pro', Arial, Helvetica, sans-serif; line-height: 1.6; color: #57534e; background-color: #f4f6ec; margin: 0; padding: 0; -webkit-text-size-adjust: 100%; }
+      .page { max-width: 640px; margin: 0 auto; padding: 24px 16px; }
+      .card { background: #ffffff; border: 3px solid #eab308; border-radius: 14px; overflow: hidden; }
+      .accent-bar { height: 5px; background: linear-gradient(90deg, #facc15 0%, #a3e635 45%, #4d7c0f 100%); }
+      .header { background: linear-gradient(135deg, #365314 0%, #1a2e05 100%); padding: 26px 32px; text-align: center; }
+      .header .brand { display: inline-block; font-size: 11px; letter-spacing: 3px; color: #ecfccb; font-weight: 700; text-transform: uppercase; }
+      .header h1 { color: #ffffff; margin: 8px 0 0 0; font-size: 24px; }
+      .urgent { display: inline-block; background: #fef9c3; color: #854d0e; padding: 5px 14px; border-radius: 15px; font-weight: 700; margin-top: 10px; font-size: 13px; border: 1px solid #fde68a; }
+      .content { padding: 32px; }
+      .content h2 { color: #1c1917; margin: 0 0 14px 0; font-size: 20px; }
+      .info-box { background: #f7fee7; border: 1px solid #d9f99d; border-left: 5px solid #84cc16; padding: 20px; border-radius: 10px; }
+      .info-box p { margin: 10px 0; font-size: 14px; }
+      .info-box .label { color: #3f6212; }
+      .info-box a { color: #4d7c0f; font-weight: 600; }
+      .service-badge { display: inline-block; background: #ecfccb; border: 1px solid #d9f99d; padding: 3px 12px; border-radius: 6px; color: #3f6212; font-weight: 700; }
+      .action-box { margin-top: 20px; padding: 15px 20px; background: #fefce8; border: 1px solid #fde68a; border-left: 5px solid #eab308; border-radius: 8px; }
+      .action-box p { margin: 0; color: #854d0e; font-size: 14px; }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="card">
+        <div class="accent-bar"></div>
+        <div class="header">
+          <span class="brand">Vexim Global · Admin</span>
+          <h1>🎯 Lead Mới Từ Website</h1>
+          <span class="urgent">⚡ Cần liên hệ trong 24h</span>
+        </div>
+
+        <div class="content">
+          <h2>Thông tin khách hàng:</h2>
+
+          <div class="info-box">
+            <p><strong class="label">Họ tên:</strong> ${params.name}</p>
+            <p><strong class="label">Số điện thoại:</strong> <a href="tel:${params.phone}">${params.phone}</a></p>
+            <p><strong class="label">Email:</strong> <a href="mailto:${params.email}">${params.email}</a></p>
+            <p><strong class="label">Dịch vụ quan tâm:</strong> <span class="service-badge">${params.serviceName}</span></p>
+            ${params.product ? `<p><strong class="label">Sản phẩm:</strong> ${params.product}</p>` : ""}
+            ${params.description ? `<p><strong class="label">Mô tả thêm:</strong><br><span style="color: #57534e; font-style: italic;">${escapeNewlines(params.description)}</span></p>` : ""}
+            <p style="color: #78716c; font-size: 13px;"><strong>Thời gian:</strong> ${time}</p>
+          </div>
+
+          <div class="action-box">
+            <p><strong>⏰ Hành động:</strong> Vui lòng liên hệ khách hàng trong vòng 24 giờ!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+  </html>
+  `
+}
