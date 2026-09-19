@@ -18,14 +18,17 @@ export async function GET(request: Request) {
           <meta charset="utf-8">
           <title>Lỗi xác thực</title>
           <style>
-            body { font-family: 'Be Vietnam Pro', Arial, sans-serif; background: #f8fafc; padding: 40px; text-align: center; }
-            .container { max-width: 500px; margin: 0 auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-            h1 { color: #ef4444; }
-            a { color: #2563eb; text-decoration: none; }
+            body { font-family: 'Be Vietnam Pro', Arial, sans-serif; background: #f4f6ec; padding: 40px; text-align: center; margin: 0; }
+            .container { max-width: 500px; margin: 0 auto; background: white; padding: 40px; border-radius: 14px; border: 1px solid #e6e9dd; }
+            .accent-bar { height: 5px; background: linear-gradient(90deg, #facc15 0%, #a3e635 45%, #4d7c0f 100%); border-radius: 14px 14px 0 0; margin: -40px -40px 30px -40px; }
+            h1 { color: #365314; }
+            p { color: #57534e; }
+            a { color: #4d7c0f; text-decoration: none; font-weight: 700; }
           </style>
         </head>
         <body>
           <div class="container">
+            <div class="accent-bar"></div>
             <h1>❌ Lỗi xác thực</h1>
             <p>Link xác thực không hợp lệ hoặc đã hết hạn.</p>
             <p><a href="https://www.veximglobal.com/fda-tracker">← Quay lại trang chủ</a></p>
@@ -60,15 +63,17 @@ export async function GET(request: Request) {
           <meta charset="utf-8">
           <title>Lỗi xác thực</title>
           <style>
-            body { font-family: 'Be Vietnam Pro', Arial, sans-serif; background: #f8fafc; padding: 40px; text-align: center; }
-            .container { max-width: 500px; margin: 0 auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-            h1 { color: #ef4444; }
-            p { color: #64748b; }
-            a { color: #2563eb; text-decoration: none; font-weight: 600; }
+            body { font-family: 'Be Vietnam Pro', Arial, sans-serif; background: #f4f6ec; padding: 40px; text-align: center; margin: 0; }
+            .container { max-width: 500px; margin: 0 auto; background: white; padding: 40px; border-radius: 14px; border: 1px solid #e6e9dd; }
+            .accent-bar { height: 5px; background: linear-gradient(90deg, #facc15 0%, #a3e635 45%, #4d7c0f 100%); border-radius: 14px 14px 0 0; margin: -40px -40px 30px -40px; }
+            h1 { color: #365314; }
+            p { color: #57534e; }
+            a { color: #4d7c0f; text-decoration: none; font-weight: 700; }
           </style>
         </head>
         <body>
           <div class="container">
+            <div class="accent-bar"></div>
             <h1>❌ Không tìm thấy đăng ký</h1>
             <p>Không tìm thấy đăng ký với email và token này.</p>
             <p>Link có thể đã hết hạn hoặc bạn đã xác thực trước đó.</p>
@@ -94,15 +99,17 @@ export async function GET(request: Request) {
           <meta charset="utf-8">
           <title>Đã xác thực</title>
           <style>
-            body { font-family: 'Be Vietnam Pro', Arial, sans-serif; background: #f8fafc; padding: 40px; text-align: center; }
-            .container { max-width: 500px; margin: 0 auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-            h1 { color: #10b981; }
-            p { color: #64748b; line-height: 1.6; }
-            a { display: inline-block; background: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; margin-top: 20px; font-weight: 600; }
+            body { font-family: 'Be Vietnam Pro', Arial, sans-serif; background: #f4f6ec; padding: 40px; text-align: center; margin: 0; }
+            .container { max-width: 500px; margin: 0 auto; background: white; padding: 40px; border-radius: 14px; border: 1px solid #e6e9dd; }
+            .accent-bar { height: 5px; background: linear-gradient(90deg, #facc15 0%, #a3e635 45%, #4d7c0f 100%); border-radius: 14px 14px 0 0; margin: -40px -40px 30px -40px; }
+            h1 { color: #4d7c0f; }
+            p { color: #57534e; line-height: 1.6; }
+            a { display: inline-block; background: #4d7c0f; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; margin-top: 20px; font-weight: 600; }
           </style>
         </head>
         <body>
           <div class="container">
+            <div class="accent-bar"></div>
             <h1>✅ Email đã được xác thực trước đó</h1>
             <p>Email <strong>${email}</strong> đã được xác thực.</p>
             <p>Bạn đang nhận cảnh báo FDA theo lịch đã đăng ký.</p>
@@ -146,7 +153,7 @@ export async function GET(request: Request) {
         <style>
           body { 
             font-family: 'Be Vietnam Pro', Arial, sans-serif; 
-            background: linear-gradient(135deg, #dbeafe 0%, #dcfce7 100%); 
+            background: linear-gradient(135deg, #ecfccb 0%, #f7fee7 100%); 
             padding: 40px; 
             text-align: center;
             margin: 0;
@@ -157,34 +164,42 @@ export async function GET(request: Request) {
             background: white; 
             padding: 50px 40px; 
             border-radius: 16px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+            border: 1px solid #e6e9dd;
+            overflow: hidden;
+          }
+          .accent-bar {
+            height: 6px;
+            background: linear-gradient(90deg, #facc15 0%, #a3e635 45%, #4d7c0f 100%);
+            margin: -50px -40px 30px -40px;
           }
           .success-icon {
             font-size: 64px;
             margin-bottom: 20px;
           }
           h1 { 
-            color: #10b981; 
+            color: #4d7c0f; 
             font-size: 28px;
             margin-bottom: 15px;
           }
           p { 
-            color: #64748b; 
+            color: #57534e; 
             line-height: 1.8; 
             margin-bottom: 15px;
             font-size: 16px;
           }
           .email-highlight {
-            background: #f1f5f9;
+            background: #f7fee7;
+            border: 1px solid #d9f99d;
             padding: 15px;
             border-radius: 8px;
             margin: 20px 0;
-            color: #1e293b;
+            color: #3f6212;
             font-weight: 600;
           }
           .features {
             text-align: left;
-            background: #f8fafc;
+            background: #f8faf3;
+            border: 1px solid #e6e9dd;
             padding: 20px;
             border-radius: 8px;
             margin: 25px 0;
@@ -194,12 +209,12 @@ export async function GET(request: Request) {
             padding-left: 20px;
           }
           .features li {
-            color: #475569;
+            color: #44403c;
             margin-bottom: 8px;
           }
           .btn { 
             display: inline-block; 
-            background: #2563eb; 
+            background: #4d7c0f; 
             color: white; 
             padding: 14px 32px; 
             text-decoration: none; 
@@ -209,21 +224,22 @@ export async function GET(request: Request) {
             transition: background 0.3s;
           }
           .btn:hover {
-            background: #1d4ed8;
+            background: #3f6212;
           }
           .footer {
             margin-top: 30px;
             padding-top: 20px;
-            border-top: 1px solid #e2e8f0;
+            border-top: 1px solid #e6e9dd;
           }
           .footer p {
-            color: #94a3b8;
+            color: #78716c;
             font-size: 14px;
           }
         </style>
       </head>
       <body>
         <div class="container">
+          <div class="accent-bar"></div>
           <div class="success-icon">🎉</div>
           <h1>Xác thực email thành công!</h1>
           
@@ -231,7 +247,7 @@ export async function GET(request: Request) {
           <div class="email-highlight">${email}</div>
           
           <div class="features">
-            <strong style="color: #1e293b;">Bạn sẽ nhận được:</strong>
+            <strong style="color: #3f6212;">Bạn sẽ nhận được:</strong>
             <ul>
               <li>✅ Cảnh báo FDA realtime từ Mỹ</li>
               <li>✅ Tóm tắt tiếng Việt với AI</li>
@@ -268,15 +284,17 @@ export async function GET(request: Request) {
         <meta charset="utf-8">
         <title>Lỗi hệ thống</title>
         <style>
-          body { font-family: 'Be Vietnam Pro', Arial, sans-serif; background: #f8fafc; padding: 40px; text-align: center; }
-          .container { max-width: 500px; margin: 0 auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-          h1 { color: #ef4444; }
-          p { color: #64748b; }
-          a { color: #2563eb; text-decoration: none; font-weight: 600; }
+          body { font-family: 'Be Vietnam Pro', Arial, sans-serif; background: #f4f6ec; padding: 40px; text-align: center; margin: 0; }
+          .container { max-width: 500px; margin: 0 auto; background: white; padding: 40px; border-radius: 14px; border: 1px solid #e6e9dd; }
+          .accent-bar { height: 5px; background: linear-gradient(90deg, #facc15 0%, #a3e635 45%, #4d7c0f 100%); border-radius: 14px 14px 0 0; margin: -40px -40px 30px -40px; }
+          h1 { color: #365314; }
+          p { color: #57534e; }
+          a { color: #4d7c0f; text-decoration: none; font-weight: 700; }
         </style>
       </head>
       <body>
         <div class="container">
+          <div class="accent-bar"></div>
           <h1>❌ Lỗi hệ thống</h1>
           <p>Đã xảy ra lỗi khi xác thực email. Vui lòng thử lại sau.</p>
           <p style="margin-top: 30px;"><a href="https://www.veximglobal.com/fda-tracker">← Quay lại FDA Tracker</a></p>

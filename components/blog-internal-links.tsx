@@ -18,7 +18,7 @@ const categoryToServices: Record<string, Array<{
     },
     {
       title: "Phòng sale xuất khẩu",
-      description: "Đội ngũ sales xuất khẩu thuê ngoài, tiếp cận 50+ buyer Mỹ/tháng và thu USD",
+      description: "Đội ngũ sales xuất khẩu thuê ngoài, kết nối buyer Mỹ theo ngành hàng và thu USD",
       href: "/services/export-sales",
       icon: TrendingUp,
     },
@@ -62,7 +62,7 @@ const categoryToServices: Record<string, Array<{
   "Xuất nhập khẩu": [
     {
       title: "Phòng sale xuất khẩu",
-      description: "Phòng kinh doanh xuất khẩu sang Mỹ trọn gói, tiếp cận 50+ buyer/tháng",
+      description: "Phòng kinh doanh xuất khẩu sang Mỹ trọn gói, kết nối buyer Mỹ phù hợp ngành hàng",
       href: "/services/export-sales",
       icon: TrendingUp,
     },
