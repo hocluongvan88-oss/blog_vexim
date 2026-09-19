@@ -222,7 +222,7 @@ export default function BlogSidebar() {
               "Đăng ký FDA thực phẩm, mỹ phẩm, dược phẩm",
               "Đại lý chính thức tại Hoa Kỳ (US Agent)",
               "Tư vấn đăng ký GACC Trung Quốc",
-              "Kiểm tra nhãn FDA",
+              "Phòng sale xuất khẩu",
             ].map((service, idx) => (
               <a
                 key={idx}
