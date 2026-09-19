@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Menu, X, User, ChevronDown, Shield, Ship } from "lucide-react"
+import { Menu, X, User, ChevronDown, Shield } from "lucide-react"
 import { ConsultationDialog } from "@/components/consultation-dialog"
 import Link from "next/link"
 import { BlogSearch } from "@/components/blog-search"
@@ -50,9 +50,13 @@ export function Header() {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16 md:h-20">
             <Link href="/" className="flex items-center gap-2.5 hover:opacity-90 transition-opacity group">
-              <span className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-gradient-to-br from-navy-800 to-navy-950 flex items-center justify-center shadow-md shadow-navy-900/20">
-                <Ship className="w-5 h-5 md:w-6 md:h-6 text-amber-400" />
-              </span>
+              <img
+                src="/logo.png"
+                alt="Vexim Global"
+                width={44}
+                height={44}
+                className="h-10 w-10 md:h-11 md:w-11 object-contain drop-shadow-sm"
+              />
               <span className="leading-none">
                 <span className="block text-xl md:text-2xl font-bold tracking-tight">
                   <span className="text-navy-900">VEXIM</span>
