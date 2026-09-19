@@ -6,7 +6,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
-import { ArrowRight, Loader2, Shield, FileCheck, Lock } from "lucide-react"
+import { ArrowRight, Loader2, Shield, FileCheck, Clock } from "lucide-react"
 import { ConsultationDialog } from "./consultation-dialog"
 
 export function HeroSection() {
@@ -92,36 +92,38 @@ export function HeroSection() {
               Giải pháp xuất nhập khẩu toàn cầu
             </span>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-balance leading-tight">
-              Chuẩn hóa quốc tế cùng đội ngũ chuyên gia FDA hàng đầu
+              Giảm rào cản pháp lý, sẵn sàng đưa sản phẩm ra thị trường quốc tế
             </h1>
             <h2 className="text-2xl md:text-3xl font-bold mb-6 text-yellow-400 drop-shadow-lg">
-              Vượt mọi rào cản pháp lý bằng kinh nghiệm thực chiến từ chuyên gia bản địa. 
+              Từ tuân thủ pháp lý, hoàn thiện hồ sơ đến tiếp cận thị trường và phát triển kênh bán hàng.
             </h2>
             <p className="text-lg md:text-xl mb-8 text-white/90 leading-relaxed">
-              Vexim quy tụ đội ngũ cố vấn quốc tế am hiểu sâu sắc quy định FDA & MoCRA. chúng tôi trực tiếp xử lý hồ sơ, tối ưu hóa thành phần và nhãn mác, giúp sản phẩm của bạn thông quan an toàn và tự tin hiện diện tại các hệ thống bán lẻ lớn nhất Hoa Kỳ.
+              Vexim Global tư vấn và hỗ trợ doanh nghiệp Việt Nam tiếp cận thị trường Hoa Kỳ và các thị trường quốc tế. Với FDA, chúng tôi giúp doanh nghiệp hiểu đúng yêu cầu, chuẩn bị đúng hồ sơ và xử lý thủ tục rõ ràng, hiệu quả.
             </p>
             <ul className="space-y-4 mb-8">
-              <li className="flex items-center gap-3">
+              <li className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
                   <Shield className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-white/90">
-                  Cập nhật quy định mới nhất - Am hiểu tường tận mọi thay đổi từ FDA & MoCRA.
+                  <strong className="font-semibold text-white">Cập nhật quy định</strong> — theo dõi sát các yêu cầu và thay đổi ảnh hưởng đến sản phẩm, hồ sơ và kế hoạch xuất khẩu.
                 </span>
               </li>
-              <li className="flex items-center gap-3">
+              <li className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
                   <FileCheck className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-white/90">
-                  Kiểm soát rủi ro tuyệt đối - Rà soát hồ sơ và thành phần kỹ lưỡng, triệt tiêu nguy cơ bị giữ hàng tại cảng.
+                  <strong className="font-semibold text-white">Rà soát hồ sơ kỹ lưỡng</strong> — kiểm tra doanh nghiệp, sản phẩm, nhãn mác và tài liệu trước khi tiến hành.
                 </span>
               </li>
-              <li className="flex items-center gap-3">
+              <li className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
-                  <Lock className="w-5 h-5 text-white" />
+                  <Clock className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-white/90">Hỗ trợ 24/7 - Kết nối không khoảng cách giữa doanh nghiệp Việt và mạng lưới chuyên gia tại Mỹ.</span>
+                <span className="text-white/90">
+                  <strong className="font-semibold text-white">Quy trình rõ ràng – xử lý nhanh</strong> — chuẩn hóa từng bước, minh bạch tiến độ, tối ưu thời gian hoàn thiện hồ sơ.
+                </span>
               </li>
             </ul>
             <Button variant="cta" size="lg" onClick={() => setIsDialogOpen(true)}>
