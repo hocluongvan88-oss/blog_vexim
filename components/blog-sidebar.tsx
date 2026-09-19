@@ -72,13 +72,15 @@ export default function BlogSidebar() {
       {/* Wrapper group for sticky behavior - ensures all 3 cards stay together */}
       <div className="sticky top-24 space-y-6">
 
-        {/* CTA Card */}
-        <Card className="p-6 bg-gradient-to-br from-primary to-primary/90 text-white">
+        {/* CTA Card — navy đậm + điểm nhấn xanh nhạt, CTA vàng/cam */}
+        <Card className="relative p-6 bg-gradient-to-br from-navy-950 via-navy-900 to-navy-800 text-white overflow-hidden">
+          <div className="pointer-events-none absolute -top-12 -right-12 w-40 h-40 rounded-full bg-sky-400/20 blur-3xl" aria-hidden="true" />
+          <div className="relative">
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center">
-              <Award className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
+              <Award className="w-5 h-5 text-navy-950" />
             </div>
-            <Badge className="bg-accent/20 text-white border-0">Miễn phí</Badge>
+            <Badge className="bg-sky-400/20 text-sky-200 border-0">Miễn phí</Badge>
           </div>
 
           <h3 className="text-xl font-bold mb-3 text-balance">Nhận tư vấn miễn phí từ chuyên gia</h3>
@@ -158,11 +160,7 @@ export default function BlogSidebar() {
                 <p className="text-sm text-white bg-red-600/80 rounded-md px-3 py-2">{errorMessage}</p>
               )}
 
-              <Button
-                type="submit"
-                className="w-full bg-red-600 hover:bg-red-700 text-white font-bold shadow-lg transition-all"
-                disabled={loading}
-              >
+              <Button type="submit" variant="cta" className="w-full" disabled={loading}>
                 {loading ? "Đang gửi..." : "Đăng ký tư vấn miễn phí"}
               </Button>
 
@@ -170,11 +168,12 @@ export default function BlogSidebar() {
             </form>
           ) : (
             <div className="text-center py-8">
-              <CheckCircle2 className="w-12 h-12 text-accent mx-auto mb-3" />
+              <CheckCircle2 className="w-12 h-12 text-sky-300 mx-auto mb-3" />
               <p className="text-lg font-semibold mb-1">Đăng ký thành công!</p>
               <p className="text-white/90 text-sm">Chúng tôi sẽ liên hệ với bạn trong 24h</p>
             </div>
           )}
+          </div>
         </Card>
 
         {/* Stats Card */}

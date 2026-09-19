@@ -116,7 +116,7 @@ export function ExportSalesInlineForm() {
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             disabled={isSubmitting}
-            className="h-9 sm:h-10 text-xs sm:text-sm bg-background border-slate-300 dark:border-slate-700 focus:border-emerald-500"
+            className="h-9 sm:h-10 text-xs sm:text-sm bg-background border-slate-300 dark:border-slate-700 focus:border-sky-500"
           />
         </div>
         <div>
@@ -131,7 +131,7 @@ export function ExportSalesInlineForm() {
             value={formData.phone}
             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
             disabled={isSubmitting}
-            className="h-9 sm:h-10 text-xs sm:text-sm bg-background border-slate-300 dark:border-slate-700 focus:border-emerald-500"
+            className="h-9 sm:h-10 text-xs sm:text-sm bg-background border-slate-300 dark:border-slate-700 focus:border-sky-500"
           />
         </div>
       </div>
@@ -149,7 +149,7 @@ export function ExportSalesInlineForm() {
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             disabled={isSubmitting}
-            className="h-9 sm:h-10 text-xs sm:text-sm bg-background border-slate-300 dark:border-slate-700 focus:border-emerald-500"
+            className="h-9 sm:h-10 text-xs sm:text-sm bg-background border-slate-300 dark:border-slate-700 focus:border-sky-500"
           />
         </div>
         <div>
@@ -158,7 +158,7 @@ export function ExportSalesInlineForm() {
           </label>
           <select
             id="form-industry"
-            className="w-full h-9 sm:h-10 px-3 py-1.5 border border-slate-300 dark:border-slate-700 rounded-md bg-background text-xs sm:text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+            className="w-full h-9 sm:h-10 px-3 py-1.5 border border-slate-300 dark:border-slate-700 rounded-md bg-background text-xs sm:text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
             value={formData.service}
             onChange={(e) => setFormData({ ...formData, service: e.target.value })}
             disabled={isSubmitting}
@@ -182,7 +182,7 @@ export function ExportSalesInlineForm() {
           value={formData.product}
           onChange={(e) => setFormData({ ...formData, product: e.target.value })}
           disabled={isSubmitting}
-          className="h-9 sm:h-10 text-xs sm:text-sm bg-background border-slate-300 dark:border-slate-700 focus:border-emerald-500"
+          className="h-9 sm:h-10 text-xs sm:text-sm bg-background border-slate-300 dark:border-slate-700 focus:border-sky-500"
         />
       </div>
 
@@ -197,7 +197,7 @@ export function ExportSalesInlineForm() {
           value={formData.description}
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
           disabled={isSubmitting}
-          className="bg-background text-xs sm:text-sm py-2 min-h-[54px] border-slate-300 dark:border-slate-700 focus:border-emerald-500 resize-none"
+          className="bg-background text-xs sm:text-sm py-2 min-h-[54px] border-slate-300 dark:border-slate-700 focus:border-sky-500 resize-none"
         />
       </div>
 
@@ -205,18 +205,18 @@ export function ExportSalesInlineForm() {
         <div
           className={`p-2.5 sm:p-3 rounded-lg text-xs sm:text-sm flex items-center gap-2 ${
             submitMessage.startsWith("✓")
-              ? "bg-emerald-50 text-emerald-800 border border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-300 dark:border-emerald-800"
+              ? "bg-sky-50 text-sky-800 border border-sky-200 dark:bg-sky-950/30 dark:text-sky-300 dark:border-sky-800"
               : "bg-red-50 text-red-800 border border-red-200 dark:bg-red-950/30 dark:text-red-300 dark:border-red-800"
           }`}
         >
-          {submitMessage.startsWith("✓") && <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />}
+          {submitMessage.startsWith("✓") && <CheckCircle2 className="w-4 h-4 shrink-0 text-sky-600" />}
           <span className="leading-snug">{submitMessage}</span>
         </div>
       )}
 
       <Button
         type="submit"
-        className="w-full h-11 sm:h-12 bg-emerald-600 text-white hover:bg-emerald-700 shadow-md font-bold text-sm sm:text-base rounded-xl transition-all flex items-center justify-center gap-2 whitespace-normal py-2 text-center"
+        className="w-full h-11 sm:h-12 bg-gradient-to-r from-amber-400 to-orange-500 text-navy-950 hover:from-amber-500 hover:to-orange-600 shadow-md shadow-orange-500/25 font-bold text-sm sm:text-base rounded-xl transition-all flex items-center justify-center gap-2 whitespace-normal py-2 text-center"
         disabled={isSubmitting}
       >
         {isSubmitting ? (
@@ -233,7 +233,7 @@ export function ExportSalesInlineForm() {
       </Button>
 
       <div className="flex items-center justify-center gap-1.5 text-[11px] sm:text-xs text-muted-foreground pt-0.5 text-center">
-        <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+        <ShieldCheck className="w-3.5 h-3.5 text-sky-600 shrink-0" />
         <span>Bảo mật 100% dữ liệu sản phẩm & thông tin nhà máy</span>
       </div>
     </form>

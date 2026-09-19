@@ -6,7 +6,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
-import { ArrowRight, Loader2, Shield, FileCheck, Lock } from "lucide-react"
+import { ArrowRight, Loader2, Shield, FileCheck, Clock } from "lucide-react"
 import { ConsultationDialog } from "./consultation-dialog"
 
 export function HeroSection() {
@@ -55,8 +55,8 @@ export function HeroSection() {
   }
 
   return (
-    <section id="hero" className="relative pt-24 md:pt-32 pb-16 md:pb-24 overflow-hidden">
-      {/* Background Image */}
+    <section id="hero" className="relative pt-24 md:pt-32 pb-16 md:pb-24 overflow-hidden bg-navy-950">
+      {/* Background Image — logistics / cảng biển */}
       <div
         className="absolute inset-0 z-0"
         style={{
@@ -65,63 +65,80 @@ export function HeroSection() {
           backgroundPosition: "center",
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/95 via-primary/90 to-primary/80" />
+        {/* Lớp phủ navy đậm dần sang phải để ảnh vẫn lộ ra, không còn một màu xanh phẳng */}
+        <div className="absolute inset-0 bg-gradient-to-r from-navy-950/97 via-navy-900/92 to-navy-800/70" />
+      </div>
+
+      {/* Điểm nhấn xanh nhạt — glow + grid trang trí */}
+      <div className="pointer-events-none absolute inset-0 z-0" aria-hidden="true">
+        <div className="absolute -top-32 right-[-10%] w-[480px] h-[480px] rounded-full bg-sky-400/20 blur-[120px]" />
+        <div className="absolute bottom-[-20%] left-[15%] w-[420px] h-[420px] rounded-full bg-amber-400/10 blur-[120px]" />
+        <div
+          className="absolute inset-0 opacity-[0.07]"
+          style={{
+            backgroundImage:
+              "linear-gradient(to right, #7dd3fc 1px, transparent 1px), linear-gradient(to bottom, #7dd3fc 1px, transparent 1px)",
+            backgroundSize: "56px 56px",
+          }}
+        />
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
-        <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+        <div className="grid md:grid-cols-[1.1fr_0.9fr] lg:grid-cols-[1.15fr_0.85fr] gap-8 md:gap-10 items-center">
           {/* Left Content */}
           <div className="text-white">
+            <span className="inline-flex items-center gap-2 rounded-full border border-sky-300/30 bg-sky-400/10 px-4 py-1.5 text-sm font-medium text-sky-200 mb-6">
+              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+              Giải pháp xuất nhập khẩu toàn cầu
+            </span>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-balance leading-tight">
-              Chuẩn hóa quốc tế cùng đội ngũ chuyên gia FDA hàng đầu
+              Giảm rào cản pháp lý, sẵn sàng đưa sản phẩm ra thị trường quốc tế
             </h1>
             <h2 className="text-2xl md:text-3xl font-bold mb-6 text-yellow-400 drop-shadow-lg">
-              Vượt mọi rào cản pháp lý bằng kinh nghiệm thực chiến từ chuyên gia bản địa. 
+              Từ tuân thủ pháp lý, hoàn thiện hồ sơ đến tiếp cận thị trường và phát triển kênh bán hàng.
             </h2>
             <p className="text-lg md:text-xl mb-8 text-white/90 leading-relaxed">
-              Vexim quy tụ đội ngũ cố vấn quốc tế am hiểu sâu sắc quy định FDA & MoCRA. chúng tôi trực tiếp xử lý hồ sơ, tối ưu hóa thành phần và nhãn mác, giúp sản phẩm của bạn thông quan an toàn và tự tin hiện diện tại các hệ thống bán lẻ lớn nhất Hoa Kỳ.
+              Vexim Global tư vấn và hỗ trợ doanh nghiệp Việt Nam tiếp cận thị trường Hoa Kỳ và các thị trường quốc tế. Với FDA, chúng tôi giúp doanh nghiệp hiểu đúng yêu cầu, chuẩn bị đúng hồ sơ và xử lý thủ tục rõ ràng, hiệu quả.
             </p>
             <ul className="space-y-4 mb-8">
-              <li className="flex items-center gap-3">
+              <li className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
                   <Shield className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-white/90">
-                  Cập nhật quy định mới nhất - Am hiểu tường tận mọi thay đổi từ FDA & MoCRA.
+                  <strong className="font-semibold text-white">Cập nhật quy định</strong> — theo dõi sát các yêu cầu và thay đổi ảnh hưởng đến sản phẩm, hồ sơ và kế hoạch xuất khẩu.
                 </span>
               </li>
-              <li className="flex items-center gap-3">
+              <li className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
                   <FileCheck className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-white/90">
-                  Kiểm soát rủi ro tuyệt đối - Rà soát hồ sơ và thành phần kỹ lưỡng, triệt tiêu nguy cơ bị giữ hàng tại cảng.
+                  <strong className="font-semibold text-white">Rà soát hồ sơ kỹ lưỡng</strong> — kiểm tra doanh nghiệp, sản phẩm, nhãn mác và tài liệu trước khi tiến hành.
                 </span>
               </li>
-              <li className="flex items-center gap-3">
+              <li className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
-                  <Lock className="w-5 h-5 text-white" />
+                  <Clock className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-white/90">Hỗ trợ 24/7 - Kết nối không khoảng cách giữa doanh nghiệp Việt và mạng lưới chuyên gia tại Mỹ.</span>
+                <span className="text-white/90">
+                  <strong className="font-semibold text-white">Quy trình rõ ràng – xử lý nhanh</strong> — chuẩn hóa từng bước, minh bạch tiến độ, tối ưu thời gian hoàn thiện hồ sơ.
+                </span>
               </li>
             </ul>
-            <Button
-              size="lg"
-              className="bg-red-600 text-white hover:bg-red-700 shadow-lg"
-              onClick={() => setIsDialogOpen(true)}
-            >
+            <Button variant="cta" size="lg" onClick={() => setIsDialogOpen(true)}>
               Tư vấn miễn phí
               <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
           </div>
 
           {/* Right Content - Consultation Form */}
-          <Card id="consultation-form" className="p-6 md:p-8 bg-white shadow-2xl">
-            <h3 className="text-2xl font-bold text-primary mb-2">Tư vấn miễn phí - Nhận kết quả trong 24h</h3>
-            <p className="text-muted-foreground mb-6">
+          <Card id="consultation-form" className="p-5 md:p-6 bg-white shadow-2xl rounded-xl">
+            <h3 className="text-lg md:text-xl font-bold text-primary mb-1.5">Tư vấn miễn phí - Nhận kết quả trong 24h</h3>
+            <p className="text-sm text-muted-foreground mb-4">
               <span className="text-accent font-semibold">Vui lòng gửi lại thông tin</span> chúng tôi sẽ liên hệ với bạn ngay!
             </p>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-3">
               {/* Honeypot field ẩn */}
               <input
                 type="text"
@@ -133,9 +150,9 @@ export function HeroSection() {
                 autoComplete="off"
               />
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium mb-2">
+                  <label htmlFor="name" className="block text-[13px] font-medium mb-1">
                     Họ và tên <span className="text-destructive">*</span>
                   </label>
                   <Input
@@ -149,7 +166,7 @@ export function HeroSection() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="phone" className="block text-sm font-medium mb-2">
+                  <label htmlFor="phone" className="block text-[13px] font-medium mb-1">
                     Số điện thoại <span className="text-destructive">*</span>
                   </label>
                   <Input
@@ -165,7 +182,7 @@ export function HeroSection() {
               </div>
 
               <div>
-                <label htmlFor="email" className="block text-sm font-medium mb-2">
+                <label htmlFor="email" className="block text-[13px] font-medium mb-1">
                   Email <span className="text-destructive">*</span>
                 </label>
                 <Input
@@ -179,12 +196,12 @@ export function HeroSection() {
                 />
               </div>
               <div>
-                <label htmlFor="service" className="block text-sm font-medium mb-2">
+                <label htmlFor="service" className="block text-[13px] font-medium mb-1">
                   Loại dịch vụ quan tâm
                 </label>
                 <select
                   id="service"
-                  className="w-full px-3 py-2 border border-input rounded-md bg-background"
+                  className="w-full px-3 py-1.5 text-sm border border-input rounded-md bg-background"
                   value={formData.service}
                   onChange={(e) => setFormData({ ...formData, service: e.target.value })}
                   disabled={isSubmitting}
@@ -200,7 +217,7 @@ export function HeroSection() {
               </div>
 
               <div>
-                <label htmlFor="product" className="block text-sm font-medium mb-2">
+                <label htmlFor="product" className="block text-[13px] font-medium mb-1">
                   Sản phẩm cần đăng ký
                 </label>
                 <Input
@@ -214,7 +231,7 @@ export function HeroSection() {
               </div>
 
               <div>
-                <label htmlFor="description" className="block text-sm font-medium mb-2">
+                <label htmlFor="description" className="block text-[13px] font-medium mb-1">
                   Mô tả thêm (chứng chỉ, quy trình sản xuất...)
                 </label>
                 <textarea
@@ -223,8 +240,8 @@ export function HeroSection() {
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   disabled={isSubmitting}
-                  className="w-full px-3 py-2 border border-input rounded-md bg-background text-sm"
-                  rows={3}
+                  className="w-full px-3 py-1.5 border border-input rounded-md bg-background text-sm"
+                  rows={2}
                 />
               </div>
 
@@ -236,12 +253,7 @@ export function HeroSection() {
                 </div>
               )}
 
-              <Button
-                type="submit"
-                className="w-full bg-accent text-accent-foreground hover:bg-accent/90"
-                size="lg"
-                disabled={isSubmitting}
-              >
+              <Button type="submit" variant="cta" className="w-full" disabled={isSubmitting}>
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

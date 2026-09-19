@@ -5,7 +5,7 @@ const serviceCategories = [
   {
     title: "FDA Food",
     icon: CheckCircle2,
-    color: "bg-blue-50 text-blue-600",
+    color: "bg-secondary text-navy-700",
     services: [
       "Đăng ký cơ sở sản xuất",
       "Hỗ trợ US Agent",
@@ -15,7 +15,7 @@ const serviceCategories = [
   {
     title: "MoCRA Cosmetics",
     icon: Users,
-    color: "bg-purple-50 text-purple-600",
+    color: "bg-amber-50 text-amber-600",
     services: [
       "Responsible Person (RP)",
       "Product Listing",
@@ -25,7 +25,7 @@ const serviceCategories = [
   {
     title: "Label & Ingredients",
     icon: Microscope,
-    color: "bg-green-50 text-green-600",
+    color: "bg-accent-soft text-accent",
     services: [
       "Review thành phần",
       "Nutrition Facts",

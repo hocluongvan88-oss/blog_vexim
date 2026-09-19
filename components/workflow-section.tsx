@@ -10,25 +10,25 @@ const workflowSteps = [
     number: "01",
     title: "Tiếp nhận & Tư vấn",
     description: "Lắng nghe nhu cầu, phân tích tình hình doanh nghiệp và đề xuất giải pháp phù hợp nhất.",
-    color: "from-blue-500 to-blue-600",
+    color: "from-navy-700 to-navy-900",
   },
   {
     number: "02",
     title: "Chuẩn bị hồ sơ",
     description: "Thu thập, kiểm tra và hoàn thiện toàn bộ hồ sơ pháp lý theo quy định của từng thị trường.",
-    color: "from-emerald-500 to-emerald-600",
+    color: "from-sky-500 to-sky-600",
   },
   {
     number: "03",
     title: "Nộp hồ sơ & Theo dõi",
     description: "Gửi hồ sơ đến cơ quan có thẩm quyền, theo dõi tiến độ và phối hợp giải quyết vướng mắc.",
-    color: "from-blue-500 to-blue-600",
+    color: "from-navy-700 to-navy-900",
   },
   {
     number: "04",
     title: "Nhận kết quả & Hỗ trợ",
     description: "Bàn giao giấy phép, hướng dẫn sử dụng và hỗ trợ duy trì tuân thủ lâu dài.",
-    color: "from-emerald-500 to-emerald-600",
+    color: "from-sky-500 to-sky-600",
   },
 ]
 
@@ -109,7 +109,7 @@ export function WorkflowSection() {
               </p>
               <button
                 onClick={() => setIsDialogOpen(true)}
-                className="inline-block bg-accent text-white px-8 py-3 rounded-lg font-medium hover:bg-accent/90 transition-colors"
+                className="inline-block bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-navy-950 px-8 py-3 rounded-lg font-semibold shadow-md shadow-orange-500/25 transition-all"
               >
                 Bắt đầu ngay hôm nay
               </button>

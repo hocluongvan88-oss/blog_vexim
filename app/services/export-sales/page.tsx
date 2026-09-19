@@ -287,8 +287,8 @@ export default function ExportSalesServicePage() {
 
             {/* VÙNG TIÊU ĐỀ RIÊNG BIỆT — TƯƠNG PHẢN CAO, KHÔNG PHỦ BANNER XANH */}
             <div className="text-center max-w-4xl mx-auto">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 sm:px-4 sm:py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 text-[11px] sm:text-xs md:text-sm font-bold uppercase tracking-wider mb-4 sm:mb-6">
-                <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600 dark:text-emerald-400" />
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 sm:px-4 sm:py-1.5 rounded-full bg-sky-100 dark:bg-sky-950/40 text-sky-800 dark:text-sky-300 border border-sky-300 dark:border-sky-800 text-[11px] sm:text-xs md:text-sm font-bold uppercase tracking-wider mb-4 sm:mb-6">
+                <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-sky-600 dark:text-sky-400" />
                 DỊCH VỤ PHÒNG SALE XUẤT KHẨU
               </div>
 
@@ -297,7 +297,7 @@ export default function ExportSalesServicePage() {
               </h1>
 
               <p className="text-sm sm:text-base md:text-xl text-slate-700 dark:text-slate-300 leading-relaxed font-medium mb-6 sm:mb-8 max-w-3xl mx-auto text-balance">
-                <strong className="text-emerald-700 dark:text-emerald-400 font-bold">
+                <strong className="text-sky-700 dark:text-sky-400 font-bold">
                   Vexim trở thành phòng sale xuất khẩu thuê ngoài
                 </strong>
                 , đại diện cho Supplier tiếp cận và kết nối trực tiếp với buyer tại thị trường Mỹ dựa trên dữ liệu hải quan thực tế và đội ngũ chuyên gia tại Hoa Kỳ.
@@ -315,7 +315,7 @@ export default function ExportSalesServicePage() {
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 w-full max-w-md sm:max-w-none mx-auto">
                 <ExportSalesBookingButton
                   size="lg"
-                  className="w-full sm:w-auto bg-emerald-600 text-white hover:bg-emerald-700 shadow-md text-sm sm:text-base px-5 sm:px-8 py-3 sm:py-4 h-auto font-bold whitespace-normal leading-snug text-center"
+                  className="w-full sm:w-auto bg-gradient-to-r from-amber-400 to-orange-500 text-navy-950 hover:from-amber-500 hover:to-orange-600 shadow-md shadow-orange-500/25 text-sm sm:text-base px-5 sm:px-8 py-3 sm:py-4 h-auto font-bold whitespace-normal leading-snug text-center"
                 >
                   <span>Đăng ký tư vấn Phòng Sale Xuất khẩu</span>
                   <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2 shrink-0" />
@@ -338,7 +338,7 @@ export default function ExportSalesServicePage() {
                   <div className="text-[11px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1 leading-tight">Dữ liệu hải quan Bill of Lading thực</div>
                 </div>
                 <div className="p-2.5 sm:p-3 rounded-xl bg-slate-100/60 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800">
-                  <div className="text-xl sm:text-2xl md:text-3xl font-black text-emerald-600">7 Tiêu chí</div>
+                  <div className="text-xl sm:text-2xl md:text-3xl font-black text-sky-600">7 Tiêu chí</div>
                   <div className="text-[11px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1 leading-tight">Sàng lọc buyer trước khi tiếp cận</div>
                 </div>
                 <div className="p-2.5 sm:p-3 rounded-xl bg-slate-100/60 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800">
@@ -405,20 +405,20 @@ export default function ExportSalesServicePage() {
         <section className="py-12 sm:py-16 md:py-24 bg-white dark:bg-background border-b border-border/70 overflow-hidden">
           <div className="container mx-auto px-4 max-w-6xl">
             <div className="max-w-3xl mx-auto text-center mb-8 sm:mb-12 md:mb-16">
-              <Badge variant="outline" className="mb-2.5 sm:mb-3 text-emerald-700 border-emerald-300 bg-emerald-50/60 font-semibold px-2.5 sm:px-3 py-1 text-xs sm:text-sm">
+              <Badge variant="outline" className="mb-2.5 sm:mb-3 text-sky-700 border-sky-300 bg-sky-50/60 font-semibold px-2.5 sm:px-3 py-1 text-xs sm:text-sm">
                 Giải pháp toàn diện
               </Badge>
               <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight leading-snug">
                 Giải pháp của Vexim Global
               </h2>
               <p className="text-slate-700 dark:text-slate-300 mt-2.5 sm:mt-3 text-sm sm:text-base md:text-lg font-medium leading-relaxed">
-                Vexim trở thành <strong className="text-emerald-700 dark:text-emerald-400">phòng sale xuất khẩu thuê ngoài</strong>, 
+                Vexim trở thành <strong className="text-sky-700 dark:text-sky-400">phòng sale xuất khẩu thuê ngoài</strong>, 
                 đại diện cho Supplier tiếp cận và kết nối trực tiếp với buyer tại thị trường Mỹ.
               </p>
             </div>
 
             {/* Core Methodology Highlight */}
-            <div className="rounded-xl sm:rounded-2xl border border-emerald-200 sm:border-2 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-950/20 p-4 sm:p-6 md:p-8 mb-8 sm:mb-12">
+            <div className="rounded-xl sm:rounded-2xl border border-sky-200 sm:border-2 dark:border-sky-800 bg-sky-50/50 dark:bg-sky-950/20 p-4 sm:p-6 md:p-8 mb-8 sm:mb-12">
               <div className="max-w-3xl mx-auto text-center">
                 <h3 className="text-base sm:text-xl md:text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2 sm:mb-3 leading-snug">
                   Không đơn thuần cung cấp danh sách buyer — Vexim phân tích và chọn lọc trước khi tiếp cận
@@ -436,9 +436,9 @@ export default function ExportSalesServicePage() {
                 return (
                   <div
                     key={idx}
-                    className="p-4 sm:p-5 rounded-xl border border-border bg-card shadow-xs hover:border-emerald-400 transition-colors"
+                    className="p-4 sm:p-5 rounded-xl border border-border bg-card shadow-xs hover:border-sky-400 transition-colors"
                   >
-                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 flex items-center justify-center mb-2.5 sm:mb-3">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-400 flex items-center justify-center mb-2.5 sm:mb-3">
                       <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                     </div>
                     <h4 className="text-sm sm:text-base font-bold text-slate-900 dark:text-slate-100 mb-1 leading-snug">
@@ -452,7 +452,7 @@ export default function ExportSalesServicePage() {
               })}
 
               {/* Card thứ 8: Tổng kết chi phí & sức mạnh */}
-              <div className="p-4 sm:p-5 rounded-xl border border-emerald-500/50 sm:border-2 bg-gradient-to-br from-emerald-600 to-teal-700 text-white flex flex-col justify-between shadow-md">
+              <div className="p-4 sm:p-5 rounded-xl border border-sky-300/60 sm:border-2 bg-gradient-to-br from-navy-800 to-navy-950 text-white flex flex-col justify-between shadow-md">
                 <div>
                   <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-white/20 text-white flex items-center justify-center mb-2.5 sm:mb-3">
                     <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -462,7 +462,7 @@ export default function ExportSalesServicePage() {
                     Chi phí vận hành chỉ tương đương một nhân sự văn phòng — nhưng bạn sở hữu cả một bộ máy dữ liệu và mạng lưới buyer chuyên nghiệp.
                   </p>
                 </div>
-                <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t border-white/20 text-[11px] sm:text-xs font-bold text-emerald-200">
+                <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t border-white/20 text-[11px] sm:text-xs font-bold text-sky-200">
                   Hiệu quả tối ưu · Rủi ro tối thiểu
                 </div>
               </div>
@@ -531,14 +531,14 @@ export default function ExportSalesServicePage() {
                 return (
                   <div
                     key={step.step}
-                    className="p-4 sm:p-6 rounded-xl sm:rounded-2xl border border-border bg-card shadow-xs hover:border-emerald-400 hover:shadow-md transition-all flex flex-col justify-between"
+                    className="p-4 sm:p-6 rounded-xl sm:rounded-2xl border border-border bg-card shadow-xs hover:border-sky-400 hover:shadow-md transition-all flex flex-col justify-between"
                   >
                     <div>
                       <div className="flex items-center justify-between mb-3 sm:mb-4">
-                        <span className="text-xl sm:text-2xl font-black text-emerald-600 font-mono">
+                        <span className="text-xl sm:text-2xl font-black text-sky-600 font-mono">
                           {step.step}
                         </span>
-                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-sky-50 dark:bg-sky-950 text-sky-600 dark:text-sky-400 flex items-center justify-center">
                           <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                         </div>
                       </div>
@@ -562,7 +562,7 @@ export default function ExportSalesServicePage() {
         <section className="py-12 sm:py-16 md:py-24 bg-white dark:bg-background border-b border-border/70 overflow-hidden">
           <div className="container mx-auto px-4 max-w-6xl">
             <div className="max-w-3xl mx-auto text-center mb-8 sm:mb-12 md:mb-16">
-              <Badge variant="outline" className="mb-2.5 sm:mb-3 text-emerald-700 border-emerald-300 bg-emerald-50/60 font-semibold px-2.5 sm:px-3 py-1 text-xs sm:text-sm">
+              <Badge variant="outline" className="mb-2.5 sm:mb-3 text-sky-700 border-sky-300 bg-sky-50/60 font-semibold px-2.5 sm:px-3 py-1 text-xs sm:text-sm">
                 Lợi thế bền vững
               </Badge>
               <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight leading-snug">
@@ -579,10 +579,10 @@ export default function ExportSalesServicePage() {
                 return (
                   <div
                     key={idx}
-                    className="p-4 sm:p-6 rounded-xl sm:rounded-2xl border border-border bg-card shadow-xs hover:border-emerald-300 transition-colors flex flex-col justify-between"
+                    className="p-4 sm:p-6 rounded-xl sm:rounded-2xl border border-border bg-card shadow-xs hover:border-sky-300 transition-colors flex flex-col justify-between"
                   >
                     <div>
-                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 flex items-center justify-center mb-3 sm:mb-4">
+                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-sky-50 dark:bg-sky-950 text-sky-700 dark:text-sky-400 flex items-center justify-center mb-3 sm:mb-4">
                         <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                       </div>
                       <h3 className="text-sm sm:text-base md:text-lg font-bold text-slate-900 dark:text-slate-100 mb-1.5 sm:mb-2 leading-snug">
@@ -622,17 +622,17 @@ export default function ExportSalesServicePage() {
         {/* ========================================================= */}
         <section id="dang-ky" className="py-12 sm:py-16 md:py-24 bg-white dark:bg-background overflow-hidden">
           <div className="container mx-auto px-4 max-w-5xl">
-            <div className="rounded-2xl sm:rounded-3xl border border-emerald-200 sm:border-2 sm:border-emerald-300 dark:border-emerald-800 bg-gradient-to-br from-emerald-50/40 via-white to-slate-50 dark:from-slate-900 dark:to-slate-950 p-4 sm:p-6 md:p-10 shadow-lg sm:shadow-xl">
+            <div className="rounded-2xl sm:rounded-3xl border border-sky-200 sm:border-2 sm:border-sky-300 dark:border-sky-800 bg-gradient-to-br from-sky-50/40 via-white to-slate-50 dark:from-slate-900 dark:to-slate-950 p-4 sm:p-6 md:p-10 shadow-lg sm:shadow-xl">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-10 items-center">
                 {/* Left: Message & Contact */}
                 <div className="lg:col-span-5 flex flex-col gap-3.5 sm:gap-5">
-                  <Badge className="bg-emerald-600 text-white font-bold w-fit text-xs px-2.5 sm:px-3 py-1">
+                  <Badge className="bg-sky-600 text-white font-bold w-fit text-xs px-2.5 sm:px-3 py-1">
                     KẾT NỐI NGAY HÔM NAY
                   </Badge>
 
                   <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight leading-snug">
                     Bạn có sản phẩm tốt.
-                    <span className="block text-emerald-700 dark:text-emerald-400 mt-1">
+                    <span className="block text-sky-700 dark:text-sky-400 mt-1">
                       Vexim giúp bạn xây dựng hệ thống để đưa sản phẩm đó đến đúng buyer.
                     </span>
                   </h2>
@@ -643,19 +643,19 @@ export default function ExportSalesServicePage() {
 
                   <div className="pt-2 sm:pt-3 space-y-2.5 sm:space-y-3 border-t border-slate-200 dark:border-slate-800">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0">
+                      <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300 flex items-center justify-center shrink-0">
                         <PhoneCall className="w-4 h-4" />
                       </div>
                       <div>
                         <div className="text-[11px] sm:text-xs text-muted-foreground">Hotline tư vấn xuất khẩu 24/7</div>
-                        <a href="tel:0373685634" className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 hover:text-emerald-600">
+                        <a href="tel:0373685634" className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 hover:text-sky-600">
                           0373 685 634
                         </a>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0">
+                      <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300 flex items-center justify-center shrink-0">
                         <Clock className="w-4 h-4" />
                       </div>
                       <div>
