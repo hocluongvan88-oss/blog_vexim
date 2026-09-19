@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vexim Global — Thư viện email (Vàng Xanh)</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #1c2410; color: #eef2e2; font-family: 'Segoe UI', Arial, sans-serif; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10;
+      background: linear-gradient(90deg, #365314, #4d7c0f 55%, #65a30d);
+      padding: 18px 28px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+      border-bottom: 3px solid #facc15;
+    }
+    .topbar .logo { font-weight: 800; letter-spacing: 2px; font-size: 15px; color: #fef9c3; }
+    .topbar h1 { font-size: 17px; margin: 0; font-weight: 700; color: white; }
+    .topbar .swatches { display: flex; gap: 6px; margin-left: auto; }
+    .topbar .sw { width: 22px; height: 22px; border-radius: 6px; border: 1px solid rgba(255,255,255,.35); }
+    .palette-note { width: 100%; font-size: 12px; color: #d9f99d; margin-top: 2px; }
+    .grid {
+      max-width: 1400px; margin: 0 auto; padding: 24px;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(680px, 1fr)); gap: 24px;
+    }
+    @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+    .card { background: #242e14; border: 1px solid #3a4a1e; border-radius: 14px; overflow: hidden; }
+    .card-head {
+      display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+      background: #2c3818; border-bottom: 1px solid #3a4a1e;
+    }
+    .num {
+      background: #facc15; color: #1a2e05; font-weight: 800; font-size: 12px;
+      border-radius: 8px; padding: 4px 8px;
+    }
+    .card-title { font-weight: 700; font-size: 14px; }
+    .card-file { font-size: 11px; color: #9db078; }
+    .open { margin-left: auto; font-size: 12px; color: #bef264; text-decoration: none; white-space: nowrap; }
+    .open:hover { text-decoration: underline; }
+    iframe { width: 100%; height: 980px; border: 0; display: block; background: #f4f6ec; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <span class="logo">VEXIM GLOBAL</span>
+    <h1>📧 Thư viện email — thiết kế lại ton màu vàng xanh</h1>
+    <div class="swatches">
+      <span class="sw" style="background:#facc15" title="#facc15"></span>
+      <span class="sw" style="background:#eab308" title="#eab308"></span>
+      <span class="sw" style="background:#a3e635" title="#a3e635"></span>
+      <span class="sw" style="background:#84cc16" title="#84cc16"></span>
+      <span class="sw" style="background:#4d7c0f" title="#4d7c0f"></span>
+      <span class="sw" style="background:#365314" title="#365314"></span>
+    </div>
+    <div class="palette-note">
+      Palette: vàng #facc15 → #eab308 · xanh vàng #a3e635 → #84cc16 → #4d7c0f · xanh rêu đậm #365314 (bản tin khẩn) · nền #f4f6ec
+    </div>
+  </div>
+  <div class="grid">
+
+      <div class="card">
+        <div class="card-head">
+          <span class="num">01</span>
+          <div>
+            <div class="card-title">1. Xác nhận đăng ký cảnh báo FDA</div>
+            <div class="card-file">01-xac-nhan-dang-ky-fda.html</div>
+          </div>
+          <a class="open" href="01-xac-nhan-dang-ky-fda.html" target="_blank">Mở &times; toàn màn hình</a>
+        </div>
+        <iframe src="01-xac-nhan-dang-ky-fda.html" loading="lazy" title="1. Xác nhận đăng ký cảnh báo FDA"></iframe>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="num">02</span>
+          <div>
+            <div class="card-title">2. Bản tin cảnh báo FDA (hàng ngày / hàng tuần)</div>
+            <div class="card-file">02-ban-tin-canh-bao.html</div>
+          </div>
+          <a class="open" href="02-ban-tin-canh-bao.html" target="_blank">Mở &times; toàn màn hình</a>
+        </div>
+        <iframe src="02-ban-tin-canh-bao.html" loading="lazy" title="2. Bản tin cảnh báo FDA (hàng ngày / hàng tuần)"></iframe>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="num">03</span>
+          <div>
+            <div class="card-title">3. Cảnh báo FDA khẩn cấp</div>
+            <div class="card-file">03-canh-bao-khan-cap.html</div>
+          </div>
+          <a class="open" href="03-canh-bao-khan-cap.html" target="_blank">Mở &times; toàn màn hình</a>
+        </div>
+        <iframe src="03-canh-bao-khan-cap.html" loading="lazy" title="3. Cảnh báo FDA khẩn cấp"></iframe>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="num">04</span>
+          <div>
+            <div class="card-title">4. Xác nhận hủy đăng ký</div>
+            <div class="card-file">04-huy-dang-ky.html</div>
+          </div>
+          <a class="open" href="04-huy-dang-ky.html" target="_blank">Mở &times; toàn màn hình</a>
+        </div>
+        <iframe src="04-huy-dang-ky.html" loading="lazy" title="4. Xác nhận hủy đăng ký"></iframe>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="num">05</span>
+          <div>
+            <div class="card-title">5. Xác nhận hồ sơ GACC (khách hàng)</div>
+            <div class="card-file">05-xac-nhan-ho-so-gacc.html</div>
+          </div>
+          <a class="open" href="05-xac-nhan-ho-so-gacc.html" target="_blank">Mở &times; toàn màn hình</a>
+        </div>
+        <iframe src="05-xac-nhan-ho-so-gacc.html" loading="lazy" title="5. Xác nhận hồ sơ GACC (khách hàng)"></iframe>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="num">06</span>
+          <div>
+            <div class="card-title">6. Thông báo hồ sơ GACC mới (admin)</div>
+            <div class="card-file">06-thong-bao-gacc-admin.html</div>
+          </div>
+          <a class="open" href="06-thong-bao-gacc-admin.html" target="_blank">Mở &times; toàn màn hình</a>
+        </div>
+        <iframe src="06-thong-bao-gacc-admin.html" loading="lazy" title="6. Thông báo hồ sơ GACC mới (admin)"></iframe>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="num">07</span>
+          <div>
+            <div class="card-title">7. Nhắc nhở gia hạn đăng ký FDA</div>
+            <div class="card-file">07-nhac-no-gia-han-fda.html</div>
+          </div>
+          <a class="open" href="07-nhac-no-gia-han-fda.html" target="_blank">Mở &times; toàn màn hình</a>
+        </div>
+        <iframe src="07-nhac-no-gia-han-fda.html" loading="lazy" title="7. Nhắc nhở gia hạn đăng ký FDA"></iframe>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="num">08</span>
+          <div>
+            <div class="card-title">8. Nhắc nhở gia hạn US Agent</div>
+            <div class="card-file">08-nhac-no-gia-han-us-agent.html</div>
+          </div>
+          <a class="open" href="08-nhac-no-gia-han-us-agent.html" target="_blank">Mở &times; toàn màn hình</a>
+        </div>
+        <iframe src="08-nhac-no-gia-han-us-agent.html" loading="lazy" title="8. Nhắc nhở gia hạn US Agent"></iframe>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="num">09</span>
+          <div>
+            <div class="card-title">9. Xác nhận đăng ký tư vấn (khách hàng)</div>
+            <div class="card-file">09-xac-nhan-tu-van-khach-hang.html</div>
+          </div>
+          <a class="open" href="09-xac-nhan-tu-van-khach-hang.html" target="_blank">Mở &times; toàn màn hình</a>
+        </div>
+        <iframe src="09-xac-nhan-tu-van-khach-hang.html" loading="lazy" title="9. Xác nhận đăng ký tư vấn (khách hàng)"></iframe>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="num">10</span>
+          <div>
+            <div class="card-title">10. Lead mới từ website (admin)</div>
+            <div class="card-file">10-thong-cao-lead-moi-admin.html</div>
+          </div>
+          <a class="open" href="10-thong-cao-lead-moi-admin.html" target="_blank">Mở &times; toàn màn hình</a>
+        </div>
+        <iframe src="10-thong-cao-lead-moi-admin.html" loading="lazy" title="10. Lead mới từ website (admin)"></iframe>
+      </div>
+  </div>
+</body>
+</html>

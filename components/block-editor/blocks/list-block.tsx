@@ -149,6 +149,9 @@ function ListItem({
 export function ListBlock({ data, onChange, onEnter, onBackspace }: ListBlockProps) {
   const { items = [""], style = "unordered", align = "left" } = data
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null)
+  // Scope việc tìm <li> theo đúng khối danh sách này (trước đây querySelector toàn trang
+  // nên khi bài có nhiều danh sách thì focus nhảy sang danh sách khác)
+  const listRef = useRef<HTMLDivElement>(null)
 
   const alignClass = {
     left: "text-left",
@@ -215,28 +218,28 @@ export function ListBlock({ data, onChange, onEnter, onBackspace }: ListBlockPro
 
   // Focus management
   useEffect(() => {
-    if (focusedIndex !== null) {
-      setTimeout(() => {
-        const liElement = document.querySelector(
-          `li[data-item-index="${focusedIndex}"]`
-        ) as HTMLElement
-        const element = liElement?.querySelector('[contenteditable]') as HTMLElement
-        if (element) {
-          element.focus()
-          const range = document.createRange()
-          const sel = window.getSelection()
-          range.selectNodeContents(element)
-          range.collapse(false)
-          sel?.removeAllRanges()
-          sel?.addRange(range)
-        }
-        setFocusedIndex(null)
-      }, 0)
-    }
+    if (focusedIndex === null) return
+
+    const timer = setTimeout(() => {
+      const liElement = listRef.current?.querySelector(`li[data-item-index="${focusedIndex}"]`) as HTMLElement | null
+      const element = liElement?.querySelector("[contenteditable]") as HTMLElement | null
+      if (element) {
+        element.focus()
+        const range = document.createRange()
+        const sel = window.getSelection()
+        range.selectNodeContents(element)
+        range.collapse(false)
+        sel?.removeAllRanges()
+        sel?.addRange(range)
+      }
+      setFocusedIndex(null)
+    }, 0)
+
+    return () => clearTimeout(timer)
   }, [focusedIndex])
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2" ref={listRef}>
       <ul className={`${listClass} pl-6 space-y-2 ${alignClass}`}>
         {items.map((item, index) => (
           <ListItem

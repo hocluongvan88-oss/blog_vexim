@@ -7,18 +7,13 @@ import { Button } from "@/components/ui/button"
 import { Calendar, User, ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { BlogSearch } from "@/components/blog-search"
+import { BLOG_CATEGORY_SLUGS } from "@/lib/blog-categories"
+
+const POST_CARD_COLUMNS = "id, title, slug, excerpt, category, featured_image, published_at"
 
 export const metadata = {
   title: "Blog - Kiến thức xuất nhập khẩu",
   description: "Cập nhật tin tức, kiến thức pháp lý và hướng dẫn về xuất nhập khẩu quốc tế từ chuyên gia Vexim Global.",
-  keywords: [
-    "blog xuất nhập khẩu",
-    "kiến thức xuất khẩu",
-    "tin tức thương mại",
-    "hướng dẫn FDA",
-    "hướng dẫn GACC",
-    "pháp lý xuất khẩu",
-  ],
   alternates: {
     canonical: "https://www.veximglobal.com/blog",
   },
@@ -37,7 +32,13 @@ export default async function BlogPage({ searchParams }: { searchParams: Promise
   const params = await searchParams
   const selectedCategory = params.category || "all"
 
-  let query = supabase.from("posts").select("*").eq("status", "published").order("published_at", { ascending: false })
+  // Chỉ lấy các cột cần cho danh sách (trước đây select("*") kéo theo cả content JSON của mọi bài)
+  let query = supabase
+    .from("posts")
+    .select(POST_CARD_COLUMNS)
+    .eq("status", "published")
+    .order("published_at", { ascending: false })
+    .limit(60)
 
   if (selectedCategory && selectedCategory !== "all") {
     query = query.eq("category", selectedCategory)
@@ -49,16 +50,7 @@ export default async function BlogPage({ searchParams }: { searchParams: Promise
     console.error("Error fetching posts:", error)
   }
 
-  const categories = [
-    "all",
-    "FDA",
-    "GACC",
-    "MFDS",
-    "Truy xuất nguồn gốc",
-    "Tin tức thị trường",
-    "Xuất nhập khẩu",
-    "Kiến thức pháp lý",
-  ]
+  const categories = ["all", ...BLOG_CATEGORY_SLUGS]
 
   // Format date helper
   const formatDate = (dateString: string) => {

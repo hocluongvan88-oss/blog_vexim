@@ -10,7 +10,7 @@ const services = [
     description:
       "Xuất khẩu thực phẩm sang Mỹ bắt buộc phải có FDA Registration và DUNS lâm định danh (UFI). Vexim hỗ trợ trong gói từ đăng ký mã DUNS đến hoàn tất hồ sơ FDA.",
     items: [
-      "Đăng ký mã DUNS chuẩn xác",
+      "Đăng ký mã DUNS miễn phí",
       "Food Facility Registration",
       "Gia hạn FDA định kỳ"
     ],
@@ -41,16 +41,16 @@ const services = [
     link: "/services/us-agent",
   },
   {
-    image: "/korean-cosmetics-health-products-laboratory-qualit.jpg",
-    title: "Kiểm tra Nhãn & Thành phần",
+    image: "/landing/audience-team.jpg",
+    title: "Phòng Sale Xuất Khẩu",
     description:
-      "Rà soát bảng thành phần (Ingredients) và thiết kế nhãn (Nutrition Facts) theo chuẩn 21 CFR. Tránh rủi ro hàng sẽ bị giữ lại tại cảng do lỗi trình bày.",
+      "Phòng kinh doanh xuất khẩu thuê ngoài trọn gói cho nhà máy Việt sang Mỹ. Tìm buyer thẩm định, đàm phán thương mại và hỗ trợ tuân thủ.",
     items: [
-      "Review Ingredients chuyên sâu",
-      "Sửa nhãn chuẩn 21 CFR",
-      "Kiểm soát Health Claims"
+      "Tiếp cận buyer Mỹ phù hợp ngành hàng",
+      "Hỗ trợ tuân thủ & đàm phán",
+      "Tối ưu nguồn lực vận hành"
     ],
-    link: "/services/fda-label-check",
+    link: "/services/export-sales",
   },
   {
     image: "/fsvp-compliance-food-import.jpg",

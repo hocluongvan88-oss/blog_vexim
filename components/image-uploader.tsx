@@ -6,8 +6,9 @@ import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
-import { Upload, Loader2, X, ImageIcon } from "lucide-react"
+import { Upload, Loader2, X, ImageIcon, AlertTriangle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { useImageDimensions } from "@/hooks/use-image-dimensions"
 
 interface ImageUploaderProps {
   value: string
@@ -20,6 +21,9 @@ export function ImageUploader({ value, onChange, onPreviewChange }: ImageUploade
   const [preview, setPreview] = useState<string | null>(value || null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { toast } = useToast()
+
+  // Ảnh bìa cần ≥1200px ngang để đủ điều kiện thẻ lớn trên Google Discover
+  const dimensions = useImageDimensions(preview)
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -150,17 +154,37 @@ export function ImageUploader({ value, onChange, onPreviewChange }: ImageUploade
       </div>
 
       {preview && (
-        <div className="relative aspect-video max-w-md overflow-hidden rounded-lg border bg-muted">
-          <img src={preview || "/placeholder.svg"} alt="Preview" className="w-full h-full object-cover" />
-          <Button
-            type="button"
-            variant="destructive"
-            size="icon"
-            className="absolute top-2 right-2"
-            onClick={handleRemove}
-          >
-            <X className="w-4 h-4" />
-          </Button>
+        <div className="space-y-2">
+          <div className="relative aspect-video max-w-md overflow-hidden rounded-lg border bg-muted">
+            <img src={preview || "/placeholder.svg"} alt="Preview" className="w-full h-full object-cover" />
+            <Button
+              type="button"
+              variant="destructive"
+              size="icon"
+              className="absolute top-2 right-2"
+              onClick={handleRemove}
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+
+          {dimensions && (
+            <div
+              className={`flex items-start gap-2 rounded-md border px-3 py-2 text-xs ${
+                dimensions.width >= 1200
+                  ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                  : "border-amber-300 bg-amber-50 text-amber-900"
+              }`}
+            >
+              <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+              <span>
+                {dimensions.width}×{dimensions.height}px —{" "}
+                {dimensions.width >= 1200
+                  ? "đạt chuẩn thẻ lớn Google Discover, ảnh bìa sẽ hiển thị đẹp khi chia sẻ."
+                  : "nhỏ hơn 1200px nên chỉ hiện dạng thumbnail khi chia sẻ/Discover. Nên dùng ảnh lớn hơn."}
+              </span>
+            </div>
+          )}
         </div>
       )}
 

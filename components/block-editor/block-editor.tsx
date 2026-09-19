@@ -1,11 +1,9 @@
 "use client"
 
-import { useRef } from "react"
-
 import React from "react"
-import { useState, useEffect } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Plus, GripVertical, ClipboardPaste } from "lucide-react"
+import { Plus, GripVertical } from "lucide-react"
 import { BlockToolbar } from "./block-toolbar"
 import { HeadingBlock } from "./blocks/heading-block"
 import { ParagraphBlock } from "./blocks/paragraph-block"
@@ -15,244 +13,250 @@ import { TableBlock } from "./blocks/table-block"
 import { ListBlock } from "./blocks/list-block"
 import { InlineToolbar } from "./inline-toolbar"
 import type { Block, BlockType } from "./types"
-import { Textarea } from "@/components/ui/textarea"
+import { generateBlockId, parsedBlocksToBlocks, type ParsedBlock } from "@/lib/content-parsers"
 
 interface BlockEditorProps {
   value: Block[]
   onChange: (blocks: Block[]) => void
 }
 
-// Parse markdown table
-const parseMarkdownTable = (lines: string[]) => {
-  if (lines.length < 2) return null
-  
-  const rows: string[][] = []
-  let separatorIndex = -1
-  
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim()
-    if (/^\|[\s\-:|\s]+\|$/.test(line) && line.includes("-")) {
-      separatorIndex = i
-      continue
-    }
-    const cells = line.split("|").slice(1, -1).map(cell => cell.trim())
-    if (cells.length > 0) rows.push(cells)
-  }
-  
-  if (rows.length === 0) return null
-  const maxCols = Math.max(...rows.map(r => r.length))
-  const normalizedRows = rows.map(row => {
-    while (row.length < maxCols) row.push("")
-    return row
-  })
-  
+const HISTORY_LIMIT = 50
+const TYPING_COALESCE_MS = 900
+
+function createDefaultBlock(): Block {
   return {
-    rows: normalizedRows.length,
-    cols: maxCols,
-    content: normalizedRows,
-    hasHeader: separatorIndex === 1,
+    id: generateBlockId("block"),
+    type: "paragraph",
+    data: { text: "", align: "justify" },
   }
 }
 
-// Parse HTML table
-const parseHTMLTable = (tableEl: Element) => {
-  const rows: string[][] = []
-  tableEl.querySelectorAll("tr").forEach((tr) => {
-    const cells: string[] = []
-    tr.querySelectorAll("td, th").forEach((cell) => {
-      cells.push(cell.textContent?.trim() || "")
-    })
-    if (cells.length > 0) rows.push(cells)
-  })
-  
-  if (rows.length === 0) return null
-  const maxCols = Math.max(...rows.map(r => r.length))
-  const normalizedRows = rows.map(row => {
-    while (row.length < maxCols) row.push("")
-    return row
-  })
-  
-  return {
-    rows: normalizedRows.length,
-    cols: maxCols,
-    content: normalizedRows,
-    hasHeader: tableEl.querySelector("tr:first-child th") !== null || true,
+/** Editor luôn cần ít nhất 1 khối để hiển thị placeholder. */
+function normalizeBlocks(value: Block[] | undefined | null): Block[] {
+  return value && value.length > 0 ? value : [createDefaultBlock()]
+}
+
+function getDefaultBlockData(type: BlockType): Record<string, unknown> {
+  switch (type) {
+    case "heading":
+      return { level: 2, text: "", align: "left" }
+    case "paragraph":
+      return { text: "", align: "justify" }
+    case "image":
+      return { url: "", alt: "", caption: "", align: "center", width: "100%" }
+    case "quote":
+      return { text: "", author: "", align: "left" }
+    case "table":
+      return { rows: 2, cols: 2, content: [["", ""], ["", ""]], hasHeader: true, align: "left" }
+    case "list":
+      return { style: "unordered", items: [""], align: "left" }
+    default:
+      return {}
   }
 }
 
 export function BlockEditor({ value, onChange }: BlockEditorProps) {
-  // Always ensure at least one block exists - use static ID to avoid hydration mismatch
-  const initialBlocks = value && value.length > 0 ? value : [{
-    id: "block_initial_default",
-    type: "paragraph" as BlockType,
-    data: { text: "", align: "justify" },
-  }]
-  
-  const [blocks, setBlocks] = useState<Block[]>(initialBlocks)
+  const [blocks, setBlocks] = useState<Block[]>(() => normalizeBlocks(value))
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null)
   const [showBlockMenu, setShowBlockMenu] = useState(false)
   const [insertPosition, setInsertPosition] = useState<number>(0)
-  const blockCounterRef = useRef(0)
-  
-  // Undo/Redo state
-  const [history, setHistory] = useState<Block[][]>([initialBlocks])
-  const [historyIndex, setHistoryIndex] = useState(0)
-  const isUndoingRef = useRef(false)
 
-  // Sync blocks to parent
+  /** Nguồn dữ liệu thật của editor (tránh closure cũ trong các handler). */
+  const blocksRef = useRef<Block[]>(blocks)
+  const onChangeRef = useRef(onChange)
+
+  // Undo/Redo — lưu bằng ref để không phải stringify lại toàn bộ blocks mỗi lần render
+  const historyRef = useRef<Block[][]>([blocks])
+  const historyIndexRef = useRef(0)
+  const lastPushTimeRef = useRef(0)
+  const coalesceKeyRef = useRef<string | null>(null)
+
   useEffect(() => {
-    onChange(blocks)
-  }, [blocks, onChange])
-  
-  // Track history for undo/redo
+    onChangeRef.current = onChange
+  }, [onChange])
+
+  /** Thông báo cho component cha mỗi khi nội dung đổi (cha là nguồn dữ liệu khi lưu). */
   useEffect(() => {
-    if (!isUndoingRef.current) {
-      // Only save to history if blocks actually changed
-      const lastHistory = history[historyIndex]
-      const hasChanged = JSON.stringify(lastHistory) !== JSON.stringify(blocks)
-      
-      if (hasChanged) {
-        // Remove any "future" history and add new state
-        const newHistory = history.slice(0, historyIndex + 1)
-        newHistory.push(blocks)
-        
-        // Limit history to last 50 states
-        if (newHistory.length > 50) {
-          newHistory.shift()
-        } else {
-          setHistoryIndex(historyIndex + 1)
-        }
-        
-        setHistory(newHistory)
-      }
-    }
-    isUndoingRef.current = false
+    blocksRef.current = blocks
+    onChangeRef.current(blocks)
   }, [blocks])
-  
-  // Keyboard shortcuts
+
+  /**
+   * Đồng bộ khi cha đổi `value` từ bên ngoài (Import HTML/Markdown, áp dụng gợi ý AI,
+   * khôi phục bản nháp...). Bỏ qua khi `value` chính là mảng do editor vừa phát ra.
+   */
+  useEffect(() => {
+    if (!value) return
+    if (value === blocksRef.current) return
+    // Tránh re-normalize khi value rỗng và editor đã có khối mặc định -> tránh vòng lặp vô tận
+    if (value.length === 0 && blocksRef.current.length <= 1) {
+      const currentText = String(blocksRef.current[0]?.data?.text ?? "").trim()
+      if (!currentText) return
+    }
+    if (JSON.stringify(value) === JSON.stringify(blocksRef.current)) return
+
+    const next = normalizeBlocks(value)
+    blocksRef.current = next
+    setBlocks(next)
+
+    // Ghi vào lịch sử để người dùng có thể undo thao tác import
+    historyRef.current = [...historyRef.current.slice(0, historyIndexRef.current + 1), next].slice(-HISTORY_LIMIT)
+    historyIndexRef.current = historyRef.current.length - 1
+    coalesceKeyRef.current = null
+  }, [value])
+
+  const recordHistory = useCallback((next: Block[], coalesceKey?: string) => {
+    const now = Date.now()
+    const trimmed = historyRef.current.slice(0, historyIndexRef.current + 1)
+    const last = trimmed[trimmed.length - 1]
+
+    if (last && JSON.stringify(last) === JSON.stringify(next)) return
+
+    // Gộp các thay đổi liên tiếp trên cùng một khối text thành 1 bước undo
+    const canCoalesce =
+      !!coalesceKey &&
+      coalesceKeyRef.current === coalesceKey &&
+      now - lastPushTimeRef.current < TYPING_COALESCE_MS &&
+      trimmed.length > 1
+
+    if (canCoalesce) {
+      trimmed[trimmed.length - 1] = next
+      historyRef.current = trimmed
+      lastPushTimeRef.current = now
+      return
+    }
+
+    coalesceKeyRef.current = coalesceKey ?? null
+    lastPushTimeRef.current = now
+    const appended = [...trimmed, next]
+    historyRef.current = appended.length > HISTORY_LIMIT ? appended.slice(appended.length - HISTORY_LIMIT) : appended
+    historyIndexRef.current = historyRef.current.length - 1
+  }, [])
+
+  /** Ghi nội dung mới + lịch sử (dùng cho mọi thao tác của người dùng). */
+  const commit = useCallback(
+    (next: Block[], coalesceKey?: string) => {
+      blocksRef.current = next
+      setBlocks(next)
+      recordHistory(next, coalesceKey)
+    },
+    [recordHistory],
+  )
+
+  const applyHistoryState = useCallback((state: Block[]) => {
+    blocksRef.current = state
+    setBlocks(state)
+    coalesceKeyRef.current = null
+  }, [])
+
+  const undo = useCallback(() => {
+    if (historyIndexRef.current <= 0) return
+    historyIndexRef.current -= 1
+    const previous = historyRef.current[historyIndexRef.current]
+    if (previous) applyHistoryState(previous)
+  }, [applyHistoryState])
+
+  const redo = useCallback(() => {
+    if (historyIndexRef.current >= historyRef.current.length - 1) return
+    historyIndexRef.current += 1
+    const next = historyRef.current[historyIndexRef.current]
+    if (next) applyHistoryState(next)
+  }, [applyHistoryState])
+
+  // Keyboard shortcuts: Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ctrl+Z / Cmd+Z - Undo
-      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+      const withModifier = e.ctrlKey || e.metaKey
+      if (!withModifier) return
+
+      if (e.key === "z" && !e.shiftKey) {
         e.preventDefault()
-        if (historyIndex > 0) {
-          isUndoingRef.current = true
-          const previousState = history[historyIndex - 1]
-          setBlocks(previousState)
-          setHistoryIndex(historyIndex - 1)
-        }
-      }
-      
-      // Ctrl+Y / Cmd+Shift+Z - Redo
-      if (((e.ctrlKey || e.metaKey) && e.key === 'y') || ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'z')) {
+        undo()
+      } else if (e.key === "y" || (e.shiftKey && e.key.toLowerCase() === "z")) {
         e.preventDefault()
-        if (historyIndex < history.length - 1) {
-          isUndoingRef.current = true
-          const nextState = history[historyIndex + 1]
-          setBlocks(nextState)
-          setHistoryIndex(historyIndex + 1)
-        }
+        redo()
       }
     }
-    
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [history, historyIndex])
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [undo, redo])
+
+  const focusBlockAfterRender = (blockId: string) => {
+    setTimeout(() => {
+      const element = document.querySelector(`[data-block-id="${blockId}"] [contenteditable]`) as HTMLElement | null
+      element?.focus()
+    }, 50)
+  }
 
   const addBlock = (type: BlockType, position: number) => {
-    blockCounterRef.current += 1
     const newBlock: Block = {
-      id: `block_${blockCounterRef.current}_${Math.random().toString(36).substr(2, 9)}`,
+      id: generateBlockId("block"),
       type,
       data: getDefaultBlockData(type),
     }
 
-    const newBlocks = [...blocks]
+    const newBlocks = [...blocksRef.current]
     newBlocks.splice(position, 0, newBlock)
-    setBlocks(newBlocks)
+    commit(newBlocks)
     setShowBlockMenu(false)
     setSelectedBlockId(newBlock.id)
-
-    // Focus the new block after it's rendered
-    setTimeout(() => {
-      const newBlockElement = document.querySelector(`[data-block-id="${newBlock.id}"] [contenteditable]`) as HTMLElement
-      if (newBlockElement) {
-        newBlockElement.focus()
-      }
-    }, 50)
+    focusBlockAfterRender(newBlock.id)
   }
 
-  const getDefaultBlockData = (type: BlockType): any => {
-    switch (type) {
-      case "heading":
-        return { level: 2, text: "", align: "left" }
-      case "paragraph":
-        return { text: "", align: "justify" }
-      case "image":
-        return { url: "", caption: "", align: "center", width: "100%" }
-      case "quote":
-        return { text: "", author: "", align: "left" }
-      case "table":
-        return { rows: 2, cols: 2, content: [["", ""], ["", ""]], align: "left" }
-      case "list":
-        return { style: "unordered", items: [""], align: "left" }
-      default:
-        return {}
-    }
+  const updateBlock = (id: string, data: Record<string, unknown>) => {
+    const next = blocksRef.current.map((block) => (block.id === id ? { ...block, data: { ...block.data, ...data } } : block))
+    const coalesceKey = typeof data.text === "string" ? `text:${id}` : undefined
+    commit(next, coalesceKey)
   }
 
-  const updateBlock = (id: string, data: any) => {
-    setBlocks(blocks.map((block) => (block.id === id ? { ...block, data: { ...block.data, ...data } } : block)))
-  }
-
-  const convertBlockType = (id: string, newType: BlockType, newData: any) => {
-    setBlocks(blocks.map((block) => (block.id === id ? { ...block, type: newType, data: newData } : block)))
+  const convertBlockType = (id: string, newType: BlockType, newData: Record<string, unknown>) => {
+    commit(blocksRef.current.map((block) => (block.id === id ? { ...block, type: newType, data: newData } : block)))
   }
 
   const deleteBlock = (id: string) => {
-    // Prevent deleting the last block - instead clear its content
-    if (blocks.length === 1) {
+    const current = blocksRef.current
+
+    // Không xoá khối cuối cùng — chỉ xoá nội dung
+    if (current.length === 1) {
       updateBlock(id, { text: "" })
-      // Focus the block
-      setTimeout(() => {
-        const blockElement = document.querySelector(`[data-block-id="${id}"] [contenteditable]`) as HTMLElement
-        if (blockElement) {
-          blockElement.focus()
-        }
-      }, 50)
+      focusBlockAfterRender(id)
       return
     }
-    
-    // Find the index to focus next
-    const index = blocks.findIndex((block) => block.id === id)
-    const filtered = blocks.filter((block) => block.id !== id)
-    setBlocks(filtered)
+
+    const index = current.findIndex((block) => block.id === id)
+    const filtered = current.filter((block) => block.id !== id)
+    commit(filtered)
     setSelectedBlockId(null)
-    
-    // Focus the previous block if possible, otherwise the next one
-    setTimeout(() => {
-      const targetIndex = Math.max(0, index - 1)
-      const targetBlock = filtered[targetIndex]
-      if (targetBlock) {
-        const blockElement = document.querySelector(`[data-block-id="${targetBlock.id}"] [contenteditable]`) as HTMLElement
-        if (blockElement) {
-          blockElement.focus()
-        }
-      }
-    }, 50)
+
+    const targetIndex = Math.max(0, index - 1)
+    const targetBlock = filtered[targetIndex]
+    if (targetBlock) focusBlockAfterRender(targetBlock.id)
   }
 
   const moveBlock = (id: string, direction: "up" | "down") => {
-    const index = blocks.findIndex((block) => block.id === id)
+    const current = blocksRef.current
+    const index = current.findIndex((block) => block.id === id)
     if (index === -1) return
 
     const newIndex = direction === "up" ? index - 1 : index + 1
-    if (newIndex < 0 || newIndex >= blocks.length) return
+    if (newIndex < 0 || newIndex >= current.length) return
 
-    const newBlocks = [...blocks]
+    const newBlocks = [...current]
     const [movedBlock] = newBlocks.splice(index, 1)
     newBlocks.splice(newIndex, 0, movedBlock)
-    setBlocks(newBlocks)
+    commit(newBlocks)
+  }
+
+  const reorderBlocks = (draggedId: string, targetIndex: number) => {
+    const current = blocksRef.current
+    const draggedIndex = current.findIndex((block) => block.id === draggedId)
+    if (draggedIndex === -1 || draggedIndex === targetIndex) return
+
+    const newBlocks = [...current]
+    const [draggedBlock] = newBlocks.splice(draggedIndex, 1)
+    newBlocks.splice(targetIndex, 0, draggedBlock)
+    commit(newBlocks)
   }
 
   const handleDragStart = (e: React.DragEvent, blockId: string) => {
@@ -268,15 +272,41 @@ export function BlockEditor({ value, onChange }: BlockEditorProps) {
 
   const handleDrop = (e: React.DragEvent, targetIndex: number) => {
     e.preventDefault()
-    const draggedBlockId = e.dataTransfer.getData("text/plain")
-    const draggedIndex = blocks.findIndex((b) => b.id === draggedBlockId)
-    
-    if (draggedIndex === -1 || draggedIndex === targetIndex) return
+    reorderBlocks(e.dataTransfer.getData("text/plain"), targetIndex)
+  }
 
-    const newBlocks = [...blocks]
-    const [draggedBlock] = newBlocks.splice(draggedIndex, 1)
-    newBlocks.splice(targetIndex, 0, draggedBlock)
-    setBlocks(newBlocks)
+  /** Paste nhiều dòng text thuần -> mỗi dòng một khối đoạn văn. */
+  const handlePasteSplit = (currentBlockId: string, index: number, lines: string[]) => {
+    const current = blocksRef.current
+    const newBlocks = [...current]
+
+    newBlocks[index] = { ...newBlocks[index], data: { ...newBlocks[index].data, text: lines[0] } }
+
+    lines.slice(1).forEach((line, i) => {
+      newBlocks.splice(index + 1 + i, 0, {
+        id: generateBlockId("block"),
+        type: "paragraph",
+        data: { text: line, align: "justify" },
+      })
+    })
+
+    commit(newBlocks)
+    void currentBlockId
+  }
+
+  /** Paste HTML/Markdown đã được parse thành nhiều khối -> thay khối hiện tại bằng các khối đó. */
+  const handlePasteBlocks = (currentBlockId: string, parsed: ParsedBlock[]) => {
+    const current = blocksRef.current
+    const index = current.findIndex((block) => block.id === currentBlockId)
+    if (index === -1) return
+
+    const converted = parsedBlocksToBlocks(parsed)
+    if (converted.length === 0) return
+
+    const newBlocks = [...current]
+    newBlocks.splice(index, 1, ...converted)
+    commit(newBlocks)
+    setSelectedBlockId(converted[0].id)
   }
 
   const renderBlock = (block: Block, index: number) => {
@@ -293,17 +323,8 @@ export function BlockEditor({ value, onChange }: BlockEditorProps) {
       >
         {/* Block Controls */}
         <div className="absolute -left-10 top-2 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-1">
-          <div
-            draggable
-            onDragStart={(e) => handleDragStart(e, block.id)}
-            className="cursor-grab active:cursor-grabbing"
-          >
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 w-6 p-0 cursor-grab"
-              onMouseDown={(e) => e.stopPropagation()}
-            >
+          <div draggable onDragStart={(e) => handleDragStart(e, block.id)} className="cursor-grab active:cursor-grabbing">
+            <Button variant="ghost" size="sm" className="h-6 w-6 p-0 cursor-grab" onMouseDown={(e) => e.stopPropagation()}>
               <GripVertical className="w-4 h-4" />
             </Button>
           </div>
@@ -349,74 +370,8 @@ export function BlockEditor({ value, onChange }: BlockEditorProps) {
               onChange={(data) => updateBlock(block.id, data)}
               onEnter={() => addBlock("paragraph", index + 1)}
               onBackspace={() => deleteBlock(block.id)}
-              onPasteSplit={(lines) => {
-                updateBlock(block.id, { text: lines[0] })
-                const newBlocks = [...blocks]
-                lines.slice(1).forEach((line, i) => {
-                  blockCounterRef.current += 1
-                  const newBlock: Block = {
-                    id: `block_${blockCounterRef.current}_paste`,
-                    type: "paragraph",
-                    data: { text: line, align: "justify" },
-                  }
-                  newBlocks.splice(index + 1 + i, 0, newBlock)
-                })
-                setBlocks(newBlocks)
-              }}
-              onPasteBlocks={(parsedBlocks) => {
-                // Replace current block with first parsed block, insert rest after
-                const newBlocks = [...blocks]
-                // Remove current block
-                const currentIdx = newBlocks.findIndex((b) => b.id === block.id)
-                newBlocks.splice(currentIdx, 1)
-
-                parsedBlocks.forEach((pb, i) => {
-                  blockCounterRef.current += 1
-                  let newBlock: Block
-
-                  if (pb.type === "heading") {
-                    newBlock = {
-                      id: `block_${blockCounterRef.current}_paste`,
-                      type: "heading",
-                      data: { text: pb.text, level: pb.level ?? 2, align: "left" },
-                    }
-                  } else if (pb.type === "quote") {
-                    newBlock = {
-                      id: `block_${blockCounterRef.current}_paste`,
-                      type: "quote",
-                      data: { text: pb.text, author: "", align: "left" },
-                    }
-                  } else if (pb.type === "list") {
-                    newBlock = {
-                      id: `block_${blockCounterRef.current}_paste`,
-                      type: "list",
-                      data: { style: pb.style ?? "unordered", items: pb.items ?? [], align: "left" },
-                    }
-                  } else if (pb.type === "table" && pb.tableData) {
-                    // Handle pasted table from Google Docs/Word/Markdown
-                    newBlock = {
-                      id: `block_${blockCounterRef.current}_paste`,
-                      type: "table",
-                      data: {
-                        rows: pb.tableData.rows,
-                        cols: pb.tableData.cols,
-                        content: pb.tableData.content,
-                        hasHeader: pb.tableData.hasHeader,
-                        align: "left",
-                      },
-                    }
-                  } else {
-                    newBlock = {
-                      id: `block_${blockCounterRef.current}_paste`,
-                      type: "paragraph",
-                      data: { text: pb.text, align: "justify" },
-                    }
-                  }
-                  newBlocks.splice(currentIdx + i, 0, newBlock)
-                })
-
-                setBlocks(newBlocks)
-              }}
+              onPasteSplit={(lines) => handlePasteSplit(block.id, index, lines)}
+              onPasteBlocks={(parsedBlocks) => handlePasteBlocks(block.id, parsedBlocks)}
             />
           )}
           {block.type === "image" && <ImageBlock data={block.data} onChange={(data) => updateBlock(block.id, data)} />}
@@ -491,13 +446,9 @@ export function BlockEditor({ value, onChange }: BlockEditorProps) {
           </div>
         </div>
       )}
-      
+
       {/* Inline Formatting Toolbar */}
-      <InlineToolbar
-        onFormat={(command, value) => {
-          document.execCommand(command, false, value)
-        }}
-      />
+      <InlineToolbar onFormat={(command, value) => document.execCommand(command, false, value)} />
     </div>
   )
 }

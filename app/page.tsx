@@ -8,7 +8,6 @@ import { NewsPreview } from "@/components/news-preview"
 import { Footer } from "@/components/footer"
 import { BackToTop } from "@/components/back-to-top"
 import { FDAAlertBadge } from "@/components/fda/fda-alert-badge"
-import { ExpertsSection } from "@/components/experts-section"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -21,53 +20,13 @@ export const metadata: Metadata = {
 }
 
 export default function Home() {
-  const organizationSchema = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    name: "Vexim Global",
-    alternateName: "Vexim",
-    url: "https://www.veximglobal.com",
-    logo: "https://www.veximglobal.com/logo.png",
-    description:
-      "Chuyên gia tư vấn pháp lý xuất nhập khẩu hàng đầu Việt Nam. Dịch vụ đăng ký FDA, GACC, MFDS, CE và giấy phép xuất khẩu quốc tế.",
-    address: {
-      "@type": "PostalAddress",
-      addressLocality: "Hồ Chí Minh",
-      addressCountry: "VN",
-    },
-    contactPoint: {
-      "@type": "ContactPoint",
-      contactType: "Customer Service",
-      availableLanguage: ["Vietnamese", "English"],
-    },
-    sameAs: [
-      "https://www.facebook.com/veximglobal",
-      "https://www.linkedin.com/company/veximglobal",
-      "https://zalo.me/veximglobal",
-    ],
-  }
-
-  const websiteSchema = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    name: "Vexim Global",
-    url: "https://www.veximglobal.com",
-    potentialAction: {
-      "@type": "SearchAction",
-      target: {
-        "@type": "EntryPoint",
-        urlTemplate: "https://www.veximglobal.com/blog?search={search_term_string}",
-      },
-      "query-input": "required name=search_term_string",
-    },
-  }
-
   const serviceSchema = {
     "@context": "https://schema.org",
     "@type": "ProfessionalService",
     name: "Vexim Global",
     image: "https://www.veximglobal.com/logo.png",
-    "@id": "https://www.veximglobal.com",
+    "@id": "https://www.veximglobal.com/#service",
+    provider: { "@id": "https://www.veximglobal.com/#organization" },
     url: "https://www.veximglobal.com",
     telephone: "+84-xxx-xxx-xxx",
     priceRange: "$$",
@@ -96,15 +55,12 @@ export default function Home() {
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }} />
       <main className="min-h-screen">
         <Header />
         <HeroSection />
         <ServicesGrid />
         <WhyChooseUs />
-        <ExpertsSection />
         <WorkflowSection />
         <Statistics />
         <NewsPreview />

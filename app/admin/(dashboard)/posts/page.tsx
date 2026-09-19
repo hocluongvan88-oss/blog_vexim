@@ -43,10 +43,15 @@ export default function PostsListPage() {
 
   const loadPosts = async () => {
     try {
-      const { data, error } = await supabase.from("posts").select("*").order("created_at", { ascending: false })
-      
+      // Chỉ lấy các cột cần cho danh sách (trước đây select("*") kéo theo cả content JSON của mọi bài)
+      const { data, error } = await supabase
+        .from("posts")
+        .select("id, title, slug, excerpt, category, status, created_at, published_at, featured_image")
+        .order("created_at", { ascending: false })
+        .limit(200)
+
       if (error) throw error
-      setPosts(data || [])
+      setPosts((data as Post[]) || [])
     } catch (error) {
       toast({
         title: "Lỗi tải dữ liệu",
