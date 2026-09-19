@@ -765,7 +765,7 @@ export function suggestQuestions(focusKeyword = "", category = ""): string[] {
     `${keyword} mất bao lâu?`,
     `Chi phí ${keyword} là bao nhiêu?`,
     `${keyword} cần những giấy tờ gì?`,
-    `Doanh nghiệp Việt Nam cần lưu ý gì khi ${keyword}?`,
+    `Doanh nghiệp Việt Nam cần lưu ý gì về ${keyword}?`,
   ]
 
   if (/FDA/i.test(category)) {
