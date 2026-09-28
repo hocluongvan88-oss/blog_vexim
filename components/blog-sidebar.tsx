@@ -10,6 +10,19 @@ import { Mail, Phone, CheckCircle2, TrendingUp, Award, Clock, User } from "lucid
 import { Badge } from "@/components/ui/badge"
 import { motion } from "framer-motion"
 import { useRef } from "react"
+import Link from "next/link"
+
+/**
+ * Dịch vụ nổi bật ở sidebar blog.
+ * Mỗi mục trỏ thẳng tới trang dịch vụ tương ứng — trước đây cả 4 mục cùng trỏ
+ * tới "/dich-vu" (route không tồn tại nên bấm vào là 404).
+ */
+const featuredServices = [
+  { label: "Đăng ký FDA thực phẩm, mỹ phẩm, dược phẩm", href: "/services/fda" },
+  { label: "Đại lý chính thức tại Hoa Kỳ (US Agent)", href: "/services/us-agent" },
+  { label: "Tư vấn đăng ký GACC Trung Quốc", href: "/services/gacc" },
+  { label: "Phòng sale xuất khẩu", href: "/services/export-sales" },
+]
 
 export default function BlogSidebar() {
   const [name, setName] = useState("")
@@ -218,20 +231,15 @@ export default function BlogSidebar() {
           <h4 className="font-bold text-lg mb-4 text-primary">Dịch vụ nổi bật</h4>
 
           <div className="space-y-3">
-            {[
-              "Đăng ký FDA thực phẩm, mỹ phẩm, dược phẩm",
-              "Đại lý chính thức tại Hoa Kỳ (US Agent)",
-              "Tư vấn đăng ký GACC Trung Quốc",
-              "Phòng sale xuất khẩu",
-            ].map((service, idx) => (
-              <a
-                key={idx}
-                href="/dich-vu"
+            {featuredServices.map((service) => (
+              <Link
+                key={service.href}
+                href={service.href}
                 className="flex items-center gap-2 p-3 rounded-lg hover:bg-accent/5 transition-colors group"
               >
                 <CheckCircle2 className="w-4 h-4 text-accent flex-shrink-0" />
-                <span className="text-sm group-hover:text-accent transition-colors">{service}</span>
-              </a>
+                <span className="text-sm group-hover:text-accent transition-colors">{service.label}</span>
+              </Link>
             ))}
           </div>
         </Card>

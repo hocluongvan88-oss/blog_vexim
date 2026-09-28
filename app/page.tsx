@@ -7,7 +7,6 @@ import { Statistics } from "@/components/statistics"
 import { NewsPreview } from "@/components/news-preview"
 import { Footer } from "@/components/footer"
 import { BackToTop } from "@/components/back-to-top"
-import { FDAAlertBadge } from "@/components/fda/fda-alert-badge"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -66,7 +65,8 @@ export default function Home() {
         <NewsPreview />
         <Footer />
         <BackToTop />
-        <FDAAlertBadge />
+        {/* Nút "FDA Alert" nổi màu đỏ (góc dưới bên trái) đã được gỡ khỏi trang chủ.
+            Component vẫn còn ở components/fda/fda-alert-badge.tsx nếu muốn dùng lại ở trang khác. */}
       </main>
     </>
   )
