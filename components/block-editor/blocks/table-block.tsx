@@ -389,15 +389,15 @@ export function TableBlock({ data, onChange }: TableBlockProps) {
       )}
 
       {/* Bảng hiển thị chuẩn xác như bài thật */}
-      <div className="overflow-x-auto border rounded-lg shadow-2xs">
+      <div className="overflow-x-auto border border-border rounded-lg shadow-2xs bg-white">
         <table className="border-collapse w-full table-auto">
           {hasHeader && content.length > 0 && (
             <thead>
-              <tr className="bg-secondary/70">
+              <tr className="bg-secondary/70 border-b border-border">
                 {content[0].map((cell, colIndex) => (
                   <th
                     key={colIndex}
-                    className="border-b border-r last:border-r-0 px-3 py-2.5 align-top min-w-[120px]"
+                    className="border-r border-border last:border-r-0 px-3.5 py-2.5 align-top min-w-[120px]"
                     scope="col"
                   >
                     <RichTableCell
@@ -416,11 +416,14 @@ export function TableBlock({ data, onChange }: TableBlockProps) {
             {content.slice(hasHeader ? 1 : 0).map((row, rowIndex) => {
               const actualRowIndex = hasHeader ? rowIndex + 1 : rowIndex
               return (
-                <tr key={actualRowIndex} className="even:bg-muted/15 hover:bg-muted/30 transition-colors">
+                <tr
+                  key={actualRowIndex}
+                  className="border-b border-border last:border-b-0 even:bg-muted/15 hover:bg-muted/30 transition-colors"
+                >
                   {row.map((cell, colIndex) => (
                     <td
                       key={colIndex}
-                      className="border-b border-r last:border-r-0 last:border-b-0 px-3 py-2 align-top min-w-[120px]"
+                      className="border-r border-border last:border-r-0 px-3.5 py-2.5 align-top min-w-[120px]"
                     >
                       <RichTableCell
                         value={cell}
