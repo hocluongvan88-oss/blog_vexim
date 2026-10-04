@@ -11,6 +11,8 @@
  */
 import { readFileSync } from "fs"
 import { mergeIncomingMessages } from "@/lib/chat-message-merge"
+import { shouldOfferConsultation, isSubstantiveQuestion } from "@/lib/consultation-offer"
+import { formatVnPhone, VEXIM_PHONE, VEXIM_ZALO_URL, VEXIM_PHONE_DISPLAY } from "@/lib/contact-info"
 
 let pass = 0
 let fail = 0
@@ -83,8 +85,8 @@ for (const status of ["ok", "handed_over", "handoff", "ask_contact"]) {
   check(widget.includes(`data.status === "${status}"`), `Widget xử lý status "${status}"`)
 }
 check(
-  widget.includes("throw new Error(data.error") && widget.includes("setShowZaloCta(true)"),
-  'Widget xử lý status "error" (báo lỗi thân thiện + gợi ý Zalo)',
+  widget.includes("throw new Error(data.error") && widget.includes('setConsultReason("error")'),
+  'Widget xử lý status "error" (báo lỗi thân thiện + hiện số Zalo)',
 )
 check(route.includes('status: "handoff"'), "API vẫn trả status handoff (hợp đồng không đổi)")
 
@@ -104,6 +106,54 @@ check(
   /const SHOW_ZALO_BUTTON = false/.test(clientWidgets) && clientWidgets.includes("{SHOW_ZALO_BUTTON && <ZaloChatButton />}"),
   "Nút Zalo OA đang TẮT (bật lại bằng SHOW_ZALO_BUTTON = true)",
 )
+
+// 11. Số Zalo/hotline chính thức
+check(VEXIM_PHONE === "0373685634", "Số liên hệ chính thức là 0373685634")
+check(formatVnPhone(VEXIM_PHONE) === "0373 685 634", `Hiển thị số dễ đọc: ${VEXIM_PHONE_DISPLAY}`)
+check(formatVnPhone("0912345678") === "0912 345 678", "Định dạng số 10 chữ số bất kỳ")
+check(formatVnPhone("abc") === "abc", "Chuỗi không phải số -> giữ nguyên, không lỗi")
+check(VEXIM_ZALO_URL === "https://zalo.me/0373685634", `Link Zalo đúng số: ${VEXIM_ZALO_URL}`)
+
+// 12. Khi nào mời khách tư vấn sâu hơn
+const cases: Array<{ name: string; signals: Parameters<typeof shouldOfferConsultation>[0]; expect: boolean; reason?: string }> = [
+  { name: "hệ thống chuyển chuyên viên", signals: { status: "handoff" }, expect: true, reason: "handoff" },
+  { name: "hệ thống xin thông tin liên hệ", signals: { status: "ask_contact" }, expect: true, reason: "ask_contact" },
+  { name: "hội thoại đã ở chế độ chuyên viên", signals: { status: "handed_over" }, expect: true, reason: "handed_over" },
+  { name: "lỗi kết nối", signals: { status: "error" }, expect: true, reason: "error" },
+  { name: "AI tự thấy cần người thật", signals: { status: "ok", suggestHandover: true }, expect: true, reason: "ai_suggested" },
+  { name: "khách hỏi báo giá", signals: { status: "ok", customerMessage: "Cho em xin báo giá dịch vụ FDA với ạ" }, expect: true, reason: "deep_request" },
+  { name: "khách xin tư vấn trực tiếp", signals: { status: "ok", customerMessage: "Có ai tư vấn trực tiếp không ạ?" }, expect: true, reason: "deep_request" },
+  { name: "khách hỏi số điện thoại", signals: { status: "ok", customerMessage: "Cho em xin số điện thoại bên mình nhé" }, expect: true, reason: "deep_request" },
+  { name: "khách hỏi hợp đồng", signals: { status: "ok", customerMessage: "Bên mình có ký hợp đồng không?" }, expect: true, reason: "deep_request" },
+  { name: "không có tài liệu khớp + câu hỏi thật", signals: { status: "ok", sourcesCount: 0, customerMessage: "Thủ tục xuất khẩu thực phẩm sang Mỹ cần gì ạ?" }, expect: true, reason: "no_documents" },
+  { name: "chào hỏi xã giao", signals: { status: "ok", sourcesCount: 0, customerMessage: "xin chào" }, expect: false },
+  { name: "cảm ơn", signals: { status: "ok", sourcesCount: 0, customerMessage: "ok em cảm ơn nhé" }, expect: false },
+  // Tra cứu thường mà AI CÓ tài liệu trả lời -> KHÔNG mời Zalo (tránh làm phiền khách)
+  { name: "hỏi phí, AI có tài liệu trả lời", signals: { status: "ok", sourcesCount: 3, customerMessage: "Phí FDA là bao nhiêu?" }, expect: false },
+  { name: "tra cứu thường, có tài liệu", signals: { status: "ok", sourcesCount: 2, customerMessage: "Hồ sơ GACC cần những gì?" }, expect: false },
+]
+
+for (const testCase of cases) {
+  const decision = shouldOfferConsultation(testCase.signals)
+  const ok = decision.offer === testCase.expect && (!testCase.reason || decision.reason === testCase.reason)
+  check(ok, `Mời tư vấn sâu — ${testCase.name}: ${decision.offer ? decision.reason : "không mời"}`)
+}
+
+// 13. Câu hỏi thật vs câu xã giao
+check(isSubstantiveQuestion("Thủ tục xuất khẩu thực phẩm sang Mỹ cần gì ạ?") === true, "Nhận ra câu hỏi thật")
+check(isSubstantiveQuestion("ok") === false, "Không coi 'ok' là câu hỏi")
+check(isSubstantiveQuestion("cảm ơn em") === false, "Không coi lời cảm ơn là câu hỏi")
+
+// 14. Widget dùng đúng số chính thức, không còn số OA cũ
+check(!widget.includes("2933050463560569889"), "Khung chat không còn dùng ID OA cũ")
+check(widget.includes("VEXIM_ZALO_URL") && widget.includes("VEXIM_PHONE_DISPLAY"), "Khung chat lấy số từ lib/contact-info")
+check(widget.includes("shouldOfferConsultation"), "Khung chat dùng chung logic mời tư vấn sâu")
+check(widget.includes("CONSULTATION_CONTENT"), "Thẻ mời tư vấn nói theo từng ngữ cảnh")
+
+// 15. AI cũng biết số để tự mời khách
+const aiService = readFileSync("lib/ai-service.ts", "utf8")
+check(aiService.includes("CONTACT_GUIDANCE"), "AI có hướng dẫn riêng về việc mời tư vấn sâu")
+check(aiService.includes("config.systemPrompt + context + CONTACT_GUIDANCE"), "Hướng dẫn luôn được ghép vào system prompt")
 
 console.log(`\n${pass} PASS / ${fail} FAIL`)
 if (fail) process.exit(1)

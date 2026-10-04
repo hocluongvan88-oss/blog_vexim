@@ -1,5 +1,6 @@
 import Groq from "groq-sdk"
 import { embedQuery, embedTexts, getEmbeddingConfig, isEmbeddingEnabled, toVectorLiteral } from "@/lib/embeddings"
+import { VEXIM_PHONE_DISPLAY, VEXIM_ZALO_URL } from "@/lib/contact-info"
 
 // Initialize Groq client
 let groq: Groq | null = null
@@ -448,6 +449,20 @@ function analyzeIntent(
 }
 
 /**
+ * Hướng dẫn cố định về việc mời khách tư vấn sâu hơn.
+ *
+ * Luôn được ghép vào system prompt (kể cả khi admin đã tự đặt system prompt trong
+ * CSDL) để AI không bao giờ tự bịa giá và luôn có cách chuyển khách sang chuyên viên.
+ */
+const CONTACT_GUIDANCE = `
+
+📞 KHI KHÁCH CẦN TƯ VẤN SÂU HƠN — hãy chủ động mời khách liên hệ:
+- Trường hợp cần: hỏi báo giá/chi phí cụ thể, hồ sơ riêng của công ty khách, hợp đồng, khiếu nại, hoặc câu hỏi không có trong tài liệu nội bộ.
+- Cách mời: "Anh/chị nhắn Zalo ${VEXIM_PHONE_DISPLAY} (${VEXIM_ZALO_URL}) hoặc để lại số điện thoại, chuyên viên Vexim sẽ tư vấn trực tiếp ạ."
+- TUYỆT ĐỐI không tự bịa giá, thời hạn, cam kết hay quy định không có trong tài liệu. Nếu không có thông tin, nói rõ là chưa có và mời chuyên viên.
+- Trả lời ngắn gọn, xưng "em", gọi khách là "anh/chị". Tối đa 3–4 câu cho mỗi lần trả lời.`
+
+/**
  * Tạo response từ AI với RAG
  */
 export async function generateAIResponse(
@@ -476,7 +491,7 @@ export async function generateAIResponse(
     const messages: any[] = [
       {
         role: "system",
-        content: config.systemPrompt + context,
+        content: config.systemPrompt + context + CONTACT_GUIDANCE,
       },
       ...conversationHistory,
       {

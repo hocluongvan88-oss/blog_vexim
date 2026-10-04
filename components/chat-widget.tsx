@@ -3,14 +3,50 @@
 import React from "react"
 
 import { useState, useRef, useEffect, useCallback } from "react"
-import { MessageCircle, X, Send, Minimize2, Headset } from "lucide-react"
+import { MessageCircle, X, Send, Minimize2, Headset, Phone, Copy, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import { mergeIncomingMessages } from "@/lib/chat-message-merge"
+import {
+  VEXIM_PHONE_DISPLAY,
+  VEXIM_PHONE_TEL_URL,
+  VEXIM_ZALO_URL,
+  contactInvite,
+} from "@/lib/contact-info"
+import {
+  shouldOfferConsultation,
+  type ConsultationReason,
+} from "@/lib/consultation-offer"
 
-/** Nút Zalo của Vexim — dùng khi cần chuyển khách sang chuyên viên. */
-const ZALO_URL = "https://zalo.me/2933050463560569889"
+/**
+ * Nội dung thẻ "cần tư vấn sâu hơn" — nói đúng ngữ cảnh từng trường hợp
+ * thay vì lặp lại một câu máy móc.
+ */
+const CONSULTATION_CONTENT: Record<ConsultationReason, { title: string; subtitle: string }> = {
+  handoff: { title: "Đã chuyển cho chuyên viên", subtitle: contactInvite() },
+  handed_over: { title: "Chuyên viên đang hỗ trợ anh/chị", subtitle: contactInvite() },
+  ask_contact: {
+    title: "Anh/chị để lại liên hệ giúp em nhé",
+    subtitle: `Chuyên viên Vexim sẽ gọi lại trong giờ làm việc — hoặc anh/chị chủ động nhắn Zalo ${VEXIM_PHONE_DISPLAY}.`,
+  },
+  ai_suggested: {
+    title: "Vấn đề này cần chuyên viên tư vấn kỹ hơn",
+    subtitle: contactInvite(),
+  },
+  no_documents: {
+    title: "Em chưa có tài liệu cho phần này",
+    subtitle: `Để chắc chắn và không nói sai, anh/chị hỏi trực tiếp chuyên viên Vexim nhé — ${VEXIM_PHONE_DISPLAY}.`,
+  },
+  deep_request: {
+    title: "Phần này chuyên viên báo giá & tư vấn riêng",
+    subtitle: contactInvite(),
+  },
+  error: {
+    title: "Kết nối đang gián đoạn",
+    subtitle: `Anh/chị nhắn Zalo hoặc gọi ${VEXIM_PHONE_DISPLAY} để được hỗ trợ ngay ạ.`,
+  },
+}
 
 // Simple markdown parser for chatbot messages
 function parseMarkdown(text: string): React.ReactNode {
@@ -92,8 +128,9 @@ export function ChatWidget() {
   const [conversationId, setConversationId] = useState("")
   const [isStreaming, setIsStreaming] = useState(false)
   const [unreadCount, setUnreadCount] = useState(0)
-  /** Bật khi AI/rule engine đề nghị chuyển sang chuyên viên hoặc xin thông tin liên hệ */
-  const [showZaloCta, setShowZaloCta] = useState(false)
+  /** Lý do mời khách liên hệ Zalo/hotline (null = chưa cần) */
+  const [consultReason, setConsultReason] = useState<ConsultationReason | null>(null)
+  const [phoneCopied, setPhoneCopied] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const knownIdsRef = useRef<Set<string>>(new Set())
@@ -266,15 +303,14 @@ export function ChatWidget() {
           localStorage.setItem("vexim_conversation_id", data.response.conversation_id)
         }
 
-        // Cần người thật tư vấn -> gợi ý luôn kênh Zalo của Vexim
-        if (
-          data.status === "handoff" ||
-          data.status === "ask_contact" ||
-          data.status === "handed_over" ||
-          data.response.handoff
-        ) {
-          setShowZaloCta(true)
-        }
+        // Khi nào mời khách tư vấn sâu hơn qua Zalo/hotline — xem lib/consultation-offer.ts
+        const decision = shouldOfferConsultation({
+          status: data.status,
+          suggestHandover: data.response.suggest_handover === true,
+          sourcesCount: Array.isArray(data.response.sources) ? data.response.sources.length : undefined,
+          customerMessage: sentText,
+        })
+        if (decision.offer && decision.reason) setConsultReason(decision.reason)
 
         const fullMessage = String(data.response.message_text || "")
         const messageId = data.response.message_id || `bot_${Date.now()}`
@@ -327,7 +363,7 @@ export function ChatWidget() {
         created_at: new Date().toISOString(),
       }
       setMessages((prev) => [...prev, errorMessage])
-      setShowZaloCta(true)
+      setConsultReason("error")
     } finally {
       setIsLoading(false)
       // Auto-focus input sau khi gửi tin nhắn
@@ -414,6 +450,18 @@ export function ChatWidget() {
                     <p className="text-xs mt-2">
                       Anh/chị hỏi về FDA, GACC, MFDS, US Agent… em trả lời ngay ạ.
                     </p>
+                    <p className="mt-3 text-xs">
+                      Cần tư vấn sâu hơn, anh/chị nhắn Zalo{" "}
+                      <a
+                        href={VEXIM_ZALO_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-semibold text-[#0068FF] hover:underline"
+                      >
+                        {VEXIM_PHONE_DISPLAY}
+                      </a>{" "}
+                      ạ.
+                    </p>
                   </div>
                 )}
 
@@ -475,21 +523,75 @@ export function ChatWidget() {
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Cần chuyên viên -> mời khách nhắn Zalo để được trả lời nhanh hơn */}
-              {showZaloCta && (
-                <div className="border-t bg-amber-50 p-3">
-                  <p className="text-xs text-amber-900">
-                    Chuyên viên Vexim sẽ phản hồi trong khung chat này. Cần gấp hơn, anh/chị nhắn Zalo ạ:
-                  </p>
-                  <a
-                    href={ZALO_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-2 flex items-center justify-center gap-2 rounded-md bg-[#0068FF] px-3 py-2 text-sm font-medium text-white hover:bg-[#0057d6]"
-                  >
-                    <Headset className="h-4 w-4" />
-                    Chat Zalo với chuyên viên
-                  </a>
+              {/* Mời tư vấn sâu hơn: hiện số Zalo/hotline chính thức của Vexim */}
+              {consultReason && (
+                <div className="border-t border-sky-200 bg-gradient-to-br from-sky-50 to-white p-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="text-sm font-semibold text-sky-900">
+                        {CONSULTATION_CONTENT[consultReason].title}
+                      </p>
+                      <p className="mt-0.5 text-xs text-sky-800/90">
+                        {CONSULTATION_CONTENT[consultReason].subtitle}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setConsultReason(null)}
+                      className="shrink-0 text-sky-700/60 transition-colors hover:text-sky-900"
+                      aria-label="Đóng gợi ý"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+
+                  <div className="mt-2 flex items-center gap-2 rounded-md border border-sky-200 bg-white px-3 py-2">
+                    <Phone className="h-4 w-4 shrink-0 text-sky-600" />
+                    <span className="text-base font-bold tracking-wide text-slate-900">
+                      {VEXIM_PHONE_DISPLAY}
+                    </span>
+                    <button
+                      onClick={async () => {
+                        try {
+                          await navigator.clipboard.writeText(VEXIM_PHONE_DISPLAY.replace(/\s/g, ""))
+                          setPhoneCopied(true)
+                          setTimeout(() => setPhoneCopied(false), 2000)
+                        } catch {
+                          // Trình duyệt chặn clipboard -> khách vẫn đọc được số trên màn hình
+                        }
+                      }}
+                      className="ml-auto flex items-center gap-1 text-xs font-medium text-sky-700 hover:text-sky-900"
+                      aria-label="Sao chép số điện thoại"
+                    >
+                      {phoneCopied ? (
+                        <>
+                          <Check className="h-3.5 w-3.5" /> Đã copy
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="h-3.5 w-3.5" /> Copy
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  <div className="mt-2 flex gap-2">
+                    <a
+                      href={VEXIM_ZALO_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex flex-1 items-center justify-center gap-2 rounded-md bg-[#0068FF] px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-[#0057d6]"
+                    >
+                      <Headset className="h-4 w-4" />
+                      Nhắn Zalo
+                    </a>
+                    <a
+                      href={VEXIM_PHONE_TEL_URL}
+                      className="flex flex-1 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-800 transition-colors hover:bg-slate-50"
+                    >
+                      <Phone className="h-4 w-4" />
+                      Gọi điện
+                    </a>
+                  </div>
                 </div>
               )}
 
@@ -510,7 +612,19 @@ export function ChatWidget() {
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground mt-2 text-center">
-                  Powered by Vexim Global • Hỗ trợ 24/7
+                  Cần tư vấn sâu hơn?{" "}
+                  <a
+                    href={VEXIM_ZALO_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium text-[#0068FF] hover:underline"
+                  >
+                    Zalo {VEXIM_PHONE_DISPLAY}
+                  </a>{" "}
+                  ·{" "}
+                  <a href={VEXIM_PHONE_TEL_URL} className="font-medium hover:underline">
+                    Gọi {VEXIM_PHONE_DISPLAY}
+                  </a>
                 </p>
               </div>
             </>
