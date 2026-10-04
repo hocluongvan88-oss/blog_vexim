@@ -32,7 +32,7 @@ async function mergeConversationMetadata(supabase: any, conversationId: string, 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { customer_id, customer_name, message_text, conversation_id, lead_profile } = body
+    const { customer_id, customer_name, message_text, conversation_id, lead_profile, has_file, attachment_url, attachment_name } = body
 
     console.log("[v0] Processing AI message:", { customer_id, message_text })
 
@@ -147,10 +147,16 @@ export async function POST(request: NextRequest) {
     console.log("[v0] Hồ sơ khách:", summarizeLead(leadProfile).join(" | ") || "(chưa thu thập được gì)")
 
     // Evaluate rules first to determine action
+    // Khách vừa gửi file (nhãn sản phẩm, danh mục…) -> rule LQ-04 chuyển chuyên viên,
+    // vì file cần người thật xem chứ AI không tự đoán được.
+    const messageForRules = attachment_url
+      ? `${message_text} [Đã gửi file: ${attachment_name || "tệp đính kèm"}]`
+      : message_text
+
     const ruleContext: MessageContext = {
-      message: message_text,
+      message: messageForRules,
       conversationHistory: conversationHistory.map(m => m.content),
-      hasFile: false, // TODO: Add file detection
+      hasFile: has_file === true,
       // KHÔNG truyền customer_name vào companyName: khung chat luôn gửi tên mặc
       // định "Khách hàng", mà rule LQ-01 coi đó là tên công ty -> mọi tin nhắn
       // (kể cả "xin chào") đều bị chuyển thành xin số điện thoại.

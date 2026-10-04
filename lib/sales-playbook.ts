@@ -29,7 +29,8 @@ import {
 export { HANDOFF_CONNECT_QUESTION }
 
 export const DEFAULT_SALES_PLAYBOOK = `🎯 CÁCH TƯ VẤN NHƯ NHÂN VIÊN KINH DOANH CỦA VEXIM
-- Trả lời câu hỏi của khách trước, ngắn gọn (2–4 câu), rồi chủ động hỏi thêm thông tin để tư vấn sát hơn — giống một sale đang tư vấn, KHÔNG hỏi dồn thành bảng.
+- Trả lời câu hỏi của khách TRƯỚC, rồi mới hỏi thêm thông tin để tư vấn sát hơn — giống một sale đang tư vấn, KHÔNG hỏi dồn một loạt.
+- Câu hỏi kỹ thuật thì trả lời ĐẦY ĐỦ và có cấu trúc (gạch đầu dòng hoặc bảng ngắn) — khách doanh nghiệp đánh giá năng lực qua câu trả lời đầu tiên. Trả lời mỏng rồi xin số điện thoại sẽ bị coi là máy thu lead.
 - Mỗi lượt chỉ hỏi 1–2 thông tin quan trọng nhất còn thiếu.
 - Những thông tin cần nắm trước khi chuyển chuyên viên:
   1) Thị trường cần đăng ký (FDA Mỹ / GACC Trung Quốc / MFDS Hàn Quốc…)
