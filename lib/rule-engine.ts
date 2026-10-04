@@ -103,6 +103,14 @@ function checkComplianceRisk(message: string): RuleResult | null {
     /(từng|đã) bị.*FDA/i,
     /vi phạm/i,
     /không đạt.*yêu cầu/i,
+    // Hàng/lô hàng đang bị giữ ở cảng hoặc bị FDA – hải quan chặn (detention).
+    // Đây là tình huống khẩn: khách đang mất tiền mỗi ngày, phải có chuyên viên
+    // vào ngay. Trước đây các câu kiểu "lô hàng của em bị hải quan Mỹ giữ lại"
+    // rơi vào AI_CONTINUE — trợ lý trả lời chung chung trong lúc hàng đang bị giữ.
+    /bị\s+(giữ|chặn|tạm giữ|thu hồi|detention)/i,
+    /(hải quan|cảng|cửa khẩu|fda)[^.!?]{0,25}(giữ|chặn|detention|tạm giữ)/i,
+    /giữ\s+(lại\s+)?(hàng|lô hàng|hồ sơ|container)/i,
+    /(detention|detained|shipment hold)/i,
   ]
   if (violationPatterns.some((p) => p.test(message))) {
     return {
@@ -203,6 +211,28 @@ function checkSalesIntent(message: string): RuleResult | null {
       reason: "Service inquiry - tagged as sales interest",
       ruleId: "SI-03",
       tags: { reason: "sales", urgency: "medium" },
+    }
+  }
+
+  // SI-04b: TÍN HIỆU MUA rõ nhất — khách nói thẳng là muốn đăng ký / nhờ làm hồ sơ.
+  // Trước đây "Mình muốn đăng ký FDA" và "Đăng ký giúp tôi luôn đi" không khớp
+  // rule nào (SI-04 chỉ có "muốn làm / triển khai / bắt đầu") nên khách sẵn sàng
+  // mua vẫn chỉ được AI trả lời chung chung, không ai được báo.
+  //
+  // Chốt chặn: nếu câu đó kèm câu hỏi kiến thức ("…thì cần chuẩn bị gì?") thì
+  // KHÔNG tính là tín hiệu mua — phải để AI trả lời, tránh biến thành máy thu lead.
+  const buyingIntentPatterns = [
+    /(muốn|định|cần|nhờ|tính)\s+(đăng ký|nộp hồ sơ|gửi hồ sơ|làm hồ sơ|ký hợp đồng)/i,
+    /(đăng ký|nộp hồ sơ|gửi hồ sơ|làm hồ sơ)\s+(giúp|hộ|luôn|ngay|đi|với\s+(em|mình|tôi|anh|chị|bên em))/i,
+    /nhờ\s+(em|bên em|mình|bên mình|vexim)\s+(đăng ký|làm|nộp|gửi)/i,
+  ]
+  const asksKnowledge = /[?]|cần gì|cần chuẩn bị|như thế nào|thế nào|bao lâu|bao nhiêu|điều kiện|quy trình|gì ạ|gì không|giấy tờ gì/i
+  if (buyingIntentPatterns.some((p) => p.test(message)) && !asksKnowledge.test(message)) {
+    return {
+      action: "ASK_CONTACT",
+      reason: "Customer ready to buy - wants to register now",
+      ruleId: "SI-04-READY",
+      tags: { reason: "sales", urgency: "high" },
     }
   }
 
@@ -451,7 +481,7 @@ export function getContactRequestMessage(ruleId?: string): string {
 
 Để tư vấn cụ thể cho trường hợp của anh/chị, em xin phép kết nối với chuyên viên. 
 
-Anh/chì để lại số điện thoại, chuyên viên sẽ liên hệ tư vấn chi tiết ngay ạ.`
+Anh/chị để lại số điện thoại, chuyên viên sẽ liên hệ tư vấn chi tiết ngay ạ.`
   }
 
   // Standard contact request

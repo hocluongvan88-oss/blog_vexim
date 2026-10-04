@@ -197,10 +197,15 @@ export async function POST(request: NextRequest) {
         ask_connect: true,
       })
 
-      // Save bot message explaining handover
+      // Save bot message explaining handover.
+      // Nếu khách VỪA ĐỒNG Ý (SI-02) thì không hỏi lại "có muốn kết nối không" —
+      // hỏi lại ngay sau khi khách vừa nói "có" là máy móc. Các trường hợp còn lại
+      // vẫn kết thúc bằng câu chốt bắt buộc của Vexim.
       const handoverMessage =
-        "Cảm ơn anh/chị. Để tư vấn chính xác nhất, em đang chuyển cho chuyên viên của Vexim xử lý. " +
-        HANDOFF_CONNECT_QUESTION
+        ruleResult.ruleId === "SI-02-IMMEDIATE"
+          ? "Dạ em đã ghi nhận ạ. Em chuyển thông tin cho chuyên viên Vexim, chuyên viên sẽ liên hệ anh/chị trong giờ làm việc ạ."
+          : "Cảm ơn anh/chị. Để tư vấn chính xác nhất, em đang chuyển cho chuyên viên của Vexim xử lý. " +
+            HANDOFF_CONNECT_QUESTION
       
       const { data: botMessage } = await supabase
         .from("chat_messages")

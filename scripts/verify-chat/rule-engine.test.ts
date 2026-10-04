@@ -249,6 +249,54 @@ check(
   "Trợ lý viết bài không còn gọi model đã chết (chỉ nhắc trong ghi chú)",
 )
 
+/* ---------- 3b. Tín hiệu mua & tình huống khẩn ---------- */
+// Lỗi thật: "Mình muốn đăng ký FDA" — câu mua rõ nhất — trước đây không khớp rule
+// nào nên khách sẵn sàng mua vẫn chỉ được AI trả lời chung chung, không ai được báo.
+const buyingSignals = [
+  "Mình muốn đăng ký FDA",
+  "Em muốn đăng ký GACC cho nhà máy",
+  "Đăng ký giúp tôi luôn đi",
+  "Chị cần nộp hồ sơ FDA luôn",
+]
+for (const m of buyingSignals) {
+  const r = run(m)
+  check(r.action === "ASK_CONTACT", `Khách ngỏ ý muốn đăng ký -> phải xin liên hệ: "${m}" -> ${r.ruleId}`)
+}
+
+// …nhưng nếu kèm câu hỏi kiến thức thì KHÔNG được chặn câu trả lời
+const knowledgeStillAnswered = [
+  "Mình muốn đăng ký FDA thì cần chuẩn bị giấy tờ gì?",
+  "Đăng ký GACC mất bao lâu?",
+  "Thực phẩm đóng hộp xuất sang Mỹ cần gì?",
+]
+for (const m of knowledgeStillAnswered) {
+  const r = run(m)
+  check(r.action === "AI_CONTINUE", `Câu hỏi kiến thức vẫn để AI trả lời: "${m.slice(0, 45)}…" -> ${r.action}`)
+}
+
+// Lỗi thật: hàng đang bị giữ ở cảng (detention) rơi vào AI_CONTINUE — trợ lý trả lời
+// chung chung trong lúc khách đang mất tiền mỗi ngày. Đây là ca khẩn, phải có người.
+const emergencies = [
+  "Hồ sơ của tôi bị FDA giữ ở cảng rồi, làm sao?",
+  "Lô hàng của em bị hải quan Mỹ giữ lại",
+  "Nếu hàng bị FDA giữ lại (detention) thì phải làm sao?",
+]
+for (const m of emergencies) {
+  const r = run(m)
+  check(
+    r.action === "HANDOFF_TO_ADMIN" && r.ruleId === "CR-03" && r.tags.urgency === "high",
+    `Hàng bị giữ ở cảng -> chuyển chuyên viên ngay: "${m.slice(0, 45)}…" -> ${r.ruleId} / ${r.tags.urgency}`,
+  )
+}
+
+const ruleEngineSrc = readFileSync("lib/rule-engine.ts", "utf8")
+check(!ruleEngineSrc.includes("anh/chì"), "Hết lỗi chính tả \"anh/chì\" trong tin nhắn mẫu gửi khách")
+const sendAiSrc = readFileSync("app/api/chatbot/send-ai/route.ts", "utf8")
+check(
+  sendAiSrc.includes('ruleResult.ruleId === "SI-02-IMMEDIATE"'),
+  "Khách vừa đồng ý thì xác nhận ngay, không hỏi lại câu chốt vừa hỏi",
+)
+
 testModelFallback().then(() => {
   console.log(`\n${pass} PASS / ${fail} FAIL`)
   if (fail) process.exit(1)

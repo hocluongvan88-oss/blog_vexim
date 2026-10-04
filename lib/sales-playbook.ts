@@ -47,7 +47,7 @@ export const DEFAULT_SALES_PLAYBOOK = `🎯 CÁCH TƯ VẤN NHƯ NHÂN VIÊN KIN
 
 export const SALES_FACTS = `📌 SỐ LIỆU CHUẨN DO VEXIM CUNG CẤP (dùng đúng con số, không suy diễn):
 - Đăng ký FDA (Mỹ): khoảng ${VEXIM_TIMELINES.fdaWithDuns} nếu khách ĐÃ có mã DUNS đúng với địa chỉ thực tế của nhà máy; khoảng ${VEXIM_TIMELINES.fdaWithoutDuns} nếu CHƯA có mã DUNS.
-- Đăng ký GACC (Trung Quốc): Vexim chỉ nhận đăng ký ${VEXIM_TIMELINES.gaccNote.toLowerCase()}; thời gian khoảng ${VEXIM_TIMELINES.gacc}.
+- Đăng ký GACC (Trung Quốc): ${VEXIM_TIMELINES.gaccNote}; thời gian khoảng ${VEXIM_TIMELINES.gacc}.
 - Đây là mốc tham khảo — nói rõ với khách là thời gian thực tế phụ thuộc hồ sơ, và mời chuyên viên xác nhận khi khách cần con số chính xác.
 
 🏆 BẰNG CHỨNG NĂNG LỰC (dùng khi khách hỏi Vexim có uy tín không / đã làm cho ai):
