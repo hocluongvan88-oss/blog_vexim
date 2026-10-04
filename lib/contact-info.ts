@@ -21,6 +21,14 @@ export const VEXIM_PHONE_TEL_URL = `tel:${VEXIM_PHONE}`
 /** Bấm là mở Zalo ở đúng số này (khách nhắn tin ngay, không cần lưu số). */
 export const VEXIM_ZALO_URL = `https://zalo.me/${VEXIM_PHONE}`
 
+/**
+ * Trang hồ sơ năng lực chính thức (bằng chứng thực tế: chứng nhận FDA đã cấp,
+ * case study, quy trình 5 bước, so sánh thị trường). Dùng khi khách hỏi Vexim có
+ * uy tín không / đã làm cho ai chưa — người đi mua dịch vụ tư vấn luôn cần
+ * kiểm chứng được, chứ không chỉ tin lời trợ lý ảo.
+ */
+export const VEXIM_CREDENTIALS_URL = "https://fda.veximglobal.com"
+
 /** "0373685634" -> "0373 685 634" (giữ nguyên nếu không phải số 10 chữ số). */
 export function formatVnPhone(phone: string = VEXIM_PHONE): string {
   const digits = String(phone).replace(/\D/g, "")

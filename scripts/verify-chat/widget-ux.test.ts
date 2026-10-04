@@ -142,5 +142,42 @@ check(!/Tối đa 3–4 câu cho mỗi lần trả lời/.test(aiService),
 check(/Câu xã giao \(chào hỏi, cảm ơn\): 1–2 câu/.test(aiService),
   "Vẫn giữ ngắn gọn với câu xã giao")
 
+/* ---------- 12. Bằng chứng năng lực (hồ sơ năng lực) ---------- */
+const credentialsUrl = "https://fda.veximglobal.com"
+check(
+  readFileSync("lib/contact-info.ts", "utf8").includes("VEXIM_CREDENTIALS_URL"),
+  "Trang hồ sơ năng lực là một hằng số dùng chung, không rải rác trong code",
+)
+check(widget.includes("VEXIM_CREDENTIALS_URL"), "Khung chat có link tới hồ sơ năng lực để khách kiểm chứng")
+check(
+  widget.includes("Xem hồ sơ năng lực") && widget.includes("Hồ sơ năng lực, chứng nhận FDA"),
+  "Link xuất hiện ở màn hình trống và trong thẻ tư vấn",
+)
+check(
+  widget.includes("Vexim đã hỗ trợ doanh nghiệp nào xuất Mỹ?"),
+  "Có câu hỏi gợi ý về uy tín — câu người đi mua dịch vụ luôn muốn hỏi",
+)
+
+const credentials = readFileSync("knowledge/ho-so-nang-luc-vexim.md", "utf8")
+check(credentials.includes("200 doanh nghiệp"), "Tài liệu nêu số doanh nghiệp đã hỗ trợ (200+)")
+check(credentials.includes("35-2957758"), "Tài liệu có EIN thật của Vexim (US Agent trực tiếp)")
+check(credentials.includes("10048679256") && credentials.includes("17721772358"),
+  "Tài liệu có mã đăng ký FDA đã được cấp (bằng chứng kiểm chứng được)")
+check(credentials.includes("LIBRA") && credentials.includes("3/2026"),
+  "Có case study Libra đã thông quan cảng Mỹ 3/2026")
+check(credentials.includes("KHÔNG được bịa thêm"), "Tài liệu tự nhắc chỉ dùng số liệu có thật")
+check(credentials.includes("1–2 ngày") && credentials.includes("2–5 ngày làm việc"),
+  "Tài liệu phân biệt hai mốc thời gian (đăng ký vs quy trình tổng thể)")
+
+const playbook = readFileSync("lib/sales-playbook.ts", "utf8")
+check(/CÓ UY TÍN KHÔNG/.test(playbook), "Cẩm nang dạy AI trả lời câu hỏi về uy tín bằng bằng chứng thật")
+check(/không bịa thêm tên khách hàng/.test(playbook), "Cẩm nang chặn AI bịa tên khách hàng/số liệu")
+check(playbook.includes("https://fda.veximglobal.com"), "Cẩm nang kèm link để khách tự kiểm chứng")
+// Bằng chứng năng lực phải LUÔN có trong prompt, không phụ thuộc việc tìm tài liệu
+check(/BẰNG CHỨNG NĂNG LỰC/.test(playbook) && playbook.includes("200 doanh nghiệp"),
+  "Bằng chứng năng lực luôn nằm trong prompt (RAG có thể không tìm ra đoạn ngắn)")
+check(playbook.includes("35-2957758") && playbook.includes("LIBRA"),
+  "Prompt có EIN và case study thật để trả lời câu hỏi về uy tín")
+
 console.log(`\n${pass} PASS / ${fail} FAIL`)
 if (fail) process.exit(1)

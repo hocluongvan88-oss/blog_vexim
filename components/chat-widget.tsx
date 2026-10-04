@@ -26,6 +26,7 @@ import {
   VEXIM_PHONE_DISPLAY,
   VEXIM_PHONE_TEL_URL,
   VEXIM_ZALO_URL,
+  VEXIM_CREDENTIALS_URL,
   contactInvite,
 } from "@/lib/contact-info"
 import {
@@ -84,7 +85,9 @@ const QUICK_QUESTIONS = [
   "Thực phẩm đóng hộp xuất sang Mỹ cần gì?",
   "Đăng ký GACC mất bao lâu?",
   "Đã có mã DUNS thì đăng ký FDA mất mấy ngày?",
-  "US Agent là gì và khi nào cần?",
+  // Người đi mua dịch vụ luôn muốn kiểm chứng năng lực nhà cung cấp
+  "Vexim đã hỗ trợ doanh nghiệp nào xuất Mỹ?",
+  "Bên mình báo giá thế nào?",
 ]
 
 /**
@@ -704,6 +707,20 @@ export function ChatWidget() {
                         ))}
                       </div>
 
+                      {/* Người mua cần kiểm chứng: cho họ xem bằng chứng thật
+                          (chứng nhận FDA đã cấp, case study đã thông quan Mỹ) */}
+                      <p className="mt-3 text-xs">
+                        <a
+                          href={VEXIM_CREDENTIALS_URL}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-medium text-primary underline"
+                        >
+                          Xem hồ sơ năng lực &amp; case study thực tế
+                        </a>{" "}
+                        (200+ doanh nghiệp đã xuất Mỹ thành công)
+                      </p>
+
                       <p className="mt-3 text-xs">
                         Cần tư vấn sâu hơn, anh/chị nhắn Zalo{" "}
                         <a
@@ -951,6 +968,17 @@ export function ChatWidget() {
                       )}
                     </div>
                   )}
+
+                  <p className="mt-2 text-xs">
+                    <a
+                      href={VEXIM_CREDENTIALS_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium text-sky-700 underline"
+                    >
+                      Hồ sơ năng lực, chứng nhận FDA &amp; case study của Vexim
+                    </a>
+                  </p>
 
                   <div className="mt-2 flex gap-2">
                     <a
