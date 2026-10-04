@@ -342,3 +342,26 @@ html {
 [contenteditable]:focus {
   outline: none;
 }
+
+/* ------------------------------------------------------------------
+   Nút Zalo OA (Zalo tự chèn iframe) — mặc định nằm cùng góc phải với
+   khung chat AI nên hai nút đè lên nhau. Đẩy Zalo sang góc TRÁI để cả
+   hai kênh cùng hiển thị rõ ràng.
+   ------------------------------------------------------------------ */
+.zalo-chat-widget,
+#zalo-chat-widget,
+[class*="zalo-chat-widget"] {
+  left: 24px !important;
+  right: auto !important;
+  bottom: 24px !important;
+  z-index: 40 !important;
+}
+
+@media (max-width: 640px) {
+  .zalo-chat-widget,
+  #zalo-chat-widget,
+  [class*="zalo-chat-widget"] {
+    left: 16px !important;
+    bottom: 16px !important;
+  }
+}

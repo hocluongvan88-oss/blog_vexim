@@ -2,28 +2,32 @@
 
 import React from "react"
 
-import { useState, useRef, useEffect } from "react"
-import { MessageCircle, X, Send, Minimize2 } from "lucide-react"
+import { useState, useRef, useEffect, useCallback } from "react"
+import { MessageCircle, X, Send, Minimize2, Headset } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
+import { mergeIncomingMessages } from "@/lib/chat-message-merge"
+
+/** Nút Zalo của Vexim — dùng khi cần chuyển khách sang chuyên viên. */
+const ZALO_URL = "https://zalo.me/2933050463560569889"
 
 // Simple markdown parser for chatbot messages
 function parseMarkdown(text: string): React.ReactNode {
   const lines = text.split('\n')
   const elements: React.ReactNode[] = []
-  
+
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i]
-    
+
     // Bold text: **text** or __text__
     let processedLine = line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     processedLine = processedLine.replace(/__(.+?)__/g, '<strong>$1</strong>')
-    
+
     // Italic: *text* or _text_ (but not ** or __)
     processedLine = processedLine.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '<em>$1</em>')
     processedLine = processedLine.replace(/(?<!_)_(?!_)(.+?)(?<!_)_(?!_)/g, '<em>$1</em>')
-    
+
     // List items: * item or - item
     if (line.trim().match(/^[\*\-]\s+/)) {
       const content = line.trim().replace(/^[\*\-]\s+/, '')
@@ -34,7 +38,7 @@ function parseMarkdown(text: string): React.ReactNode {
       )
       continue
     }
-    
+
     // Numbered list: 1. item
     if (line.trim().match(/^\d+\.\s+/)) {
       const content = line.trim().replace(/^\d+\.\s+/, '')
@@ -45,16 +49,16 @@ function parseMarkdown(text: string): React.ReactNode {
       )
       continue
     }
-    
+
     // Links: [text](url)
     processedLine = processedLine.replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">$1</a>')
-    
+
     // Empty lines
     if (line.trim() === '') {
       elements.push(<br key={i} />)
       continue
     }
-    
+
     // Regular paragraphs
     if (processedLine.includes('<')) {
       elements.push(
@@ -66,13 +70,14 @@ function parseMarkdown(text: string): React.ReactNode {
       )
     }
   }
-  
+
   return <div className="space-y-1">{elements}</div>
 }
 
 interface Message {
   id: string
-  sender_type: "customer" | "bot"
+  /** "agent" = chuyên viên Vexim trả lời trực tiếp trong trang quản trị */
+  sender_type: "customer" | "bot" | "agent"
   message_text: string
   created_at: string
 }
@@ -85,12 +90,32 @@ export function ChatWidget() {
   const [isLoading, setIsLoading] = useState(false)
   const [customerId, setCustomerId] = useState("")
   const [conversationId, setConversationId] = useState("")
-  const [streamingMessage, setStreamingMessage] = useState("")
   const [isStreaming, setIsStreaming] = useState(false)
+  const [unreadCount, setUnreadCount] = useState(0)
+  /** Bật khi AI/rule engine đề nghị chuyển sang chuyên viên hoặc xin thông tin liên hệ */
+  const [showZaloCta, setShowZaloCta] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const knownIdsRef = useRef<Set<string>>(new Set())
+  /** Nội dung các tin khách ĐÃ GỬI tại máy này — để không hiện trùng khi nạp lại lịch sử */
+  const localCustomerTextsRef = useRef<Set<string>>(new Set())
 
-  // Tạo customer ID duy nhất
+  /** Gộp tin nhắn mới vào danh sách, bỏ qua tin đã có (dùng cho cả polling). */
+  const mergeMessages = useCallback((incoming: Message[], options: { countUnread?: boolean } = {}) => {
+    const { added, unread } = mergeIncomingMessages<Message>(
+      incoming,
+      knownIdsRef.current,
+      localCustomerTextsRef.current,
+      options,
+    )
+
+    if (added.length === 0) return
+
+    setMessages((prev) => [...prev, ...added])
+    if (unread > 0) setUnreadCount((count) => count + unread)
+  }, [])
+
+  // Tạo customer ID duy nhất + nạp lại hội thoại cũ
   useEffect(() => {
     let storedId = localStorage.getItem("vexim_customer_id")
     if (!storedId) {
@@ -99,7 +124,6 @@ export function ChatWidget() {
     }
     setCustomerId(storedId)
 
-    // Lấy conversation ID nếu có
     const storedConvId = localStorage.getItem("vexim_conversation_id")
     if (storedConvId) {
       setConversationId(storedConvId)
@@ -110,16 +134,14 @@ export function ChatWidget() {
   // KHÔNG tự động scroll khi đang typing - để user đọc thoải mái
   // Chỉ scroll khi HOÀN THÀNH typing VÀ user đang ở cuối
   useEffect(() => {
-    // Nếu đang streaming (typing), KHÔNG scroll
     if (isStreaming) return
-    
+
     const messageContainer = messagesEndRef.current?.parentElement
     if (!messageContainer) return
-    
-    const isNearBottom = 
+
+    const isNearBottom =
       messageContainer.scrollHeight - messageContainer.scrollTop - messageContainer.clientHeight < 100
-    
-    // Chỉ scroll nếu user đang ở gần cuối VÀ đã typing xong
+
     if (isNearBottom) {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
     }
@@ -134,13 +156,63 @@ export function ChatWidget() {
     }
   }, [isOpen, isMinimized])
 
+  // Mở chat -> coi như đã đọc
+  useEffect(() => {
+    if (isOpen) setUnreadCount(0)
+  }, [isOpen])
+
+  /**
+   * Trong lúc khung chat mở, cứ 8 giây hỏi lại lịch sử để khách thấy ngay
+   * câu trả lời của chuyên viên trong trang quản trị (trước đây khách phải
+   * tải lại trang mới thấy, nên gần như không bao giờ thấy).
+   */
+  useEffect(() => {
+    if (!isOpen || !conversationId) return
+
+    const timer = setInterval(async () => {
+      try {
+        const response = await fetch(`/api/chatbot/history?conversation_id=${conversationId}`)
+        const data = await response.json()
+        if (data.status === "ok" && Array.isArray(data.messages)) {
+          mergeMessages(data.messages)
+        }
+      } catch {
+        // im lặng, thử lại ở nhịp sau
+      }
+    }, 8000)
+
+    return () => clearInterval(timer)
+  }, [isOpen, conversationId, mergeMessages])
+
+  /**
+   * Khung chat đang ĐÓNG: thỉnh thoảng vẫn kiểm tra để hiện chấm đỏ khi
+   * chuyên viên trả lời — khách không phải ngồi chờ sẵn trong khung chat.
+   */
+  useEffect(() => {
+    if (isOpen || !conversationId) return
+
+    const timer = setInterval(async () => {
+      try {
+        const response = await fetch(`/api/chatbot/history?conversation_id=${conversationId}`)
+        const data = await response.json()
+        if (data.status === "ok" && Array.isArray(data.messages)) {
+          mergeMessages(data.messages, { countUnread: true })
+        }
+      } catch {
+        // im lặng
+      }
+    }, 20000)
+
+    return () => clearInterval(timer)
+  }, [isOpen, conversationId, mergeMessages])
+
   // Load lịch sử chat
   const loadHistory = async (convId: string) => {
     try {
       const response = await fetch(`/api/chatbot/history?conversation_id=${convId}`)
       const data = await response.json()
-      if (data.status === "ok" && data.messages) {
-        setMessages(data.messages)
+      if (data.status === "ok" && Array.isArray(data.messages)) {
+        mergeMessages(data.messages)
       }
     } catch (error) {
       console.error("[v0] Error loading history:", error)
@@ -158,46 +230,64 @@ export function ChatWidget() {
       created_at: new Date().toISOString(),
     }
 
+    knownIdsRef.current.add(userMessage.id)
+    localCustomerTextsRef.current.add(userMessage.message_text.trim())
     setMessages((prev) => [...prev, userMessage])
+    const sentText = inputMessage
     setInputMessage("")
     setIsLoading(true)
 
     try {
-      const response = await fetch("/api/chatbot/send", {
+      const response = await fetch("/api/chatbot/send-ai", {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
           customer_id: customerId,
           customer_name: "Khách hàng",
-          message_text: inputMessage
+          message_text: sentText,
+          conversation_id: conversationId || undefined,
         }),
       })
 
       const data = await response.json()
-      console.log("[v0] Response from chatbot:", data)
 
-      if ((data.status === "ok" || data.status === "handed_over") && data.response) {
-        // Lưu conversation ID
-        if (data.response.conversation_id && !conversationId) {
+      // send-ai trả về: ok | handed_over | handoff | ask_contact | error
+      if (
+        (data.status === "ok" ||
+          data.status === "handed_over" ||
+          data.status === "handoff" ||
+          data.status === "ask_contact") &&
+        data.response
+      ) {
+        if (data.response.conversation_id && data.response.conversation_id !== conversationId) {
           setConversationId(data.response.conversation_id)
           localStorage.setItem("vexim_conversation_id", data.response.conversation_id)
         }
 
-        const fullMessage = data.response.message_text
+        // Cần người thật tư vấn -> gợi ý luôn kênh Zalo của Vexim
+        if (
+          data.status === "handoff" ||
+          data.status === "ask_contact" ||
+          data.status === "handed_over" ||
+          data.response.handoff
+        ) {
+          setShowZaloCta(true)
+        }
+
+        const fullMessage = String(data.response.message_text || "")
         const messageId = data.response.message_id || `bot_${Date.now()}`
-        const senderType = data.response.handed_over ? "agent" : "bot"
         const timestamp = data.response.timestamp || new Date().toISOString()
+
+        knownIdsRef.current.add(String(messageId))
 
         // Hiển thị typing effect
         setIsStreaming(true)
-        setStreamingMessage("")
-        
-        // Thêm message tạm với nội dung rỗng
+
         const tempBotMessage: Message = {
           id: messageId,
-          sender_type: senderType,
+          sender_type: "bot",
           message_text: "",
           created_at: timestamp,
         }
@@ -206,28 +296,22 @@ export function ChatWidget() {
         // Typing effect: hiển thị từng ký tự
         let currentIndex = 0
         const typingSpeed = 15 // ms per character (càng nhỏ càng nhanh)
-        
+
         const typingInterval = setInterval(() => {
           if (currentIndex < fullMessage.length) {
-            const nextChar = fullMessage[currentIndex]
-            setStreamingMessage((prev) => prev + nextChar)
-            
-            // Cập nhật message trong list
+            currentIndex++
             setMessages((prev) => {
               const updated = [...prev]
               const lastMsg = updated[updated.length - 1]
               if (lastMsg && lastMsg.id === messageId) {
-                lastMsg.message_text = fullMessage.substring(0, currentIndex + 1)
+                lastMsg.message_text = fullMessage.substring(0, currentIndex)
               }
               return updated
             })
-            
-            currentIndex++
           } else {
             // Hoàn thành typing
             clearInterval(typingInterval)
             setIsStreaming(false)
-            setStreamingMessage("")
           }
         }, typingSpeed)
       } else {
@@ -238,10 +322,12 @@ export function ChatWidget() {
       const errorMessage: Message = {
         id: `error_${Date.now()}`,
         sender_type: "bot",
-        message_text: "Xin lỗi, có lỗi xảy ra. Vui lòng thử lại sau hoặc liên hệ hotline để được hỗ trợ!",
+        message_text:
+          "Xin lỗi, em đang gặp sự cố kết nối. Anh/chị nhắn Zalo hoặc gọi hotline để được hỗ trợ ngay ạ.",
         created_at: new Date().toISOString(),
       }
       setMessages((prev) => [...prev, errorMessage])
+      setShowZaloCta(true)
     } finally {
       setIsLoading(false)
       // Auto-focus input sau khi gửi tin nhắn
@@ -266,12 +352,14 @@ export function ChatWidget() {
         <button
           onClick={() => setIsOpen(true)}
           className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-primary to-accent shadow-lg transition-all hover:scale-110 hover:shadow-xl"
-          aria-label="Mở chat"
+          aria-label="Mở chat với trợ lý AI"
         >
           <MessageCircle className="h-6 w-6 text-white" />
-          <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs text-white animate-pulse">
-            1
-          </span>
+          {unreadCount > 0 && (
+            <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs text-white">
+              {unreadCount > 9 ? "9+" : unreadCount}
+            </span>
+          )}
         </button>
       )}
 
@@ -294,7 +382,7 @@ export function ChatWidget() {
               </div>
               <div>
                 <h3 className="font-semibold text-white">Vexim Global</h3>
-                <p className="text-xs text-white/80">Đang hoạt động</p>
+                <p className="text-xs text-white/80">Trợ lý AI • Trả lời ngay 24/7</p>
               </div>
             </div>
             <div className="flex gap-2">
@@ -322,8 +410,10 @@ export function ChatWidget() {
                 {messages.length === 0 && (
                   <div className="text-center text-muted-foreground py-8">
                     <MessageCircle className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                    <p className="text-sm">Xin chào! Tôi có thể giúp gì cho bạn?</p>
-                    <p className="text-xs mt-2">Hãy bắt đầu cuộc trò chuyện...</p>
+                    <p className="text-sm">Xin chào! Em là trợ lý AI của Vexim Global.</p>
+                    <p className="text-xs mt-2">
+                      Anh/chị hỏi về FDA, GACC, MFDS, US Agent… em trả lời ngay ạ.
+                    </p>
                   </div>
                 )}
 
@@ -337,14 +427,21 @@ export function ChatWidget() {
                         "max-w-[80%] rounded-lg px-4 py-2 text-sm shadow-sm",
                         msg.sender_type === "customer"
                           ? "bg-primary text-white rounded-br-none"
-                          : "bg-white text-gray-800 rounded-bl-none"
+                          : msg.sender_type === "agent"
+                            ? "bg-emerald-50 text-gray-800 rounded-bl-none border border-emerald-200"
+                            : "bg-white text-gray-800 rounded-bl-none"
                       )}
                     >
+                      {msg.sender_type === "agent" && (
+                        <span className="mb-1 flex items-center gap-1 text-xs font-medium text-emerald-700">
+                          <Headset className="h-3 w-3" /> Chuyên viên Vexim
+                        </span>
+                      )}
                       <div className="break-words">
-                        {msg.sender_type === "bot" ? (
-                          parseMarkdown(msg.message_text)
-                        ) : (
+                        {msg.sender_type === "customer" ? (
                           <p className="whitespace-pre-wrap">{msg.message_text}</p>
+                        ) : (
+                          parseMarkdown(msg.message_text)
                         )}
                       </div>
                       <span className="text-xs opacity-70 mt-1 block">
@@ -377,6 +474,24 @@ export function ChatWidget() {
 
                 <div ref={messagesEndRef} />
               </div>
+
+              {/* Cần chuyên viên -> mời khách nhắn Zalo để được trả lời nhanh hơn */}
+              {showZaloCta && (
+                <div className="border-t bg-amber-50 p-3">
+                  <p className="text-xs text-amber-900">
+                    Chuyên viên Vexim sẽ phản hồi trong khung chat này. Cần gấp hơn, anh/chị nhắn Zalo ạ:
+                  </p>
+                  <a
+                    href={ZALO_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-2 flex items-center justify-center gap-2 rounded-md bg-[#0068FF] px-3 py-2 text-sm font-medium text-white hover:bg-[#0057d6]"
+                  >
+                    <Headset className="h-4 w-4" />
+                    Chat Zalo với chuyên viên
+                  </a>
+                </div>
+              )}
 
               {/* Input */}
               <div className="border-t bg-white p-4 rounded-b-lg">

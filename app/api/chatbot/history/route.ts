@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from "next/server"
+import { createClient } from "@/lib/supabase/server"
 
-const CHATBOT_URL = "https://chatbot-six-wheat.vercel.app"
-
+/**
+ * Lịch sử chat của khách — đọc từ chính CSDL của Vexim.
+ *
+ * Trước đây route này KHÔNG đọc CSDL mà chuyển tiếp sang một server chatbot cũ
+ * (`chatbot-six-wheat.vercel.app`). Server đó là phiên bản trước, không biết gì
+ * về `chat_messages` hiện tại → khách mở lại khung chat là trắng trơn, và trả lời
+ * của chuyên viên trong trang quản trị thì khách không bao giờ thấy.
+ */
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams
@@ -10,37 +17,52 @@ export async function GET(request: NextRequest) {
 
     if (!conversationId && !customerId) {
       return NextResponse.json(
-        { error: "Missing required parameter: conversation_id or customer_id" },
-        { status: 400 }
+        { error: "Thiếu tham số: cần conversation_id hoặc customer_id" },
+        { status: 400 },
       )
     }
 
-    console.log("[v0] Fetching chat history:", { conversationId, customerId })
+    const supabase = await createClient()
+    let convId = conversationId
 
-    // Forward request đến chatbot server
-    const url = new URL(`${CHATBOT_URL}/api/webhook/website`)
-    if (conversationId) url.searchParams.set("conversation_id", conversationId)
-    if (customerId) url.searchParams.set("customer_id", customerId)
+    // Khách quay lại: tìm lại hội thoại gần nhất của khách này trên website
+    if (!convId && customerId) {
+      const { data: conversation } = await supabase
+        .from("conversations")
+        .select("id")
+        .eq("customer_id", customerId)
+        .eq("channel", "website")
+        .order("updated_at", { ascending: false })
+        .limit(1)
+        .maybeSingle()
 
-    const response = await fetch(url.toString())
-
-    if (!response.ok) {
-      console.error("[v0] Chatbot server error:", response.status, response.statusText)
-      throw new Error(`Chatbot server responded with ${response.status}`)
+      convId = conversation?.id || null
     }
 
-    const data = await response.json()
-    console.log("[v0] Chat history loaded:", data)
+    if (!convId) {
+      // Khách mới, chưa có hội thoại nào
+      return NextResponse.json({ status: "ok", messages: [], conversation_id: null })
+    }
 
-    return NextResponse.json(data)
+    const { data: messages, error } = await supabase
+      .from("chat_messages")
+      .select("id, sender_type, message_text, created_at")
+      .eq("conversation_id", convId)
+      .order("created_at", { ascending: true })
+      .limit(200)
+
+    if (error) {
+      console.error("[v0] Lỗi đọc lịch sử chat:", error)
+      return NextResponse.json({ status: "ok", messages: [], conversation_id: convId })
+    }
+
+    return NextResponse.json({
+      status: "ok",
+      conversation_id: convId,
+      messages: messages || [],
+    })
   } catch (error) {
-    console.error("[v0] Error fetching chat history:", error)
-    return NextResponse.json(
-      {
-        status: "ok",
-        messages: [],
-      },
-      { status: 200 }
-    )
+    console.error("[v0] GET /api/chatbot/history error:", error)
+    return NextResponse.json({ status: "ok", messages: [] })
   }
 }
