@@ -154,7 +154,14 @@ check(widget.includes("CONSULTATION_CONTENT"), "Thẻ mời tư vấn nói theo 
 // 15. AI cũng biết số để tự mời khách
 const aiService = readFileSync("lib/ai-service.ts", "utf8")
 check(aiService.includes("CONTACT_GUIDANCE"), "AI có hướng dẫn riêng về việc mời tư vấn sâu")
-check(aiService.includes("config.systemPrompt + context + CONTACT_GUIDANCE"), "Hướng dẫn luôn được ghép vào system prompt")
+// Prompt cuối = system prompt + tài liệu tìm được + cẩm nang bán hàng + hướng dẫn liên hệ.
+// Cẩm nang phải LUÔN có mặt (không phụ thuộc việc tìm tài liệu có ra hay không).
+check(
+  /config\.systemPrompt \+\s*\n?\s*context \+\s*\n?\s*buildSalesPlaybook\([^)]*\) \+\s*\n?\s*CONTACT_GUIDANCE/.test(
+    aiService,
+  ),
+  "Cẩm nang bán hàng + hướng dẫn liên hệ luôn được ghép vào system prompt",
+)
 
 // 16. Không được hiện số hotline giả cho khách khi hệ thống lỗi
 for (const file of ["app/api/chatbot/send-ai/route.ts", "app/api/chatbot/send/route.ts"]) {

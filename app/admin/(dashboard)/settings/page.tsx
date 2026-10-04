@@ -21,6 +21,9 @@ interface AIConfig {
   maxTokens: number
   systemPrompt: string
   ragEnabled: boolean
+  /** Cẩm nang bán hàng (quy tắc thu thập thông tin, câu hỏi kết nối chuyên viên…).
+   *  Để trống = dùng bản mặc định trong code. Sửa ở đây không cần deploy. */
+  salesPlaybook: string
 }
 
 export default function SettingsPage() {
@@ -30,6 +33,7 @@ export default function SettingsPage() {
     maxTokens: 2048,
     systemPrompt: "",
     ragEnabled: true,
+    salesPlaybook: "",
   })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -46,7 +50,15 @@ export default function SettingsPage() {
       const { data: configs } = await supabase
         .from("ai_config")
         .select("key, value")
-        .in("key", ["model", "temperature", "max_tokens", "system_prompt", "rag_enabled"])
+        .in("key", [
+          "groq_model",
+          "model", // khoá cũ, đọc để tương thích
+          "temperature",
+          "max_tokens",
+          "system_prompt",
+          "rag_enabled",
+          "sales_playbook",
+        ])
 
       if (configs) {
         const configMap = configs.reduce((acc, { key, value }) => {
@@ -55,11 +67,12 @@ export default function SettingsPage() {
         }, {} as Record<string, any>)
 
         setAiConfig({
-          model: configMap.model || DEFAULT_GROQ_MODEL,
+          model: configMap.groq_model || configMap.model || DEFAULT_GROQ_MODEL,
           temperature: configMap.temperature || 0.7,
           maxTokens: configMap.max_tokens || 2048,
           systemPrompt: configMap.system_prompt || "",
           ragEnabled: configMap.rag_enabled !== false,
+          salesPlaybook: configMap.sales_playbook || "",
         })
       }
     } catch (error) {
@@ -76,12 +89,17 @@ export default function SettingsPage() {
       const supabase = createClient()
 
       // Prepare upsert data
+      // LƯU Ý: khoá phải là "groq_model" — lib/ai-service.ts đọc khoá này.
+      // Trước đây trang này ghi khoá "model" nên đổi model xong chatbot vẫn dùng
+      // model cũ. Vẫn ghi thêm "model" để dữ liệu cũ không bị lệch.
       const updates = [
+        { key: "groq_model", value: aiConfig.model },
         { key: "model", value: aiConfig.model },
         { key: "temperature", value: aiConfig.temperature },
         { key: "max_tokens", value: aiConfig.maxTokens },
         { key: "system_prompt", value: aiConfig.systemPrompt },
         { key: "rag_enabled", value: aiConfig.ragEnabled },
+        { key: "sales_playbook", value: aiConfig.salesPlaybook },
       ]
 
       // Upsert each config
@@ -105,6 +123,7 @@ export default function SettingsPage() {
   const resetToDefault = () => {
     setAiConfig({
       model: DEFAULT_GROQ_MODEL,
+      salesPlaybook: "",
       temperature: 0.7,
       maxTokens: 2048,
       systemPrompt: `Bạn là trợ lý AI của Vexim Global - công ty chuyên về dịch vụ đăng ký FDA và GACC cho thực phẩm, mỹ phẩm.
@@ -296,6 +315,38 @@ Lưu ý:
               />
               <p className="text-xs text-muted-foreground">
                 System prompt định hình cách AI hiểu vai trò và phong cách trả lời
+              </p>
+            </div>
+          </Card>
+
+          <Card className="p-6">
+            <div className="mb-4">
+              <h2 className="text-xl font-bold text-primary">Cẩm nang bán hàng cho AI</h2>
+              <p className="text-sm text-muted-foreground">
+                Quy tắc AI thu thập thông tin khách (thị trường, nhóm sản phẩm, mã DUNS, số
+                điện thoại), khi nào tổng hợp và mời kết nối chuyên viên. Sửa ở đây có hiệu
+                lực ngay, không cần deploy.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="salesPlaybook">Cẩm nang</Label>
+              <Textarea
+                id="salesPlaybook"
+                rows={14}
+                value={aiConfig.salesPlaybook}
+                onChange={(e) => setAiConfig({ ...aiConfig, salesPlaybook: e.target.value })}
+                placeholder="Để trống để dùng cẩm nang mặc định của hệ thống (khuyên dùng khi chưa cần tùy chỉnh)…"
+                className="font-mono text-sm"
+              />
+              <p className="text-xs text-muted-foreground">
+                Cẩm nang này <strong>luôn</strong> được ghép vào prompt của AI, khác với tài
+                liệu trong Kho tri thức (chỉ được tìm khi thấy liên quan). Số liệu như thời
+                gian đăng ký FDA/GACC nên để trong{" "}
+                <a href="/admin/knowledge-base" className="font-medium text-primary hover:underline">
+                  Kho tri thức
+                </a>{" "}
+                và cẩm nang mặc định.
               </p>
             </div>
           </Card>

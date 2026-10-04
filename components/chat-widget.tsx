@@ -18,6 +18,13 @@ import {
   shouldOfferConsultation,
   type ConsultationReason,
 } from "@/lib/consultation-offer"
+import {
+  HANDOFF_CONNECT_QUESTION,
+  extractLeadProfile,
+  isLeadReady,
+  summarizeLead,
+  type LeadProfile,
+} from "@/lib/lead-profile"
 
 /**
  * Nội dung thẻ "cần tư vấn sâu hơn" — nói đúng ngữ cảnh từng trường hợp
@@ -41,6 +48,10 @@ const CONSULTATION_CONTENT: Record<ConsultationReason, { title: string; subtitle
   deep_request: {
     title: "Phần này chuyên viên báo giá & tư vấn riêng",
     subtitle: contactInvite(),
+  },
+  ready_for_handoff: {
+    title: "Em đã nắm được thông tin cơ bản của mình",
+    subtitle: "Chuyên viên Vexim sẽ xem hồ sơ và tư vấn chính xác cho trường hợp của anh/chị ạ.",
   },
   error: {
     title: "Kết nối đang gián đoạn",
@@ -131,6 +142,13 @@ export function ChatWidget() {
   /** Lý do mời khách liên hệ Zalo/hotline (null = chưa cần) */
   const [consultReason, setConsultReason] = useState<ConsultationReason | null>(null)
   const [phoneCopied, setPhoneCopied] = useState(false)
+  /** Thông tin khách đã cung cấp trong lúc chat (thu thập như một sale Vexim) */
+  const [leadProfile, setLeadProfile] = useState<LeadProfile>({})
+  const leadProfileRef = useRef<LeadProfile>({})
+  /** Trạng thái nút "Kết nối chuyên viên" */
+  const [connectState, setConnectState] = useState<"idle" | "sending" | "sent" | "error">("idle")
+  /** Bản tổng hợp thông tin khách để hiện cho khách xác nhận lại */
+  const leadSummary = summarizeLead(leadProfile)
   /** Khung cuộn chứa tin nhắn — dùng để tự động cuộn xuống khi có tin mới. */
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   /** Khách có đang ở cuối khung không? (false = đang kéo lên đọc lại) */
@@ -187,6 +205,18 @@ export function ChatWidget() {
       localStorage.setItem("vexim_customer_id", storedId)
     }
     setCustomerId(storedId)
+
+    // Khách quay lại sau khi đóng trình duyệt: giữ lại thông tin đã cung cấp
+    try {
+      const storedProfile = localStorage.getItem("vexim_lead_profile")
+      if (storedProfile) {
+        const parsed = JSON.parse(storedProfile) as LeadProfile
+        leadProfileRef.current = parsed
+        setLeadProfile(parsed)
+      }
+    } catch {
+      // dữ liệu cũ hỏng -> bỏ qua, thu thập lại từ đầu
+    }
 
     const storedConvId = localStorage.getItem("vexim_conversation_id")
     if (storedConvId) {
@@ -303,6 +333,16 @@ export function ChatWidget() {
 
     knownIdsRef.current.add(userMessage.id)
     localCustomerTextsRef.current.add(userMessage.message_text.trim())
+
+    // Thu thập thông tin khách hàng (thị trường, nhóm sản phẩm, DUNS, số điện thoại…)
+    const nextProfile = extractLeadProfile(userMessage.message_text, leadProfileRef.current)
+    leadProfileRef.current = nextProfile
+    setLeadProfile(nextProfile)
+    try {
+      localStorage.setItem("vexim_lead_profile", JSON.stringify(nextProfile))
+    } catch {
+      // trình duyệt chặn localStorage -> vẫn gửi lên máy chủ trong request bên dưới
+    }
     // Khách vừa gửi tin -> chắc chắn muốn thấy tin của mình, kể cả khi đang
     // kéo lên đọc lại đoạn trước.
     isAtBottomRef.current = true
@@ -323,6 +363,7 @@ export function ChatWidget() {
           customer_name: "Khách hàng",
           message_text: sentText,
           conversation_id: conversationId || undefined,
+          lead_profile: nextProfile,
         }),
       })
 
@@ -347,6 +388,7 @@ export function ChatWidget() {
           suggestHandover: data.response.suggest_handover === true,
           sourcesCount: Array.isArray(data.response.sources) ? data.response.sources.length : undefined,
           customerMessage: sentText,
+          leadProfile: nextProfile,
         })
         if (decision.offer && decision.reason) setConsultReason(decision.reason)
 
@@ -599,6 +641,71 @@ export function ChatWidget() {
                       <X className="h-4 w-4" />
                     </button>
                   </div>
+
+                  {/* Câu hỏi bắt buộc theo yêu cầu của Vexim: luôn hỏi khách có muốn
+                      kết nối với chuyên viên không, kèm nút để khách đồng ý 1 chạm. */}
+                  {isLeadReady(leadProfile) || consultReason === "ready_for_handoff" ? (
+                    <p className="mt-2 text-sm font-medium text-sky-900">{HANDOFF_CONNECT_QUESTION}</p>
+                  ) : null}
+
+                  {leadSummary.length > 0 && (
+                    <ul className="mt-2 space-y-0.5 rounded-md border border-sky-100 bg-white/70 px-3 py-2 text-xs text-slate-700">
+                      <li className="font-medium text-sky-900">Thông tin em đã ghi nhận:</li>
+                      {leadSummary.map((line) => (
+                        <li key={line}>• {line}</li>
+                      ))}
+                    </ul>
+                  )}
+
+                  {connectState === "sent" ? (
+                    <p className="mt-2 flex items-center gap-1.5 rounded-md bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-800">
+                      <Check className="h-3.5 w-3.5" />
+                      Đã gửi tới chuyên viên Vexim — anh/chị để ý điện thoại/Zalo giúp em nhé.
+                    </p>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={connectState === "sending"}
+                      onClick={async () => {
+                        setConnectState("sending")
+                        try {
+                          const response = await fetch("/api/chatbot/connect", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                              conversation_id: conversationId,
+                              lead_profile: leadProfileRef.current,
+                            }),
+                          })
+                          const data = await response.json()
+                          if (!response.ok || data.status !== "ok") throw new Error(data.error || "failed")
+                          setConnectState("sent")
+                          // Hiện luôn trong mạch hội thoại để khách yên tâm
+                          setMessages((prev) => [
+                            ...prev,
+                            {
+                              id: `connect_${Date.now()}`,
+                              sender_type: "bot",
+                              message_text: String(data.message_text || ""),
+                              created_at: new Date().toISOString(),
+                            },
+                          ])
+                        } catch (error) {
+                          console.error("[v0] Không gửi được yêu cầu kết nối:", error)
+                          setConnectState("error")
+                        }
+                      }}
+                      className="mt-2 flex w-full items-center justify-center gap-2 rounded-md bg-sky-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-sky-700 disabled:opacity-60"
+                    >
+                      <Headset className="h-4 w-4" />
+                      {connectState === "sending" ? "Đang gửi tới chuyên viên…" : "Có, kết nối em với chuyên viên"}
+                    </button>
+                  )}
+                  {connectState === "error" && (
+                    <p className="mt-1 text-xs text-rose-600">
+                      Chưa gửi được ạ. Anh/chị nhắn Zalo {VEXIM_PHONE_DISPLAY} giúp em nhé.
+                    </p>
+                  )}
 
                   <div className="mt-2 flex items-center gap-2 rounded-md border border-sky-200 bg-white px-3 py-2">
                     <Phone className="h-4 w-4 shrink-0 text-sky-600" />

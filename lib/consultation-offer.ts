@@ -6,6 +6,7 @@
  * hỏi hồ sơ riêng của công ty, hỏi câu không có trong tài liệu, hoặc AI tự thấy
  * không đủ tự tin. Tách logic ra đây để kiểm thử được (khung chat cần trình duyệt).
  */
+import { shouldSummarizeAndInvite, type LeadProfile } from "@/lib/lead-profile"
 
 export type ConsultationReason =
   /** Hệ thống chuyển thẳng cho chuyên viên (rule engine) */
@@ -20,6 +21,8 @@ export type ConsultationReason =
   | "no_documents"
   /** Khách hỏi việc cần tư vấn sâu: báo giá, hợp đồng, hồ sơ riêng, khiếu nại… */
   | "deep_request"
+  /** Đã thu đủ thông tin cơ bản (hoặc khách hỏi giá) -> tổng hợp và mời kết nối chuyên viên */
+  | "ready_for_handoff"
   /** Lỗi kết nối, không trả lời được */
   | "error"
 
@@ -32,6 +35,8 @@ export interface ConsultationSignals {
   sourcesCount?: number
   /** Câu khách vừa gửi */
   customerMessage?: string
+  /** Hồ sơ khách đã thu thập được (thị trường, nhóm sản phẩm, DUNS, số điện thoại) */
+  leadProfile?: LeadProfile
 }
 
 export interface ConsultationDecision {
@@ -95,6 +100,11 @@ export function shouldOfferConsultation(signals: ConsultationSignals): Consultat
   if (suggestHandover) return { offer: true, reason: "ai_suggested" }
 
   if (isDeepConsultationRequest(customerMessage)) return { offer: true, reason: "deep_request" }
+
+  // Đủ thông tin cơ bản hoặc khách hỏi giá -> tổng hợp và mời kết nối chuyên viên
+  if (signals.leadProfile && shouldSummarizeAndInvite(signals.leadProfile, customerMessage)) {
+    return { offer: true, reason: "ready_for_handoff" }
+  }
 
   // Không có tài liệu nào khớp + khách đang hỏi thật -> câu trả lời chỉ ở mức chung
   if (sourcesCount === 0 && isSubstantiveQuestion(customerMessage)) {

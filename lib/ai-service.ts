@@ -6,6 +6,8 @@ import {
 } from "@/lib/ai-chat"
 import { embedQuery, embedTexts, getEmbeddingConfig, isEmbeddingEnabled, toVectorLiteral } from "@/lib/embeddings"
 import { VEXIM_PHONE_DISPLAY, VEXIM_ZALO_URL } from "@/lib/contact-info"
+import { buildSalesPlaybook } from "@/lib/sales-playbook"
+import { HANDOFF_CONNECT_QUESTION, type LeadProfile } from "@/lib/lead-profile"
 import {
   DEFAULT_GROQ_MODEL,
   FALLBACK_GROQ_MODELS,
@@ -38,6 +40,8 @@ export interface AIConfig {
   maxTokens: number
   temperature: number
   systemPrompt: string
+  /** Cẩm nang bán hàng do admin sửa trong CSDL (rỗng = dùng bản mặc định trong code) */
+  salesPlaybook?: string
 }
 
 export interface KnowledgeChunk {
@@ -488,6 +492,7 @@ const CONTACT_GUIDANCE = `
 📞 KHI KHÁCH CẦN TƯ VẤN SÂU HƠN — hãy chủ động mời khách liên hệ:
 - Trường hợp cần: hỏi báo giá/chi phí cụ thể, hồ sơ riêng của công ty khách, hợp đồng, khiếu nại, hoặc câu hỏi không có trong tài liệu nội bộ.
 - Cách mời: "Anh/chị nhắn Zalo ${VEXIM_PHONE_DISPLAY} (${VEXIM_ZALO_URL}) hoặc để lại số điện thoại, chuyên viên Vexim sẽ tư vấn trực tiếp ạ."
+- LUÔN kết thúc lời mời bằng đúng câu hỏi này: "${HANDOFF_CONNECT_QUESTION}"
 - TUYỆT ĐỐI không tự bịa giá, thời hạn, cam kết hay quy định không có trong tài liệu. Nếu không có thông tin, nói rõ là chưa có và mời chuyên viên.
 - TUYỆT ĐỐI KHÔNG xin số điện thoại và KHÔNG hứa chuyển chuyên viên khi khách chỉ chào hỏi, cảm ơn hay nói chuyện xã giao — những lúc đó chỉ cần chào lại thân thiện và hỏi khách cần hỗ trợ gì.
 - Trả lời ngắn gọn, xưng "em", gọi khách là "anh/chị". Tối đa 3–4 câu cho mỗi lần trả lời.`
@@ -500,7 +505,11 @@ export async function generateAIResponse(
   conversationHistory: Array<{ role: string; content: string }>,
   config: AIConfig,
   supabase: any,
-  ragEnabled: boolean = true
+  ragEnabled: boolean = true,
+  /** Hồ sơ khách đã thu thập được (thị trường, nhóm sản phẩm, DUNS, số điện thoại…) */
+  leadProfile: LeadProfile = {},
+  /** Cẩm nang bán hàng do admin sửa trong CSDL (khoá `sales_playbook`), không bắt buộc */
+  adminPlaybook?: string,
 ): Promise<AIResponse> {
   try {
     let knowledgeChunks: KnowledgeChunk[] = []
@@ -522,7 +531,11 @@ export async function generateAIResponse(
     // Gọi model AI: tự chọn Groq/Gemini theo key đang có, tự chuyển nhà cung cấp
     // khi bên kia lỗi (hết hạn mức, model bị khai tử, key sai…).
     const { text: aiMessage, provider, model: modelUsed } = await callChatModel({
-      systemPrompt: config.systemPrompt + context + CONTACT_GUIDANCE,
+      systemPrompt:
+        config.systemPrompt +
+        context +
+        buildSalesPlaybook(leadProfile, { adminPlaybook }) +
+        CONTACT_GUIDANCE,
       message,
       history: conversationHistory,
       temperature: config.temperature,
@@ -566,9 +579,11 @@ export async function loadAIConfig(supabase: any): Promise<AIConfig> {
       .select("key, value")
       .in("key", [
         "groq_model",
+        "model", // khoá cũ do trang Cài đặt ghi vào — vẫn đọc để không mất cấu hình
         "max_tokens",
         "temperature",
         "system_prompt",
+        "sales_playbook",
       ])
 
     if (error) throw error
@@ -579,9 +594,11 @@ export async function loadAIConfig(supabase: any): Promise<AIConfig> {
     })
 
     return {
-      model: config.groq_model || process.env.GROQ_MODEL || DEFAULT_GROQ_MODEL,
+      model:
+        config.groq_model || config.model || process.env.GROQ_MODEL || DEFAULT_GROQ_MODEL,
       maxTokens: parseInt(config.max_tokens) || 1024,
       temperature: parseFloat(config.temperature) || 0.7,
+      salesPlaybook: config.sales_playbook || undefined,
       systemPrompt:
         config.system_prompt ||
         `Bạn là trợ lý tư vấn tuân thủ xuất khẩu của Vexim Global.

@@ -1,14 +1,38 @@
 import { VEXIM_PHONE_DISPLAY } from "@/lib/contact-info"
+import {
+  HANDOFF_CONNECT_QUESTION,
+  extractLeadProfileFromMessages,
+  summarizeLead,
+  type LeadProfile,
+} from "@/lib/lead-profile"
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { generateAIResponse, loadAIConfig } from "@/lib/ai-service"
 import { evaluateRules, getContactRequestMessage, type MessageContext } from "@/lib/rule-engine"
 import { notifyAdmin, notifyAdminNewHandover } from "@/lib/notification-service"
 
+/**
+ * Gộp thêm dữ liệu vào metadata của hội thoại.
+ * Ghi kiểu `update({ metadata: {...} })` là GHI ĐÈ — sẽ xoá mất hồ sơ khách,
+ * service_tag… do các nhánh khác đã lưu trước đó.
+ */
+async function mergeConversationMetadata(supabase: any, conversationId: string, patch: Record<string, any>) {
+  const { data } = await supabase
+    .from("conversations")
+    .select("metadata")
+    .eq("id", conversationId)
+    .single()
+
+  await supabase
+    .from("conversations")
+    .update({ metadata: { ...(data?.metadata || {}), ...patch } })
+    .eq("id", conversationId)
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { customer_id, customer_name, message_text, conversation_id } = body
+    const { customer_id, customer_name, message_text, conversation_id, lead_profile } = body
 
     console.log("[v0] Processing AI message:", { customer_id, message_text })
 
@@ -109,6 +133,19 @@ export async function POST(request: NextRequest) {
 
     const ragEnabled = ragConfig?.value === true
 
+    // Hồ sơ khách: gộp thông tin khung chat gửi lên với thông tin trích được từ
+    // chính hội thoại (khách đổi máy/thiết bị vẫn giữ được dữ liệu đã nói).
+    const leadProfile: LeadProfile = {
+      ...extractLeadProfileFromMessages([
+        ...(historyData || [])
+          .filter((m: any) => m.sender_type === "customer")
+          .map((m: any) => m.message_text),
+        message_text,
+      ]),
+      ...(lead_profile && typeof lead_profile === "object" ? lead_profile : {}),
+    }
+    console.log("[v0] Hồ sơ khách:", summarizeLead(leadProfile).join(" | ") || "(chưa thu thập được gì)")
+
     // Evaluate rules first to determine action
     const ruleContext: MessageContext = {
       message: message_text,
@@ -122,6 +159,12 @@ export async function POST(request: NextRequest) {
 
     const ruleResult = evaluateRules(ruleContext)
     console.log("[v0] Rule evaluation result:", ruleResult)
+
+    // Lưu hồ sơ khách vào hội thoại để chuyên viên đọc được ngay, không phải hỏi lại
+    await mergeConversationMetadata(supabase, convId, {
+      lead_profile: leadProfile,
+      lead_summary: summarizeLead(leadProfile),
+    })
 
     // Handle HANDOFF_TO_ADMIN action
     if (ruleResult.action === "HANDOFF_TO_ADMIN") {
@@ -137,19 +180,21 @@ export async function POST(request: NextRequest) {
       // Update conversation with tags
       await supabase
         .from("conversations")
-        .update({
-          handover_mode: "manual",
-          metadata: {
-            service_tag: ruleResult.tags.service_tag,
-            reason: ruleResult.tags.reason,
-            urgency: ruleResult.tags.urgency,
-            rule_id: ruleResult.ruleId,
-          }
-        })
+        .update({ handover_mode: "manual" })
         .eq("id", convId)
 
+      await mergeConversationMetadata(supabase, convId, {
+        service_tag: ruleResult.tags.service_tag,
+        reason: ruleResult.tags.reason,
+        urgency: ruleResult.tags.urgency,
+        rule_id: ruleResult.ruleId,
+        ask_connect: true,
+      })
+
       // Save bot message explaining handover
-      const handoverMessage = "Cảm ơn anh/chị. Để tư vấn chính xác nhất, em đang chuyển cho chuyên viên của Vexim xử lý. Chuyên viên sẽ phản hồi trong thời gian sớm nhất ạ."
+      const handoverMessage =
+        "Cảm ơn anh/chị. Để tư vấn chính xác nhất, em đang chuyển cho chuyên viên của Vexim xử lý. " +
+        HANDOFF_CONNECT_QUESTION
       
       const { data: botMessage } = await supabase
         .from("chat_messages")
@@ -204,18 +249,13 @@ export async function POST(request: NextRequest) {
         .single()
 
       // Update conversation with tags
-      await supabase
-        .from("conversations")
-        .update({
-          metadata: {
-            service_tag: ruleResult.tags.service_tag,
-            reason: ruleResult.tags.reason,
-            urgency: ruleResult.tags.urgency,
-            rule_id: ruleResult.ruleId,
-            ask_contact: true,
-          }
-        })
-        .eq("id", convId)
+      await mergeConversationMetadata(supabase, convId, {
+        service_tag: ruleResult.tags.service_tag,
+        reason: ruleResult.tags.reason,
+        urgency: ruleResult.tags.urgency,
+        rule_id: ruleResult.ruleId,
+        ask_contact: true,
+      })
 
       // Thông báo admin NGAY khi khách được mời để lại liên hệ.
       // Trước đây nhánh này không thông báo gì → lead nóng bị bỏ quên trên trang quản trị.
@@ -249,7 +289,9 @@ export async function POST(request: NextRequest) {
       conversationHistory,
       aiConfig,
       supabase,
-      ragEnabled
+      ragEnabled,
+      leadProfile,
+      aiConfig.salesPlaybook,
     )
 
     // Update AI confidence in rule context and re-evaluate if needed
@@ -268,16 +310,15 @@ export async function POST(request: NextRequest) {
 
       await supabase
         .from("conversations")
-        .update({
-          handover_mode: "manual",
-          metadata: {
-            service_tag: ruleResult.tags.service_tag,
-            reason: "data",
-            urgency: "medium",
-            rule_id: "AI-01",
-          }
-        })
+        .update({ handover_mode: "manual" })
         .eq("id", convId)
+
+      await mergeConversationMetadata(supabase, convId, {
+        service_tag: ruleResult.tags.service_tag,
+        reason: "data",
+        urgency: "medium",
+        rule_id: "AI-01",
+      })
     }
 
     // Lưu tin nhắn từ AI
