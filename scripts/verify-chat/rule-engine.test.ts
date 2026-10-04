@@ -14,6 +14,14 @@
 import { evaluateRules, isSmallTalk, isPlaceholderName } from "@/lib/rule-engine"
 import { shouldOfferConsultation } from "@/lib/consultation-offer"
 import { analyzeIntent } from "@/lib/ai-service"
+import {
+  DEFAULT_GROQ_MODEL,
+  callGroqWithFallback,
+  isModelUnavailableError,
+  isRetiredModel,
+  resolveModelChain,
+} from "@/lib/ai-models"
+import { readFileSync } from "fs"
 
 let pass = 0
 let fail = 0
@@ -168,5 +176,80 @@ check(urgent.shouldHandover === true, "Khách cần gấp -> chuyển chuyên vi
 const notUrgent = analyzeIntent("Em hỏi về thời gian xử lý hồ sơ ạ", "Dạ khoảng 7 ngày ạ.")
 check(notUrgent.shouldHandover === false, "Câu hỏi bình thường không bị coi là khẩn cấp")
 
-console.log(`\n${pass} PASS / ${fail} FAIL`)
-if (fail) process.exit(1)
+/* ---------- 11. Groq khai tử model: chatbot phải tự chuyển model khác ---------- */
+// 16/08/2026 Groq ngừng phục vụ llama-3.3-70b-versatile. Nếu code vẫn gọi model
+// đó, khách nhắn tin mà bot im lặng mãi (404 model_not_found).
+check(isRetiredModel("llama-3.3-70b-versatile") === true, "Biết model Llama 3.3 70B đã bị Groq khai tử")
+check(isRetiredModel(DEFAULT_GROQ_MODEL) === false, `Model mặc định hiện tại (${DEFAULT_GROQ_MODEL}) còn dùng được`)
+check(resolveModelChain("llama-3.3-70b-versatile")[0] === DEFAULT_GROQ_MODEL,
+  `Model cũ trong CSDL tự chuyển sang ${DEFAULT_GROQ_MODEL}`)
+check(resolveModelChain("openai/gpt-oss-20b")[0] === "openai/gpt-oss-20b",
+  "Tôn trọng model admin chọn trong CSDL")
+const chain = resolveModelChain(undefined)
+check(chain.length === new Set(chain).size, `Chuỗi model không lặp: ${chain.join(" → ")}`)
+
+const prodError = {
+  status: 404,
+  message: '404 {"error":{"message":"The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.","type":"invalid_request_error","code":"model_not_found"}}',
+}
+check(isModelUnavailableError(prodError) === true, "Nhận ra đúng lỗi 404 model_not_found của Groq")
+check(isModelUnavailableError({ status: 400, message: "invalid request" }) === false,
+  "Không coi lỗi 400 là lỗi model (không giấu lỗi thật)")
+check(isModelUnavailableError({ status: 429, message: "rate limit" }) === false,
+  "Không coi lỗi quá hạn mức là lỗi model")
+
+// Diễn lại đúng sự cố: model đang cấu hình chết -> model dự phòng trả lời
+const calls: string[] = []
+const fakeClient = {
+  chat: {
+    completions: {
+      create: async (args: any) => {
+        calls.push(args.model)
+        if (args.model === DEFAULT_GROQ_MODEL) {
+          throw Object.assign(new Error(prodError.message), { status: 404 })
+        }
+        return { choices: [{ message: { content: "Dạ em chào anh/chị ạ!" } }] }
+      },
+    },
+  },
+}
+async function testModelFallback() {
+const result = await callGroqWithFallback(fakeClient, {
+  model: DEFAULT_GROQ_MODEL,
+  messages: [{ role: "user", content: "xin chào" }],
+  temperature: 0.7,
+  maxTokens: 512,
+})
+check(
+  result.completion.choices[0].message.content.includes("chào") && result.model !== DEFAULT_GROQ_MODEL,
+  `Model chính chết -> tự trả lời bằng "${result.model}" (đã gọi: ${calls.join(", ")})`,
+)
+
+// Lỗi thật (429) thì ném ra ngay, không thử model khác
+let threw = false
+try {
+  await callGroqWithFallback(
+    { chat: { completions: { create: async () => { throw Object.assign(new Error("rate limit"), { status: 429 }) } } } },
+    { model: DEFAULT_GROQ_MODEL, messages: [], temperature: 0.7, maxTokens: 512 },
+  )
+} catch {
+  threw = true
+}
+check(threw, "Lỗi quá hạn mức vẫn báo ra ngoài, không bị che bằng model dự phòng")
+}
+
+// Không còn chỗ nào trong repo ghim model đã chết
+const seedSql = readFileSync("scripts/008_create_ai_knowledge_base.sql", "utf8")
+check(!seedSql.includes("llama-3.3-70b-versatile"), "SQL khởi tạo không còn gieo model đã chết")
+const settingsPage = readFileSync("app/admin/(dashboard)/settings/page.tsx", "utf8")
+check(settingsPage.includes("AVAILABLE_GROQ_MODELS"), "Trang Cài đặt lấy danh sách model còn dùng được")
+const blogAssistant = readFileSync("app/api/blog/ai-assistant/route.ts", "utf8")
+check(
+  !blogAssistant.includes('"llama-3.3-70b-versatile"'),
+  "Trợ lý viết bài không còn gọi model đã chết (chỉ nhắc trong ghi chú)",
+)
+
+testModelFallback().then(() => {
+  console.log(`\n${pass} PASS / ${fail} FAIL`)
+  if (fail) process.exit(1)
+})

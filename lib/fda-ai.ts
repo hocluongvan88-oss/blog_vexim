@@ -22,7 +22,7 @@ export class FDAAIService {
       const prompt = this.buildPrompt(item)
 
       const { text } = await generateText({
-        model: "groq/llama-3.3-70b-versatile",
+        model: "groq/openai/gpt-oss-120b", // llama-3.3-70b-versatile đã bị Groq khai tử 16/08/2026
         prompt,
         maxTokens: 200,
       })

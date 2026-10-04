@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import Groq from "groq-sdk"
 import { requireAdmin } from "@/lib/require-admin"
+import { DEFAULT_GROQ_MODEL, callGroqWithFallback } from "@/lib/ai-models"
 
 const MAX_INPUT_LENGTH = 6000
 
@@ -114,14 +115,16 @@ Quy tắc:
         return NextResponse.json({ error: "Invalid task" }, { status: 400 })
     }
 
-    const completion = await groq.chat.completions.create({
+    // Model Groq cũ (llama-3.3-70b-versatile) đã bị khai tử 16/08/2026 — dùng
+    // model mặc định mới và tự chuyển model dự phòng nếu Groq đổi tiếp.
+    const { completion } = await callGroqWithFallback(groq, {
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
       ],
-      model: "llama-3.3-70b-versatile",
+      model: DEFAULT_GROQ_MODEL,
       temperature: task === "suggest_tags" ? 0.8 : 0.7,
-      max_tokens: task === "expand" ? 2048 : 1024,
+      maxTokens: task === "expand" ? 2048 : 1024,
     })
 
     const result = completion.choices[0]?.message?.content || ""

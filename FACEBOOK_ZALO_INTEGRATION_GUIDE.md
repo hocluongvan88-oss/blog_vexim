@@ -263,7 +263,7 @@ chat_messages (
   conversation_id UUID,
   sender_type TEXT,           -- 'customer' | 'bot' | 'agent'
   message_text TEXT,
-  ai_model TEXT,              -- 'llama-3.3-70b-versatile'
+  ai_model TEXT,              -- 'openai/gpt-oss-120b'
   ai_confidence FLOAT,        -- 0.0 - 1.0
   created_at TIMESTAMP
 )
@@ -315,7 +315,7 @@ Bạn là trợ lý AI của Vexim Global...
 `
 
 // Thay đổi model Groq
-const MODEL = "llama-3.3-70b-versatile"  // hoặc model khác
+const MODEL = "openai/gpt-oss-120b"  // Llama 3.3 70B đã bị Groq khai tử 16/08/2026
 
 // Thay đổi temperature (creativity)
 const TEMPERATURE = 0.7  // 0.0 = chính xác, 1.0 = sáng tạo

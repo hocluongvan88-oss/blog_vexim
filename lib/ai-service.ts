@@ -2,6 +2,25 @@ import Groq from "groq-sdk"
 import { isSmallTalk } from "@/lib/rule-engine"
 import { embedQuery, embedTexts, getEmbeddingConfig, isEmbeddingEnabled, toVectorLiteral } from "@/lib/embeddings"
 import { VEXIM_PHONE_DISPLAY, VEXIM_ZALO_URL } from "@/lib/contact-info"
+import {
+  DEFAULT_GROQ_MODEL,
+  FALLBACK_GROQ_MODELS,
+  callGroqWithFallback,
+  isRetiredModel,
+  resolveModelChain,
+  type GroqLike,
+} from "@/lib/ai-models"
+
+// Cho phép import các hằng số model từ "@/lib/ai-service" như trước
+export * from "@/lib/ai-models"
+
+/** Model dự phòng có thể ghi đè bằng biến môi trường GROQ_FALLBACK_MODELS. */
+function envFallbacks(): string[] {
+  const raw = process.env.GROQ_FALLBACK_MODELS
+  if (!raw) return FALLBACK_GROQ_MODELS
+  const list = raw.split(",").map((model) => model.trim()).filter(Boolean)
+  return list.length > 0 ? list : FALLBACK_GROQ_MODELS
+}
 
 // Initialize Groq client
 let groq: Groq | null = null
@@ -516,15 +535,23 @@ export async function generateAIResponse(
       },
     ]
 
+    if (isRetiredModel(config.model)) {
+      console.warn(
+        `[v0] Model "${config.model}" đã bị Groq ngừng phục vụ — dùng "${resolveModelChain(config.model, envFallbacks())[0]}". ` +
+          `Vào Admin → Cài đặt để đổi model trong CSDL.`
+      )
+    }
     console.log("[v0] Calling Groq API with model:", config.model)
 
-    // Gọi Groq API
-    const completion = await groq.chat.completions.create({
+    // Gọi Groq API (tự chuyển model dự phòng nếu model bị khai tử)
+    const { completion, model: modelUsed } = await callGroqWithFallback(groq as unknown as GroqLike, {
       model: config.model,
       messages,
       temperature: config.temperature,
-      max_tokens: config.maxTokens,
+      maxTokens: config.maxTokens,
+      fallbacks: envFallbacks(),
     })
+    console.log("[v0] AI trả lời bằng model:", modelUsed)
 
     const aiMessage = completion.choices[0]?.message?.content || ""
     console.log("[v0] Received AI response:", aiMessage.substring(0, 100))
@@ -544,7 +571,7 @@ export async function generateAIResponse(
 
     return {
       message:
-        "Xin lỗi, tôi đang gặp sự cố kỹ thuật. Vui lòng thử lại sau hoặc liên hệ hotline để được hỗ trợ trực tiếp.",
+        `Xin lỗi, em đang gặp sự cố kỹ thuật. Anh/chị thử lại sau giúp em, hoặc liên hệ hotline ${VEXIM_PHONE_DISPLAY} để được hỗ trợ trực tiếp ạ.`,
       confidence: 0.0,
       sources: [],
       shouldHandover: true,
@@ -576,7 +603,7 @@ export async function loadAIConfig(supabase: any): Promise<AIConfig> {
     })
 
     return {
-      model: config.groq_model || "llama-3.3-70b-versatile",
+      model: config.groq_model || process.env.GROQ_MODEL || DEFAULT_GROQ_MODEL,
       maxTokens: parseInt(config.max_tokens) || 1024,
       temperature: parseFloat(config.temperature) || 0.7,
       systemPrompt:

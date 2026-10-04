@@ -1,5 +1,6 @@
 "use client"
 
+import { AVAILABLE_GROQ_MODELS, DEFAULT_GROQ_MODEL, isRetiredModel } from "@/lib/ai-models"
 import { useEffect, useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -24,7 +25,7 @@ interface AIConfig {
 
 export default function SettingsPage() {
   const [aiConfig, setAiConfig] = useState<AIConfig>({
-    model: "llama-3.3-70b-versatile",
+    model: DEFAULT_GROQ_MODEL,
     temperature: 0.7,
     maxTokens: 2048,
     systemPrompt: "",
@@ -54,7 +55,7 @@ export default function SettingsPage() {
         }, {} as Record<string, any>)
 
         setAiConfig({
-          model: configMap.model || "llama-3.3-70b-versatile",
+          model: configMap.model || DEFAULT_GROQ_MODEL,
           temperature: configMap.temperature || 0.7,
           maxTokens: configMap.max_tokens || 2048,
           systemPrompt: configMap.system_prompt || "",
@@ -103,7 +104,7 @@ export default function SettingsPage() {
 
   const resetToDefault = () => {
     setAiConfig({
-      model: "llama-3.3-70b-versatile",
+      model: DEFAULT_GROQ_MODEL,
       temperature: 0.7,
       maxTokens: 2048,
       systemPrompt: `Bạn là trợ lý AI của Vexim Global - công ty chuyên về dịch vụ đăng ký FDA và GACC cho thực phẩm, mỹ phẩm.
@@ -194,13 +195,22 @@ Lưu ý:
                   value={aiConfig.model}
                   onChange={(e) => setAiConfig({ ...aiConfig, model: e.target.value })}
                 >
-                  <option value="llama-3.3-70b-versatile">Llama 3.3 70B (Khuyên dùng)</option>
-                  <option value="llama-3.1-70b-versatile">Llama 3.1 70B</option>
-                  <option value="llama-3.1-8b-instant">Llama 3.1 8B (Nhanh)</option>
-                  <option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
+                  {AVAILABLE_GROQ_MODELS.map((model) => (
+                    <option key={model.id} value={model.id}>
+                      {model.label}
+                    </option>
+                  ))}
+                  {/* Giữ lại lựa chọn cũ để admin thấy vì sao chatbot ngừng trả lời */}
+                  {isRetiredModel(aiConfig.model) && (
+                    <option value={aiConfig.model}>
+                      {aiConfig.model} (Groq đã ngừng phục vụ — hãy đổi model khác)
+                    </option>
+                  )}
                 </select>
                 <p className="text-xs text-muted-foreground">
-                  Chọn mô hình AI để xử lý các câu hỏi của khách hàng
+                  Chọn mô hình AI để xử lý các câu hỏi của khách hàng. Groq đã ngừng phục vụ
+                  nhóm model Llama từ 16/08/2026, nên các model cũ không còn trả lời được —
+                  hệ thống sẽ tự chuyển sang model dự phòng, nhưng nên đổi tại đây.
                 </p>
               </div>
 
