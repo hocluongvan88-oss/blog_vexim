@@ -579,7 +579,13 @@ export default function NewPostPage() {
           </div>
         )}
 
-        <div className={`grid gap-6 items-start ${showSidebar ? "lg:grid-cols-[1fr_380px] xl:grid-cols-[1fr_400px]" : "grid-cols-1 max-w-4xl mx-auto"}`}>
+        <div
+          className={`grid gap-6 items-start ${
+            showSidebar
+              ? "lg:grid-cols-[minmax(0,1fr)_420px] xl:grid-cols-[minmax(0,1fr)_470px] 2xl:grid-cols-[minmax(0,1fr)_520px]"
+              : "grid-cols-1 max-w-4xl mx-auto"
+          }`}
+        >
           {/* ==================== CỘT TRÁI: TRANG GIẤY SOẠN THẢO LIỀN MẠCH (Notion / WordPress Canvas) ==================== */}
           <div className="space-y-4 min-w-0">
             <Card className="p-6 md:p-8 shadow-xs border-border/80 bg-white space-y-5">
@@ -756,14 +762,16 @@ export default function NewPostPage() {
             </Card>
           </div>
 
-          {/* ==================== CỘT PHẢI: BẢNG CÔNG CỤ CHIA TAB GỌN GÀNG (380px) ==================== */}
+          {/* ==================== CỘT PHẢI: BẢNG CÔNG CỤ CHIA TAB (rộng 420–520px, không cắt nội dung) ==================== */}
           {showSidebar && (
-            <aside className="space-y-4 lg:sticky lg:top-16">
+            <aside className="space-y-4 min-w-0">
               <Tabs
                 value={activeSidebarTab}
                 onValueChange={(val) => setActiveSidebarTab(val as "settings" | "seo" | "ai")}
                 className="w-full"
               >
+                {/* Thanh tab luôn bám theo khi cuộn bài viết, nhưng nội dung bên dưới chảy tự nhiên (không bị cắt) */}
+                <div className="lg:sticky lg:top-16 z-20 -my-1 py-1 rounded-lg bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85">
                 <TabsList className="grid w-full grid-cols-3 h-10">
                   <TabsTrigger value="settings" className="text-xs gap-1.5">
                     <Settings2 className="w-3.5 h-3.5" />
@@ -783,6 +791,7 @@ export default function NewPostPage() {
                     <span>AI & Gợi ý</span>
                   </TabsTrigger>
                 </TabsList>
+                </div>
 
                 {/* ---------------- TAB 1: THIẾT LẬP BÀI VIẾT ---------------- */}
                 <TabsContent value="settings" className="mt-3 space-y-4">
@@ -889,7 +898,7 @@ export default function NewPostPage() {
                 </TabsContent>
 
                 {/* ---------------- TAB 2: CHẤM ĐIỂM & CÀI ĐẶT SEO ---------------- */}
-                <TabsContent value="seo" className="mt-3 space-y-4 max-h-[calc(100vh-8rem)] overflow-y-auto pr-1">
+                <TabsContent value="seo" className="mt-3 space-y-4">
                   {/* Từ khóa trọng tâm ngay trên đầu tab SEO */}
                   <Card className="p-4 space-y-3">
                     <div>
@@ -957,7 +966,7 @@ export default function NewPostPage() {
                 </TabsContent>
 
                 {/* ---------------- TAB 3: TRỢ LÝ AI & GỢI Ý NỘI DUNG ---------------- */}
-                <TabsContent value="ai" className="mt-3 space-y-4 max-h-[calc(100vh-8rem)] overflow-y-auto pr-1">
+                <TabsContent value="ai" className="mt-3 space-y-4">
                   <AIWritingAssistant
                     selectedText={selectedText}
                     fullContent={getTextContent()}
