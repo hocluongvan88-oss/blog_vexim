@@ -1,14 +1,16 @@
-import Groq from "groq-sdk"
 import { isSmallTalk } from "@/lib/rule-engine"
+import {
+  NO_CHAT_PROVIDER_MESSAGE,
+  describeChatConfig,
+  generateChatText as callChatModel,
+} from "@/lib/ai-chat"
 import { embedQuery, embedTexts, getEmbeddingConfig, isEmbeddingEnabled, toVectorLiteral } from "@/lib/embeddings"
 import { VEXIM_PHONE_DISPLAY, VEXIM_ZALO_URL } from "@/lib/contact-info"
 import {
   DEFAULT_GROQ_MODEL,
   FALLBACK_GROQ_MODELS,
-  callGroqWithFallback,
   isRetiredModel,
   resolveModelChain,
-  type GroqLike,
 } from "@/lib/ai-models"
 
 // Cho phép import các hằng số model từ "@/lib/ai-service" như trước
@@ -22,20 +24,13 @@ function envFallbacks(): string[] {
   return list.length > 0 ? list : FALLBACK_GROQ_MODELS
 }
 
-// Initialize Groq client
-let groq: Groq | null = null
-
-try {
-  if (!process.env.GROQ_API_KEY) {
-    console.error("[v0] GROQ_API_KEY is not set in environment variables")
-  } else {
-    groq = new Groq({
-      apiKey: process.env.GROQ_API_KEY,
-    })
-    console.log("[v0] Groq client initialized successfully")
-  }
-} catch (error) {
-  console.error("[v0] Error initializing Groq client:", error)
+// Nhà cung cấp AI đang dùng (Groq và/hoặc Gemini) — đọc lúc khởi động chỉ để ghi log,
+// quyết định thật được đưa ra ở mỗi lần gọi trong lib/ai-chat.ts.
+const chatConfig = describeChatConfig()
+if (chatConfig.providers.length === 0) {
+  console.error(`[v0] ${NO_CHAT_PROVIDER_MESSAGE}`)
+} else {
+  console.log(`[v0] AI trả lời khách — ${chatConfig.hint}`)
 }
 
 export interface AIConfig {
@@ -508,11 +503,6 @@ export async function generateAIResponse(
   ragEnabled: boolean = true
 ): Promise<AIResponse> {
   try {
-    // Check if Groq is initialized
-    if (!groq) {
-      throw new Error("Groq client is not initialized. Please check GROQ_API_KEY environment variable.")
-    }
-
     let knowledgeChunks: KnowledgeChunk[] = []
     let context = ""
 
@@ -522,38 +512,24 @@ export async function generateAIResponse(
       context = buildContext(knowledgeChunks)
     }
 
-    // Xây dựng messages cho Groq
-    const messages: any[] = [
-      {
-        role: "system",
-        content: config.systemPrompt + context + CONTACT_GUIDANCE,
-      },
-      ...conversationHistory,
-      {
-        role: "user",
-        content: message,
-      },
-    ]
-
     if (isRetiredModel(config.model)) {
       console.warn(
         `[v0] Model "${config.model}" đã bị Groq ngừng phục vụ — dùng "${resolveModelChain(config.model, envFallbacks())[0]}". ` +
           `Vào Admin → Cài đặt để đổi model trong CSDL.`
       )
     }
-    console.log("[v0] Calling Groq API with model:", config.model)
 
-    // Gọi Groq API (tự chuyển model dự phòng nếu model bị khai tử)
-    const { completion, model: modelUsed } = await callGroqWithFallback(groq as unknown as GroqLike, {
-      model: config.model,
-      messages,
+    // Gọi model AI: tự chọn Groq/Gemini theo key đang có, tự chuyển nhà cung cấp
+    // khi bên kia lỗi (hết hạn mức, model bị khai tử, key sai…).
+    const { text: aiMessage, provider, model: modelUsed } = await callChatModel({
+      systemPrompt: config.systemPrompt + context + CONTACT_GUIDANCE,
+      message,
+      history: conversationHistory,
       temperature: config.temperature,
       maxTokens: config.maxTokens,
-      fallbacks: envFallbacks(),
+      preferredModel: config.model,
     })
-    console.log("[v0] AI trả lời bằng model:", modelUsed)
-
-    const aiMessage = completion.choices[0]?.message?.content || ""
+    console.log(`[v0] AI trả lời bằng: ${provider}/${modelUsed}`)
     console.log("[v0] Received AI response:", aiMessage.substring(0, 100))
 
     // Phân tích intent và confidence

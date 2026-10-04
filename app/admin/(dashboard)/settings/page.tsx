@@ -212,6 +212,13 @@ Lưu ý:
                   nhóm model Llama từ 16/08/2026, nên các model cũ không còn trả lời được —
                   hệ thống sẽ tự chuyển sang model dự phòng, nhưng nên đổi tại đây.
                 </p>
+                <p className="text-xs text-muted-foreground">
+                  Chatbot chỉ cần <strong>một</strong> khoá AI: <code>GROQ_API_KEY</code> hoặc{" "}
+                  <code>GEMINI_API_KEY</code> (Gemini cũng là khoá dùng cho phần tìm tài liệu
+                  theo ngữ nghĩa). Có cả hai thì hệ thống tự chuyển sang bên còn lại khi bên
+                  kia hết hạn mức hoặc lỗi — xem log deploy dòng{" "}
+                  <code>AI trả lời khách</code> để biết đang dùng bên nào.
+                </p>
               </div>
 
               {/* Temperature */}
