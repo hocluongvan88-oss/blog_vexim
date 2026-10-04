@@ -2,10 +2,11 @@ import { VEXIM_PHONE_DISPLAY } from "@/lib/contact-info"
 import {
   HANDOFF_CONNECT_QUESTION,
   extractLeadProfileFromMessages,
+  shouldSummarizeAndInvite,
   summarizeLead,
   type LeadProfile,
 } from "@/lib/lead-profile"
-import { NextRequest, NextResponse } from "next/server"
+import { NextRequest, NextResponse, after } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { generateAIResponse, loadAIConfig } from "@/lib/ai-service"
 import {
@@ -14,7 +15,12 @@ import {
   shouldAlertAdminOnAiReply,
   type MessageContext,
 } from "@/lib/rule-engine"
-import { notifyAdmin, notifyAdminNewHandover } from "@/lib/notification-service"
+import {
+  notifyAdmin,
+  notifyAdminNewHandover,
+  sendLeadSummaryEmail,
+} from "@/lib/notification-service"
+import { shouldEmailLeadSummary } from "@/lib/lead-summary-email"
 
 /**
  * Gộp thêm dữ liệu vào metadata của hội thoại.
@@ -188,6 +194,34 @@ export async function POST(request: NextRequest) {
       lead_summary: summarizeLead(leadProfile),
     })
 
+    // Trợ lý vừa TỔNG HỢP xong thông tin (đủ 4 thông tin bắt buộc, hoặc khách hỏi
+    // giá) -> gửi hồ sơ khách về email admin. Chủ doanh nghiệp chốt: thông báo phải
+    // ra ngoài, không để chuyên viên chỉ thấy khi mở trang quản trị.
+    //
+    // Dùng after() của Next 15: email được gửi SAU khi trả lời khách, nên khách
+    // không phải chờ thêm 1–3 giây cho mỗi lượt chat.
+    // Lượt này có gửi email HỒ SƠ KHÁCH không? (dùng để không gửi thêm email thông
+    // báo thứ hai cho cùng một thời điểm — push và trang quản trị vẫn báo bình thường)
+    const summaryEmailGoingOut =
+      shouldSummarizeAndInvite(leadProfile, message_text) &&
+      shouldEmailLeadSummary(leadProfile, convMetadata)
+
+    if (summaryEmailGoingOut) {
+      const messagesForEmail = (historyData || []).map((row: any) => ({
+        sender_type: row.sender_type,
+        message_text: row.message_text,
+      }))
+      after(async () => {
+        const result = await sendLeadSummaryEmail({
+          conversationId: convId,
+          profile: leadProfile,
+          messages: messagesForEmail,
+          supabase,
+        })
+        console.log("[v0] Email hồ sơ khách hàng:", result)
+      })
+    }
+
     // Handle HANDOFF_TO_ADMIN action
     if (ruleResult.action === "HANDOFF_TO_ADMIN") {
       // Create handover immediately
@@ -243,6 +277,7 @@ export async function POST(request: NextRequest) {
         urgency: ruleResult.tags.urgency as "high" | "medium" | "low",
         serviceTag: ruleResult.tags.service_tag,
         reason: ruleResult.tags.reason,
+        skipEmail: summaryEmailGoingOut,
       })
 
       return NextResponse.json({
@@ -294,6 +329,7 @@ export async function POST(request: NextRequest) {
         serviceTag: ruleResult.tags.service_tag,
         reason: ruleResult.tags.reason,
         type: "new_lead",
+        skipEmail: summaryEmailGoingOut,
       })
 
       return NextResponse.json({
@@ -327,6 +363,7 @@ export async function POST(request: NextRequest) {
           serviceTag: ruleResult.tags.service_tag,
           reason: ruleResult.reason,
           type: "new_lead",
+          skipEmail: summaryEmailGoingOut,
         })
         await mergeConversationMetadata(supabase, convId, {
           last_lead_alert_at: new Date().toISOString(),

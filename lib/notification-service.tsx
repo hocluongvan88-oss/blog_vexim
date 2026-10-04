@@ -1,5 +1,12 @@
 import { createClient } from "@/lib/supabase/server"
 import { emailService } from "@/lib/email-service-zoho"
+import {
+  buildLeadSummaryEmail,
+  leadSummaryKey,
+  leadSummaryRecipients,
+  shouldEmailLeadSummary,
+} from "@/lib/lead-summary-email"
+import type { LeadProfile } from "@/lib/lead-profile"
 
 /**
  * Loại thông báo gửi cho admin.
@@ -20,6 +27,12 @@ export interface NotificationPayload {
   type?: AdminNotificationType
   /** Kênh khách đến: website / facebook / zalo */
   channel?: string
+  /**
+   * Đã có email HỒ SƠ KHÁCH gửi đi ngay trong lượt này rồi thì bỏ kênh email ở đây
+   * (tránh chủ doanh nghiệp nhận 2 email cho cùng một thời điểm). Push và thông báo
+   * trên trang quản trị vẫn gửi bình thường.
+   */
+  skipEmail?: boolean
 }
 
 const TYPE_LABELS: Record<AdminNotificationType, string> = {
@@ -125,6 +138,11 @@ export async function saveAdminNotification(payload: NotificationPayload): Promi
  * âm thầm và admin không hề biết có khách đang chờ.
  */
 export async function sendEmailNotification(payload: NotificationPayload): Promise<boolean> {
+  if (payload.skipEmail) {
+    console.log("[admin-notify] Bỏ qua email thông báo (đã gửi email hồ sơ khách trong cùng lượt).")
+    return false
+  }
+
   try {
     const supabase = await createClient()
 
@@ -227,4 +245,88 @@ export async function notifyAdmin(payload: NotificationPayload): Promise<void> {
 /** Giữ tên cũ để không phải sửa các lời gọi hiện có. */
 export async function notifyAdminNewHandover(payload: NotificationPayload): Promise<void> {
   await notifyAdmin({ ...payload, type: payload.type || "handover" })
+}
+
+export type LeadSummaryResult = "sent" | "skipped" | "no-recipients" | "failed"
+
+/**
+ * Gửi HỒ SƠ KHÁCH HÀNG TIỀM NĂNG về email admin ngay sau khi trợ lý AI tổng hợp
+ * xong thông tin (đủ 4 thông tin bắt buộc, hoặc khách hỏi giá).
+ *
+ * Người nhận: địa chỉ của chủ doanh nghiệp (lib/lead-summary-email.ts) + các email
+ * đã cấu hình ở Admin → Cài đặt → Thông báo.
+ *
+ * Chống gửi trùng: khoá `lead_summary_email_key` lưu trong metadata hội thoại —
+ * chỉ gửi khi thông tin khách THAY ĐỔI (thêm số điện thoại, đổi thị trường…),
+ * khách nhắn thêm vài câu giống nhau sẽ không làm admin bị dội email.
+ */
+export async function sendLeadSummaryEmail(payload: {
+  conversationId: string
+  profile: LeadProfile
+  messages?: Array<{ sender_type?: string; message_text?: string }>
+  siteUrl?: string
+  /** Client supabase của request (truyền vào để dùng lại, khỏi tạo mới). */
+  supabase?: any
+}): Promise<LeadSummaryResult> {
+  const siteUrl = payload.siteUrl || process.env.NEXT_PUBLIC_SITE_URL || "https://www.veximglobal.com"
+
+  try {
+    const key = leadSummaryKey(payload.profile)
+    if (!key) return "skipped" // chưa có gì đáng gửi
+
+    const supabase = payload.supabase || (await createClient())
+
+    // Đọc metadata ngay trước khi gửi để không ghi đè dữ liệu do luồng khác vừa lưu
+    const { data: conversation } = await supabase
+      .from("conversations")
+      .select("metadata")
+      .eq("id", payload.conversationId)
+      .maybeSingle()
+
+    const metadata: Record<string, any> = (conversation?.metadata || {}) as Record<string, any>
+    if (!shouldEmailLeadSummary(payload.profile, metadata)) return "skipped"
+
+    const { data: emailConfig } = await supabase
+      .from("ai_config")
+      .select("value")
+      .eq("key", "admin_notification_emails")
+      .maybeSingle()
+
+    const configured = Array.isArray(emailConfig?.value) ? (emailConfig?.value as string[]) : []
+    const recipients = leadSummaryRecipients(configured)
+    if (recipients.length === 0) {
+      console.warn("[admin-notify] Không có email nào để nhận hồ sơ khách.")
+      return "no-recipients"
+    }
+
+    const { subject, html } = buildLeadSummaryEmail({
+      profile: payload.profile,
+      messages: payload.messages,
+      conversationId: payload.conversationId,
+      siteUrl,
+    })
+
+    const sent = await emailService.sendEmail({ to: recipients.join(", "), subject, html })
+    if (!sent) {
+      console.error("[admin-notify] Gửi email hồ sơ khách THẤT BẠI:", recipients.join(", "))
+      return "failed"
+    }
+
+    await supabase
+      .from("conversations")
+      .update({
+        metadata: {
+          ...metadata,
+          lead_summary_email_key: key,
+          lead_summary_emailed_at: new Date().toISOString(),
+        },
+      })
+      .eq("id", payload.conversationId)
+
+    console.log("[admin-notify] Đã gửi hồ sơ khách tới:", recipients.join(", "))
+    return "sent"
+  } catch (error) {
+    console.error("[admin-notify] Lỗi gửi email hồ sơ khách:", error)
+    return "failed"
+  }
 }
