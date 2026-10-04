@@ -3,7 +3,7 @@
 import React from "react"
 
 import { useState, useRef, useEffect, useCallback } from "react"
-import { MessageCircle, X, Send, Minimize2, Headset, Phone, Copy, Check } from "lucide-react"
+import { MessageCircle, X, Send, Minimize2, Headset, Phone, Copy, Check, ArrowDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
@@ -131,11 +131,38 @@ export function ChatWidget() {
   /** Lý do mời khách liên hệ Zalo/hotline (null = chưa cần) */
   const [consultReason, setConsultReason] = useState<ConsultationReason | null>(null)
   const [phoneCopied, setPhoneCopied] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  /** Khung cuộn chứa tin nhắn — dùng để tự động cuộn xuống khi có tin mới. */
+  const messagesContainerRef = useRef<HTMLDivElement>(null)
+  /** Khách có đang ở cuối khung không? (false = đang kéo lên đọc lại) */
+  const isAtBottomRef = useRef(true)
+  const [showJumpToLatest, setShowJumpToLatest] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const knownIdsRef = useRef<Set<string>>(new Set())
   /** Nội dung các tin khách ĐÃ GỬI tại máy này — để không hiện trùng khi nạp lại lịch sử */
   const localCustomerTextsRef = useRef<Set<string>>(new Set())
+
+  /** Cuộn xuống cuối khung chat. */
+  const scrollToBottom = useCallback((behavior: ScrollBehavior = "auto") => {
+    const container = messagesContainerRef.current
+    if (!container) return
+    if (behavior === "smooth") {
+      container.scrollTo({ top: container.scrollHeight, behavior: "smooth" })
+    } else {
+      container.scrollTop = container.scrollHeight
+    }
+    isAtBottomRef.current = true
+    setShowJumpToLatest(false)
+  }, [])
+
+  /** Theo dõi vị trí cuộn để biết khách có đang ở cuối khung hay không. */
+  const handleMessagesScroll = useCallback(() => {
+    const container = messagesContainerRef.current
+    if (!container) return
+    const distanceToBottom = container.scrollHeight - container.scrollTop - container.clientHeight
+    const atBottom = distanceToBottom <= 80
+    isAtBottomRef.current = atBottom
+    setShowJumpToLatest(!atBottom)
+  }, [])
 
   /** Gộp tin nhắn mới vào danh sách, bỏ qua tin đã có (dùng cho cả polling). */
   const mergeMessages = useCallback((incoming: Message[], options: { countUnread?: boolean } = {}) => {
@@ -168,30 +195,37 @@ export function ChatWidget() {
     }
   }, [])
 
-  // KHÔNG tự động scroll khi đang typing - để user đọc thoải mái
-  // Chỉ scroll khi HOÀN THÀNH typing VÀ user đang ở cuối
+  /**
+   * Tự cuộn xuống khi có nội dung mới — kể cả trong lúc AI đang gõ từng ký tự.
+   *
+   * Trước đây: cứ đang gõ là KHÔNG cuộn, nên câu trả lời dài trôi xuống dưới
+   * đáy khung và khách phải tự kéo xuống mới đọc được. Ngoài ra phép kiểm tra
+   * "đang ở cuối" được tính SAU khi khung đã cao thêm, nên tin mới luôn bị coi
+   * là "khách đã kéo lên" và không cuộn.
+   *
+   * Nay: ghi nhớ vị trí cuộn TRƯỚC đó (isAtBottomRef, cập nhật trong onScroll).
+   * Chỉ không cuộn khi khách chủ động kéo lên đọc lại — lúc đó hiện nút
+   * "Tin nhắn mới" để khách tự quyết định.
+   */
   useEffect(() => {
-    if (isStreaming) return
-
-    const messageContainer = messagesEndRef.current?.parentElement
-    if (!messageContainer) return
-
-    const isNearBottom =
-      messageContainer.scrollHeight - messageContainer.scrollTop - messageContainer.clientHeight < 100
-
-    if (isNearBottom) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-    }
-  }, [messages, isStreaming])
+    if (!isAtBottomRef.current) return
+    const container = messagesContainerRef.current
+    if (!container) return
+    // Đang gõ từng ký tự thì phải nhảy thẳng xuống đáy; dùng "smooth" sẽ bị trễ
+    // và giật vì nội dung tăng liên tục mỗi 15ms.
+    container.scrollTop = container.scrollHeight
+  }, [messages, isStreaming, consultReason])
 
   // Auto-focus input khi mở chat hoặc khi không minimize
   useEffect(() => {
     if (isOpen && !isMinimized) {
       setTimeout(() => {
         inputRef.current?.focus()
+        // Mở lại khung chat -> luôn hiện tin nhắn mới nhất ở cuối
+        scrollToBottom()
       }, 100)
     }
-  }, [isOpen, isMinimized])
+  }, [isOpen, isMinimized, scrollToBottom])
 
   // Mở chat -> coi như đã đọc
   useEffect(() => {
@@ -269,6 +303,10 @@ export function ChatWidget() {
 
     knownIdsRef.current.add(userMessage.id)
     localCustomerTextsRef.current.add(userMessage.message_text.trim())
+    // Khách vừa gửi tin -> chắc chắn muốn thấy tin của mình, kể cả khi đang
+    // kéo lên đọc lại đoạn trước.
+    isAtBottomRef.current = true
+    setShowJumpToLatest(false)
     setMessages((prev) => [...prev, userMessage])
     const sentText = inputMessage
     setInputMessage("")
@@ -327,6 +365,7 @@ export function ChatWidget() {
           message_text: "",
           created_at: timestamp,
         }
+        isAtBottomRef.current = true
         setMessages((prev) => [...prev, tempBotMessage])
 
         // Typing effect: hiển thị từng ký tự
@@ -442,85 +481,102 @@ export function ChatWidget() {
           {/* Messages */}
           {!isMinimized && (
             <>
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
-                {messages.length === 0 && (
-                  <div className="text-center text-muted-foreground py-8">
-                    <MessageCircle className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                    <p className="text-sm">Xin chào! Em là trợ lý AI của Vexim Global.</p>
-                    <p className="text-xs mt-2">
-                      Anh/chị hỏi về FDA, GACC, MFDS, US Agent… em trả lời ngay ạ.
-                    </p>
-                    <p className="mt-3 text-xs">
-                      Cần tư vấn sâu hơn, anh/chị nhắn Zalo{" "}
-                      <a
-                        href={VEXIM_ZALO_URL}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="font-semibold text-[#0068FF] hover:underline"
-                      >
-                        {VEXIM_PHONE_DISPLAY}
-                      </a>{" "}
-                      ạ.
-                    </p>
-                  </div>
-                )}
+              <div className="relative flex min-h-0 flex-1 flex-col">
+                <div
+                  ref={messagesContainerRef}
+                  onScroll={handleMessagesScroll}
+                  className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 bg-gray-50"
+                >
+                  {messages.length === 0 && (
+                    <div className="text-center text-muted-foreground py-8">
+                      <MessageCircle className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                      <p className="text-sm">Xin chào! Em là trợ lý AI của Vexim Global.</p>
+                      <p className="text-xs mt-2">
+                        Anh/chị hỏi về FDA, GACC, MFDS, US Agent… em trả lời ngay ạ.
+                      </p>
+                      <p className="mt-3 text-xs">
+                        Cần tư vấn sâu hơn, anh/chị nhắn Zalo{" "}
+                        <a
+                          href={VEXIM_ZALO_URL}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-semibold text-[#0068FF] hover:underline"
+                        >
+                          {VEXIM_PHONE_DISPLAY}
+                        </a>{" "}
+                        ạ.
+                      </p>
+                    </div>
+                  )}
 
-                {messages.map((msg) => (
-                  <div
-                    key={msg.id}
-                    className={cn("flex", msg.sender_type === "customer" ? "justify-end" : "justify-start")}
-                  >
+                  {messages.map((msg) => (
                     <div
-                      className={cn(
-                        "max-w-[80%] rounded-lg px-4 py-2 text-sm shadow-sm",
-                        msg.sender_type === "customer"
-                          ? "bg-primary text-white rounded-br-none"
-                          : msg.sender_type === "agent"
-                            ? "bg-emerald-50 text-gray-800 rounded-bl-none border border-emerald-200"
-                            : "bg-white text-gray-800 rounded-bl-none"
-                      )}
+                      key={msg.id}
+                      className={cn("flex", msg.sender_type === "customer" ? "justify-end" : "justify-start")}
                     >
-                      {msg.sender_type === "agent" && (
-                        <span className="mb-1 flex items-center gap-1 text-xs font-medium text-emerald-700">
-                          <Headset className="h-3 w-3" /> Chuyên viên Vexim
-                        </span>
-                      )}
-                      <div className="break-words">
-                        {msg.sender_type === "customer" ? (
-                          <p className="whitespace-pre-wrap">{msg.message_text}</p>
-                        ) : (
-                          parseMarkdown(msg.message_text)
+                      <div
+                        className={cn(
+                          "max-w-[80%] rounded-lg px-4 py-2 text-sm shadow-sm",
+                          msg.sender_type === "customer"
+                            ? "bg-primary text-white rounded-br-none"
+                            : msg.sender_type === "agent"
+                              ? "bg-emerald-50 text-gray-800 rounded-bl-none border border-emerald-200"
+                              : "bg-white text-gray-800 rounded-bl-none"
                         )}
-                      </div>
-                      <span className="text-xs opacity-70 mt-1 block">
-                        {new Date(msg.created_at).toLocaleTimeString("vi-VN", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-
-                {isLoading && (
-                  <div className="flex justify-start">
-                    <div className="bg-white rounded-lg px-4 py-2 shadow-sm">
-                      <div className="flex gap-1">
-                        <span className="h-2 w-2 bg-gray-400 rounded-full animate-bounce"></span>
-                        <span
-                          className="h-2 w-2 bg-gray-400 rounded-full animate-bounce"
-                          style={{ animationDelay: "0.2s" }}
-                        ></span>
-                        <span
-                          className="h-2 w-2 bg-gray-400 rounded-full animate-bounce"
-                          style={{ animationDelay: "0.4s" }}
-                        ></span>
+                      >
+                        {msg.sender_type === "agent" && (
+                          <span className="mb-1 flex items-center gap-1 text-xs font-medium text-emerald-700">
+                            <Headset className="h-3 w-3" /> Chuyên viên Vexim
+                          </span>
+                        )}
+                        <div className="break-words">
+                          {msg.sender_type === "customer" ? (
+                            <p className="whitespace-pre-wrap">{msg.message_text}</p>
+                          ) : (
+                            parseMarkdown(msg.message_text)
+                          )}
+                        </div>
+                        <span className="text-xs opacity-70 mt-1 block">
+                          {new Date(msg.created_at).toLocaleTimeString("vi-VN", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </span>
                       </div>
                     </div>
-                  </div>
-                )}
+                  ))}
 
-                <div ref={messagesEndRef} />
+                  {isLoading && (
+                    <div className="flex justify-start">
+                      <div className="bg-white rounded-lg px-4 py-2 shadow-sm">
+                        <div className="flex gap-1">
+                          <span className="h-2 w-2 bg-gray-400 rounded-full animate-bounce"></span>
+                          <span
+                            className="h-2 w-2 bg-gray-400 rounded-full animate-bounce"
+                            style={{ animationDelay: "0.2s" }}
+                          ></span>
+                          <span
+                            className="h-2 w-2 bg-gray-400 rounded-full animate-bounce"
+                            style={{ animationDelay: "0.4s" }}
+                          ></span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+              </div>
+
+              {/* Khách đã kéo lên đọc lại -> không kéo họ xuống, chỉ gợi ý */}
+              {showJumpToLatest && messages.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => scrollToBottom("smooth")}
+                  className="absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-md ring-1 ring-gray-200 transition-colors hover:bg-gray-50"
+                >
+                  <ArrowDown className="h-3.5 w-3.5" />
+                  Tin nhắn mới nhất
+                </button>
+              )}
               </div>
 
               {/* Mời tư vấn sâu hơn: hiện số Zalo/hotline chính thức của Vexim */}

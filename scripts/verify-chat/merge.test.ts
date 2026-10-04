@@ -166,5 +166,51 @@ for (const file of ["app/api/chatbot/send-ai/route.ts", "app/api/chatbot/send/ro
   )
 }
 
+// 17. Khung chat tự cuộn xuống khi có tin mới
+check(widget.includes("messagesContainerRef"), "Khung tin nhắn có ref để tự cuộn")
+check(widget.includes("onScroll={handleMessagesScroll}"), "Theo dõi vị trí cuộn của khách")
+check(widget.includes("isAtBottomRef"), "Ghi nhớ khách có đang ở cuối khung không")
+check(
+  !/if \(isStreaming\) return/.test(widget),
+  "Không còn chặn cuộn trong lúc AI gõ từng ký tự (nguyên nhân tin dài bị trôi khỏi tầm mắt)",
+)
+check(
+  widget.includes("container.scrollTop = container.scrollHeight"),
+  "Cuộn thẳng xuống đáy (không dùng smooth khi nội dung đang tăng liên tục)",
+)
+check(widget.includes("Tin nhắn mới nhất"), "Có nút quay xuống cuối khi khách kéo lên đọc lại")
+check(
+  /isAtBottomRef\.current = true\s*\n\s*setShowJumpToLatest\(false\)\s*\n\s*setMessages\(\(prev\) => \[\.\.\.prev, userMessage\]\)/.test(widget),
+  "Khách vừa gửi tin -> luôn cuộn xuống dù trước đó đang đọc lại",
+)
+check(
+  widget.includes("scrollToBottom()") && widget.includes("\[isOpen, isMinimized, scrollToBottom\]"),
+  "Mở lại khung chat -> hiện tin nhắn mới nhất",
+)
+
+/**
+ * Mô phỏng đúng lỗi khách gặp: khung cao 400px, khách đang ở cuối (nội dung 350px).
+ * Khách gửi thêm 1 tin làm nội dung dài 550px.
+ */
+const OLD_THRESHOLD = 100
+const NEW_THRESHOLD = 80
+const simulate = (contentBefore: number, contentAfter: number, scrollTop = 0, viewport = 400) => {
+  const distanceIfCheckedAfterRender = contentAfter - scrollTop - viewport
+  const oldWouldScroll = distanceIfCheckedAfterRender < OLD_THRESHOLD
+  // Cách mới: biết trước đó khách đang ở cuối (onScroll cập nhật ngay khi khách cuộn)
+  const wasAtBottom = contentBefore - scrollTop - viewport <= NEW_THRESHOLD
+  return { oldWouldScroll, newWouldScroll: wasAtBottom }
+}
+const addedMessage = simulate(350, 550)
+check(
+  addedMessage.oldWouldScroll === false && addedMessage.newWouldScroll === true,
+  "Tin mới làm khung cao thêm: cách cũ không cuộn (lỗi), cách mới cuộn xuống",
+)
+const readingUp = simulate(900, 1100, 100)
+check(
+  readingUp.newWouldScroll === false,
+  "Khách đang kéo lên đọc lại -> không bị kéo xuống, chỉ hiện nút gợi ý",
+)
+
 console.log(`\n${pass} PASS / ${fail} FAIL`)
 if (fail) process.exit(1)
