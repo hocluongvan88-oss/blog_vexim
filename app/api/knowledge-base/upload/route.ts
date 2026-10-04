@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
+import { chunkDocument, htmlToPlainText, normalizeWhitespace, insertChunks } from "@/lib/knowledge-chunks"
 
 export async function POST(request: NextRequest) {
   try {
@@ -35,14 +36,32 @@ export async function POST(request: NextRequest) {
       documentContent = content
     } else if (sourceType === "url") {
       sourceUrl = url
-      // Fetch content from URL
+      // Tải nội dung trang và CHỈ giữ phần text.
+      // Trước đây lưu nguyên HTML (kèm <script>, menu, footer) vào kho tri thức
+      // nên chunk chứa đầy rác → AI đọc phải rác và trả lời chung chung.
       try {
-        const response = await fetch(url)
-        documentContent = await response.text()
+        const response = await fetch(url, {
+          headers: { "User-Agent": "Mozilla/5.0 (compatible; VeximKnowledgeBot/1.0)" },
+        })
+        if (!response.ok) {
+          return NextResponse.json(
+            { error: `Không tải được URL (mã ${response.status}). Kiểm tra lại đường dẫn.` },
+            { status: 400 },
+          )
+        }
+        const raw = await response.text()
+        documentContent = htmlToPlainText(raw)
       } catch (error) {
         return NextResponse.json(
-          { error: "Failed to fetch URL content" },
+          { error: "Không tải được nội dung từ URL", details: error instanceof Error ? error.message : undefined },
           { status: 400 }
+        )
+      }
+
+      if (!documentContent || documentContent.trim().length < 100) {
+        return NextResponse.json(
+          { error: "Trang này không có đủ nội dung văn bản để nạp vào kho tri thức (có thể là trang động/JS)." },
+          { status: 400 },
         )
       }
     } else if (sourceType === "file") {
@@ -111,7 +130,16 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         )
       }
+
+      // Giới hạn để tránh timeout khi xử lý file quá lớn trên serverless
+      if (documentContent.length > 400_000) {
+        documentContent = documentContent.slice(0, 400_000)
+        console.warn("[v0] Nội dung file quá dài, đã cắt bớt còn 400.000 ký tự")
+      }
     }
+
+    // Chuẩn hoá text trước khi lưu (bỏ khoảng trắng rác của PDF)
+    documentContent = normalizeWhitespace(documentContent)
 
     // Insert document
     const { data: document, error: docError } = await supabase
@@ -138,10 +166,26 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Process document into chunks (async)
-    await processDocumentChunks(document.id, documentContent, supabase)
+    // Xử lý tài liệu thành các chunk cho AI tra cứu
+    const chunkResult = await processDocumentChunks(document.id, documentContent, supabase, sourceType)
 
-    return NextResponse.json({ success: true, document })
+    if (chunkResult.error) {
+      return NextResponse.json(
+        {
+          error: "Không thể tạo dữ liệu cho AI từ tài liệu này",
+          details: chunkResult.error,
+          document,
+        },
+        { status: 500 },
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
+      document,
+      chunks: chunkResult.chunks,
+      message: `Đã nạp ${chunkResult.chunks} đoạn kiến thức cho AI`,
+    })
   } catch (error) {
     console.error("Upload error:", error)
     return NextResponse.json(
@@ -154,49 +198,29 @@ export async function POST(request: NextRequest) {
 async function processDocumentChunks(
   documentId: string,
   content: string,
-  supabase: any
-) {
+  supabase: any,
+  sourceType?: string,
+): Promise<{ chunks: number; error: string | null }> {
   try {
-    // Split content into chunks (simple split by paragraphs)
-    const chunks = content
-      .split(/\n\n+/)
-      .filter((chunk) => chunk.trim().length > 50)
-      .map((chunk, index) => ({
-        document_id: documentId,
-        content: chunk.trim(),
-        chunk_index: index,
-        token_count: Math.ceil(chunk.length / 4), // Rough estimate
-      }))
+    const rows = chunkDocument(documentId, content, { sourceType })
+    const { inserted, error } = await insertChunks(supabase, rows)
 
-    // Insert chunks
-    const { error: chunksError } = await supabase
-      .from("knowledge_chunks")
-      .insert(chunks)
-
-    if (chunksError) {
-      console.error("Error inserting chunks:", chunksError)
-      // Update document status to error
-      await supabase
-        .from("knowledge_documents")
-        .update({ status: "error" })
-        .eq("id", documentId)
-      return
+    if (error) {
+      console.error("[v0] Lỗi ghi chunk:", error)
+      await supabase.from("knowledge_documents").update({ status: "error", chunks_count: 0 }).eq("id", documentId)
+      return { chunks: 0, error }
     }
 
-    // Update document status to active
     await supabase
       .from("knowledge_documents")
-      .update({
-        status: "active",
-        chunks_count: chunks.length,
-      })
+      .update({ status: "active", chunks_count: inserted })
       .eq("id", documentId)
+
+    console.log(`[v0] Tài liệu ${documentId}: đã nạp ${inserted} chunk`)
+    return { chunks: inserted, error: null }
   } catch (error) {
-    console.error("Chunk processing error:", error)
-    // Update status to error
-    await supabase
-      .from("knowledge_documents")
-      .update({ status: "error" })
-      .eq("id", documentId)
+    console.error("[v0] Chunk processing error:", error)
+    await supabase.from("knowledge_documents").update({ status: "error", chunks_count: 0 }).eq("id", documentId)
+    return { chunks: 0, error: error instanceof Error ? error.message : "Lỗi xử lý chunk" }
   }
 }

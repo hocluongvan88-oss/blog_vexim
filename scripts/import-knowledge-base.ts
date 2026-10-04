@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js"
 import * as fs from "fs"
 import * as path from "path"
+import { chunkDocument, insertChunks } from "../lib/knowledge-chunks"
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -106,56 +107,23 @@ function extractTags(content: string): string[] {
   return [...new Set(tags)] // Remove duplicates
 }
 
-// Process document into chunks
+// Process document into chunks — dùng thư viện chung để không lệch tên cột với API.
+// Bản cũ ghi trực tiếp cột `chunk_text` trong khi schema hiện tại (script 012) là
+// `content` → mọi lần chạy script này đều lỗi và không nạp được gì cho AI.
 async function processDocumentChunks(
   documentId: string,
   content: string
 ): Promise<number> {
-  try {
-    // Split content into chunks by double newlines (paragraphs)
-    const paragraphs = content.split(/\n\n+/).filter((p) => p.trim().length > 50)
-    
-    // Create chunks with overlap for better context
-    const chunks: any[] = []
-    const chunkSize = 3 // Number of paragraphs per chunk
-    const overlap = 1 // Overlap between chunks
-    
-    for (let i = 0; i < paragraphs.length; i += chunkSize - overlap) {
-      const chunkParagraphs = paragraphs.slice(i, i + chunkSize)
-      const chunkText = chunkParagraphs.join("\n\n")
-      
-      if (chunkText.trim().length > 50) {
-        chunks.push({
-          document_id: documentId,
-          chunk_text: chunkText.trim(),
-          chunk_index: Math.floor(i / (chunkSize - overlap)),
-          metadata: {
-            paragraph_count: chunkParagraphs.length,
-            char_count: chunkText.length,
-          },
-        })
-      }
-    }
-    
-    console.log(`   📦 Creating ${chunks.length} chunks...`)
-    
-    // Insert chunks in batches
-    const batchSize = 10
-    for (let i = 0; i < chunks.length; i += batchSize) {
-      const batch = chunks.slice(i, i + batchSize)
-      const { error } = await supabase.from("knowledge_chunks").insert(batch)
-      
-      if (error) {
-        console.error(`   ❌ Error inserting batch ${i / batchSize + 1}:`, error)
-        throw error
-      }
-    }
-    
-    return chunks.length
-  } catch (error) {
-    console.error("   ❌ Error processing chunks:", error)
-    throw error
+  const rows = chunkDocument(documentId, content, { sourceType: "text" })
+  const { inserted, error } = await insertChunks(supabase, rows)
+
+  if (error) {
+    console.error("   ❌ Error inserting chunks:", error)
+    throw new Error(error)
   }
+
+  console.log(`   📦 Created ${inserted} chunks`)
+  return inserted
 }
 
 // Import a single markdown file
@@ -215,7 +183,7 @@ async function importMarkdownFile(filePath: string): Promise<void> {
     // Update document status
     await supabase
       .from("knowledge_documents")
-      .update({ status: "active" })
+      .update({ status: "active", chunks_count: chunkCount })
       .eq("id", document.id)
     
     console.log(`   ✅ Complete! ${chunkCount} chunks created`)

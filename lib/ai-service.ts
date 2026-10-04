@@ -126,6 +126,9 @@ function scoreChunk(content: string, keywords: string[]): number {
  *  2. Nếu không có gì, nới lỏng bằng các từ khoá dài nhất.
  *  3. Nếu vẫn không có, trả về chunk mới nhất đúng danh mục liên quan (nếu suy ra được).
  */
+/** Nhớ tên cột chunk đã dò được để không phải kiểm tra lại mỗi lần hỏi. */
+let chunkTextColumn: string | null = null
+
 export async function searchKnowledge(
   query: string,
   topK: number = 5,
@@ -135,15 +138,33 @@ export async function searchKnowledge(
     const keywords = extractKeywords(query)
     console.log("[v0] Knowledge search — từ khoá:", keywords)
 
+    // Dò tên cột chunk thật: script 008 tạo `chunk_text`, script 012 đổi tên thành `content`.
+    // Nếu hard-code sai tên, truy vấn luôn lỗi → AI không có tài liệu nào để trả lời.
+    if (chunkTextColumn === null) {
+      const { error: contentProbe } = await supabase.from("knowledge_chunks").select("content").limit(1)
+      if (!contentProbe) {
+        chunkTextColumn = "content"
+      } else {
+        const { error: legacyProbe } = await supabase.from("knowledge_chunks").select("chunk_text").limit(1)
+        chunkTextColumn = legacyProbe ? "content" : "chunk_text"
+        if (!legacyProbe) {
+          console.warn(
+            "[v0] knowledge_chunks đang dùng cột `chunk_text` (schema cũ). Nên chạy scripts/037_standardize_knowledge_chunks.sql.",
+          )
+        }
+      }
+    }
+    const textColumn = chunkTextColumn
+
     const runQuery = async (terms: string[]) => {
       if (terms.length === 0) return [] as any[]
-      const orFilter = terms.map((term) => `content.ilike.%${term}%`).join(",")
+      const orFilter = terms.map((term) => `${textColumn}.ilike.%${term}%`).join(",")
       const { data, error } = await supabase
         .from("knowledge_chunks")
         .select(
           `
           id,
-          content,
+          ${textColumn},
           knowledge_documents!inner(title, category, status)
         `
         )
@@ -173,7 +194,7 @@ export async function searchKnowledge(
         .select(
           `
           id,
-          content,
+          ${textColumn},
           knowledge_documents!inner(title, category, status)
         `
         )
@@ -182,9 +203,13 @@ export async function searchKnowledge(
       rows = (data || []) as any[]
     }
 
-    // Xếp hạng theo số từ khoá khớp để đưa tài liệu đúng nhất lên đầu
+    // Xếp hạng: từ khoá khớp trong nội dung chunk + điểm thưởng nếu khớp TIÊU ĐỀ tài liệu
     const ranked = rows
-      .map((item) => ({ item, score: scoreChunk(item.content || "", keywords) }))
+      .map((item) => {
+        const text = item[chunkTextColumn || "content"] || item.content || item.chunk_text || ""
+        const title = item.knowledge_documents?.title || ""
+        return { item, score: scoreChunk(text, keywords) + scoreChunk(title, keywords) * 2 }
+      })
       .sort((a, b) => b.score - a.score)
       .slice(0, topK)
 
@@ -192,7 +217,7 @@ export async function searchKnowledge(
 
     return ranked.map(({ item }) => ({
       id: item.id,
-      chunk_text: item.content,
+      chunk_text: item[textColumn] ?? item.content ?? item.chunk_text ?? "",
       document_title: item.knowledge_documents?.title || "Tài liệu",
       category: item.knowledge_documents?.category || "",
     }))
