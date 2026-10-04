@@ -24,7 +24,16 @@ interface ParagraphBlockProps {
   /** Gộp đoạn văn hiện tại lên cuối khối phía trên khi nhấn Backspace ở đầu dòng */
   onMergeWithPrevious?: (currentHtml: string) => void
   /** Chuyển đổi nhanh loại khối khi gõ cú pháp Markdown (## , - , 1. , > ) */
-  onConvertBlock?: (type: BlockType, data: Record<string, unknown>) => void
+  onConvertBlock?: (
+    type: BlockType,
+    data: Record<string, unknown>,
+    meta?: { auto?: boolean; prefix?: string; label?: string },
+  ) => void
+  /**
+   * Tự động chuyển cú pháp Markdown khi gõ (## , - , 1. , > ).
+   * Tắt để gõ được các dòng như "1. Đăng ký cơ sở..." dưới dạng đoạn văn thường.
+   */
+  markdownShortcutsEnabled?: boolean
   /** Mở/đóng menu lệnh "/" (Slash Command) kiểu Notion */
   onSlashCommand?: (query: string | null, caretRect?: DOMRect) => void
   /** Di chuyển con trỏ giữa các khối bằng phím mũi tên ↑ / ↓ */
@@ -91,6 +100,7 @@ export function ParagraphBlock({
   onSplitBlock,
   onMergeWithPrevious,
   onConvertBlock,
+  markdownShortcutsEnabled = true,
   onSlashCommand,
   onNavigateVertical,
   onPasteImageFile,
@@ -182,9 +192,20 @@ export function ParagraphBlock({
 
   /** Kiểm tra cú pháp Markdown ở đầu dòng (VD: "## ", "### ", "- ", "1. ", "> ") */
   const tryMarkdownShortcut = (plainText: string, rawHtml: string): boolean => {
-    if (!onConvertBlock) return false
+    if (!onConvertBlock || !markdownShortcutsEnabled) return false
 
     const normalized = plainText.replace(/\u00A0/g, " ")
+
+    /**
+     * CHỈ chuyển đổi khi cú pháp vừa được gõ vào một khối còn trống.
+     *
+     * Trước đây chỉ cần nội dung khối BẮT ĐẦU bằng "1. " là chuyển ngay, nên những
+     * đoạn văn đánh số thủ công như "1. Đăng ký cơ sở...", "2. Chỉ định US Agent..."
+     * sẽ bị biến thành danh sách ngay khi gõ thêm bất kỳ ký tự nào.
+     */
+    const prevPlain = stripHtml(lastTextRef.current).replace(/\u00A0/g, " ").trim()
+    const isStartingEmpty = prevPlain === "" || /^(#{1,6}|[-*+]|1\.|>)$/.test(prevPlain)
+    if (!isStartingEmpty) return false
 
     // Heading: ## , ### , ####
     const headingMatch = normalized.match(/^(#{2,4})\s(.*)$/)
@@ -192,7 +213,11 @@ export function ParagraphBlock({
       const level = headingMatch[1].length as 2 | 3 | 4
       const remainder = headingMatch[2] || ""
       onSlashCommand?.(null)
-      onConvertBlock("heading", { level, text: sanitizeInlineHtml(remainder), align: "left" })
+      onConvertBlock(
+        "heading",
+        { level, text: sanitizeInlineHtml(remainder), align: "left" },
+        { auto: true, prefix: `${"#".repeat(level)} `, label: `Tiêu đề H${level}` },
+      )
       return true
     }
 
@@ -201,7 +226,11 @@ export function ParagraphBlock({
     if (ulMatch) {
       const remainder = ulMatch[1] || ""
       onSlashCommand?.(null)
-      onConvertBlock("list", { style: "unordered", items: [sanitizeInlineHtml(remainder)], align: "left" })
+      onConvertBlock(
+        "list",
+        { style: "unordered", items: [sanitizeInlineHtml(remainder)], align: "left" },
+        { auto: true, prefix: "- ", label: "Danh sách chấm" },
+      )
       return true
     }
 
@@ -210,7 +239,11 @@ export function ParagraphBlock({
     if (olMatch) {
       const remainder = olMatch[1] || ""
       onSlashCommand?.(null)
-      onConvertBlock("list", { style: "ordered", items: [sanitizeInlineHtml(remainder)], align: "left" })
+      onConvertBlock(
+        "list",
+        { style: "ordered", items: [sanitizeInlineHtml(remainder)], align: "left" },
+        { auto: true, prefix: "1. ", label: "Danh sách số" },
+      )
       return true
     }
 
@@ -219,7 +252,11 @@ export function ParagraphBlock({
     if (quoteMatch) {
       const remainder = quoteMatch[1] || ""
       onSlashCommand?.(null)
-      onConvertBlock("quote", { text: sanitizeInlineHtml(remainder), author: "", align: "left" })
+      onConvertBlock(
+        "quote",
+        { text: sanitizeInlineHtml(remainder), author: "", align: "left" },
+        { auto: true, prefix: "> ", label: "Trích dẫn" },
+      )
       return true
     }
 

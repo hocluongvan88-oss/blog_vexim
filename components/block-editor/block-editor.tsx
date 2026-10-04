@@ -25,6 +25,7 @@ import {
   Scissors,
   X,
   Check,
+  Wand2,
 } from "lucide-react"
 import { BlockToolbar } from "./block-toolbar"
 import { HeadingBlock } from "./blocks/heading-block"
@@ -98,6 +99,20 @@ export function BlockEditor({ value, onChange, onSelectBlock }: BlockEditorProps
   const [uploadingPastedImage, setUploadingPastedImage] = useState(false)
 
   /**
+   * Tự động chuyển cú pháp Markdown khi gõ (## , - , 1. , > ).
+   * Người dùng có thể tắt hẳn (lưu trong localStorage) để gõ được các dòng
+   * như "1. Đăng ký cơ sở..." dưới dạng đoạn văn thường.
+   */
+  const [markdownShortcutsEnabled, setMarkdownShortcutsEnabled] = useState(true)
+  /** Thông báo "vừa tự động chuyển khối" để người dùng hoàn tác ngay (giống Word/Google Docs). */
+  const [autoConvertNotice, setAutoConvertNotice] = useState<{
+    blockId: string
+    label: string
+    prefix: string
+  } | null>(null)
+  const autoConvertTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  /**
    * Chọn nhiều khối cùng lúc (multi-block selection) kiểu Notion:
    * Ctrl+A hai lần để chọn cả bài, Shift+Click để chọn một khoảng, Delete để xoá sạch.
    */
@@ -142,6 +157,16 @@ export function BlockEditor({ value, onChange, onSelectBlock }: BlockEditorProps
   useEffect(() => {
     onChangeRef.current = onChange
   }, [onChange])
+
+  // Đọc thiết lập "tự động chuyển Markdown" đã lưu (mặc định: bật)
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem("vexim:editor-markdown-shortcuts")
+      if (saved === "off") setMarkdownShortcutsEnabled(false)
+    } catch {
+      /* ignore */
+    }
+  }, [])
 
   useEffect(() => {
     onSelectBlockRef.current = onSelectBlock
@@ -240,12 +265,82 @@ export function BlockEditor({ value, onChange, onSelectBlock }: BlockEditorProps
     [syncHistoryMeta],
   )
 
+  const clearAutoConvertNotice = useCallback(() => {
+    if (autoConvertTimerRef.current) {
+      clearTimeout(autoConvertTimerRef.current)
+      autoConvertTimerRef.current = null
+    }
+    setAutoConvertNotice(null)
+  }, [])
+
+  const setMarkdownShortcuts = useCallback(
+    (enabled: boolean) => {
+      setMarkdownShortcutsEnabled(enabled)
+      try {
+        window.localStorage.setItem("vexim:editor-markdown-shortcuts", enabled ? "on" : "off")
+      } catch {
+        /* ignore */
+      }
+      if (!enabled) clearAutoConvertNotice()
+    },
+    [clearAutoConvertNotice],
+  )
+
+  /**
+   * Chuyển khối về đoạn văn thường, khôi phục đúng cú pháp Markdown đã gõ
+   * (VD: khối "Danh sách số" [Đăng ký cơ sở] -> đoạn văn "1. Đăng ký cơ sở").
+   */
+  const undoAutoConvert = useCallback(() => {
+    const notice = autoConvertNotice
+    if (!notice) return
+    const current = blocksRef.current
+    const index = current.findIndex((block) => block.id === notice.blockId)
+    if (index === -1) {
+      clearAutoConvertNotice()
+      return
+    }
+    const block = current[index]
+
+    let plainText = ""
+    if (block.type === "list") {
+      const items = Array.isArray(block.data?.items) ? (block.data.items as string[]) : []
+      const isOrdered = block.data?.style === "ordered"
+      plainText = items
+        .map((item, itemIndex) => `${isOrdered ? `${itemIndex + 1}. ` : "- "}${item}`)
+        .join("<br />")
+    } else if (block.type === "heading") {
+      const level = Math.min(Math.max(Number(block.data?.level) || 2, 1), 6)
+      plainText = `${"#".repeat(level)} ${String(block.data?.text ?? "")}`
+    } else if (block.type === "quote") {
+      plainText = `> ${String(block.data?.text ?? "")}`
+    } else {
+      plainText = String(block.data?.text ?? "")
+    }
+
+    const next = [...current]
+    next[index] = {
+      id: block.id,
+      type: "paragraph",
+      data: { text: plainText, align: "justify" },
+    }
+    commit(next)
+    clearAutoConvertNotice()
+    selectBlock(block.id)
+    focusBlockAfterRender(block.id, "end")
+  }, [autoConvertNotice, commit, clearAutoConvertNotice, selectBlock])
+
   const undo = useCallback(() => {
+    // Vừa tự động chuyển khối (gõ "1. ", "## "...) -> Ctrl+Z hoàn tác riêng bước chuyển
+    // đổi đó trước, đúng thói quen của Word / Google Docs.
+    if (autoConvertNotice) {
+      undoAutoConvert()
+      return
+    }
     if (historyIndexRef.current <= 0) return
     historyIndexRef.current -= 1
     const previous = historyRef.current[historyIndexRef.current]
     if (previous) applyHistoryState(previous)
-  }, [applyHistoryState])
+  }, [applyHistoryState, autoConvertNotice, undoAutoConvert])
 
   const redo = useCallback(() => {
     if (historyIndexRef.current >= historyRef.current.length - 1) return
@@ -345,10 +440,22 @@ export function BlockEditor({ value, onChange, onSelectBlock }: BlockEditorProps
     commit(next, coalesceKey)
   }
 
-  const convertBlockType = (id: string, newType: BlockType, newData: Record<string, unknown>) => {
+  const convertBlockType = (
+    id: string,
+    newType: BlockType,
+    newData: Record<string, unknown>,
+    meta?: { auto?: boolean; prefix?: string; label?: string },
+  ) => {
     commit(blocksRef.current.map((block) => (block.id === id ? { ...block, type: newType, data: newData } : block)))
     selectBlock(id)
     focusBlockAfterRender(id, "end")
+
+    if (meta?.auto) {
+      // Hiện thanh nhắc "vừa tự động chuyển" để người dùng hoàn tác hoặc tắt tính năng
+      setAutoConvertNotice({ blockId: id, label: meta.label ?? "khối mới", prefix: meta.prefix ?? "" })
+      if (autoConvertTimerRef.current) clearTimeout(autoConvertTimerRef.current)
+      autoConvertTimerRef.current = setTimeout(() => setAutoConvertNotice(null), 12000)
+    }
   }
 
   const duplicateBlock = (id: string) => {
@@ -648,6 +755,7 @@ export function BlockEditor({ value, onChange, onSelectBlock }: BlockEditorProps
   useEffect(() => {
     return () => {
       if (confirmClearTimerRef.current) clearTimeout(confirmClearTimerRef.current)
+      if (autoConvertTimerRef.current) clearTimeout(autoConvertTimerRef.current)
     }
   }, [])
 
@@ -1019,7 +1127,8 @@ export function BlockEditor({ value, onChange, onSelectBlock }: BlockEditorProps
               onPasteBlocks={(parsedBlocks) => handlePasteBlocks(block.id, parsedBlocks)}
               onSplitBlock={(beforeHtml, afterHtml) => handleSplitBlock(block.id, index, beforeHtml, afterHtml)}
               onMergeWithPrevious={(currentHtml) => handleMergeWithPrevious(block.id, index, currentHtml)}
-              onConvertBlock={(newType, newData) => convertBlockType(block.id, newType, newData)}
+              onConvertBlock={(newType, newData, meta) => convertBlockType(block.id, newType, newData, meta)}
+              markdownShortcutsEnabled={markdownShortcutsEnabled}
               onSlashCommand={(query, rect) => {
                 if (query === null) {
                   setSlashMenuState((prev) =>
@@ -1295,6 +1404,52 @@ export function BlockEditor({ value, onChange, onSelectBlock }: BlockEditorProps
         </div>
       </div>
 
+      {/* Nhắc nhở vừa tự động chuyển khối theo cú pháp Markdown (giống Word / Google Docs) */}
+      {autoConvertNotice && (
+        <div
+          className="flex flex-wrap items-center justify-between gap-2 border-b border-amber-200 bg-amber-50 px-3 py-1.5 text-xs text-amber-900"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <span className="flex items-center gap-1.5">
+            <Wand2 className="w-3.5 h-3.5 flex-shrink-0" />
+            Đã tự động chuyển thành <strong>{autoConvertNotice.label}</strong> vì bạn gõ cú pháp Markdown.
+          </span>
+          <div className="flex flex-wrap items-center gap-1">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-7 bg-white px-2 text-xs"
+              onClick={undoAutoConvert}
+              title="Trả khối về đoạn văn thường (Ctrl+Z)"
+            >
+              <Undo2 className="w-3.5 h-3.5 mr-1" />
+              Hoàn tác chuyển đổi
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-7 px-2 text-xs text-amber-900 hover:bg-amber-100 hover:text-amber-900"
+              onClick={() => setMarkdownShortcuts(false)}
+              title="Tắt vĩnh viễn việc tự chuyển khi gõ ## , - , 1. , >"
+            >
+              Tắt tự động chuyển
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0 text-amber-900 hover:bg-amber-100 hover:text-amber-900"
+              onClick={clearAutoConvertNotice}
+              title="Đóng"
+            >
+              <X className="w-3.5 h-3.5" />
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Thanh thao tác khi đang chọn nhiều khối (Notion-style) */}
       {selectedBlockIds.length > 0 && (
         <div
@@ -1400,6 +1555,15 @@ export function BlockEditor({ value, onChange, onSelectBlock }: BlockEditorProps
               <kbd className="rounded border bg-white px-1.5 py-0.5 font-mono text-[11px]">Esc</kbd> Bỏ chọn tất cả
             </span>
           </div>
+          <label className="flex items-center gap-2 text-xs font-medium cursor-pointer">
+            <input
+              type="checkbox"
+              className="h-3.5 w-3.5 accent-blue-600"
+              checked={markdownShortcutsEnabled}
+              onChange={(e) => setMarkdownShortcuts(e.target.checked)}
+            />
+            Tự động chuyển khi gõ cú pháp (## , - , 1. , &gt; )
+          </label>
           <button
             type="button"
             onClick={() => setShowShortcutsHelp(false)}
