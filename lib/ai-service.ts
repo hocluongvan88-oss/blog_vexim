@@ -1,4 +1,5 @@
 import Groq from "groq-sdk"
+import { isSmallTalk } from "@/lib/rule-engine"
 import { embedQuery, embedTexts, getEmbeddingConfig, isEmbeddingEnabled, toVectorLiteral } from "@/lib/embeddings"
 import { VEXIM_PHONE_DISPLAY, VEXIM_ZALO_URL } from "@/lib/contact-info"
 
@@ -357,7 +358,12 @@ function buildContext(chunks: KnowledgeChunk[]): string {
     return `
 
 ⚠️ KHÔNG tìm thấy tài liệu nội bộ nào liên quan tới câu hỏi này trong kho tri thức của Vexim.
-Quy tắc BẮT BUỘC khi thiếu tài liệu:
+
+NẾU khách chỉ chào hỏi / cảm ơn / nói chuyện xã giao: hãy chào lại thân thiện, giới
+thiệu ngắn gọn Vexim hỗ trợ FDA, GACC, MFDS, US Agent… và hỏi khách cần giúp gì.
+TUYỆT ĐỐI không xin số điện thoại và không nói phải chuyển chuyên viên trong trường hợp này.
+
+Quy tắc BẮT BUỘC khi thiếu tài liệu (với câu hỏi thật):
 - KHÔNG bịa số liệu, mốc thời gian, mức phí hay tên biểu mẫu.
 - Chỉ trả lời phần CHẮC CHẮN đúng theo quy định chung, ngắn gọn (tối đa 3 câu).
 - Nói rõ đây là thông tin chung và cần chuyên viên xác nhận cho trường hợp cụ thể.
@@ -382,23 +388,34 @@ Lưu ý: nếu tài liệu trên không đủ để trả lời, hãy nói rõ c
 /**
  * Phân tích intent và xác định cần chuyển sang agent không
  */
-function analyzeIntent(
+export function analyzeIntent(
   message: string,
   aiResponse: string
 ): { confidence: number; shouldHandover: boolean; reason?: string } {
+  // Chào hỏi / cảm ơn / xã giao: AI luôn trả lời được, tuyệt đối không chuyển
+  // chuyên viên. (Nếu không chặn ở đây, câu chào lại lịch sự của AI — ví dụ
+  // "Em có thể hỗ trợ anh/chị…" — bị coi là "không đủ tin cậy" và chuyển oan.)
+  if (isSmallTalk(message)) {
+    return { confidence: 0.95, shouldHandover: false }
+  }
+
+  // Dấu hiệu AI THẬT SỰ không chắc. KHÔNG dùng "có thể" hay "xin lỗi": đây là
+  // hai từ lịch sự cực kỳ phổ biến trong tiếng Việt, trước đây hễ AI viết ra là
+  // bị chấm 0.3 điểm rồi chuyển chuyên viên dù trả lời đúng.
   const lowConfidenceKeywords = [
     "không chắc",
-    "có thể",
     "không rõ",
-    "xin lỗi",
+    "chưa rõ",
     "không hiểu",
+    "không có thông tin",
+    "chưa có thông tin",
   ]
-  const urgentKeywords = [
-    "khẩn cấp",
-    "gấp",
-    "ngay",
-    "urgent",
-    "nhanh",
+  // Chỉ tính là khẩn cấp khi thật sự cần xử lý ngay (có ranh giới từ, tránh
+  // "ngay" khớp lẫn trong câu bình thường như "ngay cả", "ngay từ đầu").
+  const urgentPatterns = [
+    /(cần|muốn|làm|xử lý|triển khai|thực hiện|chốt)[\s]+(gấp|ngay)/i,
+    /\bkhẩn cấp\b/i,
+    /\burgent\b/i,
   ]
   const complexKeywords = [
     "tư vấn chi tiết",
@@ -417,9 +434,7 @@ function analyzeIntent(
   if (hasLowConfidence) confidence = 0.3
 
   // Check for urgent request
-  const isUrgent = urgentKeywords.some((keyword) =>
-    message.toLowerCase().includes(keyword)
-  )
+  const isUrgent = urgentPatterns.some((pattern) => pattern.test(message))
   if (isUrgent) {
     return {
       confidence: 0.2,
@@ -460,6 +475,7 @@ const CONTACT_GUIDANCE = `
 - Trường hợp cần: hỏi báo giá/chi phí cụ thể, hồ sơ riêng của công ty khách, hợp đồng, khiếu nại, hoặc câu hỏi không có trong tài liệu nội bộ.
 - Cách mời: "Anh/chị nhắn Zalo ${VEXIM_PHONE_DISPLAY} (${VEXIM_ZALO_URL}) hoặc để lại số điện thoại, chuyên viên Vexim sẽ tư vấn trực tiếp ạ."
 - TUYỆT ĐỐI không tự bịa giá, thời hạn, cam kết hay quy định không có trong tài liệu. Nếu không có thông tin, nói rõ là chưa có và mời chuyên viên.
+- TUYỆT ĐỐI KHÔNG xin số điện thoại và KHÔNG hứa chuyển chuyên viên khi khách chỉ chào hỏi, cảm ơn hay nói chuyện xã giao — những lúc đó chỉ cần chào lại thân thiện và hỏi khách cần hỗ trợ gì.
 - Trả lời ngắn gọn, xưng "em", gọi khách là "anh/chị". Tối đa 3–4 câu cho mỗi lần trả lời.`
 
 /**

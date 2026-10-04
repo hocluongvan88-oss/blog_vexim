@@ -1,3 +1,4 @@
+import { VEXIM_PHONE_DISPLAY } from "@/lib/contact-info"
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { generateAIResponse, loadAIConfig } from "@/lib/ai-service"
@@ -167,7 +168,7 @@ export async function POST(request: NextRequest) {
         error: "Failed to process message",
         response: {
           message_text:
-            "Xin lỗi, hệ thống đang bận. Vui lòng thử lại sau hoặc liên hệ hotline: 0123-456-789 để được hỗ trợ trực tiếp.",
+            "Xin lỗi, hệ thống đang bận. Vui lòng thử lại sau hoặc liên hệ hotline: " + VEXIM_PHONE_DISPLAY + " để được hỗ trợ trực tiếp.",
           timestamp: new Date().toISOString(),
         },
       },

@@ -26,6 +26,42 @@ export interface MessageContext {
   }
 }
 
+/**
+ * TÊN MẶC ĐỊNH/PLACEHOLDER — không phải tên công ty thật.
+ *
+ * Đây là gốc của một lỗi rất nặng: khung chat luôn gửi customer_name =
+ * "Khách hàng", mà rule LQ-01 lại coi trường này là TÊN CÔNG TY, nên MỌI tin
+ * nhắn (kể cả "xin chào") đều bị chuyển thành "để lại số điện thoại" và AI
+ * không bao giờ được trả lời.
+ */
+const PLACEHOLDER_NAMES = new Set([
+  "khách hàng", "khach hang", "khách", "khach", "guest", "customer", "anonymous", "ẩn danh",
+  "unknown", "không xác định", "test", "người dùng", "nguoi dung", "user", "visitor", "khách vãng lai",
+])
+
+export function isPlaceholderName(name?: string): boolean {
+  if (!name) return true
+  const normalized = name.trim().toLowerCase()
+  return normalized.length < 2 || PLACEHOLDER_NAMES.has(normalized)
+}
+
+/**
+ * Chào hỏi / cảm ơn / xã giao — những câu KHÔNG được biến thành xin số điện thoại
+ * hay chuyển chuyên viên. Cứ để AI chào lại thân thiện rồi hỏi khách cần gì.
+ */
+const SMALL_TALK_PATTERNS: RegExp[] = [
+  /^(xin |dạ |vâng |ạ |em |anh |chị |quý khách )*(chào|chao|hello|hi|hey|helo|alo|a lô)( (em|anh|chị|ad|admin|shop|bên mình|vexim|mọi người))?[\s.,!?]*$/i,
+  /^(ad|admin|shop|em|bên mình)\s*ơi[\s.,!?]*$/i,
+  /^(cảm ơn|cám ơn|thank you|thanks|thankyou|tks|thank)([\s.,!?]+(em|anh|chị|ad|admin|nhé|ạ|nhiều|rất|quá|bạn|mọi người))*[\s.,!?]*$/i,
+  /^(hihi|haha|hi hi|hehe)[\s.,!?]*$/i,
+]
+
+export function isSmallTalk(message: string): boolean {
+  const text = String(message || "").trim()
+  if (text.length > 40) return false
+  return SMALL_TALK_PATTERNS.some((pattern) => pattern.test(text))
+}
+
 // 1. COMPLIANCE RISK RULES (CR) - Must handoff
 function checkComplianceRisk(message: string): RuleResult | null {
   const lowerMsg = message.toLowerCase()
@@ -96,6 +132,10 @@ function checkComplianceRisk(message: string): RuleResult | null {
   // CR-05: Pricing/Quote requests
   const pricingPatterns = [
     /(phí|chi phí|giá|báo giá).*(bao nhiêu|là gì)/i,
+    // Lưu ý: KHÔNG dùng \b sau từ có dấu (á, í, ệ…) — JS coi chữ có dấu là
+    // "không phải chữ" nên \bbáo giá\b sẽ không bao giờ khớp.
+    /báo giá/i,
+    /(xin|hỏi|cho)[\s]+(giá|phí|chi phí)/i,
     /tốn.*bao nhiêu/i,
     /(quote|pricing|cost)/i,
   ]
@@ -133,8 +173,11 @@ function checkSalesIntent(message: string): RuleResult | null {
   // SI-02: "Connect me" / "I want to start" - IMMEDIATE HANDOFF
   const immediateHandoffPatterns = [
     /(kết nối|liên hệ|gọi).*(cho|giúp|tôi|mình|em|anh)/i,
-    /(có|được|đồng ý|ok|oke|okê).*(em|anh|nhé|ạ)$/i,
-    /^(có|được|ok|oke|okê|đồng ý|đc)$/i,
+    // Chỉ nhận câu ĐỒNG Ý NGẮN kiểu "ok em", "vâng ạ", "đồng ý nhé".
+    // Trước đây pattern cũ /(có|được|...).*(em|anh|nhé|ạ)$/ khớp cả câu hỏi kiến
+    // thức rất phổ biến: "Bên em có hỗ trợ không ạ?" -> chuyển chuyên viên oan.
+    /^(vâng|dạ|ừ|ừm|uhm|ok|oke|okê|okay|đồng ý|đc|được)([\s.,!?]+(em|anh|chị|nhé|nha|ạ|luôn|vậy|thế|đó|đấy))*[\s.,!?]*$/i,
+    /(đồng ý|chốt|bắt đầu|tiến hành|triển khai)[\s]+(luôn|đi|với em|với mình|với anh|với chị|nhé)/i,
     /muốn (làm|thuê|nhờ).*ngay/i,
   ]
   if (immediateHandoffPatterns.some((p) => p.test(message))) {
@@ -153,9 +196,11 @@ function checkSalesIntent(message: string): RuleResult | null {
     /(các|những) dịch vụ/i,
   ]
   if (servicePatterns.some((p) => p.test(message))) {
+    // AI trả lời được ngay (danh sách dịch vụ nằm trong system prompt) -> chỉ gắn
+    // nhãn "khách quan tâm dịch vụ", KHÔNG chặn câu trả lời để xin số điện thoại.
     return {
-      action: "ASK_CONTACT",
-      reason: "Service inquiry",
+      action: "AI_CONTINUE",
+      reason: "Service inquiry - tagged as sales interest",
       ruleId: "SI-03",
       tags: { reason: "sales", urgency: "medium" },
     }
@@ -183,9 +228,11 @@ function checkSalesIntent(message: string): RuleResult | null {
     /(timeline|duration|how long)/i,
   ]
   if (timelinePatterns.some((p) => p.test(message))) {
+    // "Đăng ký FDA mất bao lâu?" là câu tra cứu bình thường — tài liệu có số ngày
+    // xử lý, để AI trả lời rồi mới mời liên hệ nếu khách cần sâu hơn.
     return {
-      action: "ASK_CONTACT",
-      reason: "Timeline inquiry",
+      action: "AI_CONTINUE",
+      reason: "Timeline inquiry - answered from knowledge base",
       ruleId: "SI-05",
       tags: { reason: "sales", urgency: "medium" },
     }
@@ -213,8 +260,15 @@ function checkSalesIntent(message: string): RuleResult | null {
 function checkLeadQuality(message: string, context: MessageContext): RuleResult | null {
   const lowerMsg = message.toLowerCase()
 
-  // LQ-01: Provides company name
-  if (context.customerInfo?.companyName || /công ty.*(tôi|chúng tôi|em|anh) (là|tên)/i.test(message)) {
+  // LQ-01: Provides company name — CHỈ khi thật sự có tên công ty.
+  // (Trước đây chỉ cần customerInfo.companyName có giá trị là kích hoạt, mà khung
+  // chat luôn gửi "Khách hàng" → mọi tin nhắn đều thành xin số điện thoại.)
+  const companyName = context.customerInfo?.companyName
+  if (
+    (companyName && !isPlaceholderName(companyName)) ||
+    /công ty\s+(tnhh|cổ phần|cp|tnhh mtv)/i.test(message) ||
+    /công ty.*(tôi|chúng tôi|em|anh) (là|tên)/i.test(message)
+  ) {
     return {
       action: "ASK_CONTACT",
       reason: "Company identified - high quality lead",
@@ -229,9 +283,11 @@ function checkLeadQuality(message: string, context: MessageContext): RuleResult 
     /thị trường.*(mỹ|trung|hàn)/i,
   ]
   if (context.customerInfo?.market || marketPatterns.some((p) => p.test(message))) {
+    // "Xuất khẩu sang Mỹ cần gì?" là câu hỏi kiến thức phổ biến nhất — nếu chặn để
+    // xin số điện thoại thì AI không bao giờ được trả lời.
     return {
-      action: "ASK_CONTACT",
-      reason: "Target market identified",
+      action: "AI_CONTINUE",
+      reason: "Target market identified - tagged as quality lead",
       ruleId: "LQ-02",
       tags: { reason: "quality", urgency: "high" },
     }
@@ -243,9 +299,11 @@ function checkLeadQuality(message: string, context: MessageContext): RuleResult 
     /(bên|công ty).*(em|tôi|anh).*(làm|sản xuất|kinh doanh)/i,
   ]
   if (context.customerInfo?.product || productPatterns.some((p) => p.test(message))) {
+    // Mô tả sản phẩm trong câu hỏi là chuyện thường — gắn nhãn để chăm sóc sau,
+    // vẫn để AI tư vấn trước.
     return {
-      action: "ASK_CONTACT",
-      reason: "Product category identified",
+      action: "AI_CONTINUE",
+      reason: "Product category identified - tagged as quality lead",
       ruleId: "LQ-03",
       tags: { reason: "quality", urgency: "medium" },
     }
@@ -308,6 +366,18 @@ function detectServiceTag(message: string): RuleResult["tags"]["service_tag"] | 
 export function evaluateRules(context: MessageContext): RuleResult {
   const { message } = context
 
+  // Priority 0: Chào hỏi / cảm ơn / xã giao -> để AI chào lại, KHÔNG xin số điện
+  // thoại, KHÔNG chuyển chuyên viên. (Trước đây "xin chào" bị biến thành
+  // "để lại số điện thoại" vì rule LQ-01 nhận nhầm tên mặc định "Khách hàng".)
+  if (isSmallTalk(message)) {
+    return {
+      action: "AI_CONTINUE",
+      reason: "Greeting / small talk",
+      ruleId: "SMALL_TALK",
+      tags: { service_tag: detectServiceTag(message), reason: "data", urgency: "low" },
+    }
+  }
+
   // Priority 1: Compliance Risk (MUST handoff)
   const complianceResult = checkComplianceRisk(message)
   if (complianceResult) {
@@ -329,24 +399,35 @@ export function evaluateRules(context: MessageContext): RuleResult {
     }
   }
 
-  // Priority 3: Sales Intent & Lead Quality (should ask contact)
+  // Priority 3: Sales intent & lead quality.
+  //  - ASK_CONTACT / HANDOFF_TO_ADMIN: cần người thật -> trả về ngay.
+  //  - AI_CONTINUE: chỉ là nhãn (khách quan tâm dịch vụ/thị trường/sản phẩm…)
+  //    -> ghi nhớ lại, vẫn cho các rule an toàn bên dưới được xét, cuối cùng mới dùng.
   const salesResult = checkSalesIntent(message)
-  if (salesResult) {
+  if (salesResult && salesResult.action !== "AI_CONTINUE") {
     salesResult.tags.service_tag = detectServiceTag(message)
     return salesResult
   }
 
   const leadResult = checkLeadQuality(message, context)
-  if (leadResult) {
+  if (leadResult && leadResult.action !== "AI_CONTINUE") {
     leadResult.tags.service_tag = detectServiceTag(message)
     return leadResult
   }
+
+  const taggedResult = salesResult || leadResult
 
   // Priority 4: AI Confidence (safety)
   const confidenceResult = checkAIConfidence(context)
   if (confidenceResult) {
     confidenceResult.tags.service_tag = detectServiceTag(message)
     return confidenceResult
+  }
+
+  // Có nhãn chất lượng lead -> trả về nhãn đó (AI vẫn trả lời bình thường)
+  if (taggedResult) {
+    taggedResult.tags.service_tag = detectServiceTag(message)
+    return taggedResult
   }
 
   // Default: Continue with AI

@@ -50,7 +50,9 @@ const DEEP_REQUEST_PATTERNS: RegExp[] = [
   /\bbáo giá|bảng giá\b/i,
   /\bgặp (người|chuyên viên|nhân viên|tư vấn)\b/i,
   /\btư vấn (viên|sâu|trực tiếp|riêng)\b/i,
-  /\b(số điện thoại|sđt|số zalo|số liên hệ)\b/i,
+  // Không dùng \b ở cuối: "số liên hệ" kết thúc bằng chữ có dấu nên JS không
+  // tính là ký tự chữ -> \b sẽ không bao giờ khớp.
+  /(số điện thoại|sđt|số zalo|số liên hệ|hotline|liên hệ em|gọi cho em)/i,
   /\bhotline\b/i,
   /\bgọi (điện|lại|cho)\b/i,
   /\bzalo\b/i,

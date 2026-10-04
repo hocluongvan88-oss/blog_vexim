@@ -124,6 +124,7 @@ const cases: Array<{ name: string; signals: Parameters<typeof shouldOfferConsult
   { name: "khách hỏi báo giá", signals: { status: "ok", customerMessage: "Cho em xin báo giá dịch vụ FDA với ạ" }, expect: true, reason: "deep_request" },
   { name: "khách xin tư vấn trực tiếp", signals: { status: "ok", customerMessage: "Có ai tư vấn trực tiếp không ạ?" }, expect: true, reason: "deep_request" },
   { name: "khách hỏi số điện thoại", signals: { status: "ok", customerMessage: "Cho em xin số điện thoại bên mình nhé" }, expect: true, reason: "deep_request" },
+  { name: "khách hỏi số liên hệ", signals: { status: "ok", customerMessage: "Cho em xin số liên hệ" }, expect: true, reason: "deep_request" },
   { name: "khách hỏi hợp đồng", signals: { status: "ok", customerMessage: "Bên mình có ký hợp đồng không?" }, expect: true, reason: "deep_request" },
   { name: "không có tài liệu khớp + câu hỏi thật", signals: { status: "ok", sourcesCount: 0, customerMessage: "Thủ tục xuất khẩu thực phẩm sang Mỹ cần gì ạ?" }, expect: true, reason: "no_documents" },
   { name: "chào hỏi xã giao", signals: { status: "ok", sourcesCount: 0, customerMessage: "xin chào" }, expect: false },
@@ -154,6 +155,16 @@ check(widget.includes("CONSULTATION_CONTENT"), "Thẻ mời tư vấn nói theo 
 const aiService = readFileSync("lib/ai-service.ts", "utf8")
 check(aiService.includes("CONTACT_GUIDANCE"), "AI có hướng dẫn riêng về việc mời tư vấn sâu")
 check(aiService.includes("config.systemPrompt + context + CONTACT_GUIDANCE"), "Hướng dẫn luôn được ghép vào system prompt")
+
+// 16. Không được hiện số hotline giả cho khách khi hệ thống lỗi
+for (const file of ["app/api/chatbot/send-ai/route.ts", "app/api/chatbot/send/route.ts"]) {
+  const source = readFileSync(file, "utf8")
+  check(!source.includes("0123-456-789"), `${file}: không còn hotline giả 0123-456-789 trong thông báo lỗi`)
+  check(
+    source.includes("VEXIM_PHONE_DISPLAY"),
+    `${file}: thông báo lỗi dùng số thật từ lib/contact-info`,
+  )
+}
 
 console.log(`\n${pass} PASS / ${fail} FAIL`)
 if (fail) process.exit(1)

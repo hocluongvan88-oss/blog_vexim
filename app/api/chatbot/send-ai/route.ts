@@ -1,3 +1,4 @@
+import { VEXIM_PHONE_DISPLAY } from "@/lib/contact-info"
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { generateAIResponse, loadAIConfig } from "@/lib/ai-service"
@@ -113,9 +114,10 @@ export async function POST(request: NextRequest) {
       message: message_text,
       conversationHistory: conversationHistory.map(m => m.content),
       hasFile: false, // TODO: Add file detection
-      customerInfo: {
-        companyName: customer_name,
-      }
+      // KHÔNG truyền customer_name vào companyName: khung chat luôn gửi tên mặc
+      // định "Khách hàng", mà rule LQ-01 coi đó là tên công ty -> mọi tin nhắn
+      // (kể cả "xin chào") đều bị chuyển thành xin số điện thoại.
+      customerInfo: {},
     }
 
     const ruleResult = evaluateRules(ruleContext)
@@ -335,7 +337,7 @@ export async function POST(request: NextRequest) {
         error: "Internal server error",
         response: {
           message_text:
-            "Xin lỗi, hệ thống đang bận. Vui lòng thử lại sau hoặc liên hệ hotline: 0123-456-789",
+            "Xin lỗi, hệ thống đang bận. Vui lòng thử lại sau hoặc liên hệ hotline: " + VEXIM_PHONE_DISPLAY,
           timestamp: new Date().toISOString(),
         },
       },
