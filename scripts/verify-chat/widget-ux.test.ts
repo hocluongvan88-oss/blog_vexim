@@ -26,17 +26,42 @@ const check = (ok: boolean, msg: string) => {
 
 const widget = readFileSync("components/chat-widget.tsx", "utf8")
 
-/* ---------- 1. Không còn chờ chữ hiện dần ---------- */
-check(!/typingSpeed/.test(widget), "Đã bỏ hiệu ứng gõ từng ký tự (khách không phải chờ 7,5 giây)")
-// (Vẫn còn setInterval cho việc hỏi lại lịch sử mỗi 8s/20s — đó là chủ ý, không phải lỗi.)
+/* ---------- 1. Hiệu ứng gõ chữ (chủ doanh nghiệp yêu cầu bật lại) ---------- */
+check(/startTyping/.test(widget) && /stopTyping/.test(widget), "Có hiệu ứng gõ chữ cho câu trả lời mới")
 check(
-  !/currentIndex/.test(widget) && !/substring\(0, currentIndex\)/.test(widget),
-  "Không còn vòng lặp gõ chữ -> không còn lỗi trộn nội dung hai câu trả lời",
+  /typing\.id === msg\.id/.test(widget),
+  "Gõ theo TỪNG tin nhắn (theo id) — không gõ vào \"tin cuối\" như bản gây lỗi",
 )
-check(!/isStreaming/.test(widget), "Bỏ hẳn trạng thái isStreaming (nguồn của lỗi trên)")
+check(
+  /clearInterval\(typingTimerRef\.current\)/.test(widget),
+  "Trước khi gõ tin mới luôn dừng vòng lặp cũ -> không có hai vòng lặp cùng chạy",
+)
+// Gõ theo lô ký tự: câu dài không bắt khách chờ lâu hơn câu ngắn
+check(
+  /Math\.ceil\(text\.length \/ TYPING_TARGET_TICKS\)/.test(widget),
+  "Gõ theo lô ký tự, tổng thời gian như nhau với mọi độ dài câu trả lời",
+)
+const tickMatch = widget.match(/TYPING_TICK_MS = (\d+)/)
+check(
+  Boolean(tickMatch) && Number(tickMatch![1]) <= 25,
+  `Nhịp gõ nhanh (${tickMatch?.[1]}ms/lô) — không phải 15ms MỘT ký tự như bản cũ`,
+)
+check(/prefers-reduced-motion/.test(widget), "Tôn trọng cài đặt giảm chuyển động của hệ điều hành")
+check(
+  /onClick=\{typing \? stopTyping : undefined\}/.test(widget),
+  "Khách sốt ruột bấm vào khung là hiện hết chữ ngay",
+)
+check(
+  /aria-busy=\{Boolean\(typing\)\}/.test(widget),
+  "Trình đọc màn hình chờ tới khi gõ xong, không đọc từng đoạn vụn",
+)
 check(
   /message_text: fullMessage/.test(widget),
-  "Câu trả lời hiện ra ngay khi nhận được",
+  "Tin nhắn lưu trong state vẫn là bản ĐẦY ĐỦ — chỉ phần hiển thị bị cắt",
+)
+check(
+  !/typingSpeed/.test(widget) && !/currentIndex/.test(widget),
+  "Không dùng lại cách gõ cũ (typingSpeed / currentIndex)",
 )
 
 /* ---------- 2. Bảng markdown ---------- */
@@ -99,8 +124,9 @@ check(!/h-\[600px\] w-96/.test(widget), "Bỏ chiều cao 600px cố định")
 
 /* ---------- 7. Khách mới biết hỏi gì ---------- */
 check(/QUICK_QUESTIONS/.test(widget), "Có câu hỏi gợi ý ở màn hình trống")
-const quickCount = (widget.match(/^\s*"[^"]+\?",?$/gm) || []).length
-check(quickCount >= 4, `Có ít nhất 4 câu hỏi gợi ý (${quickCount})`)
+for (const chip of ["Thời gian đăng ký FDA", "Thời gian đăng ký GACC", "Gia hạn FDA"]) {
+  check(widget.includes(`"${chip}"`), `Có câu hỏi gợi ý theo yêu cầu chủ doanh nghiệp: "${chip}"`)
+}
 check(/sendMessage\(question\)/.test(widget), "Bấm gợi ý là hỏi được ngay")
 check(/onClick=\{\(\) => sendMessage\(\)\}/.test(widget),
   "Nút gửi không truyền sự kiện click vào tham số câu hỏi (lỗi cũ)")
@@ -153,9 +179,20 @@ check(
   widget.includes("Xem hồ sơ năng lực") && widget.includes("Hồ sơ năng lực, chứng nhận FDA"),
   "Link xuất hiện ở màn hình trống và trong thẻ tư vấn",
 )
+// Chip "Gia hạn FDA" phải có nội dung thật để trả lời, không thì khách bấm vào
+// lại nhận câu chung chung.
+const giaHanKnowledge = readFileSync("knowledge/fda-correct-knowledge.md", "utf8")
 check(
-  widget.includes("Vexim đã hỗ trợ doanh nghiệp nào xuất Mỹ?"),
-  "Có câu hỏi gợi ý về uy tín — câu người đi mua dịch vụ luôn muốn hỏi",
+  /gia hạn mỗi 2 năm/.test(giaHanKnowledge) && /tháng 10-12/.test(giaHanKnowledge),
+  "Kho tri thức có sẵn nội dung gia hạn FDA cho chip mới",
+)
+check(
+  readFileSync("knowledge/thoi-gian-dang-ky-fda-gacc.md", "utf8").includes("gia hạn 2 năm một lần"),
+  "Tài liệu thời gian bổ sung mục gia hạn FDA",
+)
+check(
+  readFileSync("lib/sales-playbook.ts", "utf8").includes("GIA HẠN 2 NĂM MỘT LẦN"),
+  "Cẩm nang luôn có dữ kiện gia hạn (không phụ thuộc RAG tìm ra tài liệu)",
 )
 
 const credentials = readFileSync("knowledge/ho-so-nang-luc-vexim.md", "utf8")

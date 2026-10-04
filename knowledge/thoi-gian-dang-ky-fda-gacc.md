@@ -47,5 +47,13 @@ nhiệt và an toàn của FDA. Trường hợp cụ thể cần chuyên viên k
 **Chưa có mã DUNS thì mất bao lâu?**
 Mất khoảng 5–8 ngày, so với 1–2 ngày nếu đã có mã DUNS đúng địa chỉ nhà máy.
 
+**Đăng ký FDA có phải gia hạn không?**
+
+Có. Đăng ký cơ sở (Food Facility Registration) phải **gia hạn 2 năm một lần**, kỳ gia hạn
+vào **tháng 10–12 của năm chẵn** (ví dụ 2026, 2028). Không gia hạn đúng hạn thì mã đăng ký
+bị hủy và hàng có thể bị từ chối nhập khẩu. Vexim hỗ trợ gia hạn định kỳ và nhắc nhở tự động
+để khách không bị gián đoạn xuất khẩu. Trường hợp cụ thể, chuyên viên kiểm tra ngày hết hạn
+trên chứng nhận của khách.
+
 **GACC có nhận đăng ký sản phẩm tươi không?**
 Không. GACC Vexim chỉ nhận đăng ký nhóm sản phẩm chế biến, thời gian 15–30 ngày khi nhận đủ hồ sơ.

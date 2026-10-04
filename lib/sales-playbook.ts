@@ -48,6 +48,8 @@ export const DEFAULT_SALES_PLAYBOOK = `🎯 CÁCH TƯ VẤN NHƯ NHÂN VIÊN KIN
 export const SALES_FACTS = `📌 SỐ LIỆU CHUẨN DO VEXIM CUNG CẤP (dùng đúng con số, không suy diễn):
 - Đăng ký FDA (Mỹ): khoảng ${VEXIM_TIMELINES.fdaWithDuns} nếu khách ĐÃ có mã DUNS đúng với địa chỉ thực tế của nhà máy; khoảng ${VEXIM_TIMELINES.fdaWithoutDuns} nếu CHƯA có mã DUNS.
 - Đăng ký GACC (Trung Quốc): ${VEXIM_TIMELINES.gaccNote}; thời gian khoảng ${VEXIM_TIMELINES.gacc}.
+- Gia hạn FDA (Food Facility Registration): đăng ký cơ sở phải GIA HẠN 2 NĂM MỘT LẦN, kỳ gia hạn vào tháng 10–12 của năm chẵn (ví dụ 2026, 2028). Không gia hạn đúng hạn thì mã đăng ký bị hủy và hàng có thể bị từ chối nhập khẩu. Vexim hỗ trợ gia hạn định kỳ và nhắc nhở tự động.
+- Khi khách hỏi mã FDA của họ còn hạn hay không: hướng dẫn khách xem ngày hết hạn trên chứng nhận/Registration Number, nói rõ kỳ gia hạn theo quy định, rồi mời chuyên viên kiểm tra — KHÔNG tự đoán ngày hết hạn của khách.
 - Đây là mốc tham khảo — nói rõ với khách là thời gian thực tế phụ thuộc hồ sơ, và mời chuyên viên xác nhận khi khách cần con số chính xác.
 
 🏆 BẰNG CHỨNG NĂNG LỰC (dùng khi khách hỏi Vexim có uy tín không / đã làm cho ai):

@@ -82,13 +82,29 @@ const CONSULTATION_CONTENT: Record<ConsultationReason, { title: string; subtitle
  * này là bốn chủ đề được hỏi nhiều nhất (theo dữ liệu chat_messages).
  */
 const QUICK_QUESTIONS = [
-  "Thực phẩm đóng hộp xuất sang Mỹ cần gì?",
-  "Đăng ký GACC mất bao lâu?",
-  "Đã có mã DUNS thì đăng ký FDA mất mấy ngày?",
-  // Người đi mua dịch vụ luôn muốn kiểm chứng năng lực nhà cung cấp
-  "Vexim đã hỗ trợ doanh nghiệp nào xuất Mỹ?",
-  "Bên mình báo giá thế nào?",
+  "Thời gian đăng ký FDA",
+  "Thời gian đăng ký GACC",
+  "Gia hạn FDA",
 ]
+
+/**
+ * Hiệu ứng gõ chữ — chủ doanh nghiệp yêu cầu bật lại, nhưng phải khác bản cũ.
+ *
+ * Bản cũ gõ 15ms/ký tự: câu trả lời 500 ký tự bắt khách chờ 7,5 giây. Nặng hơn,
+ * nó gõ vào "tin nhắn cuối cùng" trong danh sách, nên khi khách gửi tin thứ hai
+ * trong lúc chữ đang chạy thì HAI vòng lặp cùng ghi vào một tin -> trộn nội dung
+ * hai câu trả lời.
+ *
+ * Bản này khác ở ba điểm:
+ *  - Gõ theo LÔ ký tự, tổng thời gian ~1,2 giây cho mọi độ dài (câu dài không
+ *    bắt khách chờ lâu hơn câu ngắn).
+ *  - Mỗi vòng lặp gắn với MỘT id tin nhắn, và trước khi chạy vòng mới luôn dừng
+ *    vòng cũ — không thể ghi nhầm sang tin khác.
+ *  - Nội dung lưu trong state LUÔN là bản đầy đủ; chỉ phần hiển thị bị cắt, nên
+ *    lịch sử/khôi phục hội thoại không bao giờ bị hụt chữ.
+ */
+const TYPING_TICK_MS = 18
+const TYPING_TARGET_TICKS = 70
 
 /**
  * Dựng nội dung tin nhắn từ dữ liệu đã đọc của lib/chat-markdown.ts.
@@ -234,6 +250,11 @@ export function ChatWidget() {
   const [showJumpToLatest, setShowJumpToLatest] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const knownIdsRef = useRef<Set<string>>(new Set())
+
+  /** Tin nhắn đang được gõ chữ (chỉ ảnh hưởng phần hiển thị). */
+  const [typing, setTyping] = useState<{ id: string; shown: number; total: number } | null>(null)
+  const typingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
   /** Nội dung các tin khách ĐÃ GỬI tại máy này — để không hiện trùng khi nạp lại lịch sử */
   const localCustomerTextsRef = useRef<Set<string>>(new Set())
 
@@ -249,6 +270,51 @@ export function ChatWidget() {
     isAtBottomRef.current = true
     setShowJumpToLatest(false)
   }, [])
+
+  /** Dừng vòng lặp gõ (gõ xong, khách bấm vào khung, hoặc có tin mới). */
+  const stopTyping = useCallback(() => {
+    if (typingTimerRef.current !== null) {
+      clearInterval(typingTimerRef.current)
+      typingTimerRef.current = null
+    }
+    setTyping(null)
+  }, [])
+
+  /**
+   * Bắt đầu gõ chữ cho MỘT tin nhắn cụ thể (theo id — không phải "tin cuối").
+   * Tôn trọng cài đặt giảm chuyển động của hệ điều hành.
+   */
+  const startTyping = useCallback(
+    (messageId: string, text: string) => {
+      stopTyping()
+      if (!text.trim()) return
+      if (typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return
+
+      const step = Math.max(1, Math.ceil(text.length / TYPING_TARGET_TICKS))
+      setTyping({ id: messageId, shown: step, total: text.length })
+
+      typingTimerRef.current = setInterval(() => {
+        setTyping((prev) => {
+          if (!prev || prev.id !== messageId) return prev
+          return { ...prev, shown: Math.min(prev.shown + step, prev.total) }
+        })
+      }, TYPING_TICK_MS)
+    },
+    [stopTyping],
+  )
+
+  /** Gõ hết chữ thì dừng vòng lặp. */
+  useEffect(() => {
+    if (typing && typing.shown >= typing.total) stopTyping()
+  }, [typing, stopTyping])
+
+  /** Rời trang giữa lúc đang gõ -> dọn vòng lặp. */
+  useEffect(
+    () => () => {
+      if (typingTimerRef.current !== null) clearInterval(typingTimerRef.current)
+    },
+    [],
+  )
 
   /** Theo dõi vị trí cuộn để biết khách có đang ở cuối khung hay không. */
   const handleMessagesScroll = useCallback(() => {
@@ -320,9 +386,9 @@ export function ChatWidget() {
     const container = messagesContainerRef.current
     if (!container) return
     // Đang gõ từng ký tự thì phải nhảy thẳng xuống đáy; dùng "smooth" sẽ bị trễ
-    // và giật vì nội dung tăng liên tục mỗi 15ms.
+    // và giật vì nội dung tăng liên tục. Vì vậy theo dõi cả tiến độ gõ (typing.shown).
     container.scrollTop = container.scrollHeight
-  }, [messages, consultReason])
+  }, [messages, consultReason, typing?.shown])
 
   // Auto-focus input khi mở chat hoặc khi không minimize
   useEffect(() => {
@@ -494,13 +560,9 @@ export function ChatWidget() {
 
         knownIdsRef.current.add(String(messageId))
 
-        // Hiện câu trả lời NGAY, không gõ từng ký tự.
-        //
-        // Bản cũ gõ 15ms/ký tự: câu trả lời 500 ký tự bắt khách chờ 7,5 giây —
-        // với người đang so sánh nhiều nhà cung cấp thì đây là lý do bỏ đi.
-        // Nó còn gây lỗi: isLoading đã tắt trong lúc chữ vẫn đang gõ, nên khách
-        // gửi được tin thứ hai -> hai vòng lặp gõ cùng ghi vào "tin cuối" và làm
-        // lẫn nội dung hai câu trả lời.
+        // Tin nhắn trong state luôn là bản ĐẦY ĐỦ; hiệu ứng gõ chỉ cắt phần
+        // hiển thị theo id của chính tin này (xem startTyping) — nhờ vậy khách
+        // gửi tin mới giữa lúc chữ đang chạy cũng không làm lẫn hai câu trả lời.
         isAtBottomRef.current = true
         setMessages((prev) => [
           ...prev,
@@ -511,6 +573,7 @@ export function ChatWidget() {
             created_at: timestamp,
           },
         ])
+        startTyping(String(messageId), fullMessage)
       } else {
         throw new Error(data.error || "Lỗi không xác định")
       }
@@ -681,8 +744,12 @@ export function ChatWidget() {
                 <div
                   ref={messagesContainerRef}
                   onScroll={handleMessagesScroll}
+                  // Khách sốt ruột bấm vào khung -> hiện hết chữ ngay, không bắt chờ
+                  onClick={typing ? stopTyping : undefined}
                   role="log"
                   aria-live="polite"
+                  // Đang gõ thì báo cho trình đọc màn hình chờ, tránh đọc từng đoạn vụn
+                  aria-busy={Boolean(typing)}
                   aria-label="Nội dung hội thoại với trợ lý Vexim"
                   className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 bg-gray-50"
                 >
@@ -760,7 +827,13 @@ export function ChatWidget() {
                           {msg.sender_type === "customer" ? (
                             <p className="whitespace-pre-wrap">{msg.message_text}</p>
                           ) : (
-                            <MessageContent text={msg.message_text} />
+                            <MessageContent
+                              text={
+                                typing && typing.id === msg.id
+                                  ? msg.message_text.slice(0, typing.shown)
+                                  : msg.message_text
+                              }
+                            />
                           )}
                         </div>
                         <span className="text-xs opacity-70 mt-1 block">
