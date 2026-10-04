@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Menu, X, Bell, ChevronDown } from "lucide-react"
+import { Menu, X, ChevronDown } from "lucide-react"
+import { AdminNotificationBell } from "@/components/admin/admin-notification-bell"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Badge } from "@/components/ui/badge"
@@ -98,15 +99,8 @@ export function MobileAdminHeader({ adminUser, pendingCount = 0, pageTitle }: Mo
 
         {/* Right Actions */}
         <div className="flex items-center gap-2">
-          {/* Notifications Bell */}
-          {pendingCount > 0 && (
-            <Button variant="ghost" size="icon" className="relative bg-transparent">
-              <Bell className="h-5 w-5" />
-              <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-orange-500 text-white text-xs">
-                {pendingCount}
-              </Badge>
-            </Button>
-          )}
+          {/* Chuông thông báo thật: đọc admin_notifications + cập nhật realtime */}
+          <AdminNotificationBell />
 
           {/* User Menu */}
           <DropdownMenu>

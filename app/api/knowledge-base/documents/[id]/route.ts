@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
+import { chunkDocument, insertChunks, normalizeWhitespace } from "@/lib/knowledge-chunks"
 
 export async function PATCH(
   request: NextRequest,
@@ -37,32 +38,50 @@ export async function PATCH(
       )
     }
 
-    // If content changed, reprocess chunks
+    // Nếu nội dung thay đổi -> tạo lại chunk cho AI
     if (content) {
-      // Delete old chunks
-      await supabase
-        .from("knowledge_chunks")
-        .delete()
-        .eq("document_id", id)
+      // Lấy loại nguồn để xử lý đúng cách (URL còn sót HTML sẽ được lọc sạch)
+      const { data: existingDoc } = await supabase
+        .from("knowledge_documents")
+        .select("source_type")
+        .eq("id", id)
+        .single()
 
-      // Create new chunks (simple chunking by paragraphs)
-      const paragraphs = content.split(/\n\n+/).filter((p: string) => p.trim())
-      const chunks = paragraphs.map((text: string, index: number) => ({
-        document_id: id,
-        chunk_text: text.trim(),
-        chunk_index: index,
-        metadata: {}
-      }))
+      const prepared = normalizeWhitespace(content)
+      const rows = chunkDocument(id, prepared, { sourceType: existingDoc?.source_type || "text" })
 
-      if (chunks.length > 0) {
-        await supabase.from("knowledge_chunks").insert(chunks)
+      if (rows.length === 0) {
+        return NextResponse.json(
+          { error: "Nội dung quá ngắn để nạp cho AI. Hãy thêm nội dung rồi lưu lại." },
+          { status: 400 },
+        )
       }
 
-      // Update chunks count
-      await supabase
-        .from("knowledge_documents")
-        .update({ chunks_count: chunks.length })
-        .eq("id", id)
+      // Xoá chunk cũ TRƯỚC, nhưng nếu ghi chunk mới lỗi thì đánh dấu tài liệu
+      // là lỗi để admin biết — trước đây lỗi bị nuốt im lặng, tài liệu vẫn hiện
+      // 'active' với chunks_count cũ nhưng kho tri thức trống rỗng.
+      const { error: deleteError } = await supabase.from("knowledge_chunks").delete().eq("document_id", id)
+      if (deleteError) {
+        console.error("[knowledge] Không xoá được chunk cũ:", deleteError.message)
+      }
+
+      const { inserted, error: insertError } = await insertChunks(supabase, rows)
+
+      if (insertError) {
+        console.error("[knowledge] Lỗi ghi chunk khi sửa tài liệu:", insertError)
+        await supabase.from("knowledge_documents").update({ status: "error", chunks_count: 0 }).eq("id", id)
+        return NextResponse.json(
+          {
+            error: "Đã lưu tiêu đề nhưng KHÔNG nạp được dữ liệu cho AI",
+            details: insertError,
+          },
+          { status: 500 },
+        )
+      }
+
+      await supabase.from("knowledge_documents").update({ status: "active", chunks_count: inserted }).eq("id", id)
+
+      return NextResponse.json({ success: true, chunks: inserted })
     }
 
     return NextResponse.json({ success: true })

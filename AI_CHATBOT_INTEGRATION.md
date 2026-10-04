@@ -38,11 +38,11 @@ Script này sẽ tạo các bảng:
    \`\`\`
 
 ### Cấu Hình Model
-Mặc định sử dụng: `llama-3.3-70b-versatile`
+Mặc định sử dụng: `openai/gpt-oss-120b` (Groq đã ngừng phục vụ Llama 3.3 70B từ 16/08/2026)
 
 Có thể thay đổi trong `lib/ai-service.ts`:
 \`\`\`typescript
-const MODEL = "llama-3.3-70b-versatile" // Hoặc model khác
+const MODEL = "openai/gpt-oss-120b" // Model cũ đã bị Groq khai tử 16/08/2026
 \`\`\`
 
 ## 3. Quản Lý Knowledge Base

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import * as fs from "fs"
 import * as path from "path"
+import { chunkDocument, insertChunks } from "@/lib/knowledge-chunks"
 
 // Category mapping
 const categoryMapping: Record<string, string> = {
@@ -135,52 +136,31 @@ export async function POST(request: NextRequest) {
         continue
       }
 
-      // Create chunks
-      const paragraphs = cleanedContent.split(/\n\n+/).filter((p) => p.trim().length > 50)
-      const chunks: any[] = []
-      const chunkSize = 3
-      const overlap = 1
+      // Tạo chunk bằng thư viện dùng chung.
+      // Bản cũ ghi vào cột `chunk_text`, trong khi script 012 đã đổi tên cột thành
+      // `content` → mọi lần import đều lỗi và kho tri thức trống.
+      const chunkRows = chunkDocument(document.id, cleanedContent, { sourceType: "text" })
+      const { inserted, error: chunksError } = await insertChunks(supabase, chunkRows)
 
-      for (let i = 0; i < paragraphs.length; i += chunkSize - overlap) {
-        const chunkParagraphs = paragraphs.slice(i, i + chunkSize)
-        const chunkText = chunkParagraphs.join("\n\n")
-
-        if (chunkText.trim().length > 50) {
-          chunks.push({
-            document_id: document.id,
-            chunk_text: chunkText.trim(),
-            chunk_index: Math.floor(i / (chunkSize - overlap)),
-            metadata: {
-              paragraph_count: chunkParagraphs.length,
-              char_count: chunkText.length,
-            },
-          })
-        }
-      }
-
-      const { error: chunksError } = await supabase
-        .from("knowledge_chunks")
-        .insert(chunks)
-
-      if (chunksError) {
-        results.push({ file, status: "error", error: chunksError.message })
+      if (chunksError || inserted === 0) {
+        results.push({ file, status: "error", error: chunksError || "Không tạo được đoạn kiến thức nào" })
         await supabase
           .from("knowledge_documents")
-          .update({ status: "error" })
+          .update({ status: "error", chunks_count: 0 })
           .eq("id", document.id)
         continue
       }
 
       await supabase
         .from("knowledge_documents")
-        .update({ status: "active" })
+        .update({ status: "active", chunks_count: inserted })
         .eq("id", document.id)
 
       results.push({
         file,
         status: "success",
         documentId: document.id,
-        chunkCount: chunks.length,
+        chunkCount: inserted,
       })
     }
 

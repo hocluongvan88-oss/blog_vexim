@@ -1,13 +1,52 @@
-import { NextRequest, NextResponse } from "next/server"
+import { VEXIM_PHONE_DISPLAY } from "@/lib/contact-info"
+import {
+  HANDOFF_CONNECT_QUESTION,
+  extractLeadProfileFromMessages,
+  shouldSummarizeAndInvite,
+  summarizeLead,
+  type LeadProfile,
+} from "@/lib/lead-profile"
+import { NextRequest, NextResponse, after } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { generateAIResponse, loadAIConfig } from "@/lib/ai-service"
-import { evaluateRules, getContactRequestMessage, type MessageContext } from "@/lib/rule-engine"
-import { notifyAdminNewHandover } from "@/lib/notification-service"
+import {
+  evaluateRules,
+  getContactRequestMessage,
+  shouldAlertAdminOnAiReply,
+  type MessageContext,
+} from "@/lib/rule-engine"
+import {
+  notifyAdmin,
+  notifyAdminNewHandover,
+  sendLeadSummaryEmail,
+} from "@/lib/notification-service"
+import { shouldEmailLeadSummary } from "@/lib/lead-summary-email"
+
+/**
+ * Gộp thêm dữ liệu vào metadata của hội thoại.
+ * Ghi kiểu `update({ metadata: {...} })` là GHI ĐÈ — sẽ xoá mất hồ sơ khách,
+ * service_tag… do các nhánh khác đã lưu trước đó.
+ */
+/** Chống spam: mỗi hội thoại chỉ báo admin thêm tối đa 1 lần / 30 phút. */
+const HOT_LEAD_ALERT_COOLDOWN_MS = 30 * 60 * 1000
+
+async function mergeConversationMetadata(supabase: any, conversationId: string, patch: Record<string, any>) {
+  const { data } = await supabase
+    .from("conversations")
+    .select("metadata")
+    .eq("id", conversationId)
+    .single()
+
+  await supabase
+    .from("conversations")
+    .update({ metadata: { ...(data?.metadata || {}), ...patch } })
+    .eq("id", conversationId)
+}
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { customer_id, customer_name, message_text, conversation_id } = body
+    const { customer_id, customer_name, message_text, conversation_id, lead_profile, has_file, attachment_url, attachment_name } = body
 
     console.log("[v0] Processing AI message:", { customer_id, message_text })
 
@@ -80,6 +119,14 @@ export async function POST(request: NextRequest) {
       })
     }
 
+    // Metadata hội thoại (để chống spam thông báo lead nóng)
+    const { data: convRow } = await supabase
+      .from("conversations")
+      .select("metadata")
+      .eq("id", convId)
+      .maybeSingle()
+    const convMetadata: Record<string, any> = (convRow?.metadata || {}) as Record<string, any>
+
     // Load conversation history (last 10 messages)
     const { data: historyData } = await supabase
       .from("chat_messages")
@@ -108,18 +155,72 @@ export async function POST(request: NextRequest) {
 
     const ragEnabled = ragConfig?.value === true
 
+    // Hồ sơ khách: gộp thông tin khung chat gửi lên với thông tin trích được từ
+    // chính hội thoại (khách đổi máy/thiết bị vẫn giữ được dữ liệu đã nói).
+    const leadProfile: LeadProfile = {
+      ...extractLeadProfileFromMessages([
+        ...(historyData || [])
+          .filter((m: any) => m.sender_type === "customer")
+          .map((m: any) => m.message_text),
+        message_text,
+      ]),
+      ...(lead_profile && typeof lead_profile === "object" ? lead_profile : {}),
+    }
+    console.log("[v0] Hồ sơ khách:", summarizeLead(leadProfile).join(" | ") || "(chưa thu thập được gì)")
+
     // Evaluate rules first to determine action
+    // Khách vừa gửi file (nhãn sản phẩm, danh mục…) -> rule LQ-04 chuyển chuyên viên,
+    // vì file cần người thật xem chứ AI không tự đoán được.
+    const messageForRules = attachment_url
+      ? `${message_text} [Đã gửi file: ${attachment_name || "tệp đính kèm"}]`
+      : message_text
+
     const ruleContext: MessageContext = {
-      message: message_text,
+      message: messageForRules,
       conversationHistory: conversationHistory.map(m => m.content),
-      hasFile: false, // TODO: Add file detection
-      customerInfo: {
-        companyName: customer_name,
-      }
+      hasFile: has_file === true,
+      // KHÔNG truyền customer_name vào companyName: khung chat luôn gửi tên mặc
+      // định "Khách hàng", mà rule LQ-01 coi đó là tên công ty -> mọi tin nhắn
+      // (kể cả "xin chào") đều bị chuyển thành xin số điện thoại.
+      customerInfo: {},
     }
 
     const ruleResult = evaluateRules(ruleContext)
     console.log("[v0] Rule evaluation result:", ruleResult)
+
+    // Lưu hồ sơ khách vào hội thoại để chuyên viên đọc được ngay, không phải hỏi lại
+    await mergeConversationMetadata(supabase, convId, {
+      lead_profile: leadProfile,
+      lead_summary: summarizeLead(leadProfile),
+    })
+
+    // Trợ lý vừa TỔNG HỢP xong thông tin (đủ 4 thông tin bắt buộc, hoặc khách hỏi
+    // giá) -> gửi hồ sơ khách về email admin. Chủ doanh nghiệp chốt: thông báo phải
+    // ra ngoài, không để chuyên viên chỉ thấy khi mở trang quản trị.
+    //
+    // Dùng after() của Next 15: email được gửi SAU khi trả lời khách, nên khách
+    // không phải chờ thêm 1–3 giây cho mỗi lượt chat.
+    // Lượt này có gửi email HỒ SƠ KHÁCH không? (dùng để không gửi thêm email thông
+    // báo thứ hai cho cùng một thời điểm — push và trang quản trị vẫn báo bình thường)
+    const summaryEmailGoingOut =
+      shouldSummarizeAndInvite(leadProfile, message_text) &&
+      shouldEmailLeadSummary(leadProfile, convMetadata)
+
+    if (summaryEmailGoingOut) {
+      const messagesForEmail = (historyData || []).map((row: any) => ({
+        sender_type: row.sender_type,
+        message_text: row.message_text,
+      }))
+      after(async () => {
+        const result = await sendLeadSummaryEmail({
+          conversationId: convId,
+          profile: leadProfile,
+          messages: messagesForEmail,
+          supabase,
+        })
+        console.log("[v0] Email hồ sơ khách hàng:", result)
+      })
+    }
 
     // Handle HANDOFF_TO_ADMIN action
     if (ruleResult.action === "HANDOFF_TO_ADMIN") {
@@ -135,19 +236,26 @@ export async function POST(request: NextRequest) {
       // Update conversation with tags
       await supabase
         .from("conversations")
-        .update({
-          handover_mode: "manual",
-          metadata: {
-            service_tag: ruleResult.tags.service_tag,
-            reason: ruleResult.tags.reason,
-            urgency: ruleResult.tags.urgency,
-            rule_id: ruleResult.ruleId,
-          }
-        })
+        .update({ handover_mode: "manual" })
         .eq("id", convId)
 
-      // Save bot message explaining handover
-      const handoverMessage = "Cảm ơn anh/chị. Để tư vấn chính xác nhất, em đang chuyển cho chuyên viên của Vexim xử lý. Chuyên viên sẽ phản hồi trong thời gian sớm nhất ạ."
+      await mergeConversationMetadata(supabase, convId, {
+        service_tag: ruleResult.tags.service_tag,
+        reason: ruleResult.tags.reason,
+        urgency: ruleResult.tags.urgency,
+        rule_id: ruleResult.ruleId,
+        ask_connect: true,
+      })
+
+      // Save bot message explaining handover.
+      // Nếu khách VỪA ĐỒNG Ý (SI-02) thì không hỏi lại "có muốn kết nối không" —
+      // hỏi lại ngay sau khi khách vừa nói "có" là máy móc. Các trường hợp còn lại
+      // vẫn kết thúc bằng câu chốt bắt buộc của Vexim.
+      const handoverMessage =
+        ruleResult.ruleId === "SI-02-IMMEDIATE"
+          ? "Dạ em đã ghi nhận ạ. Em chuyển thông tin cho chuyên viên Vexim, chuyên viên sẽ liên hệ anh/chị trong giờ làm việc ạ."
+          : "Cảm ơn anh/chị. Để tư vấn chính xác nhất, em đang chuyển cho chuyên viên của Vexim xử lý. " +
+            HANDOFF_CONNECT_QUESTION
       
       const { data: botMessage } = await supabase
         .from("chat_messages")
@@ -169,6 +277,7 @@ export async function POST(request: NextRequest) {
         urgency: ruleResult.tags.urgency as "high" | "medium" | "low",
         serviceTag: ruleResult.tags.service_tag,
         reason: ruleResult.tags.reason,
+        skipEmail: summaryEmailGoingOut,
       })
 
       return NextResponse.json({
@@ -202,18 +311,26 @@ export async function POST(request: NextRequest) {
         .single()
 
       // Update conversation with tags
-      await supabase
-        .from("conversations")
-        .update({
-          metadata: {
-            service_tag: ruleResult.tags.service_tag,
-            reason: ruleResult.tags.reason,
-            urgency: ruleResult.tags.urgency,
-            rule_id: ruleResult.ruleId,
-            ask_contact: true,
-          }
-        })
-        .eq("id", convId)
+      await mergeConversationMetadata(supabase, convId, {
+        service_tag: ruleResult.tags.service_tag,
+        reason: ruleResult.tags.reason,
+        urgency: ruleResult.tags.urgency,
+        rule_id: ruleResult.ruleId,
+        ask_contact: true,
+      })
+
+      // Thông báo admin NGAY khi khách được mời để lại liên hệ.
+      // Trước đây nhánh này không thông báo gì → lead nóng bị bỏ quên trên trang quản trị.
+      await notifyAdmin({
+        conversationId: convId,
+        customerName: customer_name,
+        message: message_text,
+        urgency: (ruleResult.tags.urgency as "high" | "medium" | "low") || "medium",
+        serviceTag: ruleResult.tags.service_tag,
+        reason: ruleResult.tags.reason,
+        type: "new_lead",
+        skipEmail: summaryEmailGoingOut,
+      })
 
       return NextResponse.json({
         status: "ask_contact",
@@ -230,12 +347,38 @@ export async function POST(request: NextRequest) {
     }
 
     // Default: AI_CONTINUE - Generate AI response với RAG
+    //
+    // b2: câu hỏi giá do AI trả lời trước (tóm tắt thông tin đã biết + mời kết nối
+    // chuyên viên), sau đó khách đồng ý mới chuyển. Nhưng đây vẫn là lead nóng nhất
+    // nên phải báo admin ngay, không để chuyên viên chỉ thấy trên trang quản trị.
+    if (shouldAlertAdminOnAiReply(ruleResult)) {
+      const lastAlert = convMetadata.last_lead_alert_at ? Date.parse(convMetadata.last_lead_alert_at) : 0
+      const shouldAlert = Date.now() - (Number.isFinite(lastAlert) ? lastAlert : 0) > HOT_LEAD_ALERT_COOLDOWN_MS
+      if (shouldAlert) {
+        await notifyAdmin({
+          conversationId: convId,
+          customerName: customer_name,
+          message: message_text,
+          urgency: "high",
+          serviceTag: ruleResult.tags.service_tag,
+          reason: ruleResult.reason,
+          type: "new_lead",
+          skipEmail: summaryEmailGoingOut,
+        })
+        await mergeConversationMetadata(supabase, convId, {
+          last_lead_alert_at: new Date().toISOString(),
+        })
+      }
+    }
+
     const aiResponse = await generateAIResponse(
       message_text,
       conversationHistory,
       aiConfig,
       supabase,
-      ragEnabled
+      ragEnabled,
+      leadProfile,
+      aiConfig.salesPlaybook,
     )
 
     // Update AI confidence in rule context and re-evaluate if needed
@@ -254,16 +397,15 @@ export async function POST(request: NextRequest) {
 
       await supabase
         .from("conversations")
-        .update({
-          handover_mode: "manual",
-          metadata: {
-            service_tag: ruleResult.tags.service_tag,
-            reason: "data",
-            urgency: "medium",
-            rule_id: "AI-01",
-          }
-        })
+        .update({ handover_mode: "manual" })
         .eq("id", convId)
+
+      await mergeConversationMetadata(supabase, convId, {
+        service_tag: ruleResult.tags.service_tag,
+        reason: "data",
+        urgency: "medium",
+        rule_id: "AI-01",
+      })
     }
 
     // Lưu tin nhắn từ AI
@@ -323,7 +465,7 @@ export async function POST(request: NextRequest) {
         error: "Internal server error",
         response: {
           message_text:
-            "Xin lỗi, hệ thống đang bận. Vui lòng thử lại sau hoặc liên hệ hotline: 0123-456-789",
+            "Xin lỗi, hệ thống đang bận. Vui lòng thử lại sau hoặc liên hệ hotline: " + VEXIM_PHONE_DISPLAY,
           timestamp: new Date().toISOString(),
         },
       },

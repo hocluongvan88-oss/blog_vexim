@@ -110,7 +110,7 @@ GROQ_API_KEY=gsk_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 ## Mô hình AI sử dụng
 
-- **Model**: `llama-3.3-70b-versatile`
+- **Model**: `openai/gpt-oss-120b` (Groq đã ngừng phục vụ Llama 3.3 70B từ 16/08/2026)
 - **Provider**: Groq (ultra-fast inference)
 - **Language**: Tiếng Việt
 - **Use cases**: Content writing, SEO optimization

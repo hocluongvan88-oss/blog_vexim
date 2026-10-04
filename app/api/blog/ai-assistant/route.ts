@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
-import Groq from "groq-sdk"
 import { requireAdmin } from "@/lib/require-admin"
+import { getChatProviders, generateChatText } from "@/lib/ai-chat"
 
 const MAX_INPUT_LENGTH = 6000
 
@@ -10,18 +10,14 @@ export async function POST(request: Request) {
     const auth = await requireAdmin()
     if (!auth.ok) return auth.response
 
-    // Check if GROQ_API_KEY is configured
-    if (!process.env.GROQ_API_KEY) {
-      console.error("[blog] GROQ_API_KEY is not configured")
+    // Cần ít nhất một khoá AI (Groq hoặc Gemini)
+    if (getChatProviders().length === 0) {
+      console.error("[blog] Chưa cấu hình GROQ_API_KEY hoặc GEMINI_API_KEY")
       return NextResponse.json(
-        { error: "GROQ_API_KEY chưa được cấu hình. Vui lòng thêm vào biến môi trường." },
+        { error: "Chưa cấu hình khoá AI. Vui lòng thêm GROQ_API_KEY hoặc GEMINI_API_KEY vào biến môi trường." },
         { status: 500 }
       )
     }
-
-    const groq = new Groq({
-      apiKey: process.env.GROQ_API_KEY,
-    })
 
     const { task, text } = await request.json()
 
@@ -114,17 +110,15 @@ Quy tắc:
         return NextResponse.json({ error: "Invalid task" }, { status: 400 })
     }
 
-    const completion = await groq.chat.completions.create({
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
-      ],
-      model: "llama-3.3-70b-versatile",
+    // Groq và Gemini đều dùng được; tự chuyển bên còn lại nếu bên kia lỗi
+    // (model bị khai tử, hết hạn mức, key sai…).
+    const { text: result, provider, model } = await generateChatText({
+      systemPrompt,
+      message: userPrompt,
       temperature: task === "suggest_tags" ? 0.8 : 0.7,
-      max_tokens: task === "expand" ? 2048 : 1024,
+      maxTokens: task === "expand" ? 2048 : 1024,
     })
-
-    const result = completion.choices[0]?.message?.content || ""
+    console.log(`[blog] Trợ lý viết bài dùng ${provider}/${model}`)
 
     // Handle tags response
     if (task === "suggest_tags") {

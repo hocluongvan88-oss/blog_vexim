@@ -24,7 +24,7 @@ interface PostSidebarToolsProps {
   focusKeyword: string
   /** Tiêu đề bài đang viết — dùng để loại chính nó khỏi danh sách gợi ý */
   title: string
-  /** Thêm block vào cuối bài (BlockEditor tự đồng bộ khi prop `value` đổi) */
+  /** Thêm block ngay sau khối đang chọn (hoặc cuối bài nếu chưa chọn khối nào) */
   onInsertBlocks: (blocks: Block[]) => void
 }
 
@@ -38,11 +38,13 @@ function headingBlock(text: string): Block {
 
 /**
  * Panel hỗ trợ writer: câu hỏi nên trả lời, nguồn chính thống, liên kết nội bộ gợi ý.
- *
- * Trước đây trình soạn thảo chỉ có ô tìm bài để chèn link thủ công; phần lớn tín hiệu
- * quan trọng (câu hỏi người đọc quan tâm, nguồn chính thống, bài liên quan) đều không có gợi ý.
  */
-export function PostSidebarTools({ category = "", focusKeyword = "", title = "", onInsertBlocks }: PostSidebarToolsProps) {
+export function PostSidebarTools({
+  category = "",
+  focusKeyword = "",
+  title = "",
+  onInsertBlocks,
+}: PostSidebarToolsProps) {
   const [results, setResults] = useState<SearchResult[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const [query, setQuery] = useState("")
@@ -121,31 +123,31 @@ export function PostSidebarTools({ category = "", focusKeyword = "", title = "",
 
   /** Chèn liên kết nội bộ với anchor text mô tả đích đến (không dùng "xem thêm"). */
   const insertInternalLink = (post: SearchResult) => {
-    const anchorText = String(post?.title || "").replace(/[–—|].*$/, "").trim().slice(0, 70) || String(post?.slug || "")
+    const anchorText =
+      String(post?.title || "")
+        .replace(/[–—|].*$/, "")
+        .trim()
+        .slice(0, 70) || String(post?.slug || "")
     if (!anchorText) return
-    onInsertBlocks([
-      paragraphBlock(
-        `Xem thêm: <a href="/blog/${escapeAttr(post.slug)}">${escapeHtml(anchorText)}</a>`,
-      ),
-    ])
+    onInsertBlocks([paragraphBlock(`Xem thêm: <a href="/blog/${escapeAttr(post.slug)}">${escapeHtml(anchorText)}</a>`)])
   }
 
   return (
-    <Card className="p-6">
-      <h3 className="text-lg font-bold text-primary mb-1">Gợi ý bổ sung cho bài viết</h3>
+    <Card className="p-5">
+      <h3 className="text-base font-bold text-primary mb-1">Gợi ý bổ sung cho bài viết</h3>
       <p className="text-xs text-muted-foreground mb-4">
-        Các mục được thêm vào <strong>cuối bài</strong> — hãy kéo thả tới đúng vị trí sau khi chèn.
+        Bấm <strong>Chèn</strong> để thêm ngay dưới khối bạn đang chọn (hoặc cuối bài nếu chưa chọn khối nào).
       </p>
 
       {/* ----------------------- Câu hỏi nên trả lời ----------------------- */}
       <div className="mb-5">
-        <h4 className="text-sm font-semibold text-muted-foreground flex items-center gap-1.5 mb-2">
-          <HelpCircle className="w-4 h-4" /> Câu hỏi nên trả lời
+        <h4 className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5 mb-2">
+          <HelpCircle className="w-3.5 h-3.5" /> Câu hỏi nên trả lời (FAQ)
         </h4>
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           {questions.map((question) => (
             <div key={question} className="flex items-start justify-between gap-2 rounded-md border p-2">
-              <span className="text-sm">{question}</span>
+              <span className="text-xs leading-snug">{question}</span>
               <Button
                 variant="outline"
                 size="sm"
@@ -161,14 +163,14 @@ export function PostSidebarTools({ category = "", focusKeyword = "", title = "",
 
       {/* ------------------------- Nguồn chính thống ------------------------- */}
       <div className="mb-5">
-        <h4 className="text-sm font-semibold text-muted-foreground flex items-center gap-1.5 mb-2">
-          <BookOpen className="w-4 h-4" /> Nguồn chính thống ({category || "chung"})
+        <h4 className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5 mb-2">
+          <BookOpen className="w-3.5 h-3.5" /> Nguồn chính thống ({category || "chung"})
         </h4>
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           {sources.map((source) => (
             <div key={source.url} className="flex items-start justify-between gap-2 rounded-md border p-2">
               <div className="min-w-0">
-                <div className="text-sm leading-snug">{source.title}</div>
+                <div className="text-xs font-medium leading-snug">{source.title}</div>
                 {source.note && <div className="text-[11px] text-muted-foreground">{source.note}</div>}
               </div>
               <Button
@@ -186,8 +188,8 @@ export function PostSidebarTools({ category = "", focusKeyword = "", title = "",
 
       {/* ------------------------ Liên kết nội bộ ------------------------ */}
       <div>
-        <h4 className="text-sm font-semibold text-muted-foreground flex items-center gap-1.5 mb-2">
-          <Link2 className="w-4 h-4" /> Liên kết nội bộ gợi ý
+        <h4 className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5 mb-2">
+          <Link2 className="w-3.5 h-3.5" /> Liên kết nội bộ gợi ý
         </h4>
         <div className="relative mb-2">
           <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
@@ -195,7 +197,7 @@ export function PostSidebarTools({ category = "", focusKeyword = "", title = "",
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Tìm bài viết để liên kết..."
-            className="h-9 pl-8 text-sm"
+            className="h-8 pl-8 text-xs"
           />
         </div>
 
@@ -211,12 +213,12 @@ export function PostSidebarTools({ category = "", focusKeyword = "", title = "",
           </p>
         )}
 
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           {results.map((post) => (
             <div key={post.id} className="flex items-start justify-between gap-2 rounded-md border p-2">
               <div className="min-w-0">
-                <div className="text-sm leading-snug line-clamp-2">{post.title}</div>
-                <div className="text-[11px] text-muted-foreground">/blog/{post.slug}</div>
+                <div className="text-xs font-medium leading-snug line-clamp-2">{post.title}</div>
+                <div className="text-[10px] text-muted-foreground truncate">/blog/{post.slug}</div>
               </div>
               <Button
                 variant="outline"

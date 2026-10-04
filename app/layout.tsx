@@ -119,7 +119,7 @@ const organizationSchema = {
   sameAs: [
     "https://www.facebook.com/veximglobal",
     "https://www.linkedin.com/company/veximglobal",
-    "https://zalo.me/veximglobal",
+    "https://zalo.me/0373685634",
   ],
 }
 

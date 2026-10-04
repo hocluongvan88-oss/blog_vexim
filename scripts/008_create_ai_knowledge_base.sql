@@ -89,7 +89,8 @@ END $$;
 
 -- 5. Chèn cấu hình mặc định (Groq Llama 3)
 INSERT INTO ai_config (key, value, description) VALUES
-  ('groq_model', '"llama-3.3-70b-versatile"', 'Tên mô hình AI trên Groq'),
+  -- Llama 3.3 70B đã bị Groq ngừng phục vụ từ 16/08/2026 -> dùng GPT-OSS 120B
+  ('groq_model', '"openai/gpt-oss-120b"', 'Tên mô hình AI trên Groq'),
   ('max_tokens', '1024', 'Số lượng token tối đa'),
   ('temperature', '0.7', 'Độ sáng tạo của AI'),
   ('rag_enabled', 'true', 'Bật tính năng tra cứu kiến thức (RAG)'),

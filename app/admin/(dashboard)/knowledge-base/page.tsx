@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { BookOpen, Upload, FileText, Link2, Loader2, Trash2, RefreshCw, Brain, Download, Pencil } from "lucide-react"
+import { BookOpen, Upload, FileText, Link2, Loader2, Trash2, RefreshCw, Brain, Download, Pencil, ShieldCheck, AlertTriangle, Eye, Sparkles } from "lucide-react"
 import { toast } from "sonner"
 
 interface KnowledgeDocument {
@@ -25,8 +25,51 @@ interface KnowledgeDocument {
   created_at: string
 }
 
+/** Kết quả kiểm tra "AI đọc được gì" từ /api/knowledge-base/diagnostics */
+interface DiagnosticsReport {
+  schema: { textColumn: string; hasTokenCount: boolean }
+  summary: {
+    documents: number
+    totalChunks: number
+    usableChunks: number
+    brokenDocuments: number
+    healthy: boolean
+  }
+  documents: Array<{
+    id: string
+    title: string
+    status: string
+    declaredChunks: number
+    realChunks: number
+    ok: boolean
+    problems: string[]
+  }>
+  hints: string[]
+}
+
+/** Tình trạng "hiểu ngữ nghĩa" (embedding) của kho tri thức */
+interface EmbeddingStatus {
+  config: { enabled: boolean; provider: string; model: string; dimensions: number; hint: string }
+  coverage: { total: number; embedded: number; missing: number; error: string | null }
+  ready: boolean
+  hint: string
+}
+
+/** Nội dung xem trước cách AI cắt tài liệu thành từng đoạn */
+interface ChunkPreview {
+  count: number
+  chunks: Array<{ index: number; chars: number; tokens: number; heading: string | null; preview: string }>
+}
+
 export default function KnowledgeBasePage() {
   const [documents, setDocuments] = useState<KnowledgeDocument[]>([])
+  const [diagnostics, setDiagnostics] = useState<DiagnosticsReport | null>(null)
+  const [checking, setChecking] = useState(false)
+  const [preview, setPreview] = useState<ChunkPreview | null>(null)
+  const [previewing, setPreviewing] = useState(false)
+  const [embedding, setEmbedding] = useState<EmbeddingStatus | null>(null)
+  const [embeddingBusy, setEmbeddingBusy] = useState(false)
+  const [embeddingProgress, setEmbeddingProgress] = useState(0)
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
   const [importing, setImporting] = useState(false)
@@ -42,7 +85,80 @@ export default function KnowledgeBasePage() {
 
   useEffect(() => {
     loadDocuments()
+    loadEmbedding()
   }, [])
+
+  const loadEmbedding = async () => {
+    try {
+      const res = await fetch("/api/knowledge-base/embeddings")
+      if (res.ok) setEmbedding(await res.json())
+    } catch (error) {
+      console.error("Không tải được trạng thái embedding:", error)
+    }
+  }
+
+  /**
+   * Nạp embedding cho các đoạn còn thiếu. Server xử lý theo lô nên ở đây gọi
+   * lặp lại cho tới khi hết — tránh vượt giới hạn thời gian của serverless.
+   */
+  const handleBackfillEmbeddings = async () => {
+    setEmbeddingBusy(true)
+    setEmbeddingProgress(0)
+
+    let totalEmbedded = 0
+    let guard = 0
+
+    try {
+      while (guard < 40) {
+        guard++
+
+        const res = await fetch("/api/knowledge-base/embeddings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ limit: 50 }),
+        })
+        const payload = await res.json().catch(() => null)
+
+        if (!res.ok) {
+          toast.error(payload?.error || "Không nạp được embedding")
+          break
+        }
+
+        totalEmbedded += payload?.embedded || 0
+        setEmbeddingProgress(totalEmbedded)
+
+        // Cập nhật thanh tiến độ ngay trên giao diện
+        setEmbedding((current) =>
+          current
+            ? {
+                ...current,
+                coverage: {
+                  ...current.coverage,
+                  embedded: (payload?.coverage?.embedded ?? current.coverage.embedded) as number,
+                  missing: (payload?.coverage?.missing ?? current.coverage.missing) as number,
+                },
+              }
+            : current,
+        )
+
+        if (!payload?.remaining || payload?.embedded === 0) break
+      }
+
+      if (totalEmbedded > 0) {
+        toast.success(`Đã nạp ${totalEmbedded} đoạn kiến thức cho AI hiểu theo ngữ nghĩa`)
+      } else if (guard === 1) {
+        toast.info("Không còn đoạn nào cần nạp")
+      }
+
+      await loadEmbedding()
+      if (diagnostics) loadDiagnostics()
+    } catch (error) {
+      toast.error("Có lỗi khi nạp embedding")
+    } finally {
+      setEmbeddingBusy(false)
+      setEmbeddingProgress(0)
+    }
+  }
 
   const loadDocuments = async () => {
     try {
@@ -55,6 +171,47 @@ export default function KnowledgeBasePage() {
       console.error("Failed to load documents:", error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const loadDiagnostics = async () => {
+    setChecking(true)
+    try {
+      const res = await fetch("/api/knowledge-base/diagnostics")
+      if (res.ok) {
+        setDiagnostics(await res.json())
+      } else {
+        toast.error("Không kiểm tra được kho tri thức")
+      }
+    } catch {
+      toast.error("Không kiểm tra được kho tri thức")
+    } finally {
+      setChecking(false)
+    }
+  }
+
+  /** Xem trước:AI sẽ cắt nội dung này thành bao nhiêu đoạn và đọc đoạn nào. */
+  const handlePreviewChunks = async () => {
+    if (!content.trim()) {
+      toast.error("Nhập nội dung để xem AI sẽ đọc như thế nào")
+      return
+    }
+    setPreviewing(true)
+    try {
+      const res = await fetch("/api/knowledge-base/diagnostics", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content, sourceType: sourceType === "url" ? "url" : "text" }),
+      })
+      if (res.ok) {
+        setPreview(await res.json())
+      } else {
+        toast.error("Không xem trước được")
+      }
+    } catch {
+      toast.error("Không xem trước được")
+    } finally {
+      setPreviewing(false)
     }
   }
 
@@ -194,11 +351,15 @@ export default function KnowledgeBasePage() {
         method: "POST",
       })
 
+      const payload = await res.json().catch(() => null)
+
       if (res.ok) {
-        toast.success("Đang xử lý lại tài liệu")
+        toast.success(payload?.message || `Đã xử lý lại — ${payload?.chunks ?? 0} đoạn kiến thức cho AI`)
         loadDocuments()
+        // Tài liệu vừa sửa xong -> cập nhật luôn bảng kiểm tra nếu đang mở
+        if (diagnostics) loadDiagnostics()
       } else {
-        toast.error("Không thể xử lý lại")
+        toast.error(payload?.error || payload?.details || "Không thể xử lý lại tài liệu")
       }
     } catch (error) {
       toast.error("Có lỗi xảy ra")
@@ -216,14 +377,29 @@ export default function KnowledgeBasePage() {
 
       if (res.ok) {
         const result = await res.json()
-        const { summary } = result
-        
+        const { summary, results } = result
+
         toast.success(
           `Import hoàn tất! Thành công: ${summary.success}, Bỏ qua: ${summary.skipped}, Lỗi: ${summary.errors}`
         )
+
+        // Chỉ rõ file nào lỗi và vì sao — trước đây chỉ báo "Lỗi: N" mà không nói lý do
+        const failed = (results || []).filter((r: any) => r.status === "error")
+        if (failed.length > 0) {
+          toast.error(`${failed[0].file}: ${failed[0].error}`, { duration: 10000 })
+        } else {
+          const created = (results || []).filter((r: any) => r.status === "success")
+          if (created.length > 0) {
+            const totalChunks = created.reduce((sum: number, r: any) => sum + (r.chunkCount || 0), 0)
+            toast.success(`Đã nạp ${totalChunks} đoạn kiến thức cho AI từ ${created.length} file`)
+          }
+        }
+
         loadDocuments()
+        if (diagnostics) loadDiagnostics()
       } else {
-        toast.error("Import thất bại")
+        const err = await res.json().catch(() => null)
+        toast.error(err?.error || "Import thất bại")
       }
     } catch (error) {
       toast.error("Có lỗi xảy ra")
@@ -234,6 +410,131 @@ export default function KnowledgeBasePage() {
 
   return (
     <div className="space-y-4 p-4 lg:space-y-6 lg:p-6">
+      {diagnostics && (
+        <Card className={diagnostics.summary.healthy ? "border-green-500/40" : "border-amber-500/50"}>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base lg:text-lg">
+              {diagnostics.summary.healthy ? (
+                <ShieldCheck className="h-5 w-5 text-green-600" />
+              ) : (
+                <AlertTriangle className="h-5 w-5 text-amber-600" />
+              )}
+              AI đang đọc được {diagnostics.summary.usableChunks.toLocaleString()} đoạn kiến thức
+            </CardTitle>
+            <CardDescription className="text-xs lg:text-sm">
+              {diagnostics.summary.documents} tài liệu · {diagnostics.summary.totalChunks.toLocaleString()} đoạn trong
+              CSDL · {diagnostics.summary.brokenDocuments} tài liệu bị lỗi · cột nội dung đang dùng:{" "}
+              <code className="rounded bg-muted px-1">{diagnostics.schema.textColumn}</code>
+            </CardDescription>
+          </CardHeader>
+          {diagnostics.hints.length > 0 && (
+            <CardContent className="space-y-2 pt-0">
+              {diagnostics.hints.map((hint, i) => (
+                <p key={i} className="flex gap-2 text-xs lg:text-sm text-amber-700 dark:text-amber-400">
+                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                  {hint}
+                </p>
+              ))}
+            </CardContent>
+          )}
+          {diagnostics.documents.some((d) => !d.ok) && (
+            <CardContent className="pt-0">
+              <div className="overflow-hidden rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Tài liệu lỗi</TableHead>
+                      <TableHead className="w-24 text-center">Đoạn thật</TableHead>
+                      <TableHead className="hidden lg:table-cell">Vấn đề</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {diagnostics.documents
+                      .filter((d) => !d.ok)
+                      .map((d) => (
+                        <TableRow key={d.id}>
+                          <TableCell className="text-xs font-medium lg:text-sm">{d.title}</TableCell>
+                          <TableCell className="text-center text-xs lg:text-sm">
+                            <span className={d.realChunks === 0 ? "font-semibold text-destructive" : ""}>
+                              {d.realChunks}
+                            </span>
+                          </TableCell>
+                          <TableCell className="hidden text-xs lg:table-cell lg:text-sm">
+                            {d.problems.join(" · ")}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              </div>
+              <Button size="sm" variant="outline" className="mt-3 bg-transparent" onClick={loadDiagnostics}>
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Kiểm tra lại
+              </Button>
+            </CardContent>
+          )}
+        </Card>
+      )}
+
+      {embedding && (
+        <Card className={embedding.ready && embedding.coverage.missing === 0 ? "border-sky-500/40" : "border-muted"}>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex flex-wrap items-center gap-2 text-base lg:text-lg">
+              <Sparkles className="h-5 w-5 text-sky-600" />
+              AI hiểu tài liệu theo ngữ nghĩa
+              <Badge variant={embedding.config.enabled ? "default" : "secondary"} className="text-xs">
+                {embedding.config.enabled ? embedding.config.provider : "chưa bật"}
+              </Badge>
+            </CardTitle>
+            <CardDescription className="text-xs lg:text-sm">
+              {embedding.coverage.error
+                ? embedding.coverage.error
+                : `${embedding.coverage.embedded.toLocaleString()}/${embedding.coverage.total.toLocaleString()} đoạn đã có vector ngữ nghĩa` +
+                  (embedding.coverage.missing > 0 ? ` · còn thiếu ${embedding.coverage.missing.toLocaleString()}` : " · đầy đủ")}
+              {embedding.config.enabled && embedding.config.model ? ` · ${embedding.config.model}` : ""}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3 pt-0">
+            {embedding.coverage.total > 0 && (
+              <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full bg-sky-600 transition-all"
+                  style={{
+                    width: `${Math.round((embedding.coverage.embedded / Math.max(embedding.coverage.total, 1)) * 100)}%`,
+                  }}
+                />
+              </div>
+            )}
+
+            <p className="text-xs lg:text-sm text-muted-foreground">{embedding.hint}</p>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                size="sm"
+                onClick={handleBackfillEmbeddings}
+                disabled={embeddingBusy || !embedding.config.enabled || !!embedding.coverage.error}
+              >
+                {embeddingBusy ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Đang nạp… {embeddingProgress.toLocaleString()} đoạn
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    Nạp embedding cho AI
+                  </>
+                )}
+              </Button>
+              <Button size="sm" variant="outline" className="bg-transparent" onClick={loadEmbedding} disabled={embeddingBusy}>
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Làm mới
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h1 className="text-2xl lg:text-3xl font-bold">Kho Tri Thức AI</h1>
@@ -242,7 +543,23 @@ export default function KnowledgeBasePage() {
           </p>
         </div>
 
-        <div className="flex gap-2 w-full lg:w-auto">
+        <div className="flex flex-wrap gap-2 w-full lg:w-auto">
+          <Button
+            variant="outline"
+            onClick={loadDiagnostics}
+            disabled={checking}
+            className="flex-1 lg:flex-none text-xs lg:text-sm bg-transparent"
+          >
+            {checking ? (
+              <Loader2 className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4 animate-spin" />
+            ) : diagnostics?.summary.healthy ? (
+              <ShieldCheck className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4 text-green-600" />
+            ) : (
+              <AlertTriangle className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4 text-amber-600" />
+            )}
+            <span className="hidden lg:inline">Kiểm tra AI đọc được gì</span>
+            <span className="lg:hidden">Kiểm tra</span>
+          </Button>
           <Button 
             variant="outline"
             onClick={handleImportFiles}
@@ -266,7 +583,10 @@ export default function KnowledgeBasePage() {
           
           <Dialog open={open} onOpenChange={(isOpen) => {
             setOpen(isOpen)
-            if (!isOpen) resetForm()
+            if (!isOpen) {
+              resetForm()
+              setPreview(null)
+            }
           }}>
             <DialogTrigger asChild>
               <Button className="flex-1 lg:flex-none text-xs lg:text-sm">
@@ -378,6 +698,58 @@ export default function KnowledgeBasePage() {
                   </div>
                 )}
 
+                {sourceType !== "file" && content.trim().length > 0 && (
+                  <div className="rounded-md border border-dashed p-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <div>
+                        <p className="text-sm font-medium">Kiểm tra trước khi nạp</p>
+                        <p className="text-xs text-muted-foreground">
+                          Xem AI sẽ chia tài liệu thành bao nhiêu đoạn và đọc đoạn nào
+                        </p>
+                      </div>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="shrink-0 bg-transparent"
+                        onClick={handlePreviewChunks}
+                        disabled={previewing}
+                      >
+                        {previewing ? (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <Eye className="mr-2 h-4 w-4" />
+                        )}
+                        Xem trước
+                      </Button>
+                    </div>
+
+                    {preview && (
+                      <div className="mt-3 space-y-2">
+                        <p className="text-xs lg:text-sm">
+                          Sẽ tạo <strong>{preview.count}</strong> đoạn kiến thức:
+                        </p>
+                        <div className="max-h-56 space-y-2 overflow-y-auto">
+                          {preview.chunks.map((c) => (
+                            <div key={c.index} className="rounded border bg-muted/40 p-2">
+                              <p className="text-xs font-medium text-muted-foreground">
+                                Đoạn {c.index + 1} · {c.chars.toLocaleString()} ký tự · ~{c.tokens} token
+                                {c.heading ? ` · Mục: ${c.heading}` : ""}
+                              </p>
+                              <p className="mt-1 text-xs">{c.preview}</p>
+                            </div>
+                          ))}
+                        </div>
+                        {preview.count > preview.chunks.length && (
+                          <p className="text-xs text-muted-foreground">
+                            … và {preview.count - preview.chunks.length} đoạn khác
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 <Button 
                   onClick={editingDoc ? handleUpdate : handleUpload} 
                   disabled={uploading} 
@@ -470,10 +842,31 @@ export default function KnowledgeBasePage() {
                           <Badge variant="default" className="text-xs">Hoạt động</Badge>
                         )}
                         {doc.status === "error" && (
-                          <Badge variant="destructive" className="text-xs">Lỗi</Badge>
+                          <Badge variant="destructive" className="text-xs" title="Tài liệu không có dữ liệu cho AI — bấm biểu tượng xử lý lại">
+                            Lỗi — AI không đọc được
+                          </Badge>
                         )}
                       </TableCell>
-                      <TableCell className="hidden lg:table-cell text-sm">{doc.chunks_count}</TableCell>
+                      <TableCell className="hidden lg:table-cell text-sm">
+                        {(() => {
+                          const report = diagnostics?.documents.find((d) => d.id === doc.id)
+                          if (report && report.realChunks === 0) {
+                            return (
+                              <span className="flex items-center gap-1 font-semibold text-destructive">
+                                <AlertTriangle className="h-3.5 w-3.5" />0
+                              </span>
+                            )
+                          }
+                          if (report && report.realChunks !== doc.chunks_count) {
+                            return (
+                              <span className="flex items-center gap-1 text-amber-600" title={`Thực tế trong CSDL: ${report.realChunks}`}>
+                                {doc.chunks_count} → {report.realChunks}
+                              </span>
+                            )
+                          }
+                          return doc.chunks_count
+                        })()}
+                      </TableCell>
                       <TableCell className="hidden md:table-cell text-sm">
                         {new Date(doc.created_at).toLocaleDateString("vi-VN")}
                       </TableCell>

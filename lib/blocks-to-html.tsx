@@ -246,20 +246,34 @@ export function blocksToHTML(blocks: Block[]): string {
         }
 
         case "table": {
-          if (!data.content || !Array.isArray(data.content)) {
+          let rows: string[][] = []
+          let hasHeader = data.hasHeader !== false
+
+          if (Array.isArray(data.content) && data.content.length > 0) {
+            rows = data.content
+          } else if (Array.isArray(data.headers) || Array.isArray(data.rows)) {
+            const headerArr = Array.isArray(data.headers) ? [data.headers] : []
+            const bodyArr = Array.isArray(data.rows) ? data.rows : []
+            rows = [...headerArr, ...bodyArr]
+            hasHeader = headerArr.length > 0
+          }
+
+          if (rows.length === 0) {
             return ""
           }
 
-          const rows: string[][] = data.content
           // Tôn trọng cờ hasHeader (trước đây luôn coi hàng đầu là header)
-          const hasHeader = data.hasHeader !== false && rows.length > 0
-          const headerRow = hasHeader ? rows[0] : null
-          const bodyRows = hasHeader ? rows.slice(1) : rows
+          const effectiveHasHeader = hasHeader && rows.length > 0
+          const headerRow = effectiveHasHeader ? rows[0] : null
+          const bodyRows = effectiveHasHeader ? rows.slice(1) : rows
 
           const renderRow = (row: string[], cellTag: "th" | "td") =>
-            `<tr>${row
+            `<tr>${(Array.isArray(row) ? row : [])
               .map((cell) => {
-                const className = cellTag === "th" ? "border p-3 bg-gray-100 font-semibold" : "border p-3"
+                const className =
+                  cellTag === "th"
+                    ? "border border-border px-4 py-3 bg-secondary text-primary font-semibold text-left align-top"
+                    : "border border-border px-4 py-3 align-top"
                 const scope = cellTag === "th" ? ' scope="col"' : ""
                 return `<${cellTag}${scope} class="${className}">${renderInline(cell)}</${cellTag}>`
               })
@@ -268,7 +282,7 @@ export function blocksToHTML(blocks: Block[]): string {
           const thead = headerRow ? `<thead>${renderRow(headerRow, "th")}</thead>` : ""
           const tbody = `<tbody>${bodyRows.map((row) => renderRow(row, "td")).join("")}</tbody>`
 
-          return `<div class="my-6 overflow-x-auto"><table class="border-collapse w-full border">${thead}${tbody}</table></div>`
+          return `<div class="my-6 overflow-x-auto rounded-lg border border-border"><table class="border-collapse w-full">${thead}${tbody}</table></div>`
         }
 
         default:
