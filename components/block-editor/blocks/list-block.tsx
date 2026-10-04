@@ -57,11 +57,23 @@ function ListItem({
 
         if (tag === "a") {
           const href = el.getAttribute("href") || ""
+          const target = el.getAttribute("target") || ""
+          const rel = (el.getAttribute("rel") || "")
+            .toLowerCase()
+            .split(/\s+/)
+            .filter((token) => ["nofollow", "noopener", "noreferrer", "ugc", "sponsored"].includes(token))
           while (el.attributes.length > 0) {
             el.removeAttribute(el.attributes[0].name)
           }
           if (href && !href.toLowerCase().startsWith("javascript:")) {
             el.setAttribute("href", href)
+            if (target === "_blank") {
+              el.setAttribute("target", "_blank")
+              if (!rel.includes("noopener")) rel.push("noopener", "noreferrer")
+            }
+            if (rel.length > 0) {
+              el.setAttribute("rel", Array.from(new Set(rel)).join(" "))
+            }
           }
         } else if (allowedTags.includes(tag)) {
           while (el.attributes.length > 0) {
@@ -111,12 +123,16 @@ function ListItem({
   }, [index, onItemChange])
 
   const handleBlur = useCallback(() => {
-    if (contentRef.current) {
-      const html = sanitizeHTML(contentRef.current.innerHTML || "")
-      lastValueRef.current = html
+    if (!contentRef.current) return
+    const currentHTML = contentRef.current.innerHTML || ""
+    const html = sanitizeHTML(currentHTML)
+    lastValueRef.current = html
+    // Chỉ ghi lại DOM khi nội dung đổi thật sự: việc gán innerHTML luôn tạo lại toàn bộ
+    // text node và sẽ làm hỏng vùng bôi đen / Range đang được dùng để chèn link.
+    if (html !== currentHTML) {
       contentRef.current.innerHTML = html
-      onItemChange(index, html)
     }
+    onItemChange(index, html)
   }, [index, onItemChange, sanitizeHTML])
 
   const handleKeyDownInternal = useCallback(

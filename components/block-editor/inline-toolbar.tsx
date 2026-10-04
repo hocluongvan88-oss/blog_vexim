@@ -2,7 +2,19 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Bold, Italic, Underline, Link, Code, Unlink, ExternalLink, Search, FileText, Loader2 } from "lucide-react"
+import {
+  Bold,
+  Italic,
+  Underline,
+  Link,
+  Code,
+  Unlink,
+  ExternalLink,
+  Search,
+  FileText,
+  Loader2,
+  AlertCircle,
+} from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -24,6 +36,77 @@ interface InlineToolbarProps {
   onFormat: (command: string, value?: string) => void
 }
 
+/** Tìm vùng contentEditable chứa một node bất kỳ (ô văn bản của khối). */
+function resolveEditable(node: Node | null): HTMLElement | null {
+  if (!node) return null
+  const el = node.nodeType === Node.ELEMENT_NODE ? (node as HTMLElement) : node.parentElement
+  return (el?.closest('[contenteditable="true"]') as HTMLElement | null) ?? null
+}
+
+/**
+ * Khi khối bị re-render (React ghi lại innerHTML sau khi blur) thì Range đã lưu sẽ
+ * trỏ vào node đã bị gỡ khỏi DOM. Hàm này dựng lại Range từ chính đoạn text người
+ * dùng đã bôi đen, nhờ đó link luôn được gắn đúng chỗ thay vì nhảy về đầu nội dung.
+ */
+function findTextRange(host: HTMLElement, needle: string): Range | null {
+  const target = needle.replace(/\u00A0/g, " ").trim()
+  if (!target) return null
+
+  const walker = document.createTreeWalker(host, NodeFilter.SHOW_TEXT)
+  const nodes: Text[] = []
+  let full = ""
+  let node: Node | null = walker.nextNode()
+  while (node) {
+    const textNode = node as Text
+    nodes.push(textNode)
+    full += textNode.data
+    node = walker.nextNode()
+  }
+
+  const normalizedFull = full.replace(/\u00A0/g, " ")
+  const start = normalizedFull.indexOf(target)
+  if (start === -1) return null
+  const end = start + target.length
+
+  let offset = 0
+  let startNode: Text | null = null
+  let startOffset = 0
+  let endNode: Text | null = null
+  let endOffset = 0
+  for (const textNode of nodes) {
+    const length = textNode.data.length
+    const nodeStart = offset
+    const nodeEnd = offset + length
+    if (!startNode && start >= nodeStart && start < nodeEnd) {
+      startNode = textNode
+      startOffset = start - nodeStart
+    }
+    if (end > nodeStart && end <= nodeEnd) {
+      endNode = textNode
+      endOffset = end - nodeStart
+      break
+    }
+    offset = nodeEnd
+  }
+
+  if (!startNode || !endNode) return null
+  try {
+    const range = document.createRange()
+    range.setStart(startNode, startOffset)
+    range.setEnd(endNode, endOffset)
+    return range
+  } catch {
+    return null
+  }
+}
+
+/** Bọc nội dung trong Range bằng thẻ <a> (không phụ thuộc execCommand đã bị deprecate). */
+function wrapRangeWithLink(range: Range, anchor: HTMLAnchorElement) {
+  const contents = range.extractContents()
+  anchor.appendChild(contents)
+  range.insertNode(anchor)
+}
+
 export function InlineToolbar({ onFormat }: InlineToolbarProps) {
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null)
   const [showLinkInput, setShowLinkInput] = useState(false)
@@ -34,6 +117,7 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
   })
   const [hasExistingLink, setHasExistingLink] = useState(false)
   const [isExternalLink, setIsExternalLink] = useState(false)
+  const [linkError, setLinkError] = useState("")
   // Internal post search
   const [showPostSearch, setShowPostSearch] = useState(false)
   const [postQuery, setPostQuery] = useState("")
@@ -41,6 +125,10 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
   const [searchingPosts, setSearchingPosts] = useState(false)
   const toolbarRef = useRef<HTMLDivElement>(null)
   const savedRangeRef = useRef<Range | null>(null)
+  /** Ô contentEditable chứa vùng bôi đen — phải focus lại trước khi chèn link. */
+  const savedEditableRef = useRef<HTMLElement | null>(null)
+  /** Đoạn chữ đã bôi đen (dùng để khôi phục Range nếu DOM bị React ghi lại). */
+  const savedTextRef = useRef<string>("")
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const showLinkInputRef = useRef(false)
 
@@ -64,6 +152,10 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
     if (selection && selection.rangeCount > 0) {
       const range = selection.getRangeAt(0)
       savedRangeRef.current = range.cloneRange()
+      // Lưu lại ô văn bản + đoạn chữ đang bôi đen để khôi phục chính xác khi bấm "Thêm link"
+      savedEditableRef.current = resolveEditable(range.startContainer)
+      savedTextRef.current = range.toString()
+      setLinkError("")
 
       const rect = range.getBoundingClientRect()
       if (rect.width > 0 && rect.height > 0) {
@@ -263,66 +355,148 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
     }
   }
 
-  const handleLinkSubmit = () => {
-    if (linkOptions.url && savedRangeRef.current) {
-      const selection = window.getSelection()
-      if (selection) {
-        selection.removeAllRanges()
-        selection.addRange(savedRangeRef.current)
+  /**
+   * Khôi phục vùng bôi đen trước khi chèn link.
+   *
+   * Vì sao cần: khi bấm nút "Link", ô contentEditable bị blur và React có thể ghi lại
+   * `innerHTML` của khối (ListBlock reset innerHTML trong onBlur) → Range đã lưu trỏ vào
+   * node đã bị gỡ khỏi DOM. Nếu cứ `addRange(range cũ)` rồi `execCommand("createLink")`
+   * thì trình duyệt chèn link ở ĐẦU khối — đúng lỗi "link nhảy về đầu nội dung".
+   */
+  const restoreRange = useCallback((): Range | null => {
+    const host = savedEditableRef.current
+    if (!host || !host.isConnected) return null
 
-        document.execCommand("createLink", false, linkOptions.url)
+    const saved = savedRangeRef.current
+    // Range hợp lệ = node còn nằm trong DOM và vùng chọn nằm trọn trong khối này
+    const isValid =
+      !!saved &&
+      saved.startContainer.isConnected &&
+      saved.endContainer.isConnected &&
+      host.contains(saved.startContainer) &&
+      host.contains(saved.commonAncestorContainer)
 
-        const newSelection = window.getSelection()
-        if (newSelection && newSelection.rangeCount > 0) {
-          const range = newSelection.getRangeAt(0)
-          let linkElement: HTMLAnchorElement | null = null
+    let range: Range | null = isValid ? saved : null
 
-          const ancestor = range.commonAncestorContainer
-          if (ancestor.nodeType === Node.ELEMENT_NODE) {
-            linkElement = (ancestor as HTMLElement).closest("a")
-          } else if (ancestor.parentElement) {
-            linkElement = ancestor.parentElement.closest("a")
-          }
-
-          if (linkElement) {
-            if (linkOptions.openInNewTab) {
-              linkElement.target = "_blank"
-            } else {
-              linkElement.removeAttribute("target")
-            }
-
-            const relParts: string[] = []
-            if (linkOptions.openInNewTab) {
-              relParts.push("noopener", "noreferrer")
-            }
-            if (linkOptions.noFollow) {
-              relParts.push("nofollow")
-            }
-
-            if (relParts.length > 0) {
-              linkElement.rel = relParts.join(" ")
-            } else {
-              linkElement.removeAttribute("rel")
-            }
+    // Range cũ đã hỏng (React ghi lại DOM) -> dò lại chính đoạn chữ đã bôi đen trong khối
+    if (!range && savedTextRef.current) {
+      range = findTextRange(host, savedTextRef.current)
+      // Bôi đen qua nhiều khối/dòng: dùng phần text đầu tiên còn nằm trong khối này
+      if (!range) {
+        for (const line of savedTextRef.current.split(/\r?\n/)) {
+          const lineRange = findTextRange(host, line)
+          if (lineRange) {
+            range = lineRange
+            break
           }
         }
-
-        savedRangeRef.current = null
       }
     }
+
+    if (!range) return null
+
+    host.focus()
+    const selection = window.getSelection()
+    if (selection) {
+      selection.removeAllRanges()
+      selection.addRange(range)
+    }
+    return range
+  }, [])
+
+  const handleLinkSubmit = () => {
+    const url = linkOptions.url.trim()
+    if (!url) {
+      setLinkError("Vui lòng nhập đường dẫn, ví dụ: https://www.access.fda.gov/")
+      return
+    }
+
+    const host = savedEditableRef.current
+    const range = restoreRange()
+
+    if (!host || !range || range.collapsed) {
+      setLinkError("Không xác định được đoạn chữ cần gắn link. Hãy bôi đen lại rồi bấm Ctrl+K.")
+      return
+    }
+
+    // Bọc trực tiếp trong DOM: chính xác vị trí, giữ được target/rel, không phụ thuộc execCommand
+    const anchor = document.createElement("a")
+    anchor.setAttribute("href", url)
+    if (linkOptions.openInNewTab) {
+      anchor.setAttribute("target", "_blank")
+      const relParts = ["noopener", "noreferrer"]
+      if (linkOptions.noFollow) relParts.push("nofollow")
+      anchor.setAttribute("rel", relParts.join(" "))
+    } else if (linkOptions.noFollow) {
+      anchor.setAttribute("rel", "nofollow")
+    }
+
+    try {
+      wrapRangeWithLink(range, anchor)
+    } catch (error) {
+      console.warn("[blog] Không chèn được link:", error)
+      setLinkError("Không chèn được link vào vị trí này. Hãy bôi đen lại trong một dòng rồi thử lại.")
+      return
+    }
+
+    // Đưa con trỏ ra ngay sau link vừa chèn để gõ tiếp
+    try {
+      const after = document.createRange()
+      after.setStartAfter(anchor)
+      after.collapse(true)
+      const selection = window.getSelection()
+      selection?.removeAllRanges()
+      selection?.addRange(after)
+    } catch {
+      /* ignore */
+    }
+
+    // Báo cho React biết DOM vừa đổi để đồng bộ state của khối (lưu vào blocks)
+    host.dispatchEvent(new Event("input", { bubbles: true }))
+
+    savedRangeRef.current = null
+    savedEditableRef.current = null
+    savedTextRef.current = ""
     resetLinkState()
   }
 
   const handleRemoveLink = () => {
-    if (savedRangeRef.current) {
-      const selection = window.getSelection()
-      if (selection) {
-        selection.removeAllRanges()
-        selection.addRange(savedRangeRef.current)
-        document.execCommand("unlink", false)
-        savedRangeRef.current = null
-      }
+    const host = savedEditableRef.current
+    const range = restoreRange()
+
+    if (!host || !range) {
+      setLinkError("Không tìm thấy link để xoá. Hãy bôi đen đoạn chữ chứa link rồi thử lại.")
+      return
     }
+
+    const anchors = new Set<HTMLAnchorElement>()
+    if (range.collapsed) {
+      const node = range.startContainer
+      const el = node.nodeType === Node.ELEMENT_NODE ? (node as HTMLElement) : node.parentElement
+      const closest = el?.closest("a") as HTMLAnchorElement | null
+      if (closest && host.contains(closest)) anchors.add(closest)
+    } else {
+      host.querySelectorAll("a").forEach((element) => {
+        const a = element as HTMLAnchorElement
+        try {
+          if (range.intersectsNode(a)) anchors.add(a)
+        } catch {
+          /* ignore */
+        }
+      })
+    }
+
+    if (anchors.size === 0) {
+      setLinkError("Đoạn bôi đen không chứa link nào.")
+      return
+    }
+
+    anchors.forEach((a) => a.replaceWith(...Array.from(a.childNodes)))
+    host.dispatchEvent(new Event("input", { bubbles: true }))
+
+    savedRangeRef.current = null
+    savedEditableRef.current = null
+    savedTextRef.current = ""
     resetLinkState()
   }
 
@@ -334,6 +508,7 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
     setShowPostSearch(false)
     setPostQuery("")
     setPostResults([])
+    setLinkError("")
   }
 
   if (!position) return null
@@ -347,7 +522,6 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
         left: `${position.left}px`,
         transform: "translateX(-50%)",
       }}
-      onMouseDown={(e) => e.preventDefault()}
     >
       {!showLinkInput ? (
         <>
@@ -355,6 +529,7 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
             variant="ghost"
             size="sm"
             className="h-8 w-8 p-0 bg-transparent"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => handleFormat("bold")}
             title="In đậm (Ctrl+B)"
           >
@@ -364,6 +539,7 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
             variant="ghost"
             size="sm"
             className="h-8 w-8 p-0 bg-transparent"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => handleFormat("italic")}
             title="In nghiêng (Ctrl+I)"
           >
@@ -373,6 +549,7 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
             variant="ghost"
             size="sm"
             className="h-8 w-8 p-0 bg-transparent"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => handleFormat("underline")}
             title="Gạch chân (Ctrl+U)"
           >
@@ -382,6 +559,7 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
             variant="ghost"
             size="sm"
             className="h-8 w-8 p-0 bg-transparent"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => handleFormat("code")}
             title="Mã / Thuật ngữ"
           >
@@ -392,6 +570,7 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
             variant="ghost"
             size="sm"
             className="h-8 px-2 gap-1 bg-transparent text-xs"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={handleLinkClick}
             title="Chèn liên kết (Ctrl+K)"
           >
@@ -510,6 +689,13 @@ export function InlineToolbar({ onFormat }: InlineToolbarProps) {
           {isExternalLink && (
             <p className="text-xs text-muted-foreground">
               Link ngoài: Tự động mở tab mới với rel=&quot;noopener noreferrer&quot;
+            </p>
+          )}
+
+          {linkError && (
+            <p className="flex items-start gap-1.5 text-xs text-destructive leading-snug">
+              <AlertCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+              <span>{linkError}</span>
             </p>
           )}
 
