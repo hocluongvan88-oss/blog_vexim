@@ -16,6 +16,8 @@
  *    kho tri thức RỖNG nên AI không tra được gì.
  */
 
+import { embedTexts, getEmbeddingConfig, toVectorLiteral } from "@/lib/embeddings"
+
 export const MIN_CHUNK_CHARS = 200
 export const TARGET_CHUNK_CHARS = 1200
 export const MAX_CHUNK_CHARS = 2000
@@ -321,6 +323,8 @@ export function chunkDocument(
 
 let cachedTextColumn: ChunkTextColumn | null = null
 let cachedHasTokenCount: boolean | null = null
+let cachedHasEmbedding: boolean | null = null
+let cachedHasEmbeddingModel: boolean | null = null
 
 /**
  * Dò tên cột thật của `knowledge_chunks`.
@@ -331,9 +335,20 @@ let cachedHasTokenCount: boolean | null = null
  */
 export async function detectChunkSchema(
   supabase: any,
-): Promise<{ textColumn: ChunkTextColumn; hasTokenCount: boolean }> {
-  if (cachedTextColumn !== null && cachedHasTokenCount !== null) {
-    return { textColumn: cachedTextColumn, hasTokenCount: cachedHasTokenCount }
+): Promise<{
+  textColumn: ChunkTextColumn
+  hasTokenCount: boolean
+  /** Cột `embedding vector(1536)` đã tồn tại chưa (script 038). */
+  hasEmbedding: boolean
+  hasEmbeddingModel: boolean
+}> {
+  if (cachedTextColumn !== null && cachedHasTokenCount !== null && cachedHasEmbedding !== null) {
+    return {
+      textColumn: cachedTextColumn,
+      hasTokenCount: cachedHasTokenCount,
+      hasEmbedding: cachedHasEmbedding,
+      hasEmbeddingModel: cachedHasEmbeddingModel === true,
+    }
   }
 
   const { error: contentError } = await supabase.from("knowledge_chunks").select("content").limit(1)
@@ -341,28 +356,59 @@ export async function detectChunkSchema(
     const { error: tokenError } = await supabase.from("knowledge_chunks").select("token_count").limit(1)
     cachedTextColumn = "content"
     cachedHasTokenCount = !tokenError
-    console.log(`[knowledge] Cột chunk: content, token_count: ${cachedHasTokenCount}`)
-    return { textColumn: cachedTextColumn, hasTokenCount: cachedHasTokenCount }
+  } else {
+    cachedTextColumn = "chunk_text"
+    cachedHasTokenCount = false
+    console.warn(
+      "[knowledge] Đang dùng cột `chunk_text` (schema cũ). Nên chạy scripts/037_standardize_knowledge_chunks.sql để chuẩn hoá về `content`.",
+    )
   }
 
-  cachedTextColumn = "chunk_text"
-  cachedHasTokenCount = false
-  console.warn(
-    "[knowledge] Đang dùng cột `chunk_text` (schema cũ). Nên chạy scripts/037_standardize_knowledge_chunks.sql để chuẩn hoá về `content`.",
+  // Cột embedding do script 038 tạo — chưa chạy thì bỏ qua phần ngữ nghĩa
+  const { error: embeddingError } = await supabase.from("knowledge_chunks").select("embedding").limit(1)
+  cachedHasEmbedding = !embeddingError
+  if (cachedHasEmbedding) {
+    const { error: modelError } = await supabase.from("knowledge_chunks").select("embedding_model").limit(1)
+    cachedHasEmbeddingModel = !modelError
+  } else {
+    cachedHasEmbeddingModel = false
+    console.warn(
+      "[knowledge] Chưa có cột `embedding`. Chạy scripts/038_add_knowledge_embeddings.sql để bật tìm kiếm theo ngữ nghĩa.",
+    )
+  }
+
+  console.log(
+    `[knowledge] Schema: cột nội dung=${cachedTextColumn}, token_count=${cachedHasTokenCount}, embedding=${cachedHasEmbedding}`,
   )
-  return { textColumn: cachedTextColumn, hasTokenCount: false }
+
+  return {
+    textColumn: cachedTextColumn,
+    hasTokenCount: cachedHasTokenCount,
+    hasEmbedding: cachedHasEmbedding,
+    hasEmbeddingModel: cachedHasEmbeddingModel === true,
+  }
 }
 
-/** Ghi chunk xuống DB với đúng tên cột, trả về lỗi (nếu có) thay vì nuốt im lặng. */
+/**
+ * Ghi chunk xuống DB với đúng tên cột, trả về lỗi (nếu có) thay vì nuốt im lặng.
+ *
+ * Đồng thời tạo EMBEDDING (vector ngữ nghĩa) nếu đã chạy script 038 và đã cấu
+ * hình GEMINI_API_KEY / OPENAI_API_KEY. Việc tạo embedding là best-effort:
+ * thất bại thì chunk vẫn được lưu để tìm theo từ khoá, và admin có thể bấm
+ * "Nạp embedding cho AI" sau.
+ *
+ * Ghi theo lô nhỏ (kèm vector thì 8 dòng/lô) để tránh payload quá lớn làm
+ * request thất bại giữa chừng trên serverless.
+ */
 export async function insertChunks(
   supabase: any,
   rows: ChunkRow[],
-): Promise<{ inserted: number; error: string | null }> {
-  if (rows.length === 0) return { inserted: 0, error: null }
+): Promise<{ inserted: number; embedded: number; error: string | null; embeddingError: string | null }> {
+  if (rows.length === 0) return { inserted: 0, embedded: 0, error: null, embeddingError: null }
 
-  const { textColumn, hasTokenCount } = await detectChunkSchema(supabase)
+  const { textColumn, hasTokenCount, hasEmbedding, hasEmbeddingModel } = await detectChunkSchema(supabase)
 
-  const payload = rows.map((row) => {
+  const baseRecord = (row: ChunkRow) => {
     const record: Record<string, unknown> = {
       document_id: row.document_id,
       chunk_index: row.chunk_index,
@@ -371,12 +417,169 @@ export async function insertChunks(
     }
     if (hasTokenCount) record.token_count = row.token_count
     return record
-  })
+  }
 
-  const { error } = await supabase.from("knowledge_chunks").insert(payload)
-  if (error) return { inserted: 0, error: error.message }
+  // ── Trường hợp 1: chưa có cột embedding -> ghi thẳng theo lô 20 ──
+  if (!hasEmbedding) {
+    let inserted = 0
+    for (let i = 0; i < rows.length; i += 20) {
+      const batch = rows.slice(i, i + 20).map(baseRecord)
+      const { error } = await supabase.from("knowledge_chunks").insert(batch)
+      if (error) return { inserted, embedded: 0, error: error.message, embeddingError: null }
+      inserted += batch.length
+    }
+    return { inserted, embedded: 0, error: null, embeddingError: null }
+  }
 
-  return { inserted: payload.length, error: null }
+  // ── Trường hợp 2: có cột embedding -> tạo vector rồi ghi kèm ──
+  const config = getEmbeddingConfig()
+  let vectors: number[][] | null = null
+  let embeddingError: string | null = null
+
+  if (config.provider !== "none") {
+    const result = await embedTexts(rows.map((row) => row.text), { taskType: "document" })
+    vectors = result.embeddings
+    embeddingError = result.error
+    if (embeddingError) console.error("[knowledge] Không tạo được embedding:", embeddingError)
+  }
+
+  if (!vectors) {
+    // Không tạo được vector: vẫn phải lưu tài liệu để không mất nội dung
+    let inserted = 0
+    for (let i = 0; i < rows.length; i += 20) {
+      const batch = rows.slice(i, i + 20).map(baseRecord)
+      const { error } = await supabase.from("knowledge_chunks").insert(batch)
+      if (error) return { inserted, embedded: 0, error: error.message, embeddingError }
+      inserted += batch.length
+    }
+    return { inserted, embedded: 0, error: null, embeddingError }
+  }
+
+  // Tài liệu quá lớn: ghi trước để không vượt giới hạn thời gian của serverless,
+  // vector sẽ được nạp sau bằng nút "Nạp embedding cho AI".
+  if (rows.length > 120) {
+    let inserted = 0
+    for (let i = 0; i < rows.length; i += 20) {
+      const batch = rows.slice(i, i + 20).map(baseRecord)
+      const { error } = await supabase.from("knowledge_chunks").insert(batch)
+      if (error) return { inserted, embedded: 0, error: error.message, embeddingError }
+      inserted += batch.length
+    }
+    return {
+      inserted,
+      embedded: 0,
+      error: null,
+      embeddingError: `Tài liệu lớn (${inserted} đoạn) — hãy bấm "Nạp embedding cho AI" để tạo vector ngữ nghĩa.`,
+    }
+  }
+
+  const model = `${config.provider}:${config.model}`
+  let inserted = 0
+  for (let i = 0; i < rows.length; i += 8) {
+    const batch = rows.slice(i, i + 8).map((row, offset) => {
+      const record = baseRecord(row)
+      const vector = vectors?.[i + offset]
+      if (vector) {
+        record.embedding = toVectorLiteral(vector)
+        if (hasEmbeddingModel) record.embedding_model = model
+      }
+      return record
+    })
+    const { error } = await supabase.from("knowledge_chunks").insert(batch)
+    if (error) return { inserted, embedded: inserted, error: error.message, embeddingError }
+    inserted += batch.length
+  }
+
+  console.log(`[knowledge] Đã ghi ${inserted} chunk kèm embedding (${model})`)
+  return { inserted, embedded: inserted, error: null, embeddingError }
+}
+
+/**
+ * Nạp embedding cho các đoạn đã có trong CSDL nhưng chưa có vector.
+ * Dùng cho nút "Nạp embedding cho AI" trong trang quản trị (chạy theo lô để
+ * không vượt giới hạn thời gian của serverless).
+ */
+export async function embedMissingChunks(
+  supabase: any,
+  options: { limit?: number } = {},
+): Promise<{ embedded: number; remaining: number; error: string | null; model: string | null }> {
+  const limit = Math.min(Math.max(options.limit ?? 100, 1), 300)
+
+  const { hasEmbedding, hasEmbeddingModel, textColumn } = await detectChunkSchema(supabase)
+  if (!hasEmbedding) {
+    return {
+      embedded: 0,
+      remaining: 0,
+      error: "Chưa có cột embedding trong CSDL — hãy chạy scripts/038_add_knowledge_embeddings.sql trước.",
+      model: null,
+    }
+  }
+
+  const config = getEmbeddingConfig()
+  if (config.provider === "none") {
+    return {
+      embedded: 0,
+      remaining: 0,
+      error: "Chưa cấu hình GEMINI_API_KEY hoặc OPENAI_API_KEY trong Vercel.",
+      model: null,
+    }
+  }
+
+  const { data: rows, error: selectError } = await supabase
+    .from("knowledge_chunks")
+    .select(`id, ${textColumn}, chunk_index, document_id`)
+    .is("embedding", null)
+    .order("chunk_index", { ascending: true })
+    .limit(limit)
+
+  if (selectError) return { embedded: 0, remaining: 0, error: selectError.message, model: null }
+  if (!rows || rows.length === 0) return { embedded: 0, remaining: 0, error: null, model: null }
+
+  const texts = rows.map((row: any) => String(row[textColumn] ?? ""))
+  const { embeddings, error: embedError } = await embedTexts(texts, { taskType: "document" })
+
+  if (embedError || !embeddings) {
+    return { embedded: 0, remaining: rows.length, error: embedError || "Không tạo được embedding", model: null }
+  }
+
+  const model = `${config.provider}:${config.model}`
+  let embedded = 0
+
+  // Cập nhật song song 6 dòng một lượt cho nhanh mà không quá tải PostgREST
+  for (let i = 0; i < rows.length; i += 6) {
+    const slice = rows.slice(i, i + 6)
+    const results = await Promise.all(
+      slice.map((row: any, offset: number) => {
+        const vector = embeddings[i + offset]
+        if (!vector) return Promise.resolve({ error: null })
+        const update: Record<string, unknown> = {
+          embedding: toVectorLiteral(vector),
+          embedded_at: new Date().toISOString(),
+        }
+        if (hasEmbeddingModel) update.embedding_model = model
+        return supabase.from("knowledge_chunks").update(update).eq("id", row.id)
+      }),
+    )
+
+    const failure = results.find((result: any) => result?.error)
+    if (failure) {
+      return {
+        embedded,
+        remaining: rows.length - embedded,
+        error: String(failure.error?.message || failure.error),
+        model,
+      }
+    }
+    embedded += slice.length
+  }
+
+  // Đếm lại xem còn bao nhiêu đoạn chưa có vector
+  const { count } = await supabase
+    .from("knowledge_chunks")
+    .select("id", { count: "exact", head: true })
+    .is("embedding", null)
+
+  return { embedded, remaining: count ?? 0, error: null, model }
 }
 
 /** Cắt ngắn nội dung để hiển thị xem trước (không cắt giữa từ nếu có thể). */

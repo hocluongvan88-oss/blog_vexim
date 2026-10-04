@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { BookOpen, Upload, FileText, Link2, Loader2, Trash2, RefreshCw, Brain, Download, Pencil, ShieldCheck, AlertTriangle, Eye } from "lucide-react"
+import { BookOpen, Upload, FileText, Link2, Loader2, Trash2, RefreshCw, Brain, Download, Pencil, ShieldCheck, AlertTriangle, Eye, Sparkles } from "lucide-react"
 import { toast } from "sonner"
 
 interface KnowledgeDocument {
@@ -47,6 +47,14 @@ interface DiagnosticsReport {
   hints: string[]
 }
 
+/** Tình trạng "hiểu ngữ nghĩa" (embedding) của kho tri thức */
+interface EmbeddingStatus {
+  config: { enabled: boolean; provider: string; model: string; dimensions: number; hint: string }
+  coverage: { total: number; embedded: number; missing: number; error: string | null }
+  ready: boolean
+  hint: string
+}
+
 /** Nội dung xem trước cách AI cắt tài liệu thành từng đoạn */
 interface ChunkPreview {
   count: number
@@ -59,6 +67,9 @@ export default function KnowledgeBasePage() {
   const [checking, setChecking] = useState(false)
   const [preview, setPreview] = useState<ChunkPreview | null>(null)
   const [previewing, setPreviewing] = useState(false)
+  const [embedding, setEmbedding] = useState<EmbeddingStatus | null>(null)
+  const [embeddingBusy, setEmbeddingBusy] = useState(false)
+  const [embeddingProgress, setEmbeddingProgress] = useState(0)
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
   const [importing, setImporting] = useState(false)
@@ -74,7 +85,80 @@ export default function KnowledgeBasePage() {
 
   useEffect(() => {
     loadDocuments()
+    loadEmbedding()
   }, [])
+
+  const loadEmbedding = async () => {
+    try {
+      const res = await fetch("/api/knowledge-base/embeddings")
+      if (res.ok) setEmbedding(await res.json())
+    } catch (error) {
+      console.error("Không tải được trạng thái embedding:", error)
+    }
+  }
+
+  /**
+   * Nạp embedding cho các đoạn còn thiếu. Server xử lý theo lô nên ở đây gọi
+   * lặp lại cho tới khi hết — tránh vượt giới hạn thời gian của serverless.
+   */
+  const handleBackfillEmbeddings = async () => {
+    setEmbeddingBusy(true)
+    setEmbeddingProgress(0)
+
+    let totalEmbedded = 0
+    let guard = 0
+
+    try {
+      while (guard < 40) {
+        guard++
+
+        const res = await fetch("/api/knowledge-base/embeddings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ limit: 50 }),
+        })
+        const payload = await res.json().catch(() => null)
+
+        if (!res.ok) {
+          toast.error(payload?.error || "Không nạp được embedding")
+          break
+        }
+
+        totalEmbedded += payload?.embedded || 0
+        setEmbeddingProgress(totalEmbedded)
+
+        // Cập nhật thanh tiến độ ngay trên giao diện
+        setEmbedding((current) =>
+          current
+            ? {
+                ...current,
+                coverage: {
+                  ...current.coverage,
+                  embedded: (payload?.coverage?.embedded ?? current.coverage.embedded) as number,
+                  missing: (payload?.coverage?.missing ?? current.coverage.missing) as number,
+                },
+              }
+            : current,
+        )
+
+        if (!payload?.remaining || payload?.embedded === 0) break
+      }
+
+      if (totalEmbedded > 0) {
+        toast.success(`Đã nạp ${totalEmbedded} đoạn kiến thức cho AI hiểu theo ngữ nghĩa`)
+      } else if (guard === 1) {
+        toast.info("Không còn đoạn nào cần nạp")
+      }
+
+      await loadEmbedding()
+      if (diagnostics) loadDiagnostics()
+    } catch (error) {
+      toast.error("Có lỗi khi nạp embedding")
+    } finally {
+      setEmbeddingBusy(false)
+      setEmbeddingProgress(0)
+    }
+  }
 
   const loadDocuments = async () => {
     try {
@@ -389,6 +473,65 @@ export default function KnowledgeBasePage() {
               </Button>
             </CardContent>
           )}
+        </Card>
+      )}
+
+      {embedding && (
+        <Card className={embedding.ready && embedding.coverage.missing === 0 ? "border-sky-500/40" : "border-muted"}>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex flex-wrap items-center gap-2 text-base lg:text-lg">
+              <Sparkles className="h-5 w-5 text-sky-600" />
+              AI hiểu tài liệu theo ngữ nghĩa
+              <Badge variant={embedding.config.enabled ? "default" : "secondary"} className="text-xs">
+                {embedding.config.enabled ? embedding.config.provider : "chưa bật"}
+              </Badge>
+            </CardTitle>
+            <CardDescription className="text-xs lg:text-sm">
+              {embedding.coverage.error
+                ? embedding.coverage.error
+                : `${embedding.coverage.embedded.toLocaleString()}/${embedding.coverage.total.toLocaleString()} đoạn đã có vector ngữ nghĩa` +
+                  (embedding.coverage.missing > 0 ? ` · còn thiếu ${embedding.coverage.missing.toLocaleString()}` : " · đầy đủ")}
+              {embedding.config.enabled && embedding.config.model ? ` · ${embedding.config.model}` : ""}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3 pt-0">
+            {embedding.coverage.total > 0 && (
+              <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full bg-sky-600 transition-all"
+                  style={{
+                    width: `${Math.round((embedding.coverage.embedded / Math.max(embedding.coverage.total, 1)) * 100)}%`,
+                  }}
+                />
+              </div>
+            )}
+
+            <p className="text-xs lg:text-sm text-muted-foreground">{embedding.hint}</p>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                size="sm"
+                onClick={handleBackfillEmbeddings}
+                disabled={embeddingBusy || !embedding.config.enabled || !!embedding.coverage.error}
+              >
+                {embeddingBusy ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Đang nạp… {embeddingProgress.toLocaleString()} đoạn
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    Nạp embedding cho AI
+                  </>
+                )}
+              </Button>
+              <Button size="sm" variant="outline" className="bg-transparent" onClick={loadEmbedding} disabled={embeddingBusy}>
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Làm mới
+              </Button>
+            </div>
+          </CardContent>
         </Card>
       )}
 

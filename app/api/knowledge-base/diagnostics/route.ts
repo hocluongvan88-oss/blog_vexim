@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { detectChunkSchema, chunkDocument, extractPreview } from "@/lib/knowledge-chunks"
+import { describeEmbeddingConfig } from "@/lib/embeddings"
 
 /**
  * Kiểm tra sức khoẻ kho tri thức — trả lời câu hỏi:
@@ -74,13 +75,40 @@ export async function GET() {
     const totalChunks = realCounts.size > 0 ? [...realCounts.values()].reduce((a, b) => a + b, 0) : 0
     const usableChunks = report.filter((r) => r.ok).reduce((sum, r) => sum + r.realChunks, 0)
 
+    // Tình trạng embedding (tìm kiếm theo ngữ nghĩa)
+    const embeddingConfig = describeEmbeddingConfig()
+    let embeddedChunks = 0
+    let embeddingCoverageError: string | null = null
+
+    if (schema.hasEmbedding) {
+      const { count, error } = await supabase
+        .from("knowledge_chunks")
+        .select("id", { count: "exact", head: true })
+        .not("embedding", "is", null)
+      embeddedChunks = count || 0
+      if (error) embeddingCoverageError = error.message
+    } else {
+      embeddingCoverageError = "Chưa chạy scripts/038_add_knowledge_embeddings.sql"
+    }
+
+    const embeddingMissing = Math.max(totalChunks - embeddedChunks, 0)
+
     return NextResponse.json({
       schema,
+      embedding: {
+        ...embeddingConfig,
+        totalChunks,
+        embeddedChunks,
+        missingChunks: embeddingMissing,
+        error: embeddingCoverageError,
+        semanticSearchReady: embeddingConfig.enabled && schema.hasEmbedding && embeddedChunks > 0,
+      },
       summary: {
         documents: report.length,
         totalChunks,
         /** Số đoạn AI thực sự có thể tra cứu được */
         usableChunks,
+        embeddedChunks,
         brokenDocuments: report.filter((r) => !r.ok).length,
         healthy: report.length > 0 && report.every((r) => r.ok),
       },
@@ -94,6 +122,9 @@ export async function GET() {
           : null,
         report.some((r) => !r.ok)
           ? 'Có tài liệu bị lỗi — bấm "Xử lý lại" ở cột thao tác để tạo lại dữ liệu cho AI.'
+          : null,
+        embeddingMissing > 0
+          ? `Còn ${embeddingMissing} đoạn chưa được AI hiểu theo ngữ nghĩa — bấm "Nạp embedding cho AI".`
           : null,
       ].filter(Boolean),
     })

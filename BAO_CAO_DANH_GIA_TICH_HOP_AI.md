@@ -46,7 +46,7 @@
 
 | Vấn đề | Chi tiết | Ảnh hưởng | Cách xử lý |
 |---|---|---|---|
-| **Embedding đang là mock** | `lib/ai-service.ts` → `createEmbedding()` trả về `Array(1536).fill(0)`. `searchKnowledge()` vì thế chỉ chạy `ilike` (tìm theo từ khoá) | AI không "hiểu" ngữ nghĩa → brief/nháp/gợi ý chủ đề sẽ hời hợt, không tra được knowledge base theo ý | Bật embedding thật (OpenAI `text-embedding-3-small`, ~$0.02/1M token) hoặc dùng `pgvector` + model miễn phí |
+| ~~**Embedding đang là mock**~~ ✅ **ĐÃ SỬA** | `lib/ai-service.ts` → nay gọi `lib/embeddings.ts` (Gemini `gemini-embedding-001` miễn phí, hoặc OpenAI `text-embedding-3-small`); `searchKnowledge()` tìm kết hợp ngữ nghĩa (pgvector) + từ khoá, hợp nhất bằng RRF; nút "Nạp embedding cho AI" trong trang Kho tri thức để nạp bù dữ liệu cũ | Trước đây AI không "hiểu" ngữ nghĩa → câu hỏi dùng từ khác với tài liệu là trượt | Đã làm xong: `lib/embeddings.ts`, `scripts/038_add_knowledge_embeddings.sql`, `app/api/knowledge-base/embeddings/route.ts` |
 | **`GROQ_API_KEY` chưa có trong `.env` của môi trường này** (chỉ có ZOHO SMTP + `NEXT_PUBLIC_SITE_URL`) | `app/api/blog/ai-assistant/route.ts` trả **500** nếu thiếu key | Mọi tính năng AI mới sẽ chết im lặng | Xác nhận key đã set trên Vercel Production/Preview; thêm cảnh báo rõ trên UI khi thiếu key |
 | Crawler dùng `puppeteer-extra` + stealth | Nặng, dễ vượt giới hạn serverless | Cron có thể fail âm thầm | Đã có `cron_job_logs` + trang `/admin/cron-monitor` → cần bật cảnh báo khi job fail 2 ngày liên tiếp |
 
@@ -137,7 +137,7 @@ và vẫn qua được `post-payload.ts` để sanitize trước khi lưu.
    và cổng thông tin thuế–hải quan Việt Nam. Hiện mới có FDA + China Customs + Federal Register.
 8. Thêm "cảnh báo theo dõi" cho khách: khi có tin đúng ngành của họ (đã có `fda_subscriptions` + email digest,
    chỉ cần mở rộng theo `service_tag`).
-9. Bật **embedding thật + pgvector** để AI tra knowledge base theo ngữ nghĩa (nâng chất lượng brief/draft/chatbot).
+9. ~~Bật **embedding thật + pgvector**~~ ✅ **ĐÃ LÀM** — `lib/embeddings.ts` + `scripts/038_add_knowledge_embeddings.sql` + nút "Nạp embedding cho AI" (Gemini miễn phí hoặc OpenAI). Cần thêm `GEMINI_API_KEY` vào Vercel rồi chạy script 038.
 
 ---
 

@@ -180,11 +180,22 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Tạo vector thất bại không làm hỏng việc nạp tài liệu, nhưng phải nói rõ
+    // cho admin biết để họ bấm "Nạp embedding cho AI" nếu muốn tìm theo ngữ nghĩa.
+    const embeddingNote =
+      chunkResult.embedded === chunkResult.chunks && chunkResult.chunks > 0
+        ? ` (${chunkResult.embedded} đoạn đã được AI hiểu theo ngữ nghĩa)`
+        : chunkResult.embeddingError
+          ? " — chưa tạo được vector ngữ nghĩa, hãy bấm \"Nạp embedding cho AI\" trong trang Kho tri thức"
+          : ""
+
     return NextResponse.json({
       success: true,
       document,
       chunks: chunkResult.chunks,
-      message: `Đã nạp ${chunkResult.chunks} đoạn kiến thức cho AI`,
+      embedded: chunkResult.embedded,
+      embeddingError: chunkResult.embeddingError,
+      message: `Đã nạp ${chunkResult.chunks} đoạn kiến thức cho AI${embeddingNote}`,
     })
   } catch (error) {
     console.error("Upload error:", error)
@@ -200,15 +211,15 @@ async function processDocumentChunks(
   content: string,
   supabase: any,
   sourceType?: string,
-): Promise<{ chunks: number; error: string | null }> {
+): Promise<{ chunks: number; embedded: number; error: string | null; embeddingError: string | null }> {
   try {
     const rows = chunkDocument(documentId, content, { sourceType })
-    const { inserted, error } = await insertChunks(supabase, rows)
+    const { inserted, embedded, error, embeddingError } = await insertChunks(supabase, rows)
 
     if (error) {
       console.error("[v0] Lỗi ghi chunk:", error)
       await supabase.from("knowledge_documents").update({ status: "error", chunks_count: 0 }).eq("id", documentId)
-      return { chunks: 0, error }
+      return { chunks: 0, embedded: 0, error, embeddingError }
     }
 
     await supabase
@@ -216,11 +227,16 @@ async function processDocumentChunks(
       .update({ status: "active", chunks_count: inserted })
       .eq("id", documentId)
 
-    console.log(`[v0] Tài liệu ${documentId}: đã nạp ${inserted} chunk`)
-    return { chunks: inserted, error: null }
+    console.log(`[v0] Tài liệu ${documentId}: đã nạp ${inserted} chunk, ${embedded} chunk có vector ngữ nghĩa`)
+    return { chunks: inserted, embedded, error: null, embeddingError }
   } catch (error) {
     console.error("[v0] Chunk processing error:", error)
     await supabase.from("knowledge_documents").update({ status: "error", chunks_count: 0 }).eq("id", documentId)
-    return { chunks: 0, error: error instanceof Error ? error.message : "Lỗi xử lý chunk" }
+    return {
+      chunks: 0,
+      embedded: 0,
+      error: error instanceof Error ? error.message : "Lỗi xử lý chunk",
+      embeddingError: null,
+    }
   }
 }

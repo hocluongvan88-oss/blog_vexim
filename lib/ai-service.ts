@@ -1,4 +1,5 @@
 import Groq from "groq-sdk"
+import { embedQuery, embedTexts, getEmbeddingConfig, isEmbeddingEnabled, toVectorLiteral } from "@/lib/embeddings"
 
 // Initialize Groq client
 let groq: Groq | null = null
@@ -28,6 +29,8 @@ export interface KnowledgeChunk {
   chunk_text: string
   document_title: string
   category: string
+  /** Điểm tương đồng ngữ nghĩa 0..1 (chỉ có khi khớp bằng vector). */
+  similarity?: number
 }
 
 export interface AIResponse {
@@ -39,14 +42,19 @@ export interface AIResponse {
 }
 
 /**
- * Tạo embedding cho text (cần OpenAI hoặc alternative)
- * Đây là placeholder - bạn cần implement với OpenAI API hoặc local model
+ * Tạo embedding cho 1 đoạn text.
+ *
+ * Trước đây hàm này là GIẢ (`return Array(1536).fill(0)`) và không bao giờ được
+ * gọi — nghĩa là toàn bộ "RAG" chỉ là so khớp từ khoá. Nay gọi API thật
+ * (Gemini/OpenAI); trả `null` nếu chưa cấu hình key.
  */
-export async function createEmbedding(text: string): Promise<number[]> {
-  // TODO: Implement với OpenAI API hoặc local embedding model
-  // Hiện tại return mock embedding
-  console.log("[v0] Creating embedding for:", text.substring(0, 100))
-  return Array(1536).fill(0)
+export async function createEmbedding(text: string): Promise<number[] | null> {
+  const result = await embedTexts([text], { taskType: "document" })
+  if (result.error) {
+    console.warn("[v0] Không tạo được embedding:", result.error)
+    return null
+  }
+  return result.embeddings?.[0] || null
 }
 
 /** Từ dừng tiếng Việt + tiếng Anh — bỏ đi để giữ lại từ mang nghĩa. */
@@ -129,6 +137,87 @@ function scoreChunk(content: string, keywords: string[]): number {
 /** Nhớ tên cột chunk đã dò được để không phải kiểm tra lại mỗi lần hỏi. */
 let chunkTextColumn: string | null = null
 
+/** Tắt hẳn tìm kiếm vector trong tiến trình này nếu hàm RPC chưa tồn tại. */
+let vectorSearchDisabled = false
+
+interface RankedChunk {
+  chunk: KnowledgeChunk
+  score: number
+}
+
+/**
+ * Tìm theo NGỮ NGHĨA bằng embedding + pgvector.
+ *
+ * Khách hỏi "thủ tục xuất hàng sang Mỹ cần gì?" trong khi tài liệu chỉ ghi
+ * "Prior Notice", "FSMA", "US Agent" — tìm theo từ khoá sẽ trượt, còn vector
+ * thì khớp vì hiểu ý. Trả `null` nếu chưa bật/chưa cài đặt, khi đó hệ thống
+ * tự quay về tìm theo từ khoá.
+ */
+async function searchByVector(
+  query: string,
+  supabase: any,
+  limit: number = 12,
+): Promise<RankedChunk[] | null> {
+  if (vectorSearchDisabled || !isEmbeddingEnabled()) return null
+
+  try {
+    const vector = await embedQuery(query)
+    if (!vector) return null
+
+    const config = getEmbeddingConfig()
+    // Ngưỡng tương đồng khác nhau giữa các nhà cung cấp; có thể ghi đè bằng env.
+    const minSimilarity = Number(
+      process.env.EMBEDDING_MIN_SIMILARITY ?? (config.provider === "gemini" ? 0.5 : 0.3),
+    )
+
+    const { data, error } = await supabase.rpc("match_knowledge_chunks", {
+      query_embedding: toVectorLiteral(vector),
+      match_count: limit,
+      min_similarity: minSimilarity,
+    })
+
+    if (error) {
+      const message = error.message || ""
+      // Chưa chạy script 038 -> không thử lại nữa cho tới khi deploy lại
+      if (/could not find the function|does not exist|schema cache/i.test(message)) {
+        vectorSearchDisabled = true
+        console.warn(
+          "[v0] Chưa có hàm match_knowledge_chunks — chạy scripts/038_add_knowledge_embeddings.sql để bật tìm theo ngữ nghĩa.",
+        )
+      } else {
+        console.warn("[v0] Tìm theo ngữ nghĩa thất bại, dùng từ khoá:", message)
+      }
+      return null
+    }
+
+    const rows = (data || []) as any[]
+    console.log("[v0] Vector search — đoạn khớp:", rows.length)
+
+    return rows.map((row) => ({
+      chunk: {
+        id: row.id,
+        chunk_text: row.content || "",
+        document_title: row.document_title || "Tài liệu",
+        category: row.category || "",
+        similarity: typeof row.similarity === "number" ? row.similarity : undefined,
+      },
+      score: typeof row.similarity === "number" ? row.similarity : 0,
+    }))
+  } catch (error) {
+    console.warn("[v0] Lỗi tìm theo ngữ nghĩa:", error)
+    return null
+  }
+}
+
+/**
+ * Tìm kiếm tài liệu liên quan từ knowledge base.
+ *
+ * Chiến lược: KẾT HỢP hai cách tìm, rồi hợp nhất thứ hạng (Reciprocal Rank Fusion):
+ *  1. Ngữ nghĩa (embedding + pgvector) — hiểu ý câu hỏi, bắt được cả cách nói khác.
+ *  2. Từ khoá (3 lớp, từ chặt tới lỏng) — chính xác với mã/tên riêng như "GACC", "FSMA".
+ * Cách 1 chỉ chạy khi đã cấu hình API key + đã chạy script 038; nếu không thì
+ * hệ thống vẫn hoạt động như trước (chỉ từ khoá), không làm hỏng chatbot.
+ */
 export async function searchKnowledge(
   query: string,
   topK: number = 5,
@@ -203,24 +292,54 @@ export async function searchKnowledge(
       rows = (data || []) as any[]
     }
 
-    // Xếp hạng: từ khoá khớp trong nội dung chunk + điểm thưởng nếu khớp TIÊU ĐỀ tài liệu
-    const ranked = rows
+    // Xếp hạng từ khoá: khớp trong nội dung + điểm thưởng nếu khớp TIÊU ĐỀ tài liệu
+    const keywordRanked: RankedChunk[] = rows
       .map((item) => {
-        const text = item[chunkTextColumn || "content"] || item.content || item.chunk_text || ""
+        const text = item[textColumn] || item.content || item.chunk_text || ""
         const title = item.knowledge_documents?.title || ""
-        return { item, score: scoreChunk(text, keywords) + scoreChunk(title, keywords) * 2 }
+        return {
+          chunk: {
+            id: item.id,
+            chunk_text: text,
+            document_title: title || "Tài liệu",
+            category: item.knowledge_documents?.category || "",
+          },
+          score: scoreChunk(text, keywords) + scoreChunk(title, keywords) * 2,
+        }
       })
+      .filter((entry) => entry.score > 0 || keywords.length === 0)
       .sort((a, b) => b.score - a.score)
-      .slice(0, topK)
 
-    console.log("[v0] Knowledge chunks tìm được:", ranked.length)
+    // Xếp hạng ngữ nghĩa (có thể null nếu chưa bật)
+    const vectorRanked = await searchByVector(query, supabase, 12)
 
-    return ranked.map(({ item }) => ({
-      id: item.id,
-      chunk_text: item[textColumn] ?? item.content ?? item.chunk_text ?? "",
-      document_title: item.knowledge_documents?.title || "Tài liệu",
-      category: item.knowledge_documents?.category || "",
-    }))
+    // Hợp nhất thứ hạng (RRF): mỗi danh sách đóng góp 1/(60 + hạng).
+    // Vector được nhân 1.2 vì hiểu ý tốt hơn, từ khoá vẫn giữ vai trò bắt
+    // đúng các mã riêng như "GACC", "DIN", "FSMA 204".
+    const K = 60
+    const merged = new Map<string, RankedChunk>()
+
+    const add = (entry: RankedChunk, rank: number, weight: number) => {
+      const current = merged.get(entry.chunk.id)
+      const contribution = weight / (K + rank + 1)
+      if (current) {
+        current.score += contribution
+        // Giữ lại điểm tương đồng để hiển thị/ghi log
+        if (entry.chunk.similarity !== undefined) current.chunk.similarity = entry.chunk.similarity
+      } else {
+        merged.set(entry.chunk.id, { chunk: entry.chunk, score: contribution })
+      }
+    }
+
+    keywordRanked.forEach((entry, index) => add(entry, index, 1))
+    ;(vectorRanked || []).forEach((entry, index) => add(entry, index, 1.2))
+
+    const ranked = [...merged.values()].sort((a, b) => b.score - a.score).slice(0, topK)
+    console.log(
+      `[v0] Knowledge chunks tìm được: ${ranked.length} (từ khoá: ${keywordRanked.length}, ngữ nghĩa: ${vectorRanked?.length ?? 0})`,
+    )
+
+    return ranked.map(({ chunk }) => chunk)
   } catch (error) {
     console.error("[v0] Error searching knowledge:", error)
     return []
