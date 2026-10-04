@@ -11,7 +11,7 @@ import type { Metadata } from "next"
 export const metadata: Metadata = {
   title: "Đăng ký FDA Food Facility - FSMA Compliance",
   description:
-    "Đăng ký cơ sở sản xuất thực phẩm theo FSMA. Hoàn tất FDA Form 3537a trên hệ thống FURLS. Nhận FDA Registration Number trong 3-5 ngày làm việc.",
+    "Đăng ký cơ sở sản xuất thực phẩm theo FSMA. Hoàn tất FDA Form 3537a trên hệ thống FURLS. Nhận FDA Registration Number trong 1-2 ngày nếu đã có mã DUNS đúng địa chỉ nhà máy, 5-8 ngày nếu chưa có mã DUNS.",
   keywords: [
     "đăng ký FDA",
     "FDA Food Facility",
@@ -198,19 +198,19 @@ export default function FDARegistrationPage() {
                 step: "01",
                 title: "Thu thập thông tin cơ sở",
                 description: "Tên pháp lý công ty, địa chỉ nhà máy, loại sản phẩm, quy trình sản xuất. Thông tin người liên hệ và US Agent.",
-                time: "1 ngày",
+                time: "Do doanh nghiệp cung cấp",
               },
               {
                 step: "02",
                 title: "Chuẩn bị FDA Form 3537a",
                 description: "Điền đầy đủ thông tin vào FDA Form 3537a: Facility information, Owner/Operator, Product categories, US Agent details.",
-                time: "1-2 ngày",
+                time: "Trong ngày",
               },
               {
                 step: "03",
                 title: "Nộp qua hệ thống FURLS",
                 description: "Đăng nhập FDA Industry Systems, nộp registration qua FURLS. Hệ thống xác nhận ngay lập tức nếu không có lỗi.",
-                time: "1 ngày",
+                time: "Trong ngày",
               },
               {
                 step: "04",
@@ -222,7 +222,7 @@ export default function FDARegistrationPage() {
                 step: "05",
                 title: "Hướng dẫn sử dụng",
                 description: "Hướng dẫn sử dụng Registration Number trong Prior Notice, labeling. Lưu ý deadline gia hạn (tháng 10 năm chẵn).",
-                time: "1 ngày",
+                time: "Ngay sau khi nhận số",
               },
             ].map((process, idx) => (
               <Card key={idx} className="p-6">
@@ -247,9 +247,13 @@ export default function FDARegistrationPage() {
             ))}
           </div>
 
-          <div className="mt-8 text-center">
+          <div className="mt-8 text-center space-y-2">
             <p className="text-lg font-medium text-primary">
-              Tổng thời gian: 3-5 ngày làm việc
+              Thời gian đăng ký: 1-2 ngày nếu đã có mã DUNS đúng địa chỉ nhà máy · 5-8 ngày nếu chưa có mã DUNS
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Bước chuẩn bị hồ sơ phụ thuộc thời gian doanh nghiệp cung cấp thông tin; thời gian trên là thời gian
+              Vexim nộp và FDA cấp mã.
             </p>
           </div>
         </div>
@@ -338,8 +342,8 @@ export default function FDARegistrationPage() {
             Đăng ký FDA Food Facility ngay hôm nay
           </h2>
           <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-            Nhận FDA Registration Number trong 3-5 ngày làm việc. 
-            Sẵn sàng xuất khẩu sang thị trường Mỹ.
+            Nhận FDA Registration Number trong 1-2 ngày nếu đã có mã DUNS đúng địa chỉ nhà máy
+            (5-8 ngày nếu chưa có mã DUNS). Sẵn sàng xuất khẩu sang thị trường Mỹ.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <ConsultationDialog

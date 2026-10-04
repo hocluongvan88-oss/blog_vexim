@@ -188,6 +188,14 @@ check(/BẰNG CHỨNG NĂNG LỰC/.test(playbook) && playbook.includes("200 doan
   "Bằng chứng năng lực luôn nằm trong prompt (RAG có thể không tìm ra đoạn ngắn)")
 check(playbook.includes("35-2957758") && playbook.includes("LIBRA"),
   "Prompt có EIN và case study thật để trả lời câu hỏi về uy tín")
+// Trang dịch vụ Đăng ký FDA thực phẩm là chỗ khách hay vào nhất — phải khớp mốc chuẩn,
+// nếu không khách sẽ thấy web ghi một đằng, trợ lý AI trả lời một nẻo.
+const foodFdaPage = readFileSync("app/services/food/fda-registration/page.tsx", "utf8")
+check(foodFdaPage.includes("1-2 ngày") && foodFdaPage.includes("5-8 ngày"),
+  "Trang Đăng ký FDA thực phẩm dùng đúng mốc chuẩn 1-2 / 5-8 ngày")
+check(!staleTimeline.test(foodFdaPage), "Trang Đăng ký FDA thực phẩm đã gỡ mốc '3-5 ngày'")
+check(!/Tổng thời gian/.test(foodFdaPage),
+  "Trang không còn dòng 'Tổng thời gian' (cộng dồn các bước thành con số khác mốc chuẩn)")
 
 console.log(`\n${pass} PASS / ${fail} FAIL`)
 if (fail) process.exit(1)
