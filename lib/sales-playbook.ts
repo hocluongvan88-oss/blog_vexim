@@ -54,11 +54,11 @@ export const SALES_FACTS = `📌 SỐ LIỆU CHUẨN DO VEXIM CUNG CẤP (dùng 
 - Hơn 200 doanh nghiệp Việt Nam đã xuất khẩu thành công sang Mỹ qua Vexim.
 - Vexim có pháp nhân và EIN chính thức tại Mỹ (EIN 35-2957758), đóng vai U.S. Agent trực tiếp — không qua trung gian.
 - Đã được cấp mã đăng ký FDA thật (ví dụ 10048679256 và 17721772358) — khách tự kiểm chứng được.
-- Case study: CÔNG TY TNHH LIBRA VIỆT NAM (bánh kẹo) — nhận mã FDA trong 3–5 ngày làm việc và lô hàng đã thông quan cảng Mỹ tháng 3/2026.
+- Case study: CÔNG TY TNHH LIBRA VIỆT NAM (bánh kẹo) — đã nhận mã số đăng ký FDA (Active) cho nhà máy và lô hàng thông quan cảng Mỹ tháng 3/2026.
 - Tỷ lệ đăng ký thành công trên 99%; kinh nghiệm với cả thực phẩm, mỹ phẩm, thiết bị y tế, thực phẩm chức năng, dược phẩm.
 - Trang hồ sơ năng lực để khách xem chứng nhận và case study: https://fda.veximglobal.com
 - CHỈ dùng đúng những bằng chứng này. Không bịa thêm tên khách hàng hay con số. Không cam kết thay FDA.
-- Nếu khách đã xem trang hồ sơ năng lực (quy trình 5 bước, tổng 2–5 ngày làm việc): giải thích rõ hai mốc này đo hai việc KHÁC nhau — "1–2 / 5–8 ngày" là thời gian ĐĂNG KÝ khi hồ sơ đã sẵn sàng (tùy đã có mã DUNS hay chưa), còn "2–5 ngày" là quy trình tổng thể 5 bước. Không tự chọn một con số cho trường hợp cụ thể của khách.`
+- MỐC THỜI GIAN DUY NHẤT cho đăng ký FDA: khoảng 1–2 ngày nếu khách đã có mã DUNS đúng địa chỉ nhà máy, khoảng 5–8 ngày nếu chưa có mã DUNS. Không dùng bất kỳ con số nào khác (kể cả con số khách đọc được ở nơi khác). Nếu khách nhắc con số khác: không tranh luận, khẳng định lại mốc chuẩn, nói thời gian chính xác còn phụ thuộc hồ sơ, rồi mời chuyên viên xác nhận.`
 
 /**
  * Dựng khối cẩm nang để nhúng vào system prompt.

@@ -166,13 +166,23 @@ check(credentials.includes("10048679256") && credentials.includes("17721772358")
 check(credentials.includes("LIBRA") && credentials.includes("3/2026"),
   "Có case study Libra đã thông quan cảng Mỹ 3/2026")
 check(credentials.includes("KHÔNG được bịa thêm"), "Tài liệu tự nhắc chỉ dùng số liệu có thật")
-check(credentials.includes("1–2 ngày") && credentials.includes("2–5 ngày làm việc"),
-  "Tài liệu phân biệt hai mốc thời gian (đăng ký vs quy trình tổng thể)")
+check(credentials.includes("1–2 ngày") && credentials.includes("5–8 ngày"),
+  "Tài liệu chỉ dùng mốc chuẩn 1–2 ngày / 5–8 ngày")
+// Chủ doanh nghiệp chốt: chỉ MỘT mốc thời gian. Mọi con số khác phải bị gỡ khỏi
+// tài liệu, khỏi prompt và khỏi giao diện để khách không nhận hai câu trả lời khác nhau.
+const staleTimeline = /2[–-]5 ngày|3[–-]5 ngày/
+check(!staleTimeline.test(credentials), "Tài liệu năng lực đã gỡ hẳn mốc '2–5 ngày'")
+
+check(!staleTimeline.test(widget), "Khung chat đã gỡ hẳn mốc '2–5 ngày'")
 
 const playbook = readFileSync("lib/sales-playbook.ts", "utf8")
 check(/CÓ UY TÍN KHÔNG/.test(playbook), "Cẩm nang dạy AI trả lời câu hỏi về uy tín bằng bằng chứng thật")
 check(/không bịa thêm tên khách hàng/.test(playbook), "Cẩm nang chặn AI bịa tên khách hàng/số liệu")
 check(playbook.includes("https://fda.veximglobal.com"), "Cẩm nang kèm link để khách tự kiểm chứng")
+check(/MỐC THỜI GIAN DUY NHẤT/.test(playbook), "Prompt chốt chỉ dùng một mốc thời gian duy nhất")
+check(/Không dùng bất kỳ con số nào khác/.test(playbook),
+  "Prompt cấm AI dùng con số thời gian khác, kể cả khi khách nhắc lại")
+check(!staleTimeline.test(playbook), "Prompt của AI đã gỡ hẳn mốc '2–5 ngày'")
 // Bằng chứng năng lực phải LUÔN có trong prompt, không phụ thuộc việc tìm tài liệu
 check(/BẰNG CHỨNG NĂNG LỰC/.test(playbook) && playbook.includes("200 doanh nghiệp"),
   "Bằng chứng năng lực luôn nằm trong prompt (RAG có thể không tìm ra đoạn ngắn)")

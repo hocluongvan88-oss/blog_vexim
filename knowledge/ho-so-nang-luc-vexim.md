@@ -22,7 +22,8 @@ xử lý trực tiếp với FDA.
 
 - Đã hỗ trợ **hơn 200 doanh nghiệp Việt Nam** xuất khẩu sang Mỹ.
 - Tỷ lệ đăng ký thành công **trên 99%**.
-- Thời gian đăng ký **2–5 ngày làm việc** (quy trình 5 bước, khi hồ sơ đã đầy đủ).
+- Thời gian đăng ký FDA: khoảng **1–2 ngày** nếu đã có mã DUNS đúng địa chỉ nhà máy;
+  khoảng **5–8 ngày** nếu chưa có mã DUNS (phải đăng ký mã mới trước).
 - Khách hàng/đối tác tiêu biểu: **Libra Việt Nam (bánh kẹo)**, Green Foods, BimiFoods,
   Dann Food, Pham Gia.
 - Vexim hỗ trợ đăng ký FDA cho các nhóm: thực phẩm, mỹ phẩm, thiết bị y tế,
@@ -30,15 +31,16 @@ xử lý trực tiếp với FDA.
 
 ## 3. Quy trình 5 bước (đăng ký FDA)
 
-| Bước | Nội dung | Thời gian |
-| --- | --- | --- |
-| 1. Tư vấn | Khách cung cấp thông tin sản phẩm | 1–2 ngày |
-| 2. Chuẩn bị hồ sơ | Vexim hướng dẫn chuẩn bị tài liệu | 2–3 ngày |
-| 3. Đăng ký với FDA | Vexim nộp hồ sơ, theo dõi tiến độ | 1 ngày |
-| 4. Kiểm tra & phê duyệt | FDA xem xét, có thể yêu cầu bổ sung | 2–4 ngày |
-| 5. Nhận chứng chỉ | Khách nhận mã số FDA & chứng chỉ | 1 ngày |
+| Bước | Nội dung |
+| --- | --- |
+| 1. Tư vấn | Khách cung cấp thông tin sản phẩm |
+| 2. Chuẩn bị hồ sơ | Vexim hướng dẫn chuẩn bị tài liệu |
+| 3. Đăng ký với FDA | Vexim nộp hồ sơ, theo dõi tiến độ |
+| 4. Kiểm tra & phê duyệt | FDA xem xét, có thể yêu cầu bổ sung |
+| 5. Nhận chứng chỉ | Khách nhận mã số FDA & chứng chỉ |
 
-Tổng: 2–5 ngày làm việc.
+Quy trình gồm 5 bước như trên. **Thời gian đăng ký chỉ dùng đúng mốc ở mục 8** (1–2 ngày nếu
+đã có mã DUNS, 5–8 ngày nếu chưa có) — không cộng thời gian từng bước thành con số khác.
 
 ## 4. Hồ sơ & chứng nhận thực tế (đã có bằng chứng)
 
@@ -59,8 +61,7 @@ Tổng: 2–5 ngày làm việc.
    sản phẩm bánh kẹo thương hiệu Việt sang thị trường Mỹ.
 2. **Vexim tiếp nhận:** rà soát thành phần sản phẩm, tối ưu nhãn mác theo chuẩn FDA,
    thiết lập pháp nhân U.S. Agent chính thức bảo lãnh cho cơ sở của Libra.
-3. **Đăng ký thành công:** nhận mã số đăng ký FDA (Active) cho nhà máy chỉ trong
-   **3–5 ngày làm việc**.
+3. **Đăng ký thành công:** nhận mã số đăng ký FDA (Active) cho nhà máy.
 4. **Xuất khẩu thành công:** lô hàng bánh kẹo **thông quan tại cảng Mỹ tháng 3/2026**,
    lịch sử vận đơn (House B/L) ghi nhận công khai trên hệ thống hải quan Mỹ.
 
@@ -69,7 +70,7 @@ Tổng: 2–5 ngày làm việc.
 | Tiêu chí | Vexim Global | Dịch vụ khác |
 | --- | --- | --- |
 | Đại lý trực tiếp tại Mỹ (có EIN) | Có | Không (thường qua trung gian) |
-| Thời gian đăng ký | 2–5 ngày | 5–10 ngày |
+| Thời gian đăng ký FDA | 1–2 ngày (đã có mã DUNS) · 5–8 ngày (chưa có) | 5–10 ngày |
 | Tỷ lệ thành công | 99%+ | 90–95% |
 | Hỗ trợ 24/7 | Có | Không đầy đủ |
 | Chi phí | Tối ưu, giá cố định | Cao hơn, dễ phát sinh |
@@ -86,15 +87,17 @@ sau khi đăng ký (FDA yêu cầu gia hạn 2 năm một lần, chẵn năm ch�
 - Không cam kết thay FDA (ví dụ "chắc chắn được duyệt") — chỉ nêu tỷ lệ thành công thực tế
   và mời chuyên viên kiểm tra hồ sơ cụ thể.
 
-## 8. Hai mốc thời gian cần phân biệt cho đúng
+## 8. Mốc thời gian đăng ký FDA — NGUỒN DUY NHẤT
 
-- **Thời gian ĐĂNG KÝ (khi hồ sơ đã sẵn sàng):** 1–2 ngày nếu khách đã có mã DUNS đúng địa
-  chỉ nhà máy; 5–8 ngày nếu chưa có mã DUNS (phải đăng ký mã mới trước).
-- **Quy trình tổng thể 5 bước** (tư vấn → chuẩn bị hồ sơ → nộp → FDA xét → nhận chứng chỉ):
-  2–5 ngày làm việc khi hồ sơ đã đầy đủ.
+- **Đã có mã DUNS đúng địa chỉ nhà máy sản xuất:** khoảng **1–2 ngày**.
+- **Chưa có mã DUNS** (phải đăng ký mã mới trước): khoảng **5–8 ngày**.
 
-Nếu khách hỏi con số chính xác cho **trường hợp cụ thể của họ**, nói rõ thời gian phụ thuộc
-tình trạng hồ sơ và mã DUNS, rồi mời chuyên viên xác nhận — không tự chọn một con số.
+Đây là **con số duy nhất** được dùng khi nói về thời gian đăng ký FDA. Không dùng bất kỳ
+con số nào khác — kể cả con số xuất hiện ở tài liệu cũ hoặc ở nơi khác trên internet.
+
+Nếu khách nhắc một con số khác (ví dụ đọc được ở đâu đó): không tranh luận, khẳng định lại
+mốc chuẩn ở trên, nói rõ thời gian chính xác còn phụ thuộc tình trạng hồ sơ của khách, rồi
+mời chuyên viên xác nhận cho trường hợp cụ thể.
 
 ## 9. Câu hỏi thường gặp trên trang hồ sơ năng lực
 
