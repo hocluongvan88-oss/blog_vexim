@@ -21,6 +21,7 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { AdminNotificationBell } from "@/components/admin/admin-notification-bell"
 import { cn } from "@/lib/utils"
 import { createClient } from "@/lib/supabase/client"
 import { useState, useEffect } from "react"
@@ -158,17 +159,18 @@ export function AdminSidebar({ adminUser }: AdminSidebarProps) {
 
   return (
     <aside className="w-64 bg-white border-r min-h-screen flex flex-col sticky top-0">
-      {/* Logo */}
-      <div className="p-6 border-b">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+      {/* Logo + chuông thông báo */}
+      <div className="p-6 border-b flex items-center justify-between gap-2">
+        <Link href="/" className="flex items-center gap-2 min-w-0">
+          <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
             <Globe className="w-6 h-6 text-primary-foreground" />
           </div>
-          <div>
-            <span className="text-xl font-bold text-primary block">Vexim Global</span>
+          <div className="min-w-0">
+            <span className="text-xl font-bold text-primary block truncate">Vexim Global</span>
             <span className="text-xs text-muted-foreground">Admin Panel</span>
           </div>
         </Link>
+        <AdminNotificationBell className="flex-shrink-0" />
       </div>
 
       {/* Menu Items */}

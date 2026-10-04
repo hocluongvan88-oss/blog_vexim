@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { generateAIResponse, loadAIConfig } from "@/lib/ai-service"
+import { evaluateRules } from "@/lib/rule-engine"
+import { notifyAdmin } from "@/lib/notification-service"
 
 // Zalo Webhook Handler
 // Docs: https://developers.zalo.me/docs/official-account/api
@@ -38,15 +40,71 @@ export async function POST(request: NextRequest) {
         .single()
 
       if (handover) {
-        // Forward to agent (store message, agent will respond via admin panel)
+        // Khách đang trong phiên do chuyên viên phụ trách -> lưu tin nhắn
         await supabase.from("chat_messages").insert({
           conversation_id: conversation.id,
           sender_type: "customer",
           message_text: userMessage,
         })
 
-        // Notify agent (can use websocket or push notification here)
+        // Thông báo chuyên viên NGAY (trước đây chỉ là comment TODO nên khách
+        // nhắn trên Zalo mà không ai biết → khách bỏ đi).
+        await notifyAdmin({
+          conversationId: conversation.id,
+          customerName: conversation.customer_name || sender?.name || "Khách Zalo",
+          message: userMessage,
+          urgency: "high",
+          serviceTag: conversation.metadata?.service_tag,
+          reason: conversation.metadata?.reason,
+          type: "zalo_message",
+          channel: "zalo",
+        })
+
         return NextResponse.json({ success: true, mode: "agent" })
+      }
+
+      // Chạy rule engine TRƯỚC khi để AI trả lời — Zalo trước đây bỏ qua hoàn toàn
+      // bước này nên câu hỏi rủi ro compliance vẫn được AI trả lời tự động và
+      // không bao giờ tạo handover/ thông báo cho admin.
+      const ruleResult = evaluateRules({
+        message: userMessage,
+        conversationId: conversation.id,
+        history: [],
+        hasFile: false,
+        customerInfo: { companyName: sender?.name || "" },
+      })
+
+      if (ruleResult.action === "HANDOFF_TO_ADMIN") {
+        const handoverText =
+          "Cảm ơn anh/chị. Để tư vấn chính xác nhất, em đang chuyển cho chuyên viên của Vexim xử lý. Chuyên viên sẽ phản hồi trong thời gian sớm nhất ạ."
+
+        await supabase.from("conversation_handovers").insert({
+          conversation_id: conversation.id,
+          from_type: "bot",
+          to_type: "agent",
+          reason: ruleResult.reason,
+          status: "active",
+        })
+
+        await supabase.from("chat_messages").insert([
+          { conversation_id: conversation.id, sender_type: "customer", message_text: userMessage },
+          { conversation_id: conversation.id, sender_type: "bot", message_text: handoverText },
+        ])
+
+        await sendZaloMessage(userId, handoverText)
+
+        await notifyAdmin({
+          conversationId: conversation.id,
+          customerName: sender?.name || "Khách Zalo",
+          message: userMessage,
+          urgency: (ruleResult.tags.urgency as "high" | "medium" | "low") || "high",
+          serviceTag: ruleResult.tags.service_tag,
+          reason: ruleResult.tags.reason,
+          type: "handover",
+          channel: "zalo",
+        })
+
+        return NextResponse.json({ success: true, mode: "handoff" })
       }
 
       // Load conversation history

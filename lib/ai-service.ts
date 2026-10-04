@@ -49,8 +49,82 @@ export async function createEmbedding(text: string): Promise<number[]> {
   return Array(1536).fill(0)
 }
 
+/** Từ dừng tiếng Việt + tiếng Anh — bỏ đi để giữ lại từ mang nghĩa. */
+const STOPWORDS = new Set([
+  // tiếng Việt
+  "la", "là", "cua", "của", "va", "và", "co", "có", "khong", "không", "duoc", "được", "cho", "voi", "với",
+  "thi", "thì", "ma", "mà", "nhu", "như", "nay", "này", "do", "đó", "khi", "neu", "nếu", "toi", "tôi",
+  "minh", "mình", "anh", "chi", "chị", "em", "ban", "bạn", "can", "cần", "muon", "muốn", "hoi", "hỏi",
+  "the", "thế", "nao", "nào", "gi", "gì", "sao", "tai", "tại", "vi", "vì", "nen", "nên", "hay", "hoac", "hoặc",
+  "cac", "các", "nhung", "những", "mot", "một", "ra", "vao", "vào", "tu", "từ", "den", "đến", "ve", "về",
+  "bay", "giờ", "hien", "hiện", "xin", "chao", "chào", "cam", "cảm", "on", "ơn", "ạ", "a", "dạ", "vâng",
+  // tiếng Anh
+  "the", "a", "an", "is", "are", "was", "were", "be", "to", "of", "and", "or", "in", "on", "at", "for",
+  "with", "how", "what", "when", "where", "why", "do", "does", "did", "can", "could", "should", "would",
+  "i", "we", "you", "it", "this", "that", "my", "our", "your", "me", "us", "please", "hi", "hello",
+])
+
 /**
- * Tìm kiếm tài liệu liên quan từ knowledge base
+ * Bỏ dấu tiếng Việt (giữ nguyên chữ để so khớp hai chiều).
+ */
+function stripDiacritics(text: string): string {
+  return text
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
+    .toLowerCase()
+}
+
+/**
+ * Tách từ khoá có nghĩa từ câu hỏi của khách.
+ *
+ * Trước đây `searchKnowledge` tìm bằng CẢ CÂU hỏi làm chuỗi con
+ * (`ilike %cả câu%`) nên gần như luôn ra 0 kết quả → AI không có tài liệu
+ * tham khảo → trả lời chung chung. Giờ ta tách thành từ khoá rồi tìm OR.
+ */
+export function extractKeywords(text: string, max = 8): string[] {
+  const rawTokens = text
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .split(/\s+/)
+    .map((token) => token.trim())
+    .filter((token) => token.length >= 2)
+
+  const seen = new Set<string>()
+  const keywords: string[] = []
+
+  for (const token of rawTokens) {
+    const bare = stripDiacritics(token)
+    if (STOPWORDS.has(token) || STOPWORDS.has(bare)) continue
+    if (/^\d+$/.test(token)) continue
+    if (seen.has(bare)) continue
+    seen.add(bare)
+    keywords.push(token)
+  }
+
+  // Ưu tiên từ dài (thường là thuật ngữ chuyên ngành: "registration", "traceability"...)
+  return keywords.sort((a, b) => b.length - a.length).slice(0, max)
+}
+
+/** Đếm số từ khoá xuất hiện trong một chunk (chuẩn hoá bỏ dấu cả hai phía). */
+function scoreChunk(content: string, keywords: string[]): number {
+  const normalized = stripDiacritics(content)
+  let score = 0
+  for (const keyword of keywords) {
+    const bare = stripDiacritics(keyword)
+    if (bare && normalized.includes(bare)) score += 1
+  }
+  return score
+}
+
+/**
+ * Tìm kiếm tài liệu liên quan từ knowledge base.
+ *
+ * Chiến lược 3 lớp (từ chặt tới lỏng) để luôn có ngữ cảnh cho AI:
+ *  1. Tìm OR theo từ khoá có nghĩa, xếp hạng theo SỐ từ khoá khớp.
+ *  2. Nếu không có gì, nới lỏng bằng các từ khoá dài nhất.
+ *  3. Nếu vẫn không có, trả về chunk mới nhất đúng danh mục liên quan (nếu suy ra được).
  */
 export async function searchKnowledge(
   query: string,
@@ -58,38 +132,70 @@ export async function searchKnowledge(
   supabase: any
 ): Promise<KnowledgeChunk[]> {
   try {
-    console.log("[v0] Searching knowledge base for:", query)
+    const keywords = extractKeywords(query)
+    console.log("[v0] Knowledge search — từ khoá:", keywords)
 
-    // Tìm kiếm bằng ILIKE (case-insensitive pattern matching)
-    // Phù hợp với tiếng Việt hơn full-text search
-    const { data, error } = await supabase
-      .from("knowledge_chunks")
-      .select(
+    const runQuery = async (terms: string[]) => {
+      if (terms.length === 0) return [] as any[]
+      const orFilter = terms.map((term) => `content.ilike.%${term}%`).join(",")
+      const { data, error } = await supabase
+        .from("knowledge_chunks")
+        .select(
+          `
+          id,
+          content,
+          knowledge_documents!inner(title, category, status)
         `
-        id,
-        content,
-        knowledge_documents!inner(title, category, status)
-      `
-      )
-      .ilike("content", `%${query}%`)
-      .eq("knowledge_documents.status", "active")
-      .limit(topK)
+        )
+        .or(orFilter)
+        .eq("knowledge_documents.status", "active")
+        .limit(40)
 
-    if (error) {
-      console.error("[v0] Knowledge search error:", error)
-      throw error
+      if (error) {
+        console.error("[v0] Knowledge search error:", error)
+        return [] as any[]
+      }
+      return (data || []) as any[]
     }
 
-    console.log("[v0] Found knowledge chunks:", data?.length || 0)
+    // Lớp 1 + 2: tìm theo từ khoá, nới lỏng dần
+    let rows = await runQuery(keywords)
+    if (rows.length === 0 && keywords.length > 2) {
+      rows = await runQuery(keywords.slice(0, 3))
+    }
+    if (rows.length === 0 && keywords.length > 0) {
+      rows = await runQuery([keywords[0]])
+    }
+    // Lớp 3: chưa có từ khoá nào (câu quá ngắn) -> lấy chunk mới nhất làm ngữ cảnh nền
+    if (rows.length === 0 && keywords.length === 0) {
+      const { data } = await supabase
+        .from("knowledge_chunks")
+        .select(
+          `
+          id,
+          content,
+          knowledge_documents!inner(title, category, status)
+        `
+        )
+        .eq("knowledge_documents.status", "active")
+        .limit(40)
+      rows = (data || []) as any[]
+    }
 
-    return (
-      data?.map((item: any) => ({
-        id: item.id,
-        chunk_text: item.content, // Map content back to chunk_text for interface compatibility
-        document_title: item.knowledge_documents.title,
-        category: item.knowledge_documents.category,
-      })) || []
-    )
+    // Xếp hạng theo số từ khoá khớp để đưa tài liệu đúng nhất lên đầu
+    const ranked = rows
+      .map((item) => ({ item, score: scoreChunk(item.content || "", keywords) }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, topK)
+
+    console.log("[v0] Knowledge chunks tìm được:", ranked.length)
+
+    return ranked.map(({ item }) => ({
+      id: item.id,
+      chunk_text: item.content,
+      document_title: item.knowledge_documents?.title || "Tài liệu",
+      category: item.knowledge_documents?.category || "",
+    }))
   } catch (error) {
     console.error("[v0] Error searching knowledge:", error)
     return []
@@ -100,7 +206,18 @@ export async function searchKnowledge(
  * Xây dựng context từ knowledge chunks
  */
 function buildContext(chunks: KnowledgeChunk[]): string {
-  if (chunks.length === 0) return ""
+  if (chunks.length === 0) {
+    // Không có tài liệu nào khớp: yêu cầu AI KHÔNG bịa và chủ động xin thêm thông tin
+    // thay vì trả lời chung chung (đây là lý do khách thấy câu trả lời "nhạt").
+    return `
+
+⚠️ KHÔNG tìm thấy tài liệu nội bộ nào liên quan tới câu hỏi này trong kho tri thức của Vexim.
+Quy tắc BẮT BUỘC khi thiếu tài liệu:
+- KHÔNG bịa số liệu, mốc thời gian, mức phí hay tên biểu mẫu.
+- Chỉ trả lời phần CHẮC CHẮN đúng theo quy định chung, ngắn gọn (tối đa 3 câu).
+- Nói rõ đây là thông tin chung và cần chuyên viên xác nhận cho trường hợp cụ thể.
+- Đặt 1–2 câu hỏi làm rõ (loại sản phẩm, thị trường, cơ sở đã đăng ký chưa) để tư vấn đúng hơn.`
+  }
 
   const context = chunks
     .map(
@@ -109,7 +226,12 @@ function buildContext(chunks: KnowledgeChunk[]): string {
     )
     .join("\n\n")
 
-  return `\n\nThông tin tham khảo:\n${context}`
+  return `
+
+📚 TÀI LIỆU NỘI BỘ CỦA VEXIM (ưu tiên trả lời theo các tài liệu này, trích dẫn số liệu chính xác):
+${context}
+
+Lưu ý: nếu tài liệu trên không đủ để trả lời, hãy nói rõ cần chuyên viên xác nhận và đặt câu hỏi làm rõ — tuyệt đối không tự suy diễn số liệu.`
 }
 
 /**

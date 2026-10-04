@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { generateAIResponse, loadAIConfig } from "@/lib/ai-service"
 import { evaluateRules, getContactRequestMessage, type MessageContext } from "@/lib/rule-engine"
-import { notifyAdminNewHandover } from "@/lib/notification-service"
+import { notifyAdmin, notifyAdminNewHandover } from "@/lib/notification-service"
 
 export async function POST(request: NextRequest) {
   try {
@@ -214,6 +214,18 @@ export async function POST(request: NextRequest) {
           }
         })
         .eq("id", convId)
+
+      // Thông báo admin NGAY khi khách được mời để lại liên hệ.
+      // Trước đây nhánh này không thông báo gì → lead nóng bị bỏ quên trên trang quản trị.
+      await notifyAdmin({
+        conversationId: convId,
+        customerName: customer_name,
+        message: message_text,
+        urgency: (ruleResult.tags.urgency as "high" | "medium" | "low") || "medium",
+        serviceTag: ruleResult.tags.service_tag,
+        reason: ruleResult.tags.reason,
+        type: "new_lead",
+      })
 
       return NextResponse.json({
         status: "ask_contact",
