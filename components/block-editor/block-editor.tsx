@@ -31,7 +31,15 @@ import { ListBlock } from "./blocks/list-block"
 import { InlineToolbar } from "./inline-toolbar"
 import { SlashMenu, type SlashMenuItem } from "./slash-menu"
 import type { Block, BlockType } from "./types"
-import { generateBlockId, parsedBlocksToBlocks, type ParsedBlock } from "@/lib/content-parsers"
+import {
+  generateBlockId,
+  hasRichHtmlStructure,
+  looksLikeMarkdown,
+  parseHtmlToParsedBlocks,
+  parseMarkdownToBlocks,
+  parsedBlocksToBlocks,
+  type ParsedBlock,
+} from "@/lib/content-parsers"
 import { stripHtml } from "@/lib/sanitize"
 
 interface BlockEditorProps {
@@ -524,7 +532,7 @@ export function BlockEditor({ value, onChange, onSelectBlock }: BlockEditorProps
     void currentBlockId
   }
 
-  /** Paste HTML/Markdown đã được parse thành nhiều khối -> thay khối hiện tại bằng các khối đó. */
+  /** Paste HTML/Markdown đã được parse thành nhiều khối -> thay khối trống hoặc chèn ngay sau khối hiện tại. */
   const handlePasteBlocks = (currentBlockId: string, parsed: ParsedBlock[]) => {
     const current = blocksRef.current
     const index = current.findIndex((block) => block.id === currentBlockId)
@@ -533,10 +541,55 @@ export function BlockEditor({ value, onChange, onSelectBlock }: BlockEditorProps
     const converted = parsedBlocksToBlocks(parsed)
     if (converted.length === 0) return
 
+    const currentBlock = current[index]
+    const isCurrentEmpty =
+      currentBlock &&
+      currentBlock.type === "paragraph" &&
+      !stripHtml(String(currentBlock.data?.text ?? "")).trim()
+
     const newBlocks = [...current]
-    newBlocks.splice(index, 1, ...converted)
+    if (isCurrentEmpty) {
+      newBlocks.splice(index, 1, ...converted)
+    } else {
+      newBlocks.splice(index + 1, 0, ...converted)
+    }
     commit(newBlocks)
     selectBlock(converted[0].id)
+  }
+
+  /**
+   * Bắt sự kiện Ctrl+V ở cấp toàn trình soạn thảo (phòng trường hợp con trỏ đang đứng ở Heading,
+   * Quote hoặc vùng trắng ngoài Paragraph mà người dùng nhấn Ctrl+V để dán cả bài / bảng).
+   */
+  const handleContainerPaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
+    const pastedHTML = e.clipboardData.getData("text/html")
+    const pastedText = e.clipboardData.getData("text/plain")
+
+    let parsed: ParsedBlock[] = []
+    if (pastedHTML && hasRichHtmlStructure(pastedHTML, pastedText)) {
+      try {
+        parsed = parseHtmlToParsedBlocks(pastedHTML)
+      } catch {
+        parsed = []
+      }
+    }
+    if (parsed.length === 0 && pastedText && looksLikeMarkdown(pastedText)) {
+      parsed = parseMarkdownToBlocks(pastedText)
+    }
+
+    const isStructured =
+      parsed.length > 1 || parsed.some((b) => ["table", "image", "list", "heading", "quote"].includes(b.type))
+
+    if (!isStructured) return
+
+    e.preventDefault()
+    e.stopPropagation()
+
+    const current = blocksRef.current
+    const targetId = selectedBlockId || current[current.length - 1]?.id
+    if (targetId) {
+      handlePasteBlocks(targetId, parsed)
+    }
   }
 
   /** Khi người dùng chọn một mục từ SlashMenu ("/" hoặc nút "+") */
@@ -715,6 +768,7 @@ export function BlockEditor({ value, onChange, onSelectBlock }: BlockEditorProps
     <div
       className="block-editor-container border rounded-xl bg-white min-h-[560px] flex flex-col shadow-xs"
       onClick={() => selectBlock(null)}
+      onPaste={handleContainerPaste}
     >
       {/* Thanh công cụ định dạng cố định trên đầu trình soạn thảo (quen thuộc như WordPress / Google Docs) */}
       <div

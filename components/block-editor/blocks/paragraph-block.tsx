@@ -4,6 +4,7 @@ import React, { useEffect, useRef } from "react"
 import type { BlockType, ParagraphData } from "../types"
 import {
   cleanInlineHtml,
+  hasRichHtmlStructure,
   looksLikeMarkdown,
   parseHtmlToParsedBlocks,
   parseMarkdownToBlocks,
@@ -183,7 +184,6 @@ export function ParagraphBlock({
   const tryMarkdownShortcut = (plainText: string, rawHtml: string): boolean => {
     if (!onConvertBlock) return false
 
-    // Chuẩn hoá khoảng trắng non-breaking (\u00A0) mà trình duyệt hay chèn khi gõ Space
     const normalized = plainText.replace(/\u00A0/g, " ")
 
     // Heading: ## , ### , ####
@@ -278,7 +278,6 @@ export function ParagraphBlock({
             const beforeText = beforeRange.toString()
             const afterText = afterRange.toString()
 
-            // Nếu con trỏ đang đứng ở giữa đoạn văn -> tách câu trước & câu sau thành 2 khối
             if (beforeText.trim().length > 0 && afterText.trim().length > 0) {
               const beforeHtml = fragmentToHtml(beforeRange.cloneContents())
               const afterHtml = fragmentToHtml(afterRange.cloneContents())
@@ -322,29 +321,21 @@ export function ParagraphBlock({
     const imageFile = files.find((f) => f.type.startsWith("image/"))
     if (imageFile && onPasteImageFile) {
       e.preventDefault()
+      e.stopPropagation()
       onPasteImageFile(imageFile)
       return
     }
 
     e.preventDefault()
+    e.stopPropagation()
 
     const pastedHTML = e.clipboardData.getData("text/html")
     const pastedText = e.clipboardData.getData("text/plain")
 
-    // 1. Markdown có cấu trúc (bảng, heading, list...) -> tách thành nhiều khối
-    if (pastedText && onPasteBlocks && looksLikeMarkdown(pastedText)) {
-      const markdownBlocks = parseMarkdownToBlocks(pastedText)
-      const isStructured =
-        markdownBlocks.length > 1 ||
-        markdownBlocks.some((block) => ["table", "list", "heading", "quote"].includes(block.type))
-      if (isStructured) {
-        onPasteBlocks(markdownBlocks)
-        return
-      }
-    }
-
-    // 2. HTML từ Google Docs / Word / trang web -> tách thành nhiều khối
-    if (pastedHTML && onPasteBlocks) {
+    // 1. ƯU TIÊN HTML CÓ CẤU TRÚC từ Google Docs / Word / Excel / Notion / Gemini / Web
+    //    (Trước đây kiểm tra looksLikeMarkdown(pastedText) trước nên khi bài có "1. " hoặc "- "
+    //    thì toàn bộ thẻ <table>, <h2>, <strong> trong pastedHTML bị vứt bỏ!)
+    if (pastedHTML && onPasteBlocks && hasRichHtmlStructure(pastedHTML, pastedText)) {
       try {
         const parsedBlocks = parseHtmlToParsedBlocks(pastedHTML)
         const isStructured =
@@ -356,7 +347,8 @@ export function ParagraphBlock({
           return
         }
 
-        if (parsedBlocks.length === 1 && parsedBlocks[0].type === "paragraph") {
+        // Nếu HTML chỉ ra 1 đoạn văn đơn lẻ và text thuần không phải bảng TSV/Markdown -> chèn inline
+        if (parsedBlocks.length === 1 && parsedBlocks[0].type === "paragraph" && !looksLikeMarkdown(pastedText)) {
           insertPasteContent(parsedBlocks[0].text)
           return
         }
@@ -365,7 +357,32 @@ export function ParagraphBlock({
       }
     }
 
-    // 3. Text thuần: nhiều dòng -> nhiều khối, một dòng -> chèn tại con trỏ
+    // 2. Markdown hoặc bảng TSV (copy từ Excel/Sheets/Markdown) -> tách thành nhiều khối
+    if (pastedText && onPasteBlocks && looksLikeMarkdown(pastedText)) {
+      const markdownBlocks = parseMarkdownToBlocks(pastedText)
+      const isStructured =
+        markdownBlocks.length > 1 ||
+        markdownBlocks.some((block) => ["table", "list", "heading", "quote"].includes(block.type))
+      if (isStructured) {
+        onPasteBlocks(markdownBlocks)
+        return
+      }
+    }
+
+    // 3. Nếu vẫn có pastedHTML (ví dụ 1 câu có in đậm/link) -> chèn inline giữ định dạng
+    if (pastedHTML) {
+      try {
+        const parsedBlocks = parseHtmlToParsedBlocks(pastedHTML)
+        if (parsedBlocks.length === 1 && parsedBlocks[0].type === "paragraph") {
+          insertPasteContent(parsedBlocks[0].text)
+          return
+        }
+      } catch {
+        /* fallback xuống plain text */
+      }
+    }
+
+    // 4. Text thuần: nhiều dòng -> nhiều khối, một dòng -> chèn tại con trỏ
     const lines = pastedText
       .split(/\r?\n/)
       .map((line) => line.trim())
@@ -425,12 +442,10 @@ export function ParagraphBlock({
     const rawHtml = e.currentTarget.innerHTML
     const plainText = e.currentTarget.textContent || ""
 
-    // Thử chuyển đổi nhanh bằng Markdown shortcut (## , - , 1. , > )
     if (tryMarkdownShortcut(plainText, rawHtml)) {
       return
     }
 
-    // Kiểm tra xem có đang gõ lệnh "/" không
     checkSlashCommand(plainText)
 
     syncFromDom(rawHtml)
@@ -449,7 +464,6 @@ export function ParagraphBlock({
   }
 
   const handleBlur = (e: React.FocusEvent<HTMLParagraphElement>) => {
-    // Khi rời khối mà chỉ có dấu "/" đơn lẻ thì giữ nguyên hoặc đóng menu
     const plain = stripHtml(e.currentTarget.innerHTML).trim()
     if (plain.startsWith("/")) {
       setTimeout(() => onSlashCommand?.(null), 180)

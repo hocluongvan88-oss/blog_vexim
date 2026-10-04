@@ -99,7 +99,14 @@ function sanitizeBlockData(type: BlockType, data: Record<string, unknown>): Reco
         align: asAlign(data?.align, "left"),
       }
     case "table": {
-      const rawRows = Array.isArray(data?.content) ? (data.content as unknown[]) : []
+      let rawRows: unknown[] = []
+      if (Array.isArray(data?.content)) {
+        rawRows = data.content as unknown[]
+      } else if (Array.isArray(data?.headers) || Array.isArray(data?.rows)) {
+        const h = Array.isArray(data?.headers) ? [data.headers] : []
+        const r = Array.isArray(data?.rows) ? (data.rows as unknown[]) : []
+        rawRows = [...h, ...r]
+      }
       const content = rawRows
         .slice(0, 200)
         .map((row) => (Array.isArray(row) ? (row as unknown[]).slice(0, 30).map(asInlineHtml) : []))
