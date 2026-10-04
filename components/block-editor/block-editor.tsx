@@ -20,6 +20,11 @@ import {
   Quote,
   HelpCircle,
   Loader2,
+  Trash2,
+  Copy,
+  Scissors,
+  X,
+  Check,
 } from "lucide-react"
 import { BlockToolbar } from "./block-toolbar"
 import { HeadingBlock } from "./blocks/heading-block"
@@ -32,6 +37,7 @@ import { InlineToolbar } from "./inline-toolbar"
 import { SlashMenu, type SlashMenuItem } from "./slash-menu"
 import type { Block, BlockType } from "./types"
 import {
+  blocksToPlainText,
   generateBlockId,
   hasRichHtmlStructure,
   looksLikeMarkdown,
@@ -40,6 +46,7 @@ import {
   parsedBlocksToBlocks,
   type ParsedBlock,
 } from "@/lib/content-parsers"
+import { blocksToHTML } from "@/lib/blocks-to-html"
 import { stripHtml } from "@/lib/sanitize"
 
 interface BlockEditorProps {
@@ -89,6 +96,17 @@ export function BlockEditor({ value, onChange, onSelectBlock }: BlockEditorProps
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null)
   const [showShortcutsHelp, setShowShortcutsHelp] = useState(false)
   const [uploadingPastedImage, setUploadingPastedImage] = useState(false)
+
+  /**
+   * Chọn nhiều khối cùng lúc (multi-block selection) kiểu Notion:
+   * Ctrl+A hai lần để chọn cả bài, Shift+Click để chọn một khoảng, Delete để xoá sạch.
+   */
+  const [selectedBlockIds, setSelectedBlockIds] = useState<string[]>([])
+  const [confirmClearAll, setConfirmClearAll] = useState(false)
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const selectionAnchorRef = useRef<string | null>(null)
+  const selectAllArmRef = useRef(0)
+  const confirmClearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Slash Menu / Inline Block Picker state
   const [slashMenuState, setSlashMenuState] = useState<{
@@ -373,6 +391,277 @@ export function BlockEditor({ value, onChange, onSelectBlock }: BlockEditorProps
     }
   }
 
+  /* ============================================================
+   * CHỌN NHIỀU KHỐI & XOÁ NHANH (Notion-style)
+   * ============================================================ */
+
+  const clearBlockSelection = useCallback(() => {
+    setSelectedBlockIds([])
+    selectionAnchorRef.current = null
+  }, [])
+
+  /** Focus một khối ngay lập tức (không chờ render) — dùng khi cần gõ tiếp sau khi bỏ chọn. */
+  const focusBlockNow = useCallback((blockId: string, caret: "start" | "end" = "end") => {
+    const blockEl = document.querySelector(`[data-block-id="${blockId}"]`)
+    const editable = blockEl?.querySelector("[contenteditable=\"true\"], textarea, input") as HTMLElement | null
+    if (!editable) return
+    editable.focus()
+    if (editable.getAttribute("contenteditable") === "true") {
+      try {
+        const sel = window.getSelection()
+        const range = document.createRange()
+        range.selectNodeContents(editable)
+        range.collapse(caret === "start")
+        sel?.removeAllRanges()
+        sel?.addRange(range)
+      } catch {
+        /* ignore */
+      }
+    }
+  }, [])
+
+  /** Chọn toàn bộ khối trong bài (Ctrl+A hai lần hoặc nút "Chọn tất cả"). */
+  const selectAllBlocks = useCallback(() => {
+    const ids = blocksRef.current.map((block) => block.id)
+    if (ids.length === 0) return
+    setSelectedBlockIds(ids)
+    selectionAnchorRef.current = ids[0]
+    selectBlock(null)
+    // Bỏ bôi đen chữ trong một khối để nhìn rõ "đang chọn cả bài"
+    try {
+      window.getSelection()?.removeAllRanges()
+    } catch {
+      /* ignore */
+    }
+    containerRef.current?.focus({ preventScroll: true })
+  }, [selectBlock])
+
+  /** Shift+Click: chọn từ khối mốc tới khối vừa bấm. */
+  const selectRangeTo = useCallback((blockId: string) => {
+    const current = blocksRef.current
+    const anchorId = selectionAnchorRef.current
+    if (!anchorId) {
+      selectionAnchorRef.current = blockId
+      setSelectedBlockIds([blockId])
+      return
+    }
+    const anchorIndex = current.findIndex((b) => b.id === anchorId)
+    const focusIndex = current.findIndex((b) => b.id === blockId)
+    if (anchorIndex === -1 || focusIndex === -1) return
+    const [start, end] = anchorIndex <= focusIndex ? [anchorIndex, focusIndex] : [focusIndex, anchorIndex]
+    setSelectedBlockIds(current.slice(start, end + 1).map((b) => b.id))
+    try {
+      window.getSelection()?.removeAllRanges()
+    } catch {
+      /* ignore */
+    }
+    containerRef.current?.focus({ preventScroll: true })
+  }, [])
+
+  const getSelectedBlocks = useCallback((): Block[] => {
+    const idSet = new Set(selectedBlockIds)
+    return blocksRef.current.filter((block) => idSet.has(block.id))
+  }, [selectedBlockIds])
+
+  /** Xoá tất cả khối đang chọn; nếu xoá hết thì để lại 1 đoạn văn trống. */
+  const deleteSelectedBlocks = useCallback(() => {
+    if (selectedBlockIds.length === 0) return
+    const idSet = new Set(selectedBlockIds)
+    const current = blocksRef.current
+    const firstRemovedIndex = current.findIndex((block) => idSet.has(block.id))
+    const remaining = current.filter((block) => !idSet.has(block.id))
+
+    setSelectedBlockIds([])
+    selectionAnchorRef.current = null
+
+    if (remaining.length === 0) {
+      const fresh = createDefaultBlock()
+      commit([fresh])
+      selectBlock(fresh.id)
+      focusBlockAfterRender(fresh.id, "start")
+      return
+    }
+
+    const targetIndex = Math.min(Math.max(0, firstRemovedIndex - 1), remaining.length - 1)
+    const target = remaining[targetIndex]
+    commit(remaining)
+    if (target) {
+      selectBlock(target.id)
+      focusBlockAfterRender(target.id, "end")
+    } else {
+      selectBlock(null)
+    }
+  }, [selectedBlockIds, commit, selectBlock])
+
+  /** Xoá sạch toàn bộ nội dung bài viết (vẫn hoàn tác được bằng Ctrl+Z). */
+  const clearAllBlocks = useCallback(() => {
+    const current = blocksRef.current
+    const onlyEmptyParagraph =
+      current.length === 1 &&
+      current[0].type === "paragraph" &&
+      !stripHtml(String(current[0].data?.text ?? "")).trim()
+    if (onlyEmptyParagraph) return
+
+    const fresh = createDefaultBlock()
+    commit([fresh])
+    setSelectedBlockIds([])
+    selectionAnchorRef.current = null
+    selectBlock(fresh.id)
+    focusBlockAfterRender(fresh.id, "start")
+  }, [commit, selectBlock])
+
+  const handleClearAllClick = () => {
+    if (!confirmClearAll) {
+      setConfirmClearAll(true)
+      if (confirmClearTimerRef.current) clearTimeout(confirmClearTimerRef.current)
+      confirmClearTimerRef.current = setTimeout(() => setConfirmClearAll(false), 4000)
+      return
+    }
+    if (confirmClearTimerRef.current) clearTimeout(confirmClearTimerRef.current)
+    setConfirmClearAll(false)
+    clearAllBlocks()
+  }
+
+  /** Sao chép / Cắt nhiều khối vào clipboard (giữ cả HTML để dán sang nơi khác). */
+  const copySelectedBlocks = useCallback(
+    async (isCut: boolean) => {
+      const selected = getSelectedBlocks()
+      if (selected.length === 0) return
+      const html = blocksToHTML(selected)
+      const text = blocksToPlainText(selected)
+      try {
+        const clipboard = typeof navigator !== "undefined" ? navigator.clipboard : undefined
+        const ClipboardItemCtor = (
+          window as unknown as { ClipboardItem?: new (items: Record<string, Blob>) => ClipboardItem }
+        ).ClipboardItem
+        if (clipboard && ClipboardItemCtor) {
+          await clipboard.write([
+            new ClipboardItemCtor({
+              "text/html": new Blob([html], { type: "text/html" }),
+              "text/plain": new Blob([text], { type: "text/plain" }),
+            }),
+          ])
+        } else if (clipboard) {
+          await clipboard.writeText(text)
+        }
+      } catch {
+        /* Trình duyệt chặn clipboard → bỏ qua, người dùng vẫn có thể dùng Ctrl+C */
+      }
+      if (isCut) deleteSelectedBlocks()
+    },
+    [getSelectedBlocks, deleteSelectedBlocks],
+  )
+
+  /**
+   * Phím tắt cho vùng chọn nhiều khối (chạy ở capture phase để chặn hành vi
+   * Backspace của từng khối khi đang chọn cả bài):
+   *  - Ctrl/Cmd+A: lần 1 bôi đen trong khối, lần 2 chọn toàn bộ khối
+   *  - Delete / Backspace: xoá mọi khối đang chọn
+   *  - Esc: bỏ chọn
+   */
+  useEffect(() => {
+    const handleSelectionKeys = (e: KeyboardEvent) => {
+      const container = containerRef.current
+      if (!container) return
+
+      const targetEl = e.target as HTMLElement | null
+      const activeEl = document.activeElement as HTMLElement | null
+      const insideEditor =
+        (!!targetEl && container.contains(targetEl)) || (!!activeEl && container.contains(activeEl))
+      if (!insideEditor) return
+
+      // Đang gõ trong ô nhập liệu con (alt/caption/nội dung ô bảng dạng input...) → không can thiệp
+      const activeTag = activeEl?.tagName
+      if (activeTag === "INPUT" || activeTag === "TEXTAREA") return
+
+      const withModifier = e.ctrlKey || e.metaKey
+      const key = e.key.toLowerCase()
+
+      if (withModifier && !e.shiftKey && !e.altKey && key === "a") {
+        const now = Date.now()
+        const isSecondPress = now - selectAllArmRef.current < 1500
+        const caretInEditable = !!activeEl && activeEl.isContentEditable
+        if (!caretInEditable || isSecondPress || selectedBlockIds.length > 0) {
+          e.preventDefault()
+          e.stopPropagation()
+          selectAllBlocks()
+        } else {
+          // Lần đầu: để trình duyệt bôi đen nội dung khối hiện tại
+          selectAllArmRef.current = now
+        }
+        return
+      }
+
+      if (selectedBlockIds.length === 0) return
+
+      if (e.key === "Escape") {
+        e.preventDefault()
+        e.stopPropagation()
+        const firstId = selectedBlockIds[0]
+        clearBlockSelection()
+        // Trả con trỏ về khối đầu tiên để gõ tiếp ngay, không cần bấm chuột lại
+        if (firstId) focusBlockNow(firstId, "end")
+        return
+      }
+
+      if (e.key === "Backspace" || e.key === "Delete") {
+        e.preventDefault()
+        e.stopPropagation()
+        deleteSelectedBlocks()
+        return
+      }
+
+      // Gõ ký tự bất kỳ → bỏ chọn và gõ tiếp vào khối cuối cùng đã chọn
+      if (!withModifier && !e.altKey && e.key.length === 1) {
+        const lastId = selectedBlockIds[selectedBlockIds.length - 1]
+        clearBlockSelection()
+        if (lastId) focusBlockNow(lastId, "end")
+      }
+    }
+
+    window.addEventListener("keydown", handleSelectionKeys, true)
+    return () => window.removeEventListener("keydown", handleSelectionKeys, true)
+  }, [
+    selectedBlockIds,
+    selectAllBlocks,
+    clearBlockSelection,
+    deleteSelectedBlocks,
+    focusBlockNow,
+  ])
+
+  /** Ctrl+C / Ctrl+X khi đang chọn nhiều khối → copy/cut cả cụm khối. */
+  const handleCopyOrCut = (e: React.ClipboardEvent<HTMLDivElement>, isCut: boolean) => {
+    if (selectedBlockIds.length === 0) return
+    const selected = getSelectedBlocks()
+    if (selected.length === 0) return
+    e.preventDefault()
+    e.stopPropagation()
+    try {
+      e.clipboardData.setData("text/html", blocksToHTML(selected))
+      e.clipboardData.setData("text/plain", blocksToPlainText(selected))
+    } catch {
+      /* ignore */
+    }
+    if (isCut) deleteSelectedBlocks()
+  }
+
+  useEffect(() => {
+    return () => {
+      if (confirmClearTimerRef.current) clearTimeout(confirmClearTimerRef.current)
+    }
+  }, [])
+
+  /** Dọn các id đã chọn nếu khối bị xoá từ nơi khác (undo, import...) */
+  useEffect(() => {
+    if (selectedBlockIds.length === 0) return
+    const existing = new Set(blocks.map((b) => b.id))
+    const stillValid = selectedBlockIds.filter((id) => existing.has(id))
+    if (stillValid.length !== selectedBlockIds.length) {
+      setSelectedBlockIds(stillValid)
+      if (stillValid.length === 0) selectionAnchorRef.current = null
+    }
+  }, [blocks, selectedBlockIds])
+
   const moveBlock = (id: string, direction: "up" | "down") => {
     const current = blocksRef.current
     const index = current.findIndex((block) => block.id === id)
@@ -632,16 +921,28 @@ export function BlockEditor({ value, onChange, onSelectBlock }: BlockEditorProps
 
   const renderBlock = (block: Block, index: number) => {
     const isSelected = selectedBlockId === block.id
+    const isMultiSelected = selectedBlockIds.includes(block.id)
 
     return (
       <div
         key={block.id}
         data-block-id={block.id}
+        data-multi-selected={isMultiSelected ? "true" : undefined}
         className={`group relative rounded-lg transition-colors px-2 py-1 ${
-          isSelected ? "bg-primary/[0.03] ring-1 ring-primary/30" : "hover:bg-muted/30"
+          isMultiSelected
+            ? "bg-primary/[0.09] ring-1 ring-primary/40"
+            : isSelected
+              ? "bg-primary/[0.03] ring-1 ring-primary/30"
+              : "hover:bg-muted/30"
         }`}
         onClick={(e) => {
           e.stopPropagation()
+          // Shift+Click: chọn một khoảng khối liên tiếp (giống Notion)
+          if (e.shiftKey && (selectionAnchorRef.current || selectedBlockIds.length > 0)) {
+            selectRangeTo(block.id)
+            return
+          }
+          if (selectedBlockIds.length > 0) clearBlockSelection()
           selectBlock(block.id)
         }}
         onFocusCapture={() => selectBlock(block.id)}
@@ -681,8 +982,8 @@ export function BlockEditor({ value, onChange, onSelectBlock }: BlockEditorProps
           </div>
         </div>
 
-        {/* Block Toolbar (góc trên bên phải khối, không đè lên chữ khối trên) */}
-        {isSelected && (
+        {/* Khi đang chọn nhiều khối thì ẩn toolbar của từng khối để tránh rối */}
+        {isSelected && selectedBlockIds.length === 0 && (
           <BlockToolbar
             block={block}
             onUpdate={(data) => updateBlock(block.id, data)}
@@ -766,9 +1067,16 @@ export function BlockEditor({ value, onChange, onSelectBlock }: BlockEditorProps
 
   return (
     <div
-      className="block-editor-container border rounded-xl bg-white min-h-[560px] flex flex-col shadow-xs"
-      onClick={() => selectBlock(null)}
+      ref={containerRef}
+      tabIndex={-1}
+      className="block-editor-container border rounded-xl bg-white min-h-[560px] flex flex-col shadow-xs outline-none"
+      onClick={() => {
+        selectBlock(null)
+        clearBlockSelection()
+      }}
       onPaste={handleContainerPaste}
+      onCopy={(e) => handleCopyOrCut(e, false)}
+      onCut={(e) => handleCopyOrCut(e, true)}
     >
       {/* Thanh công cụ định dạng cố định trên đầu trình soạn thảo (quen thuộc như WordPress / Google Docs) */}
       <div
@@ -953,6 +1261,32 @@ export function BlockEditor({ value, onChange, onSelectBlock }: BlockEditorProps
             variant="ghost"
             size="sm"
             className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+            onClick={selectAllBlocks}
+            title="Chọn toàn bộ khối trong bài (hoặc bấm Ctrl+A hai lần)"
+          >
+            <Check className="w-3.5 h-3.5 mr-1" />
+            Chọn tất cả
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className={`h-7 px-2 text-xs ${
+              confirmClearAll
+                ? "bg-destructive/10 font-semibold text-destructive hover:bg-destructive/15 hover:text-destructive"
+                : "text-muted-foreground hover:text-destructive"
+            }`}
+            onClick={handleClearAllClick}
+            title="Xoá toàn bộ nội dung bài viết (Ctrl+Z để hoàn tác)"
+          >
+            <Trash2 className="w-3.5 h-3.5 mr-1" />
+            {confirmClearAll ? "Bấm lần nữa để xoá hết" : "Xoá hết nội dung"}
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
             onClick={() => setShowShortcutsHelp((v) => !v)}
           >
             <HelpCircle className="w-3.5 h-3.5 mr-1" />
@@ -960,6 +1294,67 @@ export function BlockEditor({ value, onChange, onSelectBlock }: BlockEditorProps
           </Button>
         </div>
       </div>
+
+      {/* Thanh thao tác khi đang chọn nhiều khối (Notion-style) */}
+      {selectedBlockIds.length > 0 && (
+        <div
+          className="sticky top-[6.4rem] z-10 flex flex-wrap items-center justify-between gap-2 border-b border-primary/25 bg-primary/[0.08] px-3 py-1.5 text-xs backdrop-blur"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <span className="flex items-center gap-1.5 font-semibold text-primary">
+            <Check className="w-3.5 h-3.5" />
+            Đã chọn {selectedBlockIds.length}/{blocks.length} khối
+            <span className="hidden font-normal text-muted-foreground sm:inline">
+              · Shift+Click để chọn thêm · Esc để bỏ chọn
+            </span>
+          </span>
+          <div className="flex flex-wrap items-center gap-1">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-7 px-2 text-xs"
+              onClick={() => void copySelectedBlocks(false)}
+              title="Sao chép các khối đang chọn (Ctrl+C)"
+            >
+              <Copy className="w-3.5 h-3.5 mr-1" />
+              Sao chép
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-7 px-2 text-xs"
+              onClick={() => void copySelectedBlocks(true)}
+              title="Cắt các khối đang chọn (Ctrl+X)"
+            >
+              <Scissors className="w-3.5 h-3.5 mr-1" />
+              Cắt
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              className="h-7 px-2 text-xs"
+              onClick={deleteSelectedBlocks}
+              title="Xoá các khối đang chọn (Delete / Backspace)"
+            >
+              <Trash2 className="w-3.5 h-3.5 mr-1" />
+              Xoá {selectedBlockIds.length} khối
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0"
+              onClick={clearBlockSelection}
+              title="Bỏ chọn (Esc)"
+            >
+              <X className="w-3.5 h-3.5" />
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Bảng hướng dẫn phím tắt kiểu Notion / WordPress */}
       {showShortcutsHelp && (
@@ -992,6 +1387,17 @@ export function BlockEditor({ value, onChange, onSelectBlock }: BlockEditorProps
             <span>
               <kbd className="rounded border bg-white px-1.5 py-0.5 font-mono text-[11px]">Ctrl+V</kbd> Dán từ Google
               Docs / Ảnh chụp màn hình
+            </span>
+            <span>
+              <kbd className="rounded border bg-white px-1.5 py-0.5 font-mono text-[11px]">Ctrl+A ×2</kbd> Chọn toàn bộ
+              khối (cả bài)
+            </span>
+            <span>
+              <kbd className="rounded border bg-white px-1.5 py-0.5 font-mono text-[11px]">Delete</kbd> Xoá khối đang
+              chọn
+            </span>
+            <span>
+              <kbd className="rounded border bg-white px-1.5 py-0.5 font-mono text-[11px]">Esc</kbd> Bỏ chọn tất cả
             </span>
           </div>
           <button
