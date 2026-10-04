@@ -1,13 +1,10 @@
 "use client"
 
-import React from "react"
-
-import { useEffect, useState } from "react"
+import React, { useEffect, useId, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Upload, Link as LinkIcon, AlertTriangle } from "lucide-react"
+import { Upload, AlertTriangle, Loader2, ImageIcon } from "lucide-react"
 import type { ImageData } from "../types"
 import { useImageDimensions } from "@/hooks/use-image-dimensions"
 
@@ -20,6 +17,10 @@ export function ImageBlock({ data, onChange }: ImageBlockProps) {
   const { url = "", alt = "", caption = "", align = "center", width = "100%", width_px, height_px } = data
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
+  const [isDraggingOver, setIsDraggingOver] = useState(false)
+  const [urlDraft, setUrlDraft] = useState("")
+  const fileInputId = useId()
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Đo kích thước thật để (a) lưu width/height chống nhảy layout, (b) cảnh báo ảnh quá nhỏ
   const dimensions = useImageDimensions(url)
@@ -33,10 +34,7 @@ export function ImageBlock({ data, onChange }: ImageBlockProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dimensions?.width, dimensions?.height])
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
+  const uploadFile = async (file: File) => {
     setUploadError(null)
 
     if (!file.type.startsWith("image/")) {
@@ -73,6 +71,40 @@ export function ImageBlock({ data, onChange }: ImageBlockProps) {
     }
   }
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    await uploadFile(file)
+  }
+
+  const handleDropFile = async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDraggingOver(false)
+    const file = e.dataTransfer?.files?.[0]
+    if (file && file.type.startsWith("image/")) {
+      await uploadFile(file)
+    }
+  }
+
+  const handlePaste = async (e: React.ClipboardEvent<HTMLDivElement>) => {
+    const files = Array.from(e.clipboardData?.files || [])
+    const imageFile = files.find((f) => f.type.startsWith("image/"))
+    if (imageFile) {
+      e.preventDefault()
+      e.stopPropagation()
+      await uploadFile(imageFile)
+    }
+  }
+
+  const applyUrlDraft = () => {
+    const trimmed = urlDraft.trim()
+    if (trimmed) {
+      onChange({ url: trimmed })
+      setUrlDraft("")
+    }
+  }
+
   const alignClass = {
     left: "justify-start",
     center: "justify-center",
@@ -83,34 +115,78 @@ export function ImageBlock({ data, onChange }: ImageBlockProps) {
 
   if (!url) {
     return (
-      <div className="border-2 border-dashed rounded-lg p-8 text-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="flex gap-2">
-            <label htmlFor="file-upload">
-              <Button variant="outline" className="cursor-pointer bg-transparent" disabled={uploading} asChild>
-                <span>
-                  <Upload className="w-4 h-4 mr-2" />
-                  {uploading ? "Đang tải..." : "Tải ảnh lên"}
-                </span>
-              </Button>
-              <input
-                id="file-upload"
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleFileUpload}
-                disabled={uploading}
-              />
-            </label>
+      <div
+        onDragOver={(e) => {
+          if (e.dataTransfer?.types?.includes("Files")) {
+            e.preventDefault()
+            e.stopPropagation()
+            setIsDraggingOver(true)
+          }
+        }}
+        onDragLeave={() => setIsDraggingOver(false)}
+        onDrop={handleDropFile}
+        onPaste={handlePaste}
+        className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors ${
+          isDraggingOver ? "border-primary bg-primary/5" : "border-muted-foreground/25 bg-muted/10 hover:bg-muted/20"
+        }`}
+      >
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+            {uploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ImageIcon className="w-5 h-5" />}
           </div>
-          <div className="text-sm text-muted-foreground">hoặc</div>
-          <div className="w-full max-w-md">
-            <Input
-              placeholder="Dán URL hình ảnh..."
-              onBlur={(e) => onChange({ url: e.target.value })}
+
+          <div className="space-y-1">
+            <p className="text-sm font-medium">
+              {uploading ? "Đang tải hình ảnh lên..." : "Kéo thả ảnh vào đây, dán (Ctrl+V) hoặc chọn từ máy tính"}
+            </p>
+            <p className="text-xs text-muted-foreground">Hỗ trợ JPG, PNG, WebP, GIF (tối đa 5MB, khuyến nghị ≥ 1200px)</p>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-2 mt-1">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={uploading}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <Upload className="w-4 h-4 mr-2" />
+              {uploading ? "Đang tải..." : "Chọn ảnh từ máy"}
+            </Button>
+            <input
+              ref={fileInputRef}
+              id={fileInputId}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleFileUpload}
               disabled={uploading}
             />
           </div>
+
+          <div className="flex items-center gap-2 w-full max-w-md mt-1">
+            <Input
+              placeholder="Hoặc dán URL hình ảnh (https://...) rồi nhấn Enter"
+              value={urlDraft}
+              onChange={(e) => setUrlDraft(e.target.value)}
+              onBlur={applyUrlDraft}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault()
+                  applyUrlDraft()
+                }
+              }}
+              disabled={uploading}
+              className="h-8 text-xs"
+            />
+            {urlDraft.trim() && (
+              <Button type="button" size="sm" className="h-8 text-xs" onClick={applyUrlDraft}>
+                Chèn
+              </Button>
+            )}
+          </div>
+
+          {uploadError && <p className="text-xs text-destructive font-medium mt-1">{uploadError}</p>}
         </div>
       </div>
     )
@@ -136,51 +212,48 @@ export function ImageBlock({ data, onChange }: ImageBlockProps) {
             </span>
           </div>
         )}
-        
-        {/* Alt Text - Quan trọng cho SEO */}
-        <div className="mt-3 space-y-2">
+
+        {/* Alt Text & Caption */}
+        <div className="mt-3 grid sm:grid-cols-2 gap-3 rounded-lg border bg-muted/20 p-3">
           <div>
-            <Label className="text-xs font-medium text-red-600">
-              Alt Text (Bắt buộc cho SEO) *
+            <Label className="text-xs font-medium text-foreground flex items-center gap-1">
+              Mô tả ảnh (Alt Text SEO) <span className="text-red-500">*</span>
             </Label>
             <Input
-              placeholder="Mô tả hình ảnh cho search engines và người khiếm thị..."
+              placeholder="VD: Quy trình đăng ký FDA cho thực phẩm..."
               value={alt}
               onChange={(e) => onChange({ alt: e.target.value })}
-              className={`text-sm mt-1 ${!alt ? 'border-red-300 focus:border-red-500' : 'border-green-300'}`}
+              className={`text-xs h-8 mt-1 ${!alt ? "border-amber-400 focus-visible:ring-amber-500" : "border-emerald-400"}`}
             />
-            {!alt && (
-              <p className="text-xs text-red-500 mt-1">
-                Alt text giúp Google hiểu nội dung hình ảnh và cải thiện thứ hạng SEO
-              </p>
-            )}
+            {!alt && <p className="text-[11px] text-amber-700 mt-1">Giúp Google hiểu nội dung ảnh và tăng điểm SEO</p>}
           </div>
-          
-          {/* Caption - Tùy chọn */}
+
           <div>
-            <Label className="text-xs text-muted-foreground">Chú thích (Tùy chọn)</Label>
+            <Label className="text-xs font-medium text-muted-foreground">Chú thích dưới ảnh (Tùy chọn)</Label>
             <Input
-              placeholder="Thêm chú thích hiển thị bên dưới ảnh..."
+              placeholder="Chú thích hiển thị dưới hình..."
               value={caption}
               onChange={(e) => onChange({ caption: e.target.value })}
-              className="text-sm mt-1 italic"
+              className="text-xs h-8 mt-1 italic"
             />
           </div>
         </div>
-        
-        <div className="mt-2 flex items-center gap-2">
-          <Label className="text-xs">Kích thước:</Label>
-          <select
-            value={width}
-            onChange={(e) => onChange({ width: e.target.value })}
-            className="text-xs border rounded px-2 py-1"
-          >
-            <option value="100%">Toàn bộ (100%)</option>
-            <option value="80%">Lớn (80%)</option>
-            <option value="60%">Vừa (60%)</option>
-          </select>
-          <Button variant="ghost" size="sm" onClick={() => onChange({ url: "" })} className="text-xs">
-            Thay đổi ảnh
+
+        <div className="mt-2 flex items-center justify-between gap-2 text-xs">
+          <div className="flex items-center gap-2">
+            <Label className="text-xs text-muted-foreground">Độ rộng:</Label>
+            <select
+              value={width}
+              onChange={(e) => onChange({ width: e.target.value })}
+              className="text-xs border rounded px-2 py-1 bg-background"
+            >
+              <option value="100%">Toàn bộ (100%)</option>
+              <option value="80%">Lớn (80%)</option>
+              <option value="60%">Vừa (60%)</option>
+            </select>
+          </div>
+          <Button variant="ghost" size="sm" onClick={() => onChange({ url: "" })} className="text-xs h-7">
+            Đổi ảnh khác
           </Button>
         </div>
       </figure>

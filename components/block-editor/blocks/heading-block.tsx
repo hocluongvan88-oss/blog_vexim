@@ -1,9 +1,6 @@
 "use client"
 
-import React from "react"
-import { useRef, useEffect } from "react"
-
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import React, { useRef, useEffect } from "react"
 import type { HeadingData } from "../types"
 import { sanitizeInlineHtml } from "@/lib/sanitize"
 
@@ -12,9 +9,50 @@ interface HeadingBlockProps {
   onChange: (data: Partial<HeadingData>) => void
   onEnter?: () => void
   onBackspace?: () => void
+  /** Khi nhấn Backspace ở đầu dòng tiêu đề -> chuyển về đoạn văn thường (giữ nguyên chữ) */
+  onConvertToParagraph?: (currentHtml: string) => void
+  /** Di chuyển lên/xuống giữa các khối bằng phím mũi tên ↑ / ↓ */
+  onNavigateVertical?: (direction: "up" | "down") => void
 }
 
-export function HeadingBlock({ data, onChange, onEnter, onBackspace }: HeadingBlockProps) {
+function isCaretAtStart(editor: HTMLElement): boolean {
+  const selection = window.getSelection()
+  if (!selection || !selection.isCollapsed || selection.rangeCount === 0) return false
+  const range = selection.getRangeAt(0)
+  if (!editor.contains(range.startContainer)) return false
+  try {
+    const preRange = document.createRange()
+    preRange.selectNodeContents(editor)
+    preRange.setEnd(range.startContainer, range.startOffset)
+    return preRange.toString().length === 0
+  } catch {
+    return false
+  }
+}
+
+function isCaretAtEnd(editor: HTMLElement): boolean {
+  const selection = window.getSelection()
+  if (!selection || !selection.isCollapsed || selection.rangeCount === 0) return false
+  const range = selection.getRangeAt(0)
+  if (!editor.contains(range.endContainer)) return false
+  try {
+    const postRange = document.createRange()
+    postRange.selectNodeContents(editor)
+    postRange.setStart(range.endContainer, range.endOffset)
+    return postRange.toString().length === 0
+  } catch {
+    return false
+  }
+}
+
+export function HeadingBlock({
+  data,
+  onChange,
+  onEnter,
+  onBackspace,
+  onConvertToParagraph,
+  onNavigateVertical,
+}: HeadingBlockProps) {
   const { level = 2, text = "", align = "left" } = data
 
   const editorRef = useRef<HTMLHeadingElement>(null)
@@ -54,22 +92,44 @@ export function HeadingBlock({ data, onChange, onEnter, onBackspace }: HeadingBl
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLHeadingElement>) => {
-    // Enter - tạo khối đoạn văn mới bên dưới, giữ nguyên định dạng
-    if (e.key === "Enter" && !e.shiftKey) {
+    const editor = e.currentTarget
+
+    if (e.key === "ArrowUp" && !e.shiftKey && onNavigateVertical && isCaretAtStart(editor)) {
       e.preventDefault()
-      syncFromDom(e.currentTarget.innerHTML)
-      onEnter?.()
+      onNavigateVertical("up")
+      return
     }
 
-    // Backspace ở khối rỗng - xoá khối
-    if (e.key === "Backspace" && !e.currentTarget.textContent?.trim()) {
+    if (e.key === "ArrowDown" && !e.shiftKey && onNavigateVertical && isCaretAtEnd(editor)) {
       e.preventDefault()
-      onBackspace?.()
+      onNavigateVertical("down")
+      return
+    }
+
+    // Enter - tạo khối đoạn văn mới bên dưới, giữ nguyên định dạng
+    if (e.key === "Enter" && !e.shiftKey && !isComposingRef.current) {
+      e.preventDefault()
+      syncFromDom(editor.innerHTML)
+      onEnter?.()
+      return
+    }
+
+    // Backspace ở khối rỗng -> xoá khối; ở đầu dòng -> chuyển về đoạn văn thường
+    if (e.key === "Backspace" && !isComposingRef.current) {
+      const currentText = editor.textContent?.trim() || ""
+      if (!currentText) {
+        e.preventDefault()
+        onBackspace?.()
+        return
+      }
+      if (onConvertToParagraph && isCaretAtStart(editor)) {
+        e.preventDefault()
+        onConvertToParagraph(sanitizeInlineHtml(editor.innerHTML))
+      }
     }
   }
 
   const handleInput = (e: React.FormEvent<HTMLHeadingElement>) => {
-    // Bỏ qua khi đang gõ IME (tiếng Việt) để tránh con trỏ nhảy
     if (isComposingRef.current) return
     syncFromDom(e.currentTarget.innerHTML)
   }
@@ -87,14 +147,17 @@ export function HeadingBlock({ data, onChange, onEnter, onBackspace }: HeadingBl
     syncFromDom(e.currentTarget.innerHTML)
   }
 
+  const placeholderText =
+    level === 2 ? "Tiêu đề mục chính (H2)..." : level === 3 ? "Tiêu đề mục phụ (H3)..." : "Tiêu đề nhỏ (H4)..."
+
   const headingProps = {
     ref: editorRef,
     contentEditable: true,
     suppressContentEditableWarning: true,
-    className: `${alignClass} ${
-      level === 2 ? "text-3xl" : level === 3 ? "text-2xl" : level === 1 ? "text-4xl" : "text-xl"
-    } font-bold text-primary outline-none empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground empty:before:font-normal`,
-    "data-placeholder": "Nhập tiêu đề...",
+    className: `flex-1 ${alignClass} ${
+      level === 2 ? "text-2xl md:text-3xl" : level === 3 ? "text-xl md:text-2xl" : level === 1 ? "text-3xl md:text-4xl" : "text-lg md:text-xl"
+    } font-bold text-primary outline-none empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground/50 empty:before:font-semibold`,
+    "data-placeholder": placeholderText,
     onKeyDown: handleKeyDown,
     onInput: handleInput,
     onCompositionStart: handleCompositionStart,
@@ -102,7 +165,6 @@ export function HeadingBlock({ data, onChange, onEnter, onBackspace }: HeadingBl
     onBlur: handleBlur,
   }
 
-  /** Render theo từng cấp cụ thể (thay cho thẻ động gây lỗi type & làm chậm biên dịch) */
   const renderHeading = () => {
     switch (level) {
       case 1:
@@ -121,23 +183,29 @@ export function HeadingBlock({ data, onChange, onEnter, onBackspace }: HeadingBl
   }
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center gap-2">
-        <Select
-          value={[2, 3, 4].includes(level) ? level.toString() : "2"}
-          onValueChange={(value) => onChange({ level: parseInt(value) as HeadingData["level"] })}
-        >
-          <SelectTrigger className="w-32">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="2">Tiêu đề 2</SelectItem>
-            <SelectItem value="3">Tiêu đề 3</SelectItem>
-            <SelectItem value="4">Tiêu đề 4</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+    <div className="group/heading flex items-baseline gap-2 pt-2">
       {renderHeading()}
+      {/* Bộ nút chuyển nhanh H2 / H3 / H4 nhỏ gọn, không chiếm dòng riêng */}
+      <div className="flex items-center gap-0.5 rounded-md border bg-muted/40 p-0.5 opacity-60 group-hover/heading:opacity-100 focus-within:opacity-100 transition-opacity flex-shrink-0">
+        {([2, 3, 4] as const).map((lvl) => (
+          <button
+            key={lvl}
+            type="button"
+            onMouseDown={(e) => {
+              e.preventDefault()
+              onChange({ level: lvl })
+            }}
+            className={`px-1.5 py-0.5 text-[11px] font-semibold rounded transition-colors ${
+              level === lvl
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground hover:bg-background"
+            }`}
+            title={`Đổi sang Tiêu đề H${lvl}`}
+          >
+            H{lvl}
+          </button>
+        ))}
+      </div>
     </div>
   )
 }

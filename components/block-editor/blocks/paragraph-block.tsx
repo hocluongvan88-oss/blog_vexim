@@ -1,8 +1,7 @@
 "use client"
 
-import React from "react"
-import { useEffect, useRef } from "react"
-import type { ParagraphData } from "../types"
+import React, { useEffect, useRef } from "react"
+import type { BlockType, ParagraphData } from "../types"
 import {
   cleanInlineHtml,
   looksLikeMarkdown,
@@ -10,7 +9,7 @@ import {
   parseMarkdownToBlocks,
   type ParsedBlock,
 } from "@/lib/content-parsers"
-import { sanitizeInlineHtml } from "@/lib/sanitize"
+import { sanitizeInlineHtml, stripHtml } from "@/lib/sanitize"
 
 interface ParagraphBlockProps {
   data: ParagraphData & { align?: "left" | "center" | "right" | "justify" }
@@ -19,6 +18,18 @@ interface ParagraphBlockProps {
   onBackspace?: () => void
   onPasteSplit?: (lines: string[]) => void
   onPasteBlocks?: (blocks: ParsedBlock[]) => void
+  /** Tách đoạn văn tại vị trí con trỏ khi nhấn Enter ở giữa câu */
+  onSplitBlock?: (beforeHtml: string, afterHtml: string) => void
+  /** Gộp đoạn văn hiện tại lên cuối khối phía trên khi nhấn Backspace ở đầu dòng */
+  onMergeWithPrevious?: (currentHtml: string) => void
+  /** Chuyển đổi nhanh loại khối khi gõ cú pháp Markdown (## , - , 1. , > ) */
+  onConvertBlock?: (type: BlockType, data: Record<string, unknown>) => void
+  /** Mở/đóng menu lệnh "/" (Slash Command) kiểu Notion */
+  onSlashCommand?: (query: string | null, caretRect?: DOMRect) => void
+  /** Di chuyển con trỏ giữa các khối bằng phím mũi tên ↑ / ↓ */
+  onNavigateVertical?: (direction: "up" | "down") => void
+  /** Dán trực tiếp file ảnh từ clipboard (Ctrl+V ảnh chụp màn hình) */
+  onPasteImageFile?: (file: File) => void
 }
 
 /** Decode các entity bị mã hoá 2 lần (nội dung cũ trong DB). */
@@ -33,6 +44,42 @@ function decodeHtmlEntities(html: string): string {
   }
 }
 
+function isCaretAtStart(editor: HTMLElement): boolean {
+  const selection = window.getSelection()
+  if (!selection || !selection.isCollapsed || selection.rangeCount === 0) return false
+  const range = selection.getRangeAt(0)
+  if (!editor.contains(range.startContainer)) return false
+  try {
+    const preRange = document.createRange()
+    preRange.selectNodeContents(editor)
+    preRange.setEnd(range.startContainer, range.startOffset)
+    return preRange.toString().length === 0
+  } catch {
+    return false
+  }
+}
+
+function isCaretAtEnd(editor: HTMLElement): boolean {
+  const selection = window.getSelection()
+  if (!selection || !selection.isCollapsed || selection.rangeCount === 0) return false
+  const range = selection.getRangeAt(0)
+  if (!editor.contains(range.endContainer)) return false
+  try {
+    const postRange = document.createRange()
+    postRange.selectNodeContents(editor)
+    postRange.setStart(range.endContainer, range.endOffset)
+    return postRange.toString().length === 0
+  } catch {
+    return false
+  }
+}
+
+function fragmentToHtml(fragment: DocumentFragment): string {
+  const div = document.createElement("div")
+  div.appendChild(fragment)
+  return sanitizeInlineHtml(div.innerHTML)
+}
+
 export function ParagraphBlock({
   data,
   onChange,
@@ -40,6 +87,12 @@ export function ParagraphBlock({
   onBackspace,
   onPasteSplit,
   onPasteBlocks,
+  onSplitBlock,
+  onMergeWithPrevious,
+  onConvertBlock,
+  onSlashCommand,
+  onNavigateVertical,
+  onPasteImageFile,
 }: ParagraphBlockProps) {
   const { text = "", align = "justify" } = data
   const editorRef = useRef<HTMLParagraphElement>(null)
@@ -84,7 +137,6 @@ export function ParagraphBlock({
       const selection = window.getSelection()
       const isEditorFocused = document.activeElement === editorRef.current
 
-      // Lưu vị trí con trỏ nếu đang focus
       let savedRange: Range | null = null
       if (isEditorFocused && selection && selection.rangeCount > 0) {
         try {
@@ -127,26 +179,153 @@ export function ParagraphBlock({
     onChange({ text: sanitized })
   }
 
+  /** Kiểm tra cú pháp Markdown ở đầu dòng (VD: "## ", "### ", "- ", "1. ", "> ") */
+  const tryMarkdownShortcut = (plainText: string, rawHtml: string): boolean => {
+    if (!onConvertBlock) return false
+
+    // Chuẩn hoá khoảng trắng non-breaking (\u00A0) mà trình duyệt hay chèn khi gõ Space
+    const normalized = plainText.replace(/\u00A0/g, " ")
+
+    // Heading: ## , ### , ####
+    const headingMatch = normalized.match(/^(#{2,4})\s(.*)$/)
+    if (headingMatch) {
+      const level = headingMatch[1].length as 2 | 3 | 4
+      const remainder = headingMatch[2] || ""
+      onSlashCommand?.(null)
+      onConvertBlock("heading", { level, text: sanitizeInlineHtml(remainder), align: "left" })
+      return true
+    }
+
+    // Bullet list: "- " hoặc "* "
+    const ulMatch = normalized.match(/^[-*]\s(.*)$/)
+    if (ulMatch) {
+      const remainder = ulMatch[1] || ""
+      onSlashCommand?.(null)
+      onConvertBlock("list", { style: "unordered", items: [sanitizeInlineHtml(remainder)], align: "left" })
+      return true
+    }
+
+    // Ordered list: "1. "
+    const olMatch = normalized.match(/^1\.\s(.*)$/)
+    if (olMatch) {
+      const remainder = olMatch[1] || ""
+      onSlashCommand?.(null)
+      onConvertBlock("list", { style: "ordered", items: [sanitizeInlineHtml(remainder)], align: "left" })
+      return true
+    }
+
+    // Quote: "> "
+    const quoteMatch = normalized.match(/^>\s(.*)$/)
+    if (quoteMatch) {
+      const remainder = quoteMatch[1] || ""
+      onSlashCommand?.(null)
+      onConvertBlock("quote", { text: sanitizeInlineHtml(remainder), author: "", align: "left" })
+      return true
+    }
+
+    void rawHtml
+    return false
+  }
+
+  /** Kiểm tra lệnh "/" (Slash Command) kiểu Notion */
+  const checkSlashCommand = (plainText: string) => {
+    if (!onSlashCommand || !editorRef.current) return
+    const trimmed = plainText.replace(/\u00A0/g, " ")
+
+    if (/^\/[^\s]*$/.test(trimmed)) {
+      const query = trimmed.slice(1)
+      const rect = editorRef.current.getBoundingClientRect()
+      onSlashCommand(query, rect)
+    } else {
+      onSlashCommand(null)
+    }
+  }
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLParagraphElement>) => {
-    // Enter - tạo khối đoạn văn mới bên dưới, giữ nguyên định dạng của khối hiện tại
+    const editor = e.currentTarget
+
+    // Di chuyển lên khối trên bằng phím ↑ khi con trỏ ở đầu khối
+    if (e.key === "ArrowUp" && !e.shiftKey && onNavigateVertical && isCaretAtStart(editor)) {
+      e.preventDefault()
+      onNavigateVertical("up")
+      return
+    }
+
+    // Di chuyển xuống khối dưới bằng phím ↓ khi con trỏ ở cuối khối
+    if (e.key === "ArrowDown" && !e.shiftKey && onNavigateVertical && isCaretAtEnd(editor)) {
+      e.preventDefault()
+      onNavigateVertical("down")
+      return
+    }
+
+    // Enter - tách khối tại vị trí con trỏ hoặc tạo khối đoạn văn mới bên dưới
     if (e.key === "Enter" && !e.shiftKey && !isComposingRef.current) {
       e.preventDefault()
-      syncFromDom(e.currentTarget.innerHTML)
+
+      if (onSplitBlock) {
+        const selection = window.getSelection()
+        if (selection && selection.rangeCount > 0 && editor.contains(selection.getRangeAt(0).commonAncestorContainer)) {
+          try {
+            const range = selection.getRangeAt(0)
+            const beforeRange = document.createRange()
+            beforeRange.selectNodeContents(editor)
+            beforeRange.setEnd(range.startContainer, range.startOffset)
+
+            const afterRange = document.createRange()
+            afterRange.selectNodeContents(editor)
+            afterRange.setStart(range.endContainer, range.endOffset)
+
+            const beforeText = beforeRange.toString()
+            const afterText = afterRange.toString()
+
+            // Nếu con trỏ đang đứng ở giữa đoạn văn -> tách câu trước & câu sau thành 2 khối
+            if (beforeText.trim().length > 0 && afterText.trim().length > 0) {
+              const beforeHtml = fragmentToHtml(beforeRange.cloneContents())
+              const afterHtml = fragmentToHtml(afterRange.cloneContents())
+              editor.innerHTML = beforeHtml
+              lastTextRef.current = beforeHtml
+              onSplitBlock(beforeHtml, afterHtml)
+              return
+            }
+          } catch (error) {
+            console.warn("[blog] Không tách được đoạn văn tại con trỏ:", error)
+          }
+        }
+      }
+
+      syncFromDom(editor.innerHTML)
       onEnter?.()
       return
     }
 
-    // Backspace ở khối rỗng - xoá khối
+    // Backspace ở khối rỗng -> xoá khối; hoặc ở đầu dòng -> gộp với khối phía trên
     if (e.key === "Backspace" && !isComposingRef.current) {
-      const currentText = e.currentTarget.textContent?.trim() || ""
+      const currentText = editor.textContent?.replace(/\u00A0/g, " ").trim() || ""
       if (!currentText) {
         e.preventDefault()
+        onSlashCommand?.(null)
         onBackspace?.()
+        return
+      }
+
+      if (onMergeWithPrevious && isCaretAtStart(editor)) {
+        e.preventDefault()
+        const currentHtml = sanitizeInlineHtml(editor.innerHTML)
+        onMergeWithPrevious(currentHtml)
       }
     }
   }
 
   const handlePaste = (e: React.ClipboardEvent<HTMLParagraphElement>) => {
+    // 0. Nếu clipboard có file hình ảnh (VD: vừa chụp màn hình Ctrl+V) -> tải ảnh lên
+    const files = Array.from(e.clipboardData?.files || [])
+    const imageFile = files.find((f) => f.type.startsWith("image/"))
+    if (imageFile && onPasteImageFile) {
+      e.preventDefault()
+      onPasteImageFile(imageFile)
+      return
+    }
+
     e.preventDefault()
 
     const pastedHTML = e.clipboardData.getData("text/html")
@@ -207,7 +386,6 @@ export function ParagraphBlock({
     const editor = editorRef.current
     if (!editor) return
 
-    // Nội dung từ HTML paste cần giữ thẻ inline; text thuần thì escape
     const looksLikeHtml = /<\/?[a-z][\s\S]*>/i.test(content)
     const html = sanitizeInlineHtml(looksLikeHtml ? cleanInlineHtml(content) : content)
 
@@ -222,7 +400,6 @@ export function ParagraphBlock({
       editor.contains(selection.getRangeAt(0).commonAncestorContainer)
 
     if (!hasRangeInEditor) {
-      // Không có con trỏ trong editor -> nối vào cuối
       syncFromDom(`${editor.innerHTML}${html}`)
       return
     }
@@ -244,7 +421,19 @@ export function ParagraphBlock({
   }
 
   const handleInput = (e: React.FormEvent<HTMLParagraphElement>) => {
-    syncFromDom(e.currentTarget.innerHTML)
+    if (isComposingRef.current) return
+    const rawHtml = e.currentTarget.innerHTML
+    const plainText = e.currentTarget.textContent || ""
+
+    // Thử chuyển đổi nhanh bằng Markdown shortcut (## , - , 1. , > )
+    if (tryMarkdownShortcut(plainText, rawHtml)) {
+      return
+    }
+
+    // Kiểm tra xem có đang gõ lệnh "/" không
+    checkSlashCommand(plainText)
+
+    syncFromDom(rawHtml)
   }
 
   const handleCompositionStart = () => {
@@ -253,10 +442,18 @@ export function ParagraphBlock({
 
   const handleCompositionEnd = (e: React.CompositionEvent<HTMLParagraphElement>) => {
     isComposingRef.current = false
-    syncFromDom(e.currentTarget.innerHTML)
+    const rawHtml = e.currentTarget.innerHTML
+    const plainText = e.currentTarget.textContent || ""
+    checkSlashCommand(plainText)
+    syncFromDom(rawHtml)
   }
 
   const handleBlur = (e: React.FocusEvent<HTMLParagraphElement>) => {
+    // Khi rời khối mà chỉ có dấu "/" đơn lẻ thì giữ nguyên hoặc đóng menu
+    const plain = stripHtml(e.currentTarget.innerHTML).trim()
+    if (plain.startsWith("/")) {
+      setTimeout(() => onSlashCommand?.(null), 180)
+    }
     syncFromDom(e.currentTarget.innerHTML)
   }
 
@@ -265,8 +462,8 @@ export function ParagraphBlock({
       ref={editorRef}
       contentEditable
       suppressContentEditableWarning
-      className={`${alignClass} text-base leading-relaxed outline-none min-h-[50px] resize-none overflow-hidden empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground prose prose-sm max-w-none [&_a]:text-blue-600 [&_a]:underline [&_a]:cursor-pointer [&_a:hover]:text-blue-800`}
-      data-placeholder="Nhập nội dung đoạn văn... (Bôi đen text để thêm link, in đậm, in nghiêng)"
+      className={`${alignClass} text-base leading-relaxed outline-none min-h-[32px] py-1 resize-none overflow-hidden empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground/60 prose prose-sm max-w-none [&_a]:text-blue-600 [&_a]:underline [&_a]:cursor-pointer [&_a:hover]:text-blue-800`}
+      data-placeholder="Gõ '/' để chọn khối (H2, Ảnh, Bảng, Danh sách...) hoặc nhập nội dung..."
       onKeyDown={handleKeyDown}
       onPaste={handlePaste}
       onInput={handleInput}
