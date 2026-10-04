@@ -304,30 +304,24 @@ check(
   "Khách vừa đồng ý thì xác nhận ngay, không hỏi lại câu chốt vừa hỏi",
 )
 
-/* ---------- 3f. Sau khi chuyển chuyên viên (a2) & câu hỏi giá (b2) ---------- */
-// a2: khách đang chờ chuyên viên vẫn phải được trả lời câu hỏi kiến thức. Trước đây
-// send-ai trả ngay một câu "đang được chuyên viên xử lý" rồi AI im vĩnh viễn.
+/* ---------- 3f. Sau khi chuyển chuyên viên (a1) & câu hỏi giá (b2) ---------- */
+// a1 (chủ doanh nghiệp chốt): đã chuyển chuyên viên thì AI IM LẶNG để không nói
+// chồng lên người thật. Khách vẫn thấy thẻ "Chuyên viên đang hỗ trợ" kèm Zalo/hotline
+// trong khung chat, và chuyên viên đã được báo từ lúc chuyển.
 const sendAiRoute = readFileSync("app/api/chatbot/send-ai/route.ts", "utf8")
 check(
-  sendAiRoute.includes("const alreadyHandedOver = Boolean(activeHandover)"),
-  "a2: hội thoại đã chuyển chuyên viên không còn chặn AI trả lời",
+  sendAiRoute.includes("// If handed over, don't generate AI response") &&
+    sendAiRoute.includes('status: "handed_over"') &&
+    sendAiRoute.includes("đang được xử lý bởi chuyên viên"),
+  "a1: hội thoại đã chuyển chuyên viên thì AI không trả lời nữa",
 )
 check(
-  sendAiRoute.includes("ALREADY_HANDED_OVER_NOTE") && sendAiRoute.includes("KHÔNG hỏi lại câu kết nối chuyên viên"),
-  "a2: AI được dặn vẫn trả lời kiến thức nhưng không hỏi lại câu kết nối",
+  !sendAiRoute.includes("alreadyHandedOver") && !sendAiRoute.includes("ALREADY_HANDED_OVER_NOTE"),
+  "a1: không còn nhánh cho AI trả lời song song với chuyên viên",
 )
 check(
-  sendAiRoute.includes("if (!alreadyHandedOver && ruleResult.action === \"HANDOFF_TO_ADMIN\")") &&
-    sendAiRoute.includes("if (!alreadyHandedOver && ruleResult.action === \"ASK_CONTACT\")"),
-  "a2: không tạo phiếu chuyển trùng / không xin số điện thoại lại khi đã có chuyên viên",
-)
-check(
-  sendAiRoute.includes('handover_mode: alreadyHandedOver ? "manual"'),
-  "a2: đang chờ chuyên viên thì giữ nguyên chế độ chuyên viên, không hạ về auto",
-)
-check(
-  sendAiRoute.includes('status: alreadyHandedOver ? "handed_over" : "ok"'),
-  "a2: khung chat vẫn hiện thẻ \"Chuyên viên đang hỗ trợ\" kèm câu trả lời thật",
+  !readFileSync("lib/ai-service.ts", "utf8").includes("extraInstructions"),
+  "a1: đã bỏ tham số ghi chú riêng của lượt (chỉ a2 cần, giờ không dùng)",
 )
 
 // b2: câu hỏi giá -> AI trả lời nhưng admin phải được báo (lead nóng nhất)
@@ -347,10 +341,6 @@ check(
 check(
   sendAiRoute.includes("HOT_LEAD_ALERT_COOLDOWN_MS") && sendAiRoute.includes("last_lead_alert_at"),
   "b2: chống spam thông báo — mỗi hội thoại tối đa 1 lần / 30 phút",
-)
-check(
-  readFileSync("lib/ai-service.ts", "utf8").includes("extraInstructions"),
-  "ai-service truyền được ghi chú riêng cho từng lượt (phục vụ a2)",
 )
 
 testModelFallback().then(() => {
