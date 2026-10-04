@@ -154,10 +154,12 @@ check(widget.includes("CONSULTATION_CONTENT"), "Thẻ mời tư vấn nói theo 
 // 15. AI cũng biết số để tự mời khách
 const aiService = readFileSync("lib/ai-service.ts", "utf8")
 check(aiService.includes("CONTACT_GUIDANCE"), "AI có hướng dẫn riêng về việc mời tư vấn sâu")
-// Prompt cuối = system prompt + tài liệu tìm được + cẩm nang bán hàng + hướng dẫn liên hệ.
+// Prompt cuối = system prompt + tài liệu tìm được + cẩm nang bán hàng
+// + (ghi chú riêng cho lượt đó, ví dụ hội thoại đã chuyển chuyên viên — a2)
+// + hướng dẫn liên hệ.
 // Cẩm nang phải LUÔN có mặt (không phụ thuộc việc tìm tài liệu có ra hay không).
 check(
-  /config\.systemPrompt \+\s*\n?\s*context \+\s*\n?\s*buildSalesPlaybook\([^)]*\) \+\s*\n?\s*CONTACT_GUIDANCE/.test(
+  /config\.systemPrompt \+\s*\n?\s*context \+\s*\n?\s*buildSalesPlaybook\([^)]*\) \+\s*\n?\s*(?:\(extraInstructions \|\| ""\) \+\s*\n?\s*)?CONTACT_GUIDANCE/.test(
     aiService,
   ),
   "Cẩm nang bán hàng + hướng dẫn liên hệ luôn được ghép vào system prompt",

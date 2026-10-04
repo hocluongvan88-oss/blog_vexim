@@ -513,6 +513,11 @@ export async function generateAIResponse(
   leadProfile: LeadProfile = {},
   /** Cẩm nang bán hàng do admin sửa trong CSDL (khoá `sales_playbook`), không bắt buộc */
   adminPlaybook?: string,
+  /**
+   * Ghi chú chỉ dùng cho LƯỢT NÀY (ví dụ: hội thoại đã chuyển chuyên viên nên
+   * AI vẫn trả lời kiến thức nhưng không hỏi lại câu kết nối).
+   */
+  extraInstructions?: string,
 ): Promise<AIResponse> {
   try {
     let knowledgeChunks: KnowledgeChunk[] = []
@@ -538,6 +543,7 @@ export async function generateAIResponse(
         config.systemPrompt +
         context +
         buildSalesPlaybook(leadProfile, { adminPlaybook }) +
+        (extraInstructions || "") +
         CONTACT_GUIDANCE,
       message,
       history: conversationHistory,

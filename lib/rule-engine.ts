@@ -137,27 +137,29 @@ function checkComplianceRisk(message: string): RuleResult | null {
     }
   }
 
-  // CR-05: Pricing/Quote requests
-  const pricingPatterns = [
-    /(phí|chi phí|giá|báo giá).*(bao nhiêu|là gì)/i,
-    // Lưu ý: KHÔNG dùng \b sau từ có dấu (á, í, ệ…) — JS coi chữ có dấu là
-    // "không phải chữ" nên \bbáo giá\b sẽ không bao giờ khớp.
-    /báo giá/i,
-    /(xin|hỏi|cho)[\s]+(giá|phí|chi phí)/i,
-    /tốn.*bao nhiêu/i,
-    /(quote|pricing|cost)/i,
-  ]
-  if (pricingPatterns.some((p) => p.test(message))) {
-    return {
-      action: "HANDOFF_TO_ADMIN",
-      reason: "Pricing requires custom quote",
-      ruleId: "CR-05",
-      tags: { reason: "sales", urgency: "medium" },
-    }
-  }
-
   return null
 }
+
+/**
+ * Câu hỏi về GIÁ / BÁO GIÁ.
+ *
+ * Trước đây đây là luật CR-05 nằm trong nhóm "phải chuyển chuyên viên ngay": khách
+ * vừa hỏi giá là bị chặn câu trả lời, chỉ nhận một tin nhắn xin để lại số điện
+ * thoại — không được tổng hợp thông tin đã nói, và AI im luôn cả hội thoại.
+ *
+ * Chủ doanh nghiệp chốt: để AI trả lời trước (tóm tắt những gì đã biết + mời kết
+ * nối chuyên viên), rồi mới chuyển. Bot vẫn KHÔNG tự báo giá — việc báo giá thuộc
+ * về chuyên viên; AI chỉ nói giá do chuyên viên báo theo hồ sơ cụ thể.
+ */
+export const PRICING_PATTERNS: RegExp[] = [
+  /(phí|chi phí|giá|báo giá).*(bao nhiêu|là gì)/i,
+  // Lưu ý: KHÔNG dùng \b sau từ có dấu (á, í, ệ…) — JS coi chữ có dấu là
+  // "không phải chữ" nên \bbáo giá\b sẽ không bao giờ khớp.
+  /báo giá/i,
+  /(xin|hỏi|cho)[\s]+(giá|phí|chi phí)/i,
+  /tốn.*bao nhiêu/i,
+  /(quote|pricing|cost)/i,
+]
 
 // 2. SALES INTENT RULES (SI) - Should ask contact or handoff
 function checkSalesIntent(message: string): RuleResult | null {
@@ -211,6 +213,16 @@ function checkSalesIntent(message: string): RuleResult | null {
       reason: "Service inquiry - tagged as sales interest",
       ruleId: "SI-03",
       tags: { reason: "sales", urgency: "medium" },
+    }
+  }
+
+  // SI-07: Hỏi giá — lead nóng nhất nhưng KHÔNG chặn câu trả lời (xem PRICING_PATTERNS).
+  if (PRICING_PATTERNS.some((p) => p.test(message))) {
+    return {
+      action: "AI_CONTINUE",
+      reason: "Pricing inquiry - AI summarises and invites, admin is alerted",
+      ruleId: "SI-07-PRICING",
+      tags: { reason: "sales", urgency: "high" },
     }
   }
 
@@ -390,6 +402,18 @@ function detectServiceTag(message: string): RuleResult["tags"]["service_tag"] | 
   if (/truy xuất|theo dõi/i.test(lowerMsg)) return "TRACEABILITY"
 
   return undefined
+}
+
+/**
+ * Những lượt AI VẪN trả lời nhưng là lead nóng -> phải báo admin ngay (push/email),
+ * không được để chuyên viên chỉ thấy khi mở trang quản trị.
+ *
+ * Dùng ở nhánh AI_CONTINUE của send-ai: câu trả lời của khách không bị chặn,
+ * nhưng người thật vẫn được thông báo để vào cuộc.
+ */
+export function shouldAlertAdminOnAiReply(result: RuleResult): boolean {
+  if (result.tags.urgency !== "high") return false
+  return result.tags.reason === "sales" || result.tags.reason === "compliance"
 }
 
 // Main rule engine

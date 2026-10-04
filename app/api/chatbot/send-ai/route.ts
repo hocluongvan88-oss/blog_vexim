@@ -8,7 +8,12 @@ import {
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { generateAIResponse, loadAIConfig } from "@/lib/ai-service"
-import { evaluateRules, getContactRequestMessage, type MessageContext } from "@/lib/rule-engine"
+import {
+  evaluateRules,
+  getContactRequestMessage,
+  shouldAlertAdminOnAiReply,
+  type MessageContext,
+} from "@/lib/rule-engine"
 import { notifyAdmin, notifyAdminNewHandover } from "@/lib/notification-service"
 
 /**
@@ -16,6 +21,25 @@ import { notifyAdmin, notifyAdminNewHandover } from "@/lib/notification-service"
  * Ghi kiểu `update({ metadata: {...} })` là GHI ĐÈ — sẽ xoá mất hồ sơ khách,
  * service_tag… do các nhánh khác đã lưu trước đó.
  */
+/**
+ * a2 — Hội thoại đã chuyển cho chuyên viên nhưng khách hỏi tiếp.
+ *
+ * Trước đây khách nhận đúng một câu "đang được chuyên viên xử lý" và AI im lặng
+ * vĩnh viễn cho tới khi admin đóng phiếu — khách hỏi thêm gì cũng không ai trả
+ * lời, mất cơ hội. Giờ AI vẫn trả lời câu hỏi kiến thức, chỉ khác là không hỏi
+ * lại câu kết nối chuyên viên (đã kết nối rồi).
+ */
+const ALREADY_HANDED_OVER_NOTE = `
+
+🔄 HỘI THOẠI NÀY ĐÃ ĐƯỢC CHUYỂN CHO CHUYÊN VIÊN VEXIM.
+- Anh/chị VẪN trả lời đầy đủ, có cấu trúc, các câu hỏi kiến thức: quy định, quy trình, thời gian, hồ sơ, thị trường.
+- KHÔNG hỏi lại câu kết nối chuyên viên (đã kết nối rồi) và không hứa thời điểm chuyên viên sẽ gọi.
+- Nếu khách hỏi tiến độ, giá, hoặc tình huống riêng: nói rõ chuyên viên đang xem hồ sơ và sẽ liên hệ trong giờ làm việc; nếu khách cần gấp thì mời chủ động nhắn Zalo/gọi ${VEXIM_PHONE_DISPLAY}.
+- Không tự báo giá, không cam kết kết quả — phần đó thuộc về chuyên viên.`
+
+/** Chống spam: mỗi hội thoại chỉ báo admin thêm tối đa 1 lần / 30 phút. */
+const HOT_LEAD_ALERT_COOLDOWN_MS = 30 * 60 * 1000
+
 async function mergeConversationMetadata(supabase: any, conversationId: string, patch: Record<string, any>) {
   const { data } = await supabase
     .from("conversations")
@@ -90,20 +114,20 @@ export async function POST(request: NextRequest) {
 
     if (msgError) throw msgError
 
-    // If handed over, don't generate AI response
-    if (activeHandover) {
-      console.log("[v0] Conversation handed over to agent:", activeHandover.agent_name)
-      return NextResponse.json({
-        status: "handed_over",
-        message: `Cuộc trò chuyện này đang được xử lý bởi ${activeHandover.agent_name}. Vui lòng đợi phản hồi.`,
-        response: {
-          conversation_id: convId,
-          message_text: `Cuộc trò chuyện này đang được xử lý bởi chuyên viên. Chúng tôi sẽ phản hồi bạn sớm nhất có thể.`,
-          timestamp: new Date().toISOString(),
-          handed_over: true,
-        },
-      })
+    // a2: đã chuyển chuyên viên thì KHÔNG im lặng nữa — vẫn cho AI trả lời câu hỏi
+    // kiến thức, chỉ bỏ qua các nhánh chuyển chuyên viên/xin liên hệ (đã có người).
+    const alreadyHandedOver = Boolean(activeHandover)
+    if (alreadyHandedOver) {
+      console.log("[v0] Conversation đã chuyển chuyên viên, AI vẫn trả lời:", activeHandover?.agent_name)
     }
+
+    // Metadata hội thoại (để chống spam thông báo)
+    const { data: convRow } = await supabase
+      .from("conversations")
+      .select("metadata")
+      .eq("id", convId)
+      .maybeSingle()
+    const convMetadata: Record<string, any> = (convRow?.metadata || {}) as Record<string, any>
 
     // Load conversation history (last 10 messages)
     const { data: historyData } = await supabase
@@ -173,7 +197,9 @@ export async function POST(request: NextRequest) {
     })
 
     // Handle HANDOFF_TO_ADMIN action
-    if (ruleResult.action === "HANDOFF_TO_ADMIN") {
+    // (khi hội thoại đã có chuyên viên thì bỏ qua: tạo phiếu trùng chỉ làm rối
+    //  hàng đợi và bắn thêm thông báo giống hệt nhau)
+    if (!alreadyHandedOver && ruleResult.action === "HANDOFF_TO_ADMIN") {
       // Create handover immediately
       await supabase.from("conversation_handovers").insert({
         conversation_id: convId,
@@ -244,7 +270,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Handle ASK_CONTACT action
-    if (ruleResult.action === "ASK_CONTACT") {
+    if (!alreadyHandedOver && ruleResult.action === "ASK_CONTACT") {
       const contactMessage = getContactRequestMessage(ruleResult.ruleId)
       
       const { data: botMessage } = await supabase
@@ -295,6 +321,30 @@ export async function POST(request: NextRequest) {
     }
 
     // Default: AI_CONTINUE - Generate AI response với RAG
+    //
+    // b2: câu hỏi giá (SI-07) AI trả lời rồi mới mời kết nối — nhưng vẫn là lead
+    // nóng nên phải báo admin ngay, không để chuyên viên chỉ thấy trên dashboard.
+    if (shouldAlertAdminOnAiReply(ruleResult)) {
+      const lastAlert = convMetadata.last_lead_alert_at ? Date.parse(convMetadata.last_lead_alert_at) : 0
+      const shouldAlert = Date.now() - (Number.isFinite(lastAlert) ? lastAlert : 0) > HOT_LEAD_ALERT_COOLDOWN_MS
+      if (shouldAlert) {
+        await notifyAdmin({
+          conversationId: convId,
+          customerName: customer_name,
+          message: message_text,
+          urgency: "high",
+          serviceTag: ruleResult.tags.service_tag,
+          reason: alreadyHandedOver
+            ? "Khách đang chờ chuyên viên nhưng hỏi thêm câu nóng (giá / tình huống khẩn)"
+            : ruleResult.reason,
+          type: alreadyHandedOver ? "handover" : "new_lead",
+        })
+        await mergeConversationMetadata(supabase, convId, {
+          last_lead_alert_at: new Date().toISOString(),
+        })
+      }
+    }
+
     const aiResponse = await generateAIResponse(
       message_text,
       conversationHistory,
@@ -303,6 +353,7 @@ export async function POST(request: NextRequest) {
       ragEnabled,
       leadProfile,
       aiConfig.salesPlaybook,
+      alreadyHandedOver ? ALREADY_HANDED_OVER_NOTE : undefined,
     )
 
     // Update AI confidence in rule context and re-evaluate if needed
@@ -310,7 +361,8 @@ export async function POST(request: NextRequest) {
     const confidenceCheck = evaluateRules(ruleContext)
     
     // If confidence is too low after generation, handoff
-    if (confidenceCheck.action === "HANDOFF_TO_ADMIN") {
+    // (bỏ qua nếu hội thoại đã có chuyên viên — tránh tạo phiếu trùng)
+    if (!alreadyHandedOver && confidenceCheck.action === "HANDOFF_TO_ADMIN") {
       await supabase.from("conversation_handovers").insert({
         conversation_id: convId,
         from_type: "bot",
@@ -355,12 +407,13 @@ export async function POST(request: NextRequest) {
         last_message: aiResponse.message,
         updated_at: new Date().toISOString(),
         ai_confidence: aiResponse.confidence,
-        handover_mode: aiResponse.shouldHandover ? "ai_suggested" : "auto",
+        // Đang chờ chuyên viên thì giữ nguyên chế độ chuyên viên, không hạ về auto
+        handover_mode: alreadyHandedOver ? "manual" : aiResponse.shouldHandover ? "ai_suggested" : "auto",
       })
       .eq("id", convId)
 
     // Nếu AI suggest handover, tạo record
-    if (aiResponse.shouldHandover) {
+    if (!alreadyHandedOver && aiResponse.shouldHandover) {
       await supabase.from("conversation_handovers").insert({
         conversation_id: convId,
         from_type: "bot",
@@ -370,7 +423,9 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({
-      status: "ok",
+      // Giữ status "handed_over" để khung chat hiện thẻ "Chuyên viên đang hỗ trợ",
+      // nhưng vẫn kèm câu trả lời thật của AI cho câu hỏi khách vừa gửi.
+      status: alreadyHandedOver ? "handed_over" : "ok",
       response: {
         conversation_id: convId,
         message_id: botMessage.id,
@@ -379,6 +434,7 @@ export async function POST(request: NextRequest) {
         confidence: aiResponse.confidence,
         sources: aiResponse.sources,
         suggest_handover: aiResponse.shouldHandover,
+        handed_over: alreadyHandedOver || undefined,
       },
     })
   } catch (error) {

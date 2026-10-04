@@ -11,7 +11,12 @@
  * "để lại số điện thoại" — do rule LQ-01 nhận nhầm tên mặc định "Khách hàng"
  * thành tên công ty, khiến MỌI tin nhắn đều bị chặn để xin liên hệ.
  */
-import { evaluateRules, isSmallTalk, isPlaceholderName } from "@/lib/rule-engine"
+import {
+  evaluateRules,
+  isSmallTalk,
+  isPlaceholderName,
+  shouldAlertAdminOnAiReply,
+} from "@/lib/rule-engine"
 import { shouldOfferConsultation } from "@/lib/consultation-offer"
 import { analyzeIntent } from "@/lib/ai-service"
 import {
@@ -62,8 +67,10 @@ for (const question of realQuestions) {
 /* ---------- 3. Khách thật sự cần người: VẪN phải chuyển/xin liên hệ ---------- */
 const needHuman: Array<{ message: string; expect: string; rule: string }> = [
   { message: "Bên mình có làm FDA không?", expect: "HANDOFF_TO_ADMIN", rule: "SI-01" },
-  { message: "Cho em xin báo giá dịch vụ FDA", expect: "HANDOFF_TO_ADMIN", rule: "CR-05" },
-  { message: "Cho em xin giá dịch vụ FDA", expect: "HANDOFF_TO_ADMIN", rule: "CR-05" },
+  // b2 (chủ doanh nghiệp chốt): câu hỏi giá KHÔNG chặn câu trả lời nữa — AI tóm tắt
+  // thông tin đã biết + mời kết nối chuyên viên, admin vẫn được báo ngay.
+  { message: "Cho em xin báo giá dịch vụ FDA", expect: "AI_CONTINUE", rule: "SI-07" },
+  { message: "Cho em xin giá dịch vụ FDA", expect: "AI_CONTINUE", rule: "SI-07" },
   { message: "Sản phẩm của tôi có cần đăng ký FDA không?", expect: "HANDOFF_TO_ADMIN", rule: "CR-01" },
   { message: "Có chắc được duyệt không ạ?", expect: "HANDOFF_TO_ADMIN", rule: "CR-02" },
   { message: "Bên em khác gì đơn vị khác?", expect: "ASK_CONTACT", rule: "SI-06" },
@@ -126,7 +133,7 @@ check(isSmallTalk("chào bạn, cho mình hỏi về FDA") === false, "Câu vừ
 
 /* ---------- 8. Bẫy Unicode: chữ có dấu không được làm \b hỏng luật ---------- */
 check(
-  run("Cho em xin báo giá dịch vụ FDA").ruleId === "CR-05",
+  run("Cho em xin báo giá dịch vụ FDA").ruleId === "SI-07-PRICING",
   "Nhận ra 'báo giá' dù kết thúc bằng chữ có dấu (không dùng \\b sai chỗ)",
 )
 
@@ -249,7 +256,7 @@ check(
   "Trợ lý viết bài không còn gọi model đã chết (chỉ nhắc trong ghi chú)",
 )
 
-/* ---------- 3b. Tín hiệu mua & tình huống khẩn ---------- */
+/* ---------- 3e. Tín hiệu mua & tình huống khẩn ---------- */
 // Lỗi thật: "Mình muốn đăng ký FDA" — câu mua rõ nhất — trước đây không khớp rule
 // nào nên khách sẵn sàng mua vẫn chỉ được AI trả lời chung chung, không ai được báo.
 const buyingSignals = [
@@ -295,6 +302,55 @@ const sendAiSrc = readFileSync("app/api/chatbot/send-ai/route.ts", "utf8")
 check(
   sendAiSrc.includes('ruleResult.ruleId === "SI-02-IMMEDIATE"'),
   "Khách vừa đồng ý thì xác nhận ngay, không hỏi lại câu chốt vừa hỏi",
+)
+
+/* ---------- 3f. Sau khi chuyển chuyên viên (a2) & câu hỏi giá (b2) ---------- */
+// a2: khách đang chờ chuyên viên vẫn phải được trả lời câu hỏi kiến thức. Trước đây
+// send-ai trả ngay một câu "đang được chuyên viên xử lý" rồi AI im vĩnh viễn.
+const sendAiRoute = readFileSync("app/api/chatbot/send-ai/route.ts", "utf8")
+check(
+  sendAiRoute.includes("const alreadyHandedOver = Boolean(activeHandover)"),
+  "a2: hội thoại đã chuyển chuyên viên không còn chặn AI trả lời",
+)
+check(
+  sendAiRoute.includes("ALREADY_HANDED_OVER_NOTE") && sendAiRoute.includes("KHÔNG hỏi lại câu kết nối chuyên viên"),
+  "a2: AI được dặn vẫn trả lời kiến thức nhưng không hỏi lại câu kết nối",
+)
+check(
+  sendAiRoute.includes("if (!alreadyHandedOver && ruleResult.action === \"HANDOFF_TO_ADMIN\")") &&
+    sendAiRoute.includes("if (!alreadyHandedOver && ruleResult.action === \"ASK_CONTACT\")"),
+  "a2: không tạo phiếu chuyển trùng / không xin số điện thoại lại khi đã có chuyên viên",
+)
+check(
+  sendAiRoute.includes('handover_mode: alreadyHandedOver ? "manual"'),
+  "a2: đang chờ chuyên viên thì giữ nguyên chế độ chuyên viên, không hạ về auto",
+)
+check(
+  sendAiRoute.includes('status: alreadyHandedOver ? "handed_over" : "ok"'),
+  "a2: khung chat vẫn hiện thẻ \"Chuyên viên đang hỗ trợ\" kèm câu trả lời thật",
+)
+
+// b2: câu hỏi giá -> AI trả lời nhưng admin phải được báo (lead nóng nhất)
+const pricing = run("Chi phí đăng ký FDA là bao nhiêu?")
+check(
+  pricing.action === "AI_CONTINUE" && pricing.tags.reason === "sales" && pricing.tags.urgency === "high",
+  `b2: câu hỏi giá AI trả lời nhưng gắn nhãn lead nóng: ${pricing.ruleId}`,
+)
+check(
+  shouldAlertAdminOnAiReply(pricing),
+  "b2: câu hỏi giá phải báo admin ngay (push/email), không chờ admin mở dashboard",
+)
+check(
+  !shouldAlertAdminOnAiReply(run("Đăng ký GACC mất bao lâu?")),
+  "Câu hỏi kiến thức bình thường không bắn thông báo làm phiền chuyên viên",
+)
+check(
+  sendAiRoute.includes("HOT_LEAD_ALERT_COOLDOWN_MS") && sendAiRoute.includes("last_lead_alert_at"),
+  "b2: chống spam thông báo — mỗi hội thoại tối đa 1 lần / 30 phút",
+)
+check(
+  readFileSync("lib/ai-service.ts", "utf8").includes("extraInstructions"),
+  "ai-service truyền được ghi chú riêng cho từng lượt (phục vụ a2)",
 )
 
 testModelFallback().then(() => {
