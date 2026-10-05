@@ -9,7 +9,7 @@ const benefits = [
   },
   {
     icon: Clock,
-    title: "Quy trình rõ ràng, tiến độ minh bạch",
+    title: "Quy trình rõ ràng",
     description:
       "Mỗi hồ sơ đều có phạm vi công việc, các bước xử lý và mốc tiến độ rõ ràng. Thời gian thực tế phụ thuộc vào loại hồ sơ, mức độ đầy đủ của thông tin và phản hồi từ cơ quan quản lý. Vexim cập nhật tiến độ để doanh nghiệp luôn biết hồ sơ đang ở đâu.",
   },
@@ -21,7 +21,7 @@ const benefits = [
   },
   {
     icon: FileCheck2,
-    title: "Theo sát hồ sơ đến khi hoàn tất",
+    title: "Bám sát tiến độ",
     description:
       "Không chỉ tư vấn tại thời điểm đăng ký. Vexim theo dõi hồ sơ trong quá trình xử lý, cập nhật những thay đổi có liên quan và hỗ trợ doanh nghiệp khi phát sinh vấn đề cần xử lý.",
   },
