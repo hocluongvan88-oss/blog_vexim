@@ -89,7 +89,7 @@ export function HeroSection() {
           <div className="text-white">
             <span className="inline-flex items-center gap-2 rounded-full border border-sky-300/30 bg-sky-400/10 px-4 py-1.5 text-sm font-medium text-sky-200 mb-6">
               <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-              Giải pháp xuất nhập khẩu toàn cầu
+              Regulatory Compliance & Market Access
             </span>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-balance leading-tight">
               Giảm rào cản pháp lý, sẵn sàng đưa sản phẩm ra thị trường quốc tế
