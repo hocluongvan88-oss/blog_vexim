@@ -1,29 +1,29 @@
-import { Users, Clock, DollarSign, Headphones } from "lucide-react"
+import { Globe, Clock, DollarSign, FileCheck2 } from "lucide-react"
 
 const benefits = [
   {
-    icon: Users,
-    title: "Chuyên sâu từng thị trường",
+    icon: Globe,
+    title: "Chuyên sâu thị trường Hoa Kỳ",
     description:
-      "Chúng tôi không chỉ hiểu quy định, mà còn nắm rõ cách vận hành thực tế của FDA Hoa Kỳ. Theo dõi sát từng thay đổi pháp lý, cập nhật kinh nghiệm qua hàng trăm hồ sơ đã xử lý. Đội ngũ trẻ, nhiệt huyết, luôn học hỏi để đồng hành tốt nhất cùng doanh nghiệp Việt.",
+      "Am hiểu quy định FDA và cách hồ sơ được vận hành thực tế tại thị trường Hoa Kỳ. Kinh nghiệm từ nhiều hồ sơ thực tế, kết hợp phân tích hồ sơ và cập nhật quy định để đưa ra hướng xử lý phù hợp cho từng doanh nghiệp.",
   },
   {
     icon: Clock,
-    title: "Quy trình minh bạch, tiến độ rõ ràng",
+    title: "Quy trình rõ ràng, tiến độ minh bạch",
     description:
-      "FDA Registration: 5-10 ngày làm việc. FSVP Compliance: 2-4 tuần. MOCRA Registration: 3-6 tuần tùy sản phẩm. Thời gian phụ thuộc độ đầy đủ của hồ sơ và tốc độ xử lý của FDA. Chúng tôi cập nhật tiến độ thường xuyên, không để bạn chờ đợi mơ hồ.",
+      "Mỗi hồ sơ đều có phạm vi công việc, các bước xử lý và mốc tiến độ rõ ràng. Thời gian thực tế phụ thuộc vào loại hồ sơ, mức độ đầy đủ của thông tin và phản hồi từ cơ quan quản lý. Vexim cập nhật tiến độ để doanh nghiệp luôn biết hồ sơ đang ở đâu.",
   },
   {
     icon: DollarSign,
-    title: "Báo giá rõ ràng, không phát sinh",
+    title: "Chi phí minh bạch",
     description:
-      "Chi phí được tính từng hạng mục cụ thể, minh bạch ngay từ đầu. Hợp đồng ghi rõ phạm vi công việc, thời gian cam kết và quyền lợi của hai bên. Không có chi phí ẩn, không phát sinh bất ngờ. Tuân thủ đầy đủ pháp luật về thương mại và bảo vệ người tiêu dùng.",
+      "Báo giá theo từng hạng mục và phạm vi công việc cụ thể. Hợp đồng thể hiện rõ trách nhiệm, quyền lợi và các khoản chi phí liên quan ngay từ đầu, hạn chế tối đa những khoản phát sinh ngoài dự kiến.",
   },
   {
-    icon: Headphones,
-    title: "Hỗ trợ nhiệt tình, cập nhật kịp thời",
+    icon: FileCheck2,
+    title: "Theo sát hồ sơ đến khi hoàn tất",
     description:
-      "Quy định của FDA thay đổi liên tục. Chúng tôi theo dõi hàng ngày để thông báo cho bạn kịp thời khi có điều chỉnh quan trọng. Luôn sẵn sàng tư vấn qua hotline, email, Zalo trong giờ làm việc. Đội ngũ nhiệt tình, giải đáp nhanh chóng.",
+      "Không chỉ tư vấn tại thời điểm đăng ký. Vexim theo dõi hồ sơ trong quá trình xử lý, cập nhật những thay đổi có liên quan và hỗ trợ doanh nghiệp khi phát sinh vấn đề cần xử lý.",
   },
 ]
 
@@ -33,7 +33,7 @@ export function WhyChooseUs() {
       <div className="container mx-auto px-4">
         <div className="text-center mb-12 md:mb-16">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-primary mb-4 text-balance">
-            Tại sao chọn Vexim Global?
+            Tại sao chọn chúng tôi
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             Đồng hành tin cậy, mang lại giá trị thực cho doanh nghiệp của bạn

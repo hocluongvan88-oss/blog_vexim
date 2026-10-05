@@ -1,11 +1,11 @@
 const stats = [
   {
     number: "200+",
-    label: "Doanh nghiệp đã hợp tác",
+    label: "Doanh nghiệp đã đồng hành",
   },
   {
-    number: "100%",
-    label: "Ứng dụng công nghệ vào quy trình",
+    number: "500+",
+    label: "Hồ sơ đã tư vấn & xử lý",
   },
   {
     number: "90%+",
@@ -13,7 +13,7 @@ const stats = [
   },
   {
     number: "24/7",
-    label: "Hotline hỗ trợ",
+    label: "Tiếp nhận yêu cầu hỗ trợ",
   },
 ]
 
@@ -23,9 +23,11 @@ export function Statistics() {
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Con số nói lên sự tận tâm</h2>
-          <p className="text-white/90 text-lg">Kết quả thực tế đồng hành cùng doanh nghiệp Việt</p>
-          <p className="text-white/70 text-sm mt-2">
-            *Dựa trên khảo sát phản hồi khách hàng. Mỗi hồ sơ khác nhau, kết quả phụ thuộc nhiều yếu tố
+          <p className="text-white/90 text-lg font-semibold">
+            Kết quả thực tế từ quá trình đồng hành cùng doanh nghiệp Việt
+          </p>
+          <p className="text-white/70 text-sm mt-2 italic">
+            Dựa trên dữ liệu và phản hồi khách hàng. Kết quả có thể khác nhau tùy từng hồ sơ và điều kiện thực tế.
           </p>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">

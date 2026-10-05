@@ -101,7 +101,7 @@ export function ConsultationDialog({ open, onOpenChange, children }: Consultatio
                   <Input
                     id="popup-name"
                     type="text"
-                    placeholder="Nguyễn Văn A"
+                    placeholder="Nhập tên của bạn"
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -115,7 +115,7 @@ export function ConsultationDialog({ open, onOpenChange, children }: Consultatio
                   <Input
                     id="popup-phone"
                     type="tel"
-                    placeholder="0912 345 678"
+                    placeholder="Nhập số điện thoại của bạn"
                     required
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
@@ -131,7 +131,7 @@ export function ConsultationDialog({ open, onOpenChange, children }: Consultatio
                 <Input
                   id="popup-email"
                   type="email"
-                  placeholder="email@example.com"
+                  placeholder="Nhập email của bạn"
                   required
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -165,7 +165,7 @@ export function ConsultationDialog({ open, onOpenChange, children }: Consultatio
                 <Input
                   id="popup-product"
                   type="text"
-                  placeholder="VD: Sữa tươi, Thực phẩm chức năng"
+                  placeholder="Nhập sản phẩm của bạn"
                   value={formData.product}
                   onChange={(e) => setFormData({ ...formData, product: e.target.value })}
                   disabled={isSubmitting}
@@ -174,11 +174,10 @@ export function ConsultationDialog({ open, onOpenChange, children }: Consultatio
 
               <div>
                 <label htmlFor="popup-description" className="block text-sm font-medium mb-2">
-                  Mô tả thêm (chứng chỉ, quy trình sản xuất...)
+                  Mô tả thêm
                 </label>
                 <textarea
                   id="popup-description"
-                  placeholder="VD: Có chứng chỉ ISO, sản xuất theo tiêu chuẩn GMP..."
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   disabled={isSubmitting}
@@ -244,7 +243,7 @@ export function ConsultationDialog({ open, onOpenChange, children }: Consultatio
               <Input
                 id="popup-name"
                 type="text"
-                placeholder="Nguyễn Văn A"
+                placeholder="Nhập tên của bạn"
                 required
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -258,7 +257,7 @@ export function ConsultationDialog({ open, onOpenChange, children }: Consultatio
               <Input
                 id="popup-phone"
                 type="tel"
-                placeholder="0912 345 678"
+                placeholder="Nhập số điện thoại của bạn"
                 required
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
@@ -274,7 +273,7 @@ export function ConsultationDialog({ open, onOpenChange, children }: Consultatio
             <Input
               id="popup-email"
               type="email"
-              placeholder="email@example.com"
+              placeholder="Nhập email của bạn"
               required
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -308,7 +307,7 @@ export function ConsultationDialog({ open, onOpenChange, children }: Consultatio
             <Input
               id="popup-product"
               type="text"
-              placeholder="VD: Sữa tươi, Thực phẩm chức năng"
+              placeholder="Nhập sản phẩm của bạn"
               value={formData.product}
               onChange={(e) => setFormData({ ...formData, product: e.target.value })}
               disabled={isSubmitting}
@@ -317,11 +316,10 @@ export function ConsultationDialog({ open, onOpenChange, children }: Consultatio
 
           <div>
             <label htmlFor="popup-description" className="block text-sm font-medium mb-2">
-              Mô tả thêm (chứng chỉ, quy trình sản xuất...)
+              Mô tả thêm
             </label>
             <textarea
               id="popup-description"
-              placeholder="VD: Có chứng chỉ ISO, sản xuất theo tiêu chuẩn GMP..."
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               disabled={isSubmitting}
