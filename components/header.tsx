@@ -63,7 +63,7 @@ export function Header() {
                   <span className="text-accent ml-1.5">GLOBAL</span>
                 </span>
                 <span className="hidden md:block text-[11px] font-medium tracking-[0.18em] text-muted-foreground uppercase mt-1">
-                  Export · Compliance · Logistics
+                  Tử Tế - Tận Tâm - Trách Nhiệm
                 </span>
               </span>
             </Link>

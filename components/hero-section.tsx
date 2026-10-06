@@ -89,16 +89,17 @@ export function HeroSection() {
           <div className="text-white">
             <span className="inline-flex items-center gap-2 rounded-full border border-sky-300/30 bg-sky-400/10 px-4 py-1.5 text-sm font-medium text-sky-200 mb-6">
               <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-              Giải pháp xuất nhập khẩu toàn cầu
+              Regulatory Compliance & Market Access
             </span>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-balance leading-tight">
               Giảm rào cản pháp lý, sẵn sàng đưa sản phẩm ra thị trường quốc tế
             </h1>
             <h2 className="text-2xl md:text-3xl font-bold mb-6 text-yellow-400 drop-shadow-lg">
-              Từ tuân thủ pháp lý, hoàn thiện hồ sơ đến tiếp cận thị trường và phát triển kênh bán hàng.
+              Từ tuân thủ pháp lý, hoàn thiện hồ sơ đến hỗ trợ doanh nghiệp tiếp cận thị trường Hoa Kỳ và các thị trường quốc tế.
             </h2>
             <p className="text-lg md:text-xl mb-8 text-white/90 leading-relaxed">
-              Vexim Global tư vấn và hỗ trợ doanh nghiệp Việt Nam tiếp cận thị trường Hoa Kỳ và các thị trường quốc tế. Với FDA, chúng tôi giúp doanh nghiệp hiểu đúng yêu cầu, chuẩn bị đúng hồ sơ và xử lý thủ tục rõ ràng, hiệu quả.
+              Vexim Global tư vấn và hỗ trợ doanh nghiệp Việt Nam trong các yêu cầu pháp lý khi đưa sản phẩm ra thị trường quốc tế. Với thị trường Hoa Kỳ, chúng tôi tập trung vào{" "}
+              <strong className="font-semibold text-white">FDA, FSVP và MOCRA</strong>, giúp doanh nghiệp xác định đúng yêu cầu, chuẩn bị đúng hồ sơ và xử lý theo quy trình rõ ràng.
             </p>
             <ul className="space-y-4 mb-8">
               <li className="flex items-start gap-3">
@@ -106,7 +107,7 @@ export function HeroSection() {
                   <Shield className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-white/90">
-                  <strong className="font-semibold text-white">Cập nhật quy định</strong> — theo dõi sát các yêu cầu và thay đổi ảnh hưởng đến sản phẩm, hồ sơ và kế hoạch xuất khẩu.
+                  <strong className="font-semibold text-white">Cập nhật quy định</strong> — Theo dõi các yêu cầu và thay đổi pháp lý có thể ảnh hưởng đến sản phẩm và kế hoạch xuất khẩu.
                 </span>
               </li>
               <li className="flex items-start gap-3">
@@ -114,7 +115,7 @@ export function HeroSection() {
                   <FileCheck className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-white/90">
-                  <strong className="font-semibold text-white">Rà soát hồ sơ kỹ lưỡng</strong> — kiểm tra doanh nghiệp, sản phẩm, nhãn mác và tài liệu trước khi tiến hành.
+                  <strong className="font-semibold text-white">Rà soát hồ sơ</strong> — Kiểm tra thông tin doanh nghiệp, sản phẩm, nhãn mác và tài liệu trước khi xử lý.
                 </span>
               </li>
               <li className="flex items-start gap-3">
@@ -122,7 +123,7 @@ export function HeroSection() {
                   <Clock className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-white/90">
-                  <strong className="font-semibold text-white">Quy trình rõ ràng – xử lý nhanh</strong> — chuẩn hóa từng bước, minh bạch tiến độ, tối ưu thời gian hoàn thiện hồ sơ.
+                  <strong className="font-semibold text-white">Quy trình rõ ràng</strong> — Xác định từng bước cần thực hiện, minh bạch phạm vi công việc và cập nhật tiến độ trong quá trình xử lý.
                 </span>
               </li>
             </ul>
@@ -134,9 +135,9 @@ export function HeroSection() {
 
           {/* Right Content - Consultation Form */}
           <Card id="consultation-form" className="p-5 md:p-6 bg-white shadow-2xl rounded-xl">
-            <h3 className="text-lg md:text-xl font-bold text-primary mb-1.5">Tư vấn miễn phí - Nhận kết quả trong 24h</h3>
+            <h3 className="text-lg md:text-xl font-bold text-primary mb-1.5">Tư vấn miễn phí trong 24h</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              <span className="text-accent font-semibold">Vui lòng gửi lại thông tin</span> chúng tôi sẽ liên hệ với bạn ngay!
+              Gửi thông tin sản phẩm và nhu cầu của bạn. Vexim sẽ liên hệ trao đổi về yêu cầu trong thời gian sớm nhất.
             </p>
             <form onSubmit={handleSubmit} className="space-y-3">
               {/* Honeypot field ẩn */}
@@ -158,7 +159,7 @@ export function HeroSection() {
                   <Input
                     id="name"
                     type="text"
-                    placeholder="Nguyễn Văn A"
+                    placeholder="Nhập tên của bạn"
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -172,7 +173,7 @@ export function HeroSection() {
                   <Input
                     id="phone"
                     type="tel"
-                    placeholder="0912 345 678"
+                    placeholder="Nhập số điện thoại của bạn"
                     required
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
@@ -188,7 +189,7 @@ export function HeroSection() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="email@example.com"
+                  placeholder="Nhập email của bạn"
                   required
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -223,7 +224,7 @@ export function HeroSection() {
                 <Input
                   id="product"
                   type="text"
-                  placeholder="VD: Yến hũ, Hạt điều nhân"
+                  placeholder="Nhập sản phẩm của bạn"
                   value={formData.product}
                   onChange={(e) => setFormData({ ...formData, product: e.target.value })}
                   disabled={isSubmitting}
@@ -232,11 +233,10 @@ export function HeroSection() {
 
               <div>
                 <label htmlFor="description" className="block text-[13px] font-medium mb-1">
-                  Mô tả thêm (chứng chỉ, quy trình sản xuất...)
+                  Mô tả thêm
                 </label>
                 <textarea
                   id="description"
-                  placeholder="VD: Có chứng chỉ ISO, sản xuất theo tiêu chuẩn GMP..."
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   disabled={isSubmitting}
