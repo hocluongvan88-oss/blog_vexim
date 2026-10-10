@@ -311,10 +311,12 @@ export async function callGeminiWithFallback(options: {
 /** Lỗi thuộc dạng "nhà cung cấp không dùng được" -> nên thử nhà cung cấp khác. */
 export function isProviderUnavailableError(error: any): boolean {
   const status = Number(error?.status ?? error?.response?.status ?? error?.error?.status)
-  if ([401, 403, 404, 408, 429].includes(status)) return true
+  // 413: yêu cầu lớn hơn giới hạn TPM của nhà cung cấp (vd. Groq 8.000 token/phút).
+  // Thử lại y hệt sẽ lỗi lại -> phải chuyển sang nhà cung cấp khác.
+  if ([401, 403, 404, 408, 413, 429].includes(status)) return true
   if (status >= 500) return true
-  const text = `${error?.message || ""} ${error?.error?.code || ""}`.toLowerCase()
-  return /api key|api_key|unauthorized|invalid.*key|quota|rate limit|fetch failed|network|model_not_found|does not exist|decommission/.test(
+  const text = `${error?.message || ""} ${error?.error?.code || ""} ${error?.error?.message || ""}`.toLowerCase()
+  return /api key|api_key|unauthorized|invalid.*key|quota|rate[ _]limit|fetch failed|network|model_not_found|does not exist|decommission|request too large|tokens per minute|^413\b/.test(
     text,
   )
 }

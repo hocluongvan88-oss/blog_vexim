@@ -267,6 +267,28 @@ async function runAsync() {
   check(isProviderUnavailableError({ status: 404 }) === true, "404 model bị khai tử -> thử nhà cung cấp khác")
   check(isProviderUnavailableError({ status: 400 }) === false, "400 lỗi request -> không che")
 
+  /* ---------- 14b. Groq 413 (vượt TPM) -> chuyển sang Gemini, không im lặng ---------- */
+  const groqTooLarge = Object.assign(
+    new Error('413 {"error":{"message":"Request too large for model `openai/gpt-oss-120b` ... on tokens per minute (TPM): Limit 8000, Requested 9256","type":"tokens","code":"rate_limit_exceeded"}}'),
+    { status: 413 },
+  )
+  check(isProviderUnavailableError(groqTooLarge) === true, "Groq 413 vượt TPM -> thử nhà cung cấp khác")
+  check(
+    isProviderUnavailableError({ message: "Rate limit reached", error: { code: "rate_limit_exceeded" } }) === true,
+    "Lỗi rate_limit_exceeded (có gạch dưới) -> thử nhà cung cấp khác",
+  )
+  check(isProviderUnavailableError(new Error("Request too large for model")) === true, "Thông báo 'request too large' -> thử nhà cung cấp khác")
+  setEnv({ GROQ_API_KEY: "groq-key", GEMINI_API_KEY: "gemini-key" })
+  const groqTooLargeFallback = await generateChatText({
+    systemPrompt: "x",
+    message: "Hello",
+    fetchImpl: okFetch,
+    groqClientFactory: () => ({
+      chat: { completions: { create: async () => { throw groqTooLarge } } },
+    }),
+  })
+  check(groqTooLargeFallback.provider === "gemini", "Groq 413 -> Gemini trả lời thay vì báo lỗi cho khách")
+
   /* ---------- 16. Giới hạn thời gian: nhà cung cấp treo không làm khách chờ mãi ---------- */
   const savedTimeout = process.env.AI_REQUEST_TIMEOUT_MS
   process.env.AI_REQUEST_TIMEOUT_MS = "1000"
