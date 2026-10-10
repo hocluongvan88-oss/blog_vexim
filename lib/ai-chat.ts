@@ -36,6 +36,50 @@ export const DEFAULT_GEMINI_MODEL = "gemini-3.8-flash"
 /** Các model Gemini thử lần lượt khi model chính không dùng được. */
 export const FALLBACK_GEMINI_MODELS = ["gemini-3.6-flash", "gemini-3.5-flash-lite"]
 
+/**
+ * Thời gian tối đa cho MỘT nhà cung cấp trả lời (ms). Quá thời gian này bot
+ * chuyển sang nhà cung cấp dự phòng thay vì để khách chờ hàng phút (từng gặp:
+ * Gemini mất ~96 giây cho lời chào). Đổi bằng AI_REQUEST_TIMEOUT_MS.
+ */
+export const DEFAULT_AI_REQUEST_TIMEOUT_MS = 15000
+
+export function getAiRequestTimeoutMs(): number {
+  const raw = Number(process.env.AI_REQUEST_TIMEOUT_MS)
+  return Number.isFinite(raw) && raw >= 1000 ? raw : DEFAULT_AI_REQUEST_TIMEOUT_MS
+}
+
+/** Lỗi timeout: mã 408 + cờ `timeout` để các lớp trên biết là quá thời gian. */
+export function createAiTimeoutError(provider: string, ms: number): Error {
+  return Object.assign(
+    new Error(`${provider} không phản hồi sau ${Math.round(ms / 1000)} giây (timeout)`),
+    { status: 408, timeout: true },
+  )
+}
+
+/**
+ * Chạy `run` với giới hạn thời gian. Khi hết giờ: huỷ request (AbortSignal) và
+ * ném lỗi timeout. Dùng Promise.race nên vẫn chặn được cả client không tôn trọng signal.
+ */
+export async function withAiTimeout<T>(
+  provider: string,
+  run: (signal: AbortSignal) => Promise<T>,
+  ms: number = getAiRequestTimeoutMs(),
+): Promise<T> {
+  const controller = new AbortController()
+  let timer: ReturnType<typeof setTimeout> | undefined
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => {
+      controller.abort()
+      reject(createAiTimeoutError(provider, ms))
+    }, ms)
+  })
+  try {
+    return await Promise.race([run(controller.signal), timeout])
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
 /** Thông báo khi chưa cấu hình key nào — dùng cho cả log lẫn câu trả lời khách. */
 export const NO_CHAT_PROVIDER_MESSAGE =
   "Chưa cấu hình khoá AI nào. Thêm GROQ_API_KEY hoặc GEMINI_API_KEY vào biến môi trường rồi deploy lại."
@@ -176,44 +220,49 @@ export async function callGeminiGenerate(options: {
   fetchImpl?: typeof fetch
 }): Promise<{ text: string; model: string }> {
   const fetchImpl = options.fetchImpl || fetch
-  const response = await fetchImpl(`${GEMINI_API_BASE}/${options.model}:generateContent`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-goog-api-key": options.apiKey,
-    },
-    body: JSON.stringify({
-      systemInstruction: { parts: [{ text: options.systemPrompt }] },
-      contents: options.messages.map((message) => ({
-        // Gemini dùng "model" cho lượt của trợ lý
-        role: message.role === "assistant" ? "model" : "user",
-        parts: [{ text: message.content }],
-      })),
-      generationConfig: {
-        temperature: options.temperature,
-        // Gemini 3 tốn token cho phần suy luận nội bộ -> để dư để câu trả lời
-        // không bị cắt cụt.
-        maxOutputTokens: Math.max(options.maxTokens, 2048),
+  return withAiTimeout("Gemini", async (signal) => {
+    const response = await fetchImpl(`${GEMINI_API_BASE}/${options.model}:generateContent`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": options.apiKey,
       },
-    }),
+      signal,
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: options.systemPrompt }] },
+        contents: options.messages.map((message) => ({
+          // Gemini dùng "model" cho lượt của trợ lý
+          role: message.role === "assistant" ? "model" : "user",
+          parts: [{ text: message.content }],
+        })),
+        generationConfig: {
+          temperature: options.temperature,
+          // Gemini 3 tốn token cho phần suy luận nội bộ -> để dư để câu trả lời
+          // không bị cắt cụt.
+          maxOutputTokens: Math.max(options.maxTokens, 2048),
+        },
+      }),
+    })
+
+    const payload: any = await response.json().catch(() => null)
+
+    if (!response.ok) {
+      const message = payload?.error?.message || `Gemini trả về lỗi HTTP ${response.status}`
+      throw Object.assign(new Error(message), { status: response.status })
+    }
+
+    const text = extractGeminiText(payload)
+    if (!text.trim()) {
+      throw Object.assign(new Error(describeGeminiEmptyResponse(payload)), { status: 502 })
+    }
+    return { text, model: options.model }
   })
-
-  const payload: any = await response.json().catch(() => null)
-
-  if (!response.ok) {
-    const message = payload?.error?.message || `Gemini trả về lỗi HTTP ${response.status}`
-    throw Object.assign(new Error(message), { status: response.status })
-  }
-
-  const text = extractGeminiText(payload)
-  if (!text.trim()) {
-    throw Object.assign(new Error(describeGeminiEmptyResponse(payload)), { status: 502 })
-  }
-  return { text, model: options.model }
 }
 
 /** Model chưa tồn tại/quá hạn mức -> thử model Gemini kế tiếp (hạn mức tính riêng từng model). */
 function shouldTryNextGeminiModel(error: any): boolean {
+  // Hết giờ: không thử model Gemini khác (sẽ chậm thêm) — chuyển sang Groq luôn.
+  if (error?.timeout) return false
   const status = Number(error?.status)
   if (status === 404 || status === 429 || status === 408) return true
   if (status >= 500) return true
@@ -311,15 +360,17 @@ export async function generateChatText(
           : (new Groq({ apiKey }) as unknown as GroqLike)
         const groqModel =
           preferred && providerForModel(preferred) === "groq" ? preferred : undefined
-        const { completion, model } = await callGroqWithFallback(client, {
-          model: groqModel,
-          messages: [
-            { role: "system", content: options.systemPrompt },
-            ...messages,
-          ],
-          temperature,
-          maxTokens,
-        })
+        const { completion, model } = await withAiTimeout("Groq", () =>
+          callGroqWithFallback(client, {
+            model: groqModel,
+            messages: [
+              { role: "system", content: options.systemPrompt },
+              ...messages,
+            ],
+            temperature,
+            maxTokens,
+          }),
+        )
         const text = completion?.choices?.[0]?.message?.content || ""
         if (!text.trim()) {
           throw Object.assign(new Error("Groq không trả về nội dung"), { status: 502 })

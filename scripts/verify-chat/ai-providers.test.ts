@@ -12,8 +12,10 @@
  */
 import { readFileSync } from "fs"
 import {
+  DEFAULT_AI_REQUEST_TIMEOUT_MS,
   DEFAULT_GEMINI_MODEL,
   NO_CHAT_PROVIDER_MESSAGE,
+  getAiRequestTimeoutMs,
   callGeminiGenerate,
   callGeminiWithFallback,
   describeChatConfig,
@@ -265,6 +267,104 @@ async function runAsync() {
   check(isProviderUnavailableError({ status: 404 }) === true, "404 model bị khai tử -> thử nhà cung cấp khác")
   check(isProviderUnavailableError({ status: 400 }) === false, "400 lỗi request -> không che")
 
+  /* ---------- 16. Giới hạn thời gian: nhà cung cấp treo không làm khách chờ mãi ---------- */
+  const savedTimeout = process.env.AI_REQUEST_TIMEOUT_MS
+  process.env.AI_REQUEST_TIMEOUT_MS = "1000"
+  check(getAiRequestTimeoutMs() === 1000, "Đọc AI_REQUEST_TIMEOUT_MS hợp lệ")
+  process.env.AI_REQUEST_TIMEOUT_MS = "abc"
+  check(getAiRequestTimeoutMs() === DEFAULT_AI_REQUEST_TIMEOUT_MS, "Giá trị lỗi -> dùng mặc định 15 giây")
+  process.env.AI_REQUEST_TIMEOUT_MS = "50"
+  check(getAiRequestTimeoutMs() === DEFAULT_AI_REQUEST_TIMEOUT_MS, "Quá nhỏ (<1 giây) -> dùng mặc định, tránh tự cắt sai")
+  process.env.AI_REQUEST_TIMEOUT_MS = "1000"
+
+  // Gemini treo: fetch không bao giờ trả lời, chỉ dừng khi bị huỷ (AbortSignal)
+  let hangCalls = 0
+  let hangAborted = false
+  const hangFetch: any = (_url: string, init: any) => {
+    hangCalls++
+    return new Promise((_resolve, reject) => {
+      init?.signal?.addEventListener("abort", () => {
+        hangAborted = true
+        reject(Object.assign(new Error("aborted"), { name: "AbortError" }))
+      })
+    })
+  }
+  const hangStart = Date.now()
+  let geminiTimeoutErr: any = null
+  try {
+    await callGeminiWithFallback({
+      apiKey: "gemini-key",
+      systemPrompt: "x",
+      messages: [{ role: "user", content: "xin chào" }],
+      temperature: 0.7,
+      maxTokens: 512,
+      fetchImpl: hangFetch,
+    })
+  } catch (error: any) {
+    geminiTimeoutErr = error
+  }
+  check(geminiTimeoutErr?.timeout === true && geminiTimeoutErr?.status === 408,
+    "Gemini treo -> báo lỗi timeout (408) thay vì chờ mãi")
+  check(Date.now() - hangStart < 4000, `Hết giờ đúng hạn (${Date.now() - hangStart} ms)`)
+  check(hangAborted, "Request bị huỷ khi hết giờ")
+  check(hangCalls === 1, "Gemini treo -> không thử tiếp các model Gemini khác (tránh chậm thêm)")
+
+  // Gemini treo, Groq còn sống -> Groq trả lời
+  setEnv({ GROQ_API_KEY: "groq-key", GEMINI_API_KEY: "gemini-key" })
+  const geminiHungGroqUp = await generateChatText({
+    systemPrompt: "x",
+    message: "xin chào",
+    preferredModel: DEFAULT_GEMINI_MODEL,
+    fetchImpl: hangFetch,
+    groqClientFactory: () => ({
+      chat: { completions: { create: async () => ({ choices: [{ message: { content: "Dạ em chào anh/chị ạ!" } }] }) } },
+    }),
+  })
+  check(geminiHungGroqUp.provider === "groq", "Gemini treo -> tự chuyển sang Groq trả lời")
+
+  // Groq treo, Gemini còn sống -> Gemini trả lời
+  const groqHung = await generateChatText({
+    systemPrompt: "x",
+    message: "xin chào",
+    preferredModel: "openai/gpt-oss-120b",
+    fetchImpl: okFetch,
+    groqClientFactory: () => ({
+      chat: { completions: { create: () => new Promise(() => {}) } },
+    }),
+  })
+  check(groqHung.provider === "gemini", "Groq treo -> tự chuyển sang Gemini trả lời")
+
+  // Cả hai đều treo -> báo lỗi timeout rõ ràng (không treo vô hạn)
+  let bothHungErr: any = null
+  try {
+    await generateChatText({
+      systemPrompt: "x",
+      message: "xin chào",
+      preferredModel: DEFAULT_GEMINI_MODEL,
+      fetchImpl: hangFetch,
+      groqClientFactory: () => ({
+        chat: { completions: { create: () => new Promise(() => {}) } },
+      }),
+    })
+  } catch (error: any) {
+    bothHungErr = error
+  }
+  check(bothHungErr?.timeout === true, "Cả hai nhà cung cấp đều treo -> báo lỗi timeout")
+
+  // Trả lời nhanh không bị ảnh hưởng bởi giới hạn thời gian
+  const fastResult = await generateChatText({
+    systemPrompt: "x",
+    message: "xin chào",
+    fetchImpl: okFetch,
+    groqClientFactory: () => ({
+      chat: { completions: { create: async () => ({ choices: [{ message: { content: "nhanh" } }] }) } },
+    }),
+  })
+  check(fastResult.text === "nhanh", "Trả lời nhanh -> không bị cắt bởi giới hạn thời gian")
+
+  setEnv({ GEMINI_API_KEY: undefined, GROQ_API_KEY: undefined })
+  if (savedTimeout === undefined) delete process.env.AI_REQUEST_TIMEOUT_MS
+  else process.env.AI_REQUEST_TIMEOUT_MS = savedTimeout
 }
 
 /* ---------- 15. Không còn chỗ nào bắt buộc phải có GROQ_API_KEY ---------- */
