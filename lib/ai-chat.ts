@@ -23,7 +23,7 @@ import {
   type GroqLike,
 } from "@/lib/ai-models"
 
-export type ChatProvider = "groq" | "gemini"
+export type ChatProvider = "openai" | "groq" | "gemini"
 
 const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models"
 
@@ -31,6 +31,9 @@ const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models
  * Model Gemini mặc định. Gemini 2.5 chỉ mở cho tài khoản đã dùng trước đó, nên
  * dùng dòng Gemini 3 (Google khuyến nghị cho dự án mới). Có thể đổi bằng GEMINI_MODEL.
  */
+/** Model OpenAI mặc định khi chưa đặt OPENAI_MODEL. */
+export const DEFAULT_OPENAI_MODEL = "gpt-5-mini"
+
 export const DEFAULT_GEMINI_MODEL = "gemini-3.8-flash"
 
 /** Các model Gemini thử lần lượt khi model chính không dùng được. */
@@ -41,7 +44,7 @@ export const FALLBACK_GEMINI_MODELS = ["gemini-3.6-flash", "gemini-3.5-flash-lit
  * chuyển sang nhà cung cấp dự phòng thay vì để khách chờ hàng phút (từng gặp:
  * Gemini mất ~96 giây cho lời chào). Đổi bằng AI_REQUEST_TIMEOUT_MS.
  */
-export const DEFAULT_AI_REQUEST_TIMEOUT_MS = 15000
+export const DEFAULT_AI_REQUEST_TIMEOUT_MS = 25000
 
 export function getAiRequestTimeoutMs(): number {
   const raw = Number(process.env.AI_REQUEST_TIMEOUT_MS)
@@ -82,7 +85,7 @@ export async function withAiTimeout<T>(
 
 /** Thông báo khi chưa cấu hình key nào — dùng cho cả log lẫn câu trả lời khách. */
 export const NO_CHAT_PROVIDER_MESSAGE =
-  "Chưa cấu hình khoá AI nào. Thêm GROQ_API_KEY hoặc GEMINI_API_KEY vào biến môi trường rồi deploy lại."
+  "Chưa cấu hình khoá AI nào. Thêm OPENAI_API_KEY, GROQ_API_KEY hoặc GEMINI_API_KEY vào biến môi trường rồi deploy lại."
 
 export interface ChatMessage {
   role: string
@@ -108,29 +111,46 @@ export function getGeminiApiKey(): string {
   return process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || ""
 }
 
+export function getOpenAiApiKey(): string {
+  return process.env.OPENAI_API_KEY || ""
+}
+
+/** Model OpenAI: đổi bằng OPENAI_MODEL (nên chọn đúng model đang có trong tài khoản OpenAI). */
+export function getOpenAiModel(): string {
+  return (process.env.OPENAI_MODEL || "").trim() || DEFAULT_OPENAI_MODEL
+}
+
 /** Đoán nhà cung cấp từ tên model đang cấu hình trong CSDL. */
 export function providerForModel(model?: string): ChatProvider | null {
   const normalized = (model || "").trim().toLowerCase()
   if (!normalized) return null
   if (normalized.startsWith("gemini")) return "gemini"
+  // Model OpenAI: "gpt-5-mini", "gpt-4o", "o3-mini"… (không có dấu "/")
+  if (/^(gpt-|o\d)/.test(normalized)) return "openai"
   // Mọi model Groq đều có dạng "openai/...", "qwen/...", "llama-..." …
   return "groq"
 }
 
 /**
  * Danh sách nhà cung cấp sẽ thử, theo thứ tự ưu tiên:
- * model đang cấu hình → CHAT_PROVIDER → Groq → Gemini.
+ * CHAT_PROVIDER (nếu có) → model đang cấu hình trong CSDL → OpenAI → Groq → Gemini.
  * Chỉ trả về nhà cung cấp THẬT SỰ có key.
+ *
+ * Vì sao CHAT_PROVIDER đứng trước model trong CSDL: model trong CSDL có thể còn
+ * là model Groq cũ; biến môi trường là nơi quản trị viên đặt ưu tiên rõ ràng.
  */
 export function getChatProviders(preferredModel?: string): ChatProvider[] {
   const available: ChatProvider[] = []
+  if (getOpenAiApiKey()) available.push("openai")
   if (getGroqApiKey()) available.push("groq")
   if (getGeminiApiKey()) available.push("gemini")
 
   const requested = (process.env.CHAT_PROVIDER || "").trim().toLowerCase()
-  const first =
-    providerForModel(preferredModel) ||
-    (requested === "groq" || requested === "gemini" ? (requested as ChatProvider) : null)
+  const isProvider = (value: string): value is ChatProvider =>
+    value === "openai" || value === "groq" || value === "gemini"
+  const first: ChatProvider | null = isProvider(requested)
+    ? requested
+    : providerForModel(preferredModel)
 
   if (!first || !available.includes(first)) return available
   return [first, ...available.filter((provider) => provider !== first)]
@@ -141,22 +161,31 @@ export function describeChatConfig(): {
   providers: ChatProvider[]
   groqModel: string
   geminiModel: string
+  openaiModel: string
   hint: string
 } {
   const providers = getChatProviders()
   const groqModel = process.env.GROQ_MODEL || DEFAULT_GROQ_MODEL
   const geminiModel = process.env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL
+  const openaiModel = getOpenAiModel()
+  const label = (provider: ChatProvider) =>
+    provider === "openai"
+      ? `OpenAI · ${openaiModel}`
+      : provider === "groq"
+        ? `Groq · ${groqModel}`
+        : `Gemini · ${geminiModel}`
   return {
     providers,
     groqModel,
     geminiModel,
+    openaiModel,
     hint:
       providers.length === 0
         ? NO_CHAT_PROVIDER_MESSAGE
         : providers.length === 1
-          ? `Đang dùng ${providers[0] === "groq" ? `Groq · ${groqModel}` : `Gemini · ${geminiModel}`} ` +
+          ? `Đang dùng ${label(providers[0])} ` +
             "(chỉ 1 nhà cung cấp — nên thêm key còn lại để bot không im lặng khi hết hạn mức)"
-          : `Groq · ${groqModel} (chính) → Gemini · ${geminiModel} (dự phòng)`,
+          : `${providers.map(label).join(" (chính) → ")} (dự phòng)`,
   }
 }
 
@@ -305,6 +334,71 @@ export async function callGeminiWithFallback(options: {
 }
 
 /* ------------------------------------------------------------------ */
+/* OpenAI (ChatGPT, REST, không cần thêm thư viện)                     */
+/* ------------------------------------------------------------------ */
+
+const OPENAI_CHAT_URL = "https://api.openai.com/v1/chat/completions"
+
+/**
+ * Model suy luận (gpt-5*, o-series) KHÔNG nhận `temperature` tuỳ chỉnh và dùng
+ * `max_completion_tokens` (không phải `max_tokens`). Phân biệt để gửi đúng tham số.
+ */
+export function isOpenAiReasoningModel(model: string): boolean {
+  return /^(gpt-5|o\d)/.test((model || "").trim().toLowerCase())
+}
+
+/** Gọi OpenAI Chat Completions. Lỗi HTTP được ném kèm `status` và `error` như các nhà cung cấp khác. */
+export async function callOpenAiChat(options: {
+  apiKey: string
+  model: string
+  systemPrompt: string
+  messages: ChatMessage[]
+  temperature: number
+  maxTokens: number
+  fetchImpl?: typeof fetch
+}): Promise<{ text: string; model: string }> {
+  const fetchImpl = options.fetchImpl || fetch
+  const reasoning = isOpenAiReasoningModel(options.model)
+  return withAiTimeout("OpenAI", async (signal) => {
+    const response = await fetchImpl(OPENAI_CHAT_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${options.apiKey}`,
+      },
+      signal,
+      body: JSON.stringify({
+        model: options.model,
+        messages: [
+          { role: "system", content: options.systemPrompt },
+          ...options.messages.map((message) => ({
+            role: message.role === "assistant" ? "assistant" : "user",
+            content: message.content,
+          })),
+        ],
+        // Model suy luận: giảm nỗ lực suy luận để trả lời nhanh; để đủ token cho phần suy luận + câu trả lời.
+        ...(reasoning
+          ? { reasoning_effort: "low", max_completion_tokens: Math.max(options.maxTokens, 4096) }
+          : { temperature: options.temperature, max_completion_tokens: options.maxTokens }),
+      }),
+    })
+
+    const payload: any = await response.json().catch(() => null)
+
+    if (!response.ok) {
+      const message = payload?.error?.message || `OpenAI trả về lỗi HTTP ${response.status}`
+      throw Object.assign(new Error(message), { status: response.status, error: payload?.error })
+    }
+
+    const text = payload?.choices?.[0]?.message?.content || ""
+    if (!text.trim()) {
+      throw Object.assign(new Error("OpenAI không trả về nội dung"), { status: 502 })
+    }
+    return { text, model: options.model }
+  })
+}
+
+/* ------------------------------------------------------------------ */
 /* Gọi chung: tự chọn nhà cung cấp, tự chuyển khi lỗi                   */
 /* ------------------------------------------------------------------ */
 
@@ -355,6 +449,21 @@ export async function generateChatText(
 
   for (const provider of providers) {
     try {
+      if (provider === "openai") {
+        const openaiModel =
+          preferred && providerForModel(preferred) === "openai" ? preferred : getOpenAiModel()
+        const { text, model } = await callOpenAiChat({
+          apiKey: getOpenAiApiKey(),
+          model: openaiModel,
+          systemPrompt: options.systemPrompt,
+          messages,
+          temperature,
+          maxTokens,
+          fetchImpl: options.fetchImpl,
+        })
+        return { text, provider, model }
+      }
+
       if (provider === "groq") {
         const apiKey = getGroqApiKey()
         const client = options.groqClientFactory
