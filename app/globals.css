@@ -344,8 +344,11 @@ html {
 }
 
 /* ------------------------------------------------------------------
-   Nút Zalo OA — ĐANG TẮT (xem SHOW_ZALO_BUTTON trong
-   components/client-widgets.tsx nên nút này không còn được gắn).
+   Nút Zalo OA — ĐANG BẬT, nằm DƯỚI khung chat AI ở góc phải.
+   Khung chat AI được đẩy lên `bottom-24` (96px) trong chat-widget.tsx;
+   nút Zalo giữ ở đáy màn hình (xem bộ CSS bên dưới).
+
+   Ghi chú cũ (khi nút Zalo nằm bên trái) — giữ để tham khảo:
 
    Nếu bật lại nút Zalo, mở lại đoạn CSS dưới đây để đẩy nó sang góc TRÁI,
    tránh nằm đè lên khung chat AI ở góc phải:
@@ -368,3 +371,22 @@ html {
      }
    }
    ------------------------------------------------------------------ */
+
+/* Nút Zalo OA: góc phải dưới, phía dưới khung chat AI (đang bật) */
+.zalo-chat-widget,
+#zalo-chat-widget,
+[class*="zalo-chat-widget"] {
+  right: 24px !important;
+  left: auto !important;
+  bottom: 24px !important;
+  z-index: 40 !important;
+}
+
+@media (max-width: 640px) {
+  .zalo-chat-widget,
+  #zalo-chat-widget,
+  [class*="zalo-chat-widget"] {
+    right: 16px !important;
+    bottom: 16px !important;
+  }
+}

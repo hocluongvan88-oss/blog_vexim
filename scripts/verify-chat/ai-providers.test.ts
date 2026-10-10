@@ -12,8 +12,13 @@
  */
 import { readFileSync } from "fs"
 import {
+  DEFAULT_AI_REQUEST_TIMEOUT_MS,
+  DEFAULT_OPENAI_MODEL,
+  getOpenAiModel,
+  isOpenAiReasoningModel,
   DEFAULT_GEMINI_MODEL,
   NO_CHAT_PROVIDER_MESSAGE,
+  getAiRequestTimeoutMs,
   callGeminiGenerate,
   callGeminiWithFallback,
   describeChatConfig,
@@ -38,9 +43,10 @@ const savedEnv = {
   GEMINI_API_KEY: process.env.GEMINI_API_KEY,
   GOOGLE_API_KEY: process.env.GOOGLE_API_KEY,
   CHAT_PROVIDER: process.env.CHAT_PROVIDER,
+  OPENAI_API_KEY: process.env.OPENAI_API_KEY,
 }
 function setEnv(env: Record<string, string | undefined>) {
-  for (const key of ["GROQ_API_KEY", "GEMINI_API_KEY", "GOOGLE_API_KEY", "CHAT_PROVIDER"]) {
+  for (const key of ["GROQ_API_KEY", "GEMINI_API_KEY", "GOOGLE_API_KEY", "CHAT_PROVIDER", "OPENAI_API_KEY"]) {
     delete (process.env as any)[key]
   }
   for (const [key, value] of Object.entries(env)) {
@@ -265,6 +271,233 @@ async function runAsync() {
   check(isProviderUnavailableError({ status: 404 }) === true, "404 model bị khai tử -> thử nhà cung cấp khác")
   check(isProviderUnavailableError({ status: 400 }) === false, "400 lỗi request -> không che")
 
+  /* ---------- 14b. Groq 413 (vượt TPM) -> chuyển sang Gemini, không im lặng ---------- */
+  const groqTooLarge = Object.assign(
+    new Error('413 {"error":{"message":"Request too large for model `openai/gpt-oss-120b` ... on tokens per minute (TPM): Limit 8000, Requested 9256","type":"tokens","code":"rate_limit_exceeded"}}'),
+    { status: 413 },
+  )
+  check(isProviderUnavailableError(groqTooLarge) === true, "Groq 413 vượt TPM -> thử nhà cung cấp khác")
+  check(
+    isProviderUnavailableError({ message: "Rate limit reached", error: { code: "rate_limit_exceeded" } }) === true,
+    "Lỗi rate_limit_exceeded (có gạch dưới) -> thử nhà cung cấp khác",
+  )
+  check(isProviderUnavailableError(new Error("Request too large for model")) === true, "Thông báo 'request too large' -> thử nhà cung cấp khác")
+  setEnv({ GROQ_API_KEY: "groq-key", GEMINI_API_KEY: "gemini-key" })
+  const groqTooLargeFallback = await generateChatText({
+    systemPrompt: "x",
+    message: "Hello",
+    fetchImpl: okFetch,
+    groqClientFactory: () => ({
+      chat: { completions: { create: async () => { throw groqTooLarge } } },
+    }),
+  })
+  check(groqTooLargeFallback.provider === "gemini", "Groq 413 -> Gemini trả lời thay vì báo lỗi cho khách")
+
+  /* ---------- 16. Giới hạn thời gian: nhà cung cấp treo không làm khách chờ mãi ---------- */
+  const savedTimeout = process.env.AI_REQUEST_TIMEOUT_MS
+  process.env.AI_REQUEST_TIMEOUT_MS = "1000"
+  check(getAiRequestTimeoutMs() === 1000, "Đọc AI_REQUEST_TIMEOUT_MS hợp lệ")
+  process.env.AI_REQUEST_TIMEOUT_MS = "abc"
+  check(getAiRequestTimeoutMs() === DEFAULT_AI_REQUEST_TIMEOUT_MS, "Giá trị lỗi -> dùng mặc định 15 giây")
+  process.env.AI_REQUEST_TIMEOUT_MS = "50"
+  check(getAiRequestTimeoutMs() === DEFAULT_AI_REQUEST_TIMEOUT_MS, "Quá nhỏ (<1 giây) -> dùng mặc định, tránh tự cắt sai")
+  process.env.AI_REQUEST_TIMEOUT_MS = "1000"
+
+  // Gemini treo: fetch không bao giờ trả lời, chỉ dừng khi bị huỷ (AbortSignal)
+  let hangCalls = 0
+  let hangAborted = false
+  const hangFetch: any = (_url: string, init: any) => {
+    hangCalls++
+    return new Promise((_resolve, reject) => {
+      init?.signal?.addEventListener("abort", () => {
+        hangAborted = true
+        reject(Object.assign(new Error("aborted"), { name: "AbortError" }))
+      })
+    })
+  }
+  const hangStart = Date.now()
+  let geminiTimeoutErr: any = null
+  try {
+    await callGeminiWithFallback({
+      apiKey: "gemini-key",
+      systemPrompt: "x",
+      messages: [{ role: "user", content: "xin chào" }],
+      temperature: 0.7,
+      maxTokens: 512,
+      fetchImpl: hangFetch,
+    })
+  } catch (error: any) {
+    geminiTimeoutErr = error
+  }
+  check(geminiTimeoutErr?.timeout === true && geminiTimeoutErr?.status === 408,
+    "Gemini treo -> báo lỗi timeout (408) thay vì chờ mãi")
+  check(Date.now() - hangStart < 4000, `Hết giờ đúng hạn (${Date.now() - hangStart} ms)`)
+  check(hangAborted, "Request bị huỷ khi hết giờ")
+  check(hangCalls === 1, "Gemini treo -> không thử tiếp các model Gemini khác (tránh chậm thêm)")
+
+  // Gemini treo, Groq còn sống -> Groq trả lời
+  setEnv({ GROQ_API_KEY: "groq-key", GEMINI_API_KEY: "gemini-key" })
+  const geminiHungGroqUp = await generateChatText({
+    systemPrompt: "x",
+    message: "xin chào",
+    preferredModel: DEFAULT_GEMINI_MODEL,
+    fetchImpl: hangFetch,
+    groqClientFactory: () => ({
+      chat: { completions: { create: async () => ({ choices: [{ message: { content: "Dạ em chào anh/chị ạ!" } }] }) } },
+    }),
+  })
+  check(geminiHungGroqUp.provider === "groq", "Gemini treo -> tự chuyển sang Groq trả lời")
+
+  // Groq treo, Gemini còn sống -> Gemini trả lời
+  const groqHung = await generateChatText({
+    systemPrompt: "x",
+    message: "xin chào",
+    preferredModel: "openai/gpt-oss-120b",
+    fetchImpl: okFetch,
+    groqClientFactory: () => ({
+      chat: { completions: { create: () => new Promise(() => {}) } },
+    }),
+  })
+  check(groqHung.provider === "gemini", "Groq treo -> tự chuyển sang Gemini trả lời")
+
+  // Cả hai đều treo -> báo lỗi timeout rõ ràng (không treo vô hạn)
+  let bothHungErr: any = null
+  try {
+    await generateChatText({
+      systemPrompt: "x",
+      message: "xin chào",
+      preferredModel: DEFAULT_GEMINI_MODEL,
+      fetchImpl: hangFetch,
+      groqClientFactory: () => ({
+        chat: { completions: { create: () => new Promise(() => {}) } },
+      }),
+    })
+  } catch (error: any) {
+    bothHungErr = error
+  }
+  check(bothHungErr?.timeout === true, "Cả hai nhà cung cấp đều treo -> báo lỗi timeout")
+
+  // Trả lời nhanh không bị ảnh hưởng bởi giới hạn thời gian
+  const fastResult = await generateChatText({
+    systemPrompt: "x",
+    message: "xin chào",
+    fetchImpl: okFetch,
+    groqClientFactory: () => ({
+      chat: { completions: { create: async () => ({ choices: [{ message: { content: "nhanh" } }] }) } },
+    }),
+  })
+  check(fastResult.text === "nhanh", "Trả lời nhanh -> không bị cắt bởi giới hạn thời gian")
+
+  /* ---------- 17. OpenAI (ChatGPT) ---------- */
+  setEnv({ OPENAI_API_KEY: "sk-test", GEMINI_API_KEY: "gemini-key" })
+  check(providerForModel("gpt-5-mini") === "openai" && providerForModel("o3-mini") === "openai",
+    "Tên model gpt-/o-series -> nhà cung cấp OpenAI")
+  check(providerForModel("openai/gpt-oss-120b") === "groq", "openai/gpt-oss-120b vẫn là model Groq (không nhầm sang OpenAI)")
+  check(getOpenAiModel() === DEFAULT_OPENAI_MODEL, "Chưa đặt OPENAI_MODEL -> dùng model mặc định")
+  process.env.OPENAI_MODEL = "gpt-4o-mini"
+  check(getOpenAiModel() === "gpt-4o-mini", "OPENAI_MODEL ghi đè được model")
+  delete process.env.OPENAI_MODEL
+
+  process.env.CHAT_PROVIDER = "openai"
+  check(
+    JSON.stringify(getChatProviders("openai/gpt-oss-120b")) === JSON.stringify(["openai", "gemini"]),
+    "CHAT_PROVIDER=openai thắng model Groq còn trong CSDL -> OpenAI chính, Gemini dự phòng",
+  )
+  delete process.env.CHAT_PROVIDER
+
+  // OpenAI trả lời: đúng URL/header/body
+  const openaiCaptured: any = {}
+  const openaiOk: any = async (url: string, init: any) => {
+    openaiCaptured.url = url
+    openaiCaptured.init = init
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({ choices: [{ message: { content: "Dạ em chào anh/chị ạ!" } }] }),
+    }
+  }
+  setEnv({ OPENAI_API_KEY: "sk-test" })
+  process.env.OPENAI_MODEL = "gpt-4o-mini" // model thường (không phải suy luận) cho bài kiểm tra tham số
+  const openaiResult = await generateChatText({
+    systemPrompt: "Bạn là trợ lý Vexim",
+    message: "xin chào",
+    history: [{ role: "assistant", content: "Dạ em chào" }],
+    maxTokens: 512,
+    fetchImpl: openaiOk,
+  })
+  check(openaiResult.provider === "openai" && openaiResult.text.includes("chào"),
+    `Chỉ có OPENAI_API_KEY -> ChatGPT trả lời (${openaiResult.model})`)
+  check(openaiCaptured.url === "https://api.openai.com/v1/chat/completions", "Gọi đúng endpoint Chat Completions")
+  check(openaiCaptured.init.headers.Authorization === "Bearer sk-test", "Gửi key qua header Authorization: Bearer")
+  const openaiBody = JSON.parse(openaiCaptured.init.body)
+  check(openaiBody.messages[0].role === "system" && openaiBody.messages[0].content === "Bạn là trợ lý Vexim",
+    "System prompt đứng đầu danh sách messages")
+  check(openaiBody.messages.at(-1).content === "xin chào" && openaiBody.messages[1].role === "assistant",
+    "Giữ lịch sử hội thoại và câu hỏi của khách đúng thứ tự")
+  check(openaiBody.max_completion_tokens === 512 && !("max_tokens" in openaiBody),
+    "Dùng max_completion_tokens (không dùng max_tokens đã lỗi thời)")
+  check(openaiBody.temperature === 0.7, "Model thường: gửi temperature")
+
+  // Model suy luận (gpt-5*): không gửi temperature, có reasoning_effort
+  check(isOpenAiReasoningModel("gpt-5-mini") && !isOpenAiReasoningModel("gpt-4o-mini"),
+    "Nhận diện đúng model suy luận")
+  process.env.OPENAI_MODEL = "gpt-5-mini"
+  await generateChatText({ systemPrompt: "x", message: "xin chào", maxTokens: 512, fetchImpl: openaiOk })
+  const reasoningBody = JSON.parse(openaiCaptured.init.body)
+  check(!("temperature" in reasoningBody) && reasoningBody.reasoning_effort === "low",
+    "Model gpt-5: không gửi temperature, gửi reasoning_effort=low")
+  check(reasoningBody.max_completion_tokens >= 4096, "Model gpt-5: đủ token cho phần suy luận")
+  delete process.env.OPENAI_MODEL
+
+  const openaiFail: any = async () => ({
+    ok: false,
+    status: 429,
+    json: async () => ({ error: { message: "You exceeded your current quota", code: "insufficient_quota" } }),
+  })
+  setEnv({ OPENAI_API_KEY: "sk-test", GEMINI_API_KEY: "gemini-key" })
+  process.env.CHAT_PROVIDER = "openai"
+  const openaiQuotaToGemini = await generateChatText({
+    systemPrompt: "x",
+    message: "xin chào",
+    fetchImpl: async (url: string, init: any) => (String(url).includes("openai.com") ? openaiFail(url, init) : okFetch(url, init)),
+  })
+  check(openaiQuotaToGemini.provider === "gemini", "OpenAI hết quota (429) -> tự chuyển sang Gemini")
+  delete process.env.CHAT_PROVIDER
+
+  // OpenAI treo -> hết giờ, chuyển sang Gemini
+  const openaiHang: any = (_url: string, init: any) =>
+    new Promise((_resolve, reject) => {
+      init?.signal?.addEventListener("abort", () => reject(Object.assign(new Error("aborted"), { name: "AbortError" })))
+    })
+  process.env.AI_REQUEST_TIMEOUT_MS = "1000"
+  setEnv({ OPENAI_API_KEY: "sk-test", GEMINI_API_KEY: "gemini-key" })
+  process.env.CHAT_PROVIDER = "openai"
+  const openaiHungToGemini = await generateChatText({
+    systemPrompt: "x",
+    message: "xin chào",
+    fetchImpl: async (url: string, init: any) => (String(url).includes("openai.com") ? openaiHang(url, init) : okFetch(url, init)),
+  })
+  check(openaiHungToGemini.provider === "gemini", "OpenAI treo quá giờ -> chuyển sang Gemini")
+  delete process.env.CHAT_PROVIDER
+  process.env.AI_REQUEST_TIMEOUT_MS = "1000"
+
+  // Lỗi 400 của OpenAI (sai request) không bị che
+  setEnv({ OPENAI_API_KEY: "sk-test" })
+  let openaiBadThrew = false
+  try {
+    await generateChatText({
+      systemPrompt: "x",
+      message: "xin chào",
+      fetchImpl: (async () => ({ ok: false, status: 400, json: async () => ({ error: { message: "bad" } }) })) as any,
+    })
+  } catch (error: any) {
+    openaiBadThrew = error.status === 400
+  }
+  check(openaiBadThrew, "Lỗi 400 của OpenAI vẫn ném ra ngoài")
+
+  setEnv({ GEMINI_API_KEY: undefined, GROQ_API_KEY: undefined })
+  if (savedTimeout === undefined) delete process.env.AI_REQUEST_TIMEOUT_MS
+  else process.env.AI_REQUEST_TIMEOUT_MS = savedTimeout
 }
 
 /* ---------- 15. Không còn chỗ nào bắt buộc phải có GROQ_API_KEY ---------- */
