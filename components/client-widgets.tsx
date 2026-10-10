@@ -7,18 +7,17 @@ import { ZaloChatButton } from "@/components/zalo-chat-button"
 /**
  * Bật/tắt nút Zalo OA nổi trên website.
  *
- * ĐANG TẮT theo yêu cầu: khách chỉ thấy trợ lý AI của Vexim, không còn hai nút
- * chat chồng nhau ở góc màn hình.
+ * ĐANG BẬT: nút Zalo nằm ở góc phải dưới, phía DƯỚI khung chat AI (khung chat AI
+ * được đẩy lên `bottom-24` trong chat-widget.tsx). CSS vị trí nằm trong
+ * `app/globals.css` — tìm chú thích "Nút Zalo OA".
  *
- * Muốn bật lại: đổi thành `true`. (Nhớ thêm lại đoạn CSS đẩy nút Zalo sang góc
- * trái trong `app/globals.css` — tìm chú thích "Nút Zalo OA" — nếu không nút Zalo
- * sẽ nằm đè lên khung chat AI.)
+ * Muốn tắt: đổi thành `false`.
  *
  * Lưu ý: tắt nút này KHÔNG ảnh hưởng đến kênh Zalo của Vexim. Khách vẫn nhắn
  * trực tiếp cho OA qua ứng dụng Zalo như bình thường, webhook `/api/webhooks/zalo`
  * và chuông thông báo cho admin vẫn hoạt động nguyên vẹn.
  */
-const SHOW_ZALO_BUTTON = false
+const SHOW_ZALO_BUTTON = true
 
 /**
  * Các kênh liên hệ hiển thị trên website (ẩn trong trang quản trị /admin).

@@ -680,7 +680,7 @@ export function ChatWidget() {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-primary to-accent shadow-lg transition-all hover:scale-110 hover:shadow-xl"
+          className="fixed bottom-24 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-primary to-accent shadow-lg transition-all hover:scale-110 hover:shadow-xl"
           aria-label="Mở chat với trợ lý AI của Vexim Global"
         >
           <MessageCircle className="h-6 w-6 text-white" />
@@ -696,7 +696,7 @@ export function ChatWidget() {
       {isOpen && (
         <div
           className={cn(
-            "fixed bottom-6 right-6 z-50 flex flex-col bg-white rounded-lg shadow-2xl transition-all",
+            "fixed bottom-24 right-6 z-50 flex flex-col bg-white rounded-lg shadow-2xl transition-all",
             isMinimized
               ? "h-16 w-80"
               : // dvh = chiều cao thật của màn hình (điện thoại có thanh địa chỉ động)
