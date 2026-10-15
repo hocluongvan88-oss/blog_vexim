@@ -3,7 +3,11 @@
 /** No analytics script is injected here. Use an existing GA4/GTM installation, if any.
  * Only fixed service/source labels are sent; never names, email, phone or product text.
  */
-export function trackConsultationEvent(name: "consultation_open" | "generate_lead", source: string, service: string) {
+export function trackConsultationEvent(
+  name: "consultation_open" | "form_start" | "generate_lead",
+  source: string,
+  service: string,
+) {
   if (typeof window === "undefined") return
   const analytics = window as Window & {
     dataLayer?: Array<Record<string, unknown>>

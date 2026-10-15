@@ -191,50 +191,66 @@
       "mainEntity": [
         {
           "@type": "Question",
-          "name": "Đăng ký FDA mất bao lâu?",
+          "name": "FDA là gì và tại sao doanh nghiệp Việt Nam cần đăng ký?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Thời gian phụ thuộc vào nhóm sản phẩm, tình trạng DUNS/UFI, việc xác nhận của US Agent và mức độ đầy đủ của hồ sơ. Vexim xác nhận lịch dự kiến sau khi rà soát thông tin. Không áp dụng một cam kết 2–5 ngày cho mọi thủ tục; thời gian bổ sung hồ sơ và phản hồi từ cơ quan quản lý cần được tính riêng."
+            "text": "FDA là cơ quan quản lý thực phẩm và dược phẩm Hoa Kỳ. Cơ sở thực phẩm thuộc diện áp dụng phải đăng ký trước khi cung cấp thực phẩm cho thị trường Mỹ, trừ trường hợp được miễn. Mỹ phẩm, thiết bị y tế và dược phẩm có nghĩa vụ riêng. Đăng ký không đồng nghĩa FDA phê duyệt hoặc chứng nhận chất lượng sản phẩm."
           }
         },
         {
           "@type": "Question",
-          "name": "Chi phí đăng ký FDA gồm những khoản nào?",
+          "name": "Thời gian đăng ký FDA mất bao lâu?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Chi phí dịch vụ được báo theo phạm vi công việc: đăng ký cơ sở, hỗ trợ DUNS, US Agent, rà soát nhãn hoặc thủ tục bổ sung nếu cần. FDA không thu phí đăng ký hoặc gia hạn cơ sở thực phẩm; phí dịch vụ của Vexim và phí US Agent là các khoản riêng. Mức phí của lĩnh vực khác phải được đối chiếu riêng, không suy ra từ đăng ký thực phẩm."
+            "text": "Thời gian phụ thuộc nhóm sản phẩm, tình trạng DUNS/UFI, xác nhận của US Agent và mức độ đầy đủ của hồ sơ. Vexim xác nhận lịch dự kiến sau khi rà soát thông tin; không áp dụng một cam kết 2–5 ngày cho mọi thủ tục. Thời gian bổ sung hồ sơ và phản hồi của cơ quan quản lý cần được tính riêng."
           }
         },
         {
           "@type": "Question",
-          "name": "Doanh nghiệp Việt Nam có cần US Agent không?",
+          "name": "Chi phí đăng ký FDA là bao nhiêu?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Cơ sở thực phẩm ở ngoài Hoa Kỳ thuộc diện phải đăng ký cần chỉ định US Agent theo quy định FDA. US Agent là đầu mối liên lạc với FDA, không đồng nghĩa được FDA chứng nhận hoặc bảo lãnh chất lượng sản phẩm. Vai trò US Agent cũng khác FSVP Importer và nhà nhập khẩu đứng tên lô hàng."
+            "text": "Chi phí dịch vụ được báo theo phạm vi: đăng ký cơ sở, hỗ trợ DUNS, US Agent, rà soát nhãn hoặc thủ tục bổ sung. FDA không thu phí đăng ký hoặc gia hạn cơ sở thực phẩm; phí tư vấn và US Agent là các khoản riêng. Các lĩnh vực khác cần đối chiếu mức phí theo quy định áp dụng. Vexim làm rõ các hạng mục trước khi thực hiện."
           }
         },
         {
           "@type": "Question",
-          "name": "Đăng ký cơ sở thực phẩm FDA gia hạn khi nào?",
+          "name": "Đăng ký FDA có thời hạn bao lâu và gia hạn thế nào?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Cơ sở thực phẩm thuộc diện đăng ký phải gia hạn trong khoảng 01/10 đến 31/12 của mỗi năm chẵn. Mốc này không có nghĩa mọi đăng ký đều có hiệu lực tròn hai năm kể từ ngày cấp và không áp dụng chung cho mỹ phẩm, thiết bị y tế hay dược phẩm."
+            "text": "Với cơ sở thực phẩm thuộc diện đăng ký, kỳ gia hạn diễn ra từ 01/10 đến 31/12 mỗi năm chẵn. Không mặc định đăng ký có hiệu lực tròn hai năm kể từ ngày cấp, và không áp dụng lịch này cho mọi lĩnh vực. FDA không cấp chứng nhận đăng ký cơ sở thực phẩm; giấy xác nhận của đơn vị dịch vụ, nếu có, phải ghi rõ chủ thể phát hành."
           }
         },
         {
           "@type": "Question",
-          "name": "Đăng ký FDA có phải là phê duyệt hoặc chứng nhận chất lượng không?",
+          "name": "Vexim Global có phải là đại lý chính thức của FDA không?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Không. Đăng ký cơ sở thực phẩm không phải FDA phê duyệt chất lượng cơ sở hoặc sản phẩm. FDA không cấp chứng nhận đăng ký cơ sở thực phẩm. Giấy xác nhận do đơn vị dịch vụ phát hành, nếu có, phải ghi rõ đơn vị phát hành và không được trình bày như chứng nhận do FDA cấp."
+            "text": "Vexim là đơn vị tư vấn và hỗ trợ thủ tục; không đại diện cho FDA và không được hiểu là được FDA chứng nhận hay bảo trợ. US Agent là đầu mối liên lạc tại Mỹ do cơ sở chỉ định. Việc có pháp nhân hoặc EIN tại Mỹ không đồng nghĩa FDA phê duyệt đơn vị dịch vụ. US Agent cũng khác với FSVP Importer hoặc nhà nhập khẩu đứng tên lô hàng."
           }
         },
         {
           "@type": "Question",
-          "name": "Food Facility Registration khác FCE/SID như thế nào?",
+          "name": "Tôi cần chuẩn bị những giấy tờ gì để đăng ký FDA?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Food Facility Registration là thủ tục đăng ký cơ sở thực phẩm. FCE/SID liên quan đến đăng ký cơ sở và hồ sơ quy trình chế biến đối với một số thực phẩm đóng hộp ít axit hoặc thực phẩm axit hóa thuộc diện áp dụng. Không phải mọi thực phẩm đều cần FCE/SID; cần rà soát loại sản phẩm, quy trình và điều kiện bảo quản để xác định nghĩa vụ riêng."
+            "text": "Trước tiên cần tên và địa chỉ cơ sở, thông tin liên hệ, hoạt động sản xuất, nhóm sản phẩm và tình trạng đăng ký hiện có. Với cơ sở thực phẩm, cần đối chiếu DUNS/UFI và US Agent khi áp dụng. Vexim xác nhận danh sách tài liệu cụ thể sau khi phân loại sản phẩm; nhãn, thành phần và tài liệu kỹ thuật có thể cần cho các hạng mục riêng."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Nếu hàng bị FDA giữ lại thì phải làm sao?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Cần thu thập thông báo của FDA, thông tin lô hàng và các hồ sơ liên quan, đồng thời phối hợp với nhà nhập khẩu và đơn vị khai báo để xác định lý do và thời hạn phản hồi. Vexim tiếp nhận thông tin để đánh giá phạm vi hỗ trợ. Không thể cam kết giải phóng hàng chỉ dựa vào số đăng ký FDA."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Vexim Global hỗ trợ những loại sản phẩm nào?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Vexim tiếp nhận tư vấn cho thực phẩm, mỹ phẩm và các nhóm sản phẩm liên quan tới yêu cầu FDA. Phạm vi thực hiện được xác nhận sau khi đánh giá phân loại, công dụng và hồ sơ. MoCRA, FCE/SID, FSVP hay thủ tục thiết bị y tế không phải tên gọi thay thế cho Food Facility Registration và có thể cần quy trình riêng."
           }
         }
       ]

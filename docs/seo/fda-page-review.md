@@ -1,70 +1,79 @@
-# Trang `/services/fda`: SEO, nội dung và chuyển đổi
+# Xây lại trang `/services/fda` theo landing FDA
 
-## Phạm vi
+Cập nhật: 15/10/2026.
 
-Giữ H1 “Đăng ký FDA”, bố cục hero hai cột và thứ tự các khối cũ: lợi ích, nhóm sản phẩm, quy trình 5 bước, lý do chọn Vexim và CTA cuối trang. Bổ sung bảng chi phí/thời gian sau quy trình, case Libra ở khối năng lực và FAQ/nguồn FDA trước CTA.
+## Phạm vi và giao diện
 
-Không sửa source của `fda.veximglobal.com`. Không tái sử dụng ảnh N&P cho Libra và không tự tạo tư liệu khách hàng.
+**Thay toàn bộ nội dung/bố cục cũ của `/services/fda`**, không phải bổ sung vài section SEO. Dựng lại theo thứ tự và các khối nội dung của `https://fda.veximglobal.com/`, với những điều chỉnh chủ website yêu cầu:
 
-## Những gì đã cập nhật
+- Hero dùng ảnh cảng container có sẵn trong repo (`public/china-customs-port-container-shipping-trade.jpg`), phủ tối để đọc chữ; không dùng nền xanh đặc.
+- Dùng màu thương hiệu sẵn có của website chính: navy `#0b2545`, sky `#0284c7`, nền xanh nhạt `#e8f1fa`, CTA amber `#f59e0b`. Giữ Header/Footer chung của website chính.
+- Bỏ toàn bộ chiến dịch giảm 20%: không topbar khuyến mãi, không câu quảng cáo, không nút nhận ưu đãi ở cả hai form.
+- Không sửa source hoặc triển khai riêng cho subdomain FDA. Bố cục được dựng lại từ trang tham chiếu công khai; không khẳng định sao chép chính xác từng pixel.
 
-- Metadata riêng: title, description, canonical www, Open Graph locale/title/description/image/alt, Twitter card/title/description/image/alt.
-- Ảnh chia sẻ thật `public/images/og-fda.png`, 1200×630, khoảng 28KB; chỉ dùng logo Vexim, không có logo FDA hoặc ảnh khách hàng giả.
-- Một H1, main landmark, breadcrumb điều hướng, heading có ngữ cảnh, alt ảnh minh họa, sizes/priority cho ảnh đầu trang.
-- 6 nhóm sản phẩm vẫn giữ dạng card nhưng làm rõ nghĩa vụ không giống nhau, không khẳng định mọi sản phẩm đều dùng Food Facility Registration.
-- Sửa kỳ gia hạn cơ sở thực phẩm thành 01/10–31/12 năm chẵn; phân biệt đăng ký với phê duyệt/chứng nhận; không nói số đăng ký phải được in trên nhãn.
-- Bỏ 98%, 500+, kinh nghiệm 10+ năm và các thời gian áp dụng chung chưa có dữ liệu đối chiếu. Không thêm giá hoặc cam kết hoàn tất thay thế.
-- Chi phí: báo theo phạm vi, phân biệt phí đăng ký cơ sở thực phẩm của FDA với phí dịch vụ/US Agent; không tự công bố thuế hoặc giá.
-- Case: dùng đúng **CÔNG TY TNHH LIBRA VIỆT NAM**, chỉ trình bày phạm vi đăng ký đã công bố, dẫn hồ sơ năng lực; không bảo đảm thông quan hoặc sao chép số liệu so sánh đối thủ.
-- 6 FAQ dùng chung dữ liệu với schema, hiển thị server-side trong `<details>`.
-- Thay nút tải tài liệu chưa có file bằng link hướng dẫn chính thức của FDA, không tạo PDF giả.
+Thứ tự section được kiểm thử:
 
-## Schema
+1. Banner ảnh: headline, CTA, thông tin nổi bật + form tư vấn gọn bên phải (xếp dọc trên mobile).
+2. Sáu vấn đề / giải pháp.
+3. Bốn lợi ích + dải nhóm sản phẩm.
+4. Bảng so sánh ba cột, sáu tiêu chí + CTA.
+5. Quy trình năm bước.
+6. Hai khung hồ sơ / xác nhận đăng ký.
+7. Hành trình Libra bốn bước, nội dung và ảnh xen kẽ trên desktop.
+8. Dải đối tác.
+9. Thông tin liên hệ + form đầy đủ.
+10. Tám FAQ + liên kết nguồn FDA chính thức.
 
-Layout tiếp tục xuất Organization/LocalBusiness, Logo và WebSite một lần. Trang FDA xuất một graph gồm:
+Anchor form cuối trang là `#fda-contact`, tránh trùng `#contact` của Footer dùng chung.
 
-1. WebPage, nối về WebSite và Service.
-2. Service với `@id` giữ nguyên như danh mục trang chủ.
-3. BreadcrumbList (Trang chủ → Đăng ký FDA).
-4. ImageObject cho ảnh chia sẻ.
-5. FAQPage, đúng 6 câu hỏi/câu trả lời đang hiển thị.
+## Nội dung và ảnh cần chủ website bổ sung
 
-Bản gộp để kiểm tra: `docs/seo/fda-schema.json`. **Không chèn thêm file này vào app**, vì app đã tự xuất JSON-LD. Không có Review, AggregateRating, giá hay thời hạn xử lý giả.
+- Tên chính xác: **CÔNG TY TNHH LIBRA VIỆT NAM**.
+- Không tải ảnh từ subdomain hoặc lấy hồ sơ N&P gắn cho Libra. Không tạo chứng nhận, mã đăng ký hay tài liệu khách hàng giả.
+- `lib/fda-page-content.ts` chứa `FDA_LANDING_MEDIA` với 11 vị trí `null`: hai hồ sơ, bốn ảnh Libra, năm logo đối tác. Khung chờ ảnh hiển thị rõ ảnh sẽ được bổ sung; tên đối tác tạm hiển thị dạng chữ.
+- Khi có ảnh được phép công bố, đặt file trong `public/` và cập nhật đường dẫn tại các khóa tương ứng. Kiểm tra đúng doanh nghiệp, quyền sử dụng và che thông tin nhạy cảm trước khi đưa lên. Ảnh hồ sơ/case đã cấu hình có liên kết mở ảnh đầy đủ; logo chỉ hiển thị.
+- Không sao chép các số liệu chưa chứng minh từ trang mẫu (200+ khách hàng, 99% thành công, tiết kiệm 40%, thời gian chung 2–5 ngày). Bảng so sánh dùng tiêu chí kiểm tra dịch vụ, không gán số liệu xấu cho đối thủ.
+- Đăng ký không phải FDA phê duyệt/chứng nhận chất lượng. FDA không cấp chứng nhận đăng ký cơ sở thực phẩm; giấy xác nhận từ đơn vị dịch vụ phải phân biệt rõ. Gia hạn cơ sở thực phẩm thuộc diện áp dụng: 01/10–31/12 năm chẵn.
+- Địa chỉ/email/điện thoại Việt Nam lấy từ cấu hình chung. Phần US Agent phân biệt Vexim Global LLC / EIN với doanh nghiệp Việt Nam / MST, không coi EIN là chứng nhận của FDA.
 
-FAQPage mô tả nội dung hỏi đáp, không phải cam kết Google sẽ hiển thị FAQ rich results hoặc cải thiện thứ hạng.
+## SEO và schema
 
-## Form và sự kiện
+Giữ metadata riêng của trang: title, description, canonical `https://www.veximglobal.com/services/fda`, OG/Twitter và ảnh chia sẻ thật `public/images/og-fda.png` (1200×630, khoảng 28KB).
 
-`ConsultationDialog` dùng một form chung, hỗ trợ cả `trigger`, `children` và chế độ controlled; dùng Radix DialogTrigger để hỗ trợ bàn phím/focus. Field IDs dùng `useId`, dịch vụ FDA được chọn sẵn cho hai CTA của trang.
+- Một H1, main landmark, breadcrumb, heading theo section, alt ảnh, ảnh hero priority/sizes.
+- Layout xuất Organization/LocalBusiness, Logo và WebSite một lần.
+- Page graph gồm WebPage, Service (cùng ID với danh mục dịch vụ), BreadcrumbList, ImageObject cho ảnh chia sẻ và FAQPage.
+- Tám FAQ trong HTML SSR và schema lấy từ **cùng một mảng**, không hai bản chép tay khác nhau.
+- Không có Review, AggregateRating, giá, khuyến mãi hoặc kết quả đăng ký giả trong schema.
+- `docs/seo/fda-schema.json` là bản gộp để kiểm tra; **không chèn lại** file này vào app.
+- FAQPage chỉ mô tả nội dung hỏi đáp, không hứa rich results hoặc thứ hạng tìm kiếm.
 
-- `consultation_open`: mở CTA.
-- `generate_lead`: chỉ sau response thành công và `success: true` từ API.
-- Chỉ gửi form_name/source/service trong danh sách mã cho phép, không gửi tên, email, điện thoại hoặc mô tả sản phẩm cho analytics.
-- Dùng `window.gtag` hoặc dataLayer đã có. **Chưa tự cài GA4/GTM hoặc xác minh tài khoản production**. Nếu chưa có cấu hình, form vẫn hoạt động và không phát sinh request analytics từ helper.
-- Nguồn CTA: `fda_hero`, `fda_final_cta`.
+## Hai form inline
 
-## Kiểm tra lại
+`components/fda/lead-form.tsx` thay các CTA mở modal cũ trên trang FDA, nhưng không thay đổi dialog dùng ở trang khác/Header.
+
+- Hero: tên, điện thoại, email, loại sản phẩm bắt buộc.
+- Cuối trang: thêm tên công ty bắt buộc và mô tả tùy chọn tối đa 500 ký tự, bộ đếm và nút xóa.
+- Gửi endpoint thật `POST /api/consultation`, `service: "fda"`. Tên công ty được ghép vào mô tả để đi qua mẫu email hiện có.
+- Native validation, nhãn/ID riêng cho hai form, honeypot, trạng thái đang gửi, lỗi/retry giữ dữ liệu, thành công và gửi mới. Không báo thành công nếu API lỗi, trả JSON không hợp lệ hoặc thiếu `success: true`.
+- `form_start`: focus đầu tiên của mỗi lượt form. `generate_lead`: chỉ sau response thành công. Nguồn: `fda_hero`, `fda_contact`.
+- Analytics chỉ có form_name/source/service; không gửi tên, email, số điện thoại, tên công ty, sản phẩm hoặc mô tả. Dùng gtag/dataLayer có sẵn, không tự cài GA4/GTM.
+
+## Kiểm tra đã chạy
 
 ```sh
 npm run schema:fda
 SCHEMA_TEST_BASE_URL=http://127.0.0.1:3000 npm run test:fda
 SCHEMA_TEST_BASE_URL=http://127.0.0.1:3000 npm run test:schema
 npm run test:emails
+LD_LIBRARY_PATH=/tmp/al2023/lib BROWSER_EXECUTABLE_PATH=/tmp/chromium npm run test:fda:browser
+git diff --check
 ```
 
-Browser test (Chromium cài sẵn, dùng API/analytics mô phỏng, không gửi email thật):
+- SSR: đúng thứ tự 10 section, banner ảnh, hai form, tám FAQ/schema khớp, không ưu đãi giảm giá, không ID trùng, anchor có đích, liên kết nội bộ trả 200, ảnh OG hợp lệ và toàn bộ tham chiếu schema được giải quyết.
+- Chromium: 320/390/768/1440px không tràn ngang trang, ảnh tải được. Đã xem screenshot desktop/mobile. Bảng rộng cuộn trong vùng riêng trên mobile.
+- Form: required, hero lỗi/retry/thành công, hai form độc lập, reset, trường công ty trong payload, giới hạn/bộ đếm 500 ký tự, chặn gửi trùng khi đang chờ, lỗi mạng/JSON không hợp lệ/`success: false` không đếm lead, event lead đúng nguồn và không có PII.
+- FAQ bằng bàn phím; không JavaScript page error. Dialog trigger và header controlled ở trang US Agent vẫn hoạt động.
+- Schema toàn site và bộ kiểm tra email hiện có đều pass.
 
-```sh
-BROWSER_EXECUTABLE_PATH=/path/to/chromium npm run test:fda:browser
-```
-
-Đã kiểm tra 320/390/768/1440px không tràn ngang trang, ảnh tải được; CTA bằng bàn phím; form chọn sẵn FDA; lỗi gửi giữ dữ liệu và không đếm lead; retry thành công đếm một lần; không có PII trong event; focus trở về CTA; Escape/FAQ hoạt động; luồng children và header controlled ở trang US Agent vẫn mở được.
-
-TypeScript toàn repo vẫn có lỗi tồn tại ở các khu vực khác. Không có lỗi trong page FDA, các module nội dung/schema FDA, dialog và helper conversion sau thay đổi này. Chưa kiểm thử SMTP thật, GA4 production hoặc Rich Results Test trực tuyến. Chưa chạy full build trong sandbox do phụ thuộc tải Google Fonts.
-
-## Chờ chủ website bổ sung
-
-1. Ảnh nhà máy, xác nhận đăng ký và chứng từ Libra; gửi tên file trong `public/`. Chỉ công bố sau khi kiểm tra đúng doanh nghiệp, quyền sử dụng và che dữ liệu nhạy cảm.
-2. Phạm vi cụ thể của báo giá và thời gian thực tế từng dịch vụ, nếu muốn công khai con số.
-3. Cách tính/mốc thời gian cho tỷ lệ thành công và số khách hàng trước khi đưa lại vào nội dung.
-4. Cấu hình analytics đang dùng để xác minh dữ liệu chuyển đổi production; không cung cấp mật khẩu/token trong chat.
+**Giới hạn kiểm chứng:** Browser test dùng API và analytics mô phỏng, không gửi email thật. Chưa kiểm tra SMTP, GA4/GTM hoặc triển khai production. `tsc --noEmit` toàn repo vẫn thất bại với lỗi ở các khu vực khác; không có lỗi được báo ở các file FDA page/form/content/schema/conversion vừa sửa. Không coi đây là full build thành công; sandbox có giới hạn tải Google Fonts.
