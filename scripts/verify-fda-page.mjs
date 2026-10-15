@@ -25,6 +25,11 @@ try {
   }
   walk(data)
   refs.forEach((ref) => assert.ok(definitions.has(ref), `Unresolved ${ref}`))
+  const service = definitions.get(P.serviceId("fda-registration"))
+  assert.equal(service.provider["@id"], P.ORGANIZATION_ID)
+  assert.equal(service.url, `${P.SITE_URL}${C.FDA_PAGE.path}`)
+  assert.ok(service.description.includes("01/10 đến 31/12 năm chẵn"))
+  assert.ok(!service.description.includes("gia hạn định kỳ 2 năm"))
   const faq = definitions.get(`${P.SITE_URL}${C.FDA_PAGE.path}#faq`)
   assert.deepEqual(
     faq.mainEntity.map((q) => [q.name, q.acceptedAnswer.text]),
@@ -52,7 +57,25 @@ try {
   } else {
     const response = await fetch(`${base}${C.FDA_PAGE.path}`)
     assert.equal(response.status, 200)
+    assert.ok(!/noindex|nosnippet/i.test(response.headers.get("x-robots-tag") || ""))
     const $ = load(await response.text())
+    const robots = $('meta[name="robots"]').attr("content") || ""
+    const googlebot = $('meta[name="googlebot"]').attr("content") || ""
+    assert.ok(/\bindex\b/.test(robots) && /\bfollow\b/.test(robots))
+    assert.ok(!/noindex|nosnippet|max-snippet\s*:\s*0(?:\D|$)/i.test(`${robots} ${googlebot}`))
+    const sitemap = await fetch(`${base}/sitemap.xml`)
+    assert.equal(sitemap.status, 200)
+    assert.ok(
+      load(await sitemap.text(), { xmlMode: true })("url > loc")
+        .toArray()
+        .some((el) => el.children?.[0]?.data === `${P.SITE_URL}${C.FDA_PAGE.path}`),
+      "FDA canonical must appear in sitemap",
+    )
+    const robotsResponse = await fetch(`${base}/robots.txt`)
+    assert.equal(robotsResponse.status, 200)
+    const robotsText = await robotsResponse.text()
+    assert.ok(robotsText.includes(`Sitemap: ${P.SITE_URL}/sitemap.xml`))
+    assert.ok(!/^Disallow:\s*\/services(?:\/fda)?\/?\s*$/im.test(robotsText), "Do not block FDA crawling")
     assert.equal($("html").attr("lang"), "vi")
     assert.equal($("h1").length, 1)
     assert.equal($("h1").text().trim(), "Dịch vụ đăng ký FDA Vững bước vào thị trường Mỹ")

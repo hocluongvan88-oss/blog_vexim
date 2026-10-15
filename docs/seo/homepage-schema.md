@@ -199,7 +199,7 @@ Hai khối JSON-LD khác nhau vẫn liên kết được qua @id; không bắt b
               "@id": "https://www.veximglobal.com/#service-fda-registration",
               "name": "Đăng ký FDA & DUNS",
               "serviceType": "FDA Food Facility Registration & DUNS",
-              "description": "Đăng ký mã DUNS (UFI) và Food Facility Registration với FDA cho doanh nghiệp Việt xuất khẩu thực phẩm sang Mỹ, kèm gia hạn định kỳ 2 năm.",
+              "description": "Hỗ trợ DUNS (UFI), đăng ký cơ sở thực phẩm FDA và US Agent cho doanh nghiệp Việt xuất khẩu sang Mỹ; cơ sở thuộc diện áp dụng gia hạn từ 01/10 đến 31/12 năm chẵn. Đăng ký không đồng nghĩa FDA phê duyệt sản phẩm.",
               "url": "https://www.veximglobal.com/services/fda",
               "provider": {
                 "@id": "https://www.veximglobal.com/#organization"

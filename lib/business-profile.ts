@@ -157,7 +157,7 @@ export const SERVICE_CATALOG: ServiceCatalogItem[] = [
     name: "Đăng ký FDA & DUNS",
     serviceType: "FDA Food Facility Registration & DUNS",
     description:
-      "Đăng ký mã DUNS (UFI) và Food Facility Registration với FDA cho doanh nghiệp Việt xuất khẩu thực phẩm sang Mỹ, kèm gia hạn định kỳ 2 năm.",
+      "Hỗ trợ DUNS (UFI), đăng ký cơ sở thực phẩm FDA và US Agent cho doanh nghiệp Việt xuất khẩu sang Mỹ; cơ sở thuộc diện áp dụng gia hạn từ 01/10 đến 31/12 năm chẵn. Đăng ký không đồng nghĩa FDA phê duyệt sản phẩm.",
     path: "/services/fda",
     anchor: "Dịch vụ đăng ký FDA cho doanh nghiệp Việt",
   },
