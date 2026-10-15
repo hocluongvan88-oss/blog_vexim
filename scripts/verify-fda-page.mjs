@@ -107,7 +107,15 @@ try {
     const heroSrc = $("#fda-hero img").attr("src")
     assert.ok(heroSrc.includes(C.FDA_HERO_IMAGE) || heroSrc.includes(encodeURIComponent(C.FDA_HERO_IMAGE)))
     assert.ok($('a[href="#fda-contact"]').length >= 4)
+    assert.equal($("#problems h2").text(), "Những doanh nghiệp nào cần đăng ký FDA?")
     assert.equal($("#problems article").length, 6)
+    assert.deepEqual(
+      $("#problems article")
+        .toArray()
+        .map((el) => [$(el).find("h3").text(), $(el).find("p").last().text()]),
+      C.FDA_BUSINESS_TYPES.map((item) => [item.title, item.requirement]),
+    )
+    assert.ok(!$("#problems").text().includes("Bạn gặp phải những vấn đề"))
     assert.equal($("#comparison tbody tr").length, 6)
     assert.equal($("#process ol > li").length, 5)
     assert.equal($("#documents article").length, 2)

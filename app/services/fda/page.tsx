@@ -21,7 +21,6 @@ import {
   Phone,
   ShieldCheck,
   Wallet,
-  X,
 } from "lucide-react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
@@ -40,7 +39,7 @@ import {
   FDA_LIBRA_STEPS,
   FDA_PAGE,
   FDA_PARTNERS,
-  FDA_PROBLEMS,
+  FDA_BUSINESS_TYPES,
   FDA_SOURCES,
 } from "@/lib/fda-page-content"
 import { buildFdaPageSchema } from "@/lib/fda-page-schema"
@@ -219,31 +218,31 @@ export default function FDAPage() {
         <section id="problems" className="bg-white py-16 md:py-24">
           <div className="container mx-auto px-4">
             <SectionHeading
-              eyebrow="Thấu hiểu doanh nghiệp"
-              title="Bạn gặp phải những vấn đề này khi đăng ký FDA?"
-              description="Chúng tôi hiểu những thách thức khi đưa sản phẩm Việt Nam vào thị trường Hoa Kỳ và cùng doanh nghiệp xác định hướng xử lý phù hợp."
+              eyebrow="Đối tượng cần đăng ký FDA"
+              title="Những doanh nghiệp nào cần đăng ký FDA?"
+              description="Yêu cầu đăng ký FDA phụ thuộc vào lĩnh vực, hoạt động của cơ sở và sản phẩm cung cấp cho thị trường Mỹ. Dưới đây là các nhóm doanh nghiệp cần rà soát nghĩa vụ đăng ký và các trường hợp được miễn."
             />
             <div className="grid gap-4 md:grid-cols-2 lg:gap-6">
-              {FDA_PROBLEMS.map((item, index) => (
+              {FDA_BUSINESS_TYPES.map((item, index) => (
                 <article
-                  key={item.problem}
+                  key={item.title}
                   className="rounded-xl border border-border p-5 transition-shadow hover:shadow-md md:p-6"
                 >
                   <div className="mb-4 flex items-center justify-between">
                     <span className="text-xs font-bold tracking-widest text-slate-400">0{index + 1}</span>
-                    <MessageSquareText className="h-5 w-5 text-slate-300" aria-hidden="true" />
+                    <Building2 className="h-5 w-5 text-slate-300" aria-hidden="true" />
                   </div>
                   <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    <X className="h-3.5 w-3.5" aria-hidden="true" />
-                    Vấn đề
+                    <Building2 className="h-3.5 w-3.5" aria-hidden="true" />
+                    Doanh nghiệp
                   </p>
-                  <h3 className="text-lg font-semibold text-primary">{item.problem}</h3>
+                  <h3 className="text-lg font-semibold text-primary">{item.title}</h3>
                   <div className="mt-5 rounded-lg bg-secondary/60 p-4">
                     <p className="mb-1 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-accent">
                       <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-                      Giải pháp
+                      Yêu cầu cần rà soát
                     </p>
-                    <p className="text-sm font-medium leading-relaxed text-primary">{item.solution}</p>
+                    <p className="text-sm font-medium leading-relaxed text-primary">{item.requirement}</p>
                   </div>
                 </article>
               ))}

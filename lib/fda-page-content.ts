@@ -100,13 +100,38 @@ export const FDA_LANDING_MEDIA: Record<string, string | null> = {
 
 export const FDA_HERO_IMAGE = "/china-customs-port-container-shipping-trade.jpg"
 
-export const FDA_PROBLEMS = [
-  { problem: "Quy trình phức tạp, khó hiểu", solution: "Hướng dẫn rõ từng bước theo loại hồ sơ" },
-  { problem: "Lo ngại rủi ro khi nhập khẩu", solution: "Rà soát thông tin và yêu cầu trước khi xuất hàng" },
-  { problem: "Chưa xác định đầu mối tại Mỹ", solution: "Làm rõ vai trò và phạm vi hỗ trợ của US Agent" },
-  { problem: "Chi phí chưa rõ, dễ phát sinh", solution: "Thống nhất hạng mục và phạm vi trong báo giá" },
-  { problem: "Khó theo dõi sau đăng ký", solution: "Hỗ trợ cập nhật và nhắc lịch theo phạm vi hợp tác" },
-  { problem: "Chưa chủ động kế hoạch xử lý", solution: "Xác nhận lịch dự kiến khi đã rà soát đủ thông tin" },
+/** Registration obligations depend on the activity, product and applicable exemptions. */
+export const FDA_BUSINESS_TYPES = [
+  {
+    title: "Cơ sở sản xuất, chế biến thực phẩm & đồ uống",
+    requirement:
+      "Bao gồm thực phẩm chế biến, đồ uống và thực phẩm bổ sung cung cấp cho thị trường Mỹ. Cơ sở thuộc diện áp dụng cần đăng ký Food Facility Registration; cơ sở ở ngoài Mỹ cần chỉ định US Agent.",
+  },
+  {
+    title: "Cơ sở đóng gói, lưu trữ thực phẩm",
+    requirement:
+      "Không chỉ nhà máy sản xuất: cơ sở đóng gói hoặc lưu giữ thực phẩm dành cho thị trường Mỹ cũng có thể phải đăng ký. Cần đối chiếu hoạt động thực tế và các trường hợp được miễn.",
+  },
+  {
+    title: "Cơ sở sản xuất thức ăn cho động vật",
+    requirement:
+      "Cơ sở sản xuất, chế biến, đóng gói hoặc lưu trữ thức ăn cho thú cưng, vật nuôi và nguyên liệu liên quan có thể thuộc diện đăng ký cơ sở thực phẩm với FDA khi cung cấp cho thị trường Mỹ.",
+  },
+  {
+    title: "Cơ sở sản xuất mỹ phẩm & đơn vị chịu trách nhiệm",
+    requirement:
+      "Theo MoCRA, cơ sở sản xuất hoặc chế biến mỹ phẩm có nghĩa vụ đăng ký khi thuộc diện áp dụng; đơn vị chịu trách nhiệm (Responsible Person) thực hiện liệt kê sản phẩm. Cần kiểm tra điều kiện miễn trừ riêng.",
+  },
+  {
+    title: "Doanh nghiệp trong lĩnh vực thiết bị y tế",
+    requirement:
+      "Nhà sản xuất, đơn vị đóng gói hoặc dán nhãn lại và một số chủ thể khác có thể phải đăng ký cơ sở, liệt kê thiết bị. Clearance hoặc approval, nếu bắt buộc, là yêu cầu riêng, không được thay thế bằng đăng ký.",
+  },
+  {
+    title: "Cơ sở sản xuất, gia công dược phẩm",
+    requirement:
+      "Cơ sở sản xuất, gia công, đóng gói hoặc dán nhãn thuốc cho thị trường Mỹ cần rà soát nghĩa vụ đăng ký cơ sở và liệt kê thuốc. Yêu cầu phê duyệt sản phẩm được xác định riêng theo từng loại thuốc.",
+  },
 ] as const
 
 export const FDA_COMPARISON = [

@@ -14,7 +14,7 @@ Cập nhật: 15/10/2026.
 Thứ tự section được kiểm thử:
 
 1. Banner ảnh: headline, CTA, thông tin nổi bật + form tư vấn gọn bên phải (xếp dọc trên mobile).
-2. Sáu vấn đề / giải pháp.
+2. Sáu nhóm doanh nghiệp cần rà soát nghĩa vụ đăng ký FDA: thực phẩm/đồ uống, đóng gói/lưu trữ thực phẩm, thức ăn động vật, mỹ phẩm, thiết bị y tế và dược phẩm. Giữ nguyên lưới sáu card và phong cách hiển thị; phân biệt thủ tục theo ngành và các trường hợp miễn.
 3. Bốn lợi ích + dải nhóm sản phẩm.
 4. Bảng so sánh ba cột, sáu tiêu chí + CTA.
 5. Quy trình năm bước.
