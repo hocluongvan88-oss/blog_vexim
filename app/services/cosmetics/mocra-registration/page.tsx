@@ -8,7 +8,7 @@ import Link from "next/link"
 import { ConsultationDialog } from "@/components/consultation-dialog"
 import type { Metadata } from "next"
 import { JsonLd } from "@/components/json-ld"
-import { buildServiceNode } from "@/lib/schema"
+import { buildServiceSchema } from "@/lib/schema"
 import { getService } from "@/lib/business-profile"
 
 export const metadata: Metadata = {
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
 export default function MoCRARegistrationPage() {
   /** Node Service của trang này — @id trùng với mục trong hasOfferCatalog ở trang chủ. */
   const service = getService("mocra")
-  const serviceNode = service ? buildServiceNode(service) : null
+  const serviceNode = service ? buildServiceSchema(service) : null
 
   return (
     <>

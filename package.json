@@ -6,6 +6,8 @@
     "build": "next build",
     "dev": "next dev",
     "lint": "eslint .",
+    "schema:export": "node scripts/generate-home-schema.mjs",
+    "test:schema": "node scripts/verify-schema.mjs",
     "test:emails": "node scripts/verify-emails.mjs",
     "preview:emails": "node scripts/generate-email-preview.mjs",
     "start": "next start"

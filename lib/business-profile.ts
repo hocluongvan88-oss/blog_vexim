@@ -50,7 +50,7 @@ export const SITE_URL_WITH_SLASH = `${SITE_URL}/`
 export const ORGANIZATION_ID = `${SITE_URL}/#organization`
 export const WEBSITE_ID = `${SITE_URL}/#website`
 export const LOGO_ID = `${SITE_URL}/#logo`
-/** Node dịch vụ ở trang chủ (ProfessionalService) */
+/** Node Service tổng hợp ở trang chủ; doanh nghiệp cung cấp dùng ORGANIZATION_ID. */
 export const HOME_SERVICE_ID = `${SITE_URL}/#service`
 
 export const ORGANIZATION_NAME = "Vexim Global"
@@ -121,8 +121,6 @@ export const SAME_AS: string[] = [
   SOCIAL_PROFILES.facebook,
   SOCIAL_PROFILES.linkedin,
   SOCIAL_PROFILES.zalo,
-  /** Trang hồ sơ năng lực (chứng nhận đã cấp, case study) — bằng chứng E-E-A-T. */
-  "https://fda.veximglobal.com",
 ]
 
 /** Ngôn ngữ hỗ trợ khách hàng. */

@@ -9,7 +9,7 @@ import { NewsPreview } from "@/components/news-preview"
 import { Footer } from "@/components/footer"
 import { BackToTop } from "@/components/back-to-top"
 import { JsonLd } from "@/components/json-ld"
-import { buildBreadcrumbSchema, buildHomeServiceSchema } from "@/lib/schema"
+import { buildHomePageSchema } from "@/lib/schema"
 import { SITE_DESCRIPTION, SITE_TITLE, SITE_URL_WITH_SLASH } from "@/lib/business-profile"
 import type { Metadata } from "next"
 
@@ -24,8 +24,8 @@ import type { Metadata } from "next"
  *     không chứa từ khóa nào mà trang thực sự phục vụ, và nhắc dịch vụ trang chủ
  *     không có. Nay nhắm đúng cụm có nhu cầu tìm kiếm: đăng ký FDA, US Agent,
  *     xuất khẩu sang Mỹ.
- *  2. canonical "/" -> URL tuyệt đối có "/" ở cuối, khớp og:url, sitemap.xml và
- *     đích của redirect 301 từ bản không-www.
+ *  2. Canonical và og:url dùng domain www; Next chuẩn hóa URL trang chủ về
+ *     origin không có dấu "/" cuối, khớp sitemap.xml.
  */
 export const metadata: Metadata = {
   title: SITE_TITLE,
@@ -57,16 +57,8 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <>
-      {/*
-        ProfessionalService của trang chủ + danh mục 6 dịch vụ (hasOfferCatalog).
-        Mỗi Service mang @id ổn định trùng với node Service trên landing page
-        của chính dịch vụ đó — xem `lib/schema.ts` và `lib/business-profile.ts`.
-      */}
-      <JsonLd id="home-service-schema" data={buildHomeServiceSchema()} />
-      <JsonLd
-        id="home-breadcrumb-schema"
-        data={buildBreadcrumbSchema([{ name: "Trang chủ", path: "/" }])}
-      />
+      {/* Site-wide business graph is emitted once by the root layout. */}
+      <JsonLd id="home-page-schema" data={buildHomePageSchema()} />
       <main className="min-h-screen">
         <Header />
         <HeroSection />

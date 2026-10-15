@@ -35,7 +35,7 @@ import Link from "next/link"
 import Image from "next/image"
 import type { Metadata } from "next"
 import { JsonLd } from "@/components/json-ld"
-import { buildServiceNode } from "@/lib/schema"
+import { buildServiceSchema } from "@/lib/schema"
 import { getService } from "@/lib/business-profile"
 import { ExportSalesFaq } from "@/components/export-sales/export-sales-faq"
 import {
@@ -254,7 +254,7 @@ export default function ExportSalesServicePage() {
    * (không @id, trùng lặp với node ở layout) và thiếu `@id` cho chính Service.
    */
   const service = getService("export-sales")
-  const serviceNode = service ? buildServiceNode(service) : null
+  const serviceNode = service ? buildServiceSchema(service) : null
 
   return (
     <>
