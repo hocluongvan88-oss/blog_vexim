@@ -262,7 +262,7 @@ export async function GET(request: Request) {
           
           <div class="footer">
             <p><strong>Vexim Global</strong> - Chuyên gia xuất nhập khẩu toàn cầu</p>
-            <p>Email: contact@veximglobal.vn | Phone: 0373 685 634</p>
+            <p>Email: contact@veximglobal.com | Phone: 0373 685 634</p>
           </div>
         </div>
       </body>

@@ -103,7 +103,7 @@ export async function POST(request: Request) {
 
       // Send notification to admin
       await emailService.sendEmail({
-        to: "contact@veximglobal.vn", // Admin email
+        to: "contact@veximglobal.com", // Admin email
         subject: `🔔 Hồ sơ GACC mới: ${data.companyName} - ${data.productName}`,
         html: getGACCAdminNotificationHTML(emailParams),
       })

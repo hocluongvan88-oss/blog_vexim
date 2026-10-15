@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { Mail, Phone, MapPin, Facebook, Linkedin } from "lucide-react"
+import { Mail, Phone, MapPin } from "lucide-react"
 import {
   ADDRESS,
   ORGANIZATION_NAME,
@@ -37,40 +37,7 @@ export function Footer() {
               Đối tác tin cậy trong lĩnh vực tư vấn pháp lý xuất nhập khẩu quốc tế. Chúng tôi cam kết mang đến giải pháp
               tối ưu nhất cho doanh nghiệp.
             </p>
-            <div className="flex gap-4">
-              {/*
-                Trước đây cả 3 icon đều trỏ href="#" — link chết, không truyền tín hiệu
-                nào và khiến `sameAs` trong schema trỏ tới profile không được link từ trang.
-                YouTube đã bỏ vì site chưa có kênh khai báo ở đâu trong code.
-              */}
-              <a
-                href={SOCIAL_PROFILES.facebook}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-cta hover:text-cta-foreground transition-colors"
-                aria-label="Facebook Vexim Global"
-              >
-                <Facebook className="w-5 h-5" />
-              </a>
-              <a
-                href={SOCIAL_PROFILES.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-cta hover:text-cta-foreground transition-colors"
-                aria-label="LinkedIn Vexim Global"
-              >
-                <Linkedin className="w-5 h-5" />
-              </a>
-              <a
-                href={SOCIAL_PROFILES.zalo}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-cta hover:text-cta-foreground transition-colors text-sm font-semibold"
-                aria-label="Zalo Vexim Global"
-              >
-                Zalo
-              </a>
-            </div>
+
           </div>
 
           {/* Services */}
@@ -145,6 +112,27 @@ export function Footer() {
         </div>
 
         <div className="border-t border-white/20 pt-8 text-center text-white/80">
+          <nav aria-label="Mạng xã hội Vexim Global" className="flex flex-wrap items-center justify-center gap-4 mb-6">
+            {[
+              { name: "Facebook", href: SOCIAL_PROFILES.facebook, icon: "/facebook.png" },
+              { name: "LinkedIn", href: SOCIAL_PROFILES.linkedin, icon: "/linkedin.png" },
+            ].map(({ name, href, icon }) => (
+              <a
+                key={name}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`${name} Vexim Global (mở tab mới)`}
+                className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3 py-2 hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white transition-colors"
+              >
+                <img src={icon} alt="" width={40} height={40} className="rounded-md bg-white" />
+                <span>{name}</span>
+              </a>
+            ))}
+            <a href={SOCIAL_PROFILES.zalo} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center rounded-lg px-3 py-2 hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
+              Zalo
+            </a>
+          </nav>
           <p>&copy; {new Date().getFullYear()} {ORGANIZATION_NAME}. Bản quyền thuộc về Công ty.</p>
         </div>
       </div>

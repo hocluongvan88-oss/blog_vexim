@@ -16,13 +16,7 @@
  *
  * Từ nay sửa một chỗ là footer, schema, email và sitemap dùng theo.
  *
- * ⚠️ HAI GIÁ TRỊ CẦN DOANH NGHIỆP XÁC NHẬN (đang để nguyên như cũ, chưa tự đổi):
- *   1. `SOCIAL_PROFILES.facebook` / `.linkedin` — hai URL này chỉ xuất hiện trong
- *      schema chứ không có ở bất kỳ chỗ nào khác trên site, và icon mạng xã hội ở
- *      footer vẫn trỏ `href="#"`. Rất có thể là URL tạm. Hãy thay bằng profile thật
- *      (hoặc bỏ khỏi `sameAs`) — `sameAs` trỏ tới trang không tồn tại là tín hiệu xấu.
- *   2. `ADDRESS` — đang lấy đúng theo footer. Nếu Vexim có văn phòng ở TP.HCM thì
- *      khai cả hai bằng `MULTIPLE_LOCATIONS`.
+ * Liên kết mạng xã hội và email đã được doanh nghiệp xác nhận.
  */
 
 import { VEXIM_PHONE, VEXIM_PHONE_DISPLAY } from "./contact-info"
@@ -64,8 +58,8 @@ export const ORGANIZATION_NAME = "Vexim Global"
 /** Số điện thoại dạng quốc tế E.164 — bắt buộc cho schema `telephone`. */
 export const PHONE_E164 = "+84373685634"
 
-/** Email công khai. Footer + email nội bộ (`app/api/gacc/submit`) đang dùng đuôi .vn */
-export const PUBLIC_EMAIL = "contact@veximglobal.vn"
+/** Email liên hệ chính thức do doanh nghiệp xác nhận. */
+export const PUBLIC_EMAIL = "contact@veximglobal.com"
 
 /** Địa chỉ hiển thị công khai (khớp 1:1 với footer). */
 export const ADDRESS = {
@@ -111,12 +105,12 @@ export const AREA_SERVED = ["VN", "US"] as const
 
 /**
  * Kênh chính thức cho `sameAs`.
- * ⚠️ Facebook/LinkedIn CHƯA được xác minh — xem ghi chú ở đầu file.
+ * Facebook/LinkedIn do doanh nghiệp cung cấp; dùng URL công khai, không dùng trang quản trị.
  * Zalo là link thật (sinh từ hotline trong `lib/contact-info.ts`).
  */
 export const SOCIAL_PROFILES = {
-  facebook: "https://www.facebook.com/veximglobal",
-  linkedin: "https://www.linkedin.com/company/veximglobal",
+  facebook: "https://www.facebook.com/profile.php?id=61568290953268",
+  linkedin: "https://www.linkedin.com/company/143976436/",
   zalo: `https://zalo.me/${VEXIM_PHONE}`,
 } as const
 
