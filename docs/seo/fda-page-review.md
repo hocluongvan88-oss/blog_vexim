@@ -26,12 +26,12 @@ Thứ tự section được kiểm thử:
 
 Anchor form cuối trang là `#fda-contact`, tránh trùng `#contact` của Footer dùng chung.
 
-## Nội dung và ảnh cần chủ website bổ sung
+## Nội dung và ảnh đã được chủ website bổ sung
 
 - Tên chính xác: **CÔNG TY TNHH LIBRA VIỆT NAM**.
 - Không tải ảnh từ subdomain hoặc lấy hồ sơ N&P gắn cho Libra. Không tạo chứng nhận, mã đăng ký hay tài liệu khách hàng giả.
-- `lib/fda-page-content.ts` chứa `FDA_LANDING_MEDIA` với 11 vị trí `null`: hai hồ sơ, bốn ảnh Libra, năm logo đối tác. Khung chờ ảnh hiển thị rõ ảnh sẽ được bổ sung; tên đối tác tạm hiển thị dạng chữ.
-- Khi có ảnh được phép công bố, đặt file trong `public/` và cập nhật đường dẫn tại các khóa tương ứng. Kiểm tra đúng doanh nghiệp, quyền sử dụng và che thông tin nhạy cảm trước khi đưa lên. Ảnh hồ sơ/case đã cấu hình có liên kết mở ảnh đầy đủ; logo chỉ hiển thị.
+- Đã kết nối đủ 11 ảnh do chủ website tải lên `public/images/fda/` vào `FDA_LANDING_MEDIA`: hai hồ sơ, bốn ảnh Libra và năm logo đối tác. Đã chuyển các file có đuôi WebP/PNG sai định dạng về đúng định dạng; tài liệu dùng WebP lossless để giữ nguyên nội dung. Các hồ sơ đều mang tên Libra, không dùng hồ sơ N&P.
+- Muốn thay ảnh, cập nhật file tương ứng hoặc đường dẫn trong cấu hình. Giữ `null` nếu cần tạm ẩn ảnh. Ảnh hồ sơ/case có liên kết mở ảnh đầy đủ; logo dùng object-contain để không bị cắt. Không tự chỉnh nội dung hoặc mốc hiệu lực trên giấy xác nhận do chủ website cung cấp. Logo Dann Food được tải lên có chữ Vieclam.tv; nên thay bằng logo gốc sạch khi có.
 - Không sao chép các số liệu chưa chứng minh từ trang mẫu (200+ khách hàng, 99% thành công, tiết kiệm 40%, thời gian chung 2–5 ngày). Bảng so sánh dùng tiêu chí kiểm tra dịch vụ, không gán số liệu xấu cho đối thủ.
 - Đăng ký không phải FDA phê duyệt/chứng nhận chất lượng. FDA không cấp chứng nhận đăng ký cơ sở thực phẩm; giấy xác nhận từ đơn vị dịch vụ phải phân biệt rõ. Gia hạn cơ sở thực phẩm thuộc diện áp dụng: 01/10–31/12 năm chẵn.
 - Địa chỉ/email/điện thoại Việt Nam lấy từ cấu hình chung. Phần US Agent phân biệt Vexim Global LLC / EIN với doanh nghiệp Việt Nam / MST, không coi EIN là chứng nhận của FDA.

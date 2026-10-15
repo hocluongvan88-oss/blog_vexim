@@ -120,7 +120,11 @@ try {
     assert.equal($("#process ol > li").length, 5)
     assert.equal($("#documents article").length, 2)
     assert.equal($("#case-libra article").length, 4)
-    assert.equal($("#partners img").length, 0, "Partner logos await approved uploads")
+    assert.equal(
+      $("#partners img").length,
+      C.FDA_PARTNERS.filter((partner) => C.FDA_LANDING_MEDIA[partner.media]).length,
+      "Render every configured partner logo",
+    )
     assert.equal($("#faq details").length, 8)
     for (const form of $('[data-testid="fda-lead-form"]').toArray()) {
       for (const name of ["name", "phone", "email", "product"])
@@ -137,7 +141,33 @@ try {
     $('main a[href^="#"]').each((_, el) =>
       assert.ok(ids.includes($(el).attr("href").slice(1)), `Missing anchor target ${$(el).attr("href")}`),
     )
-    assert.equal($("#case-libra img").length, 0, "No pending case images may be published")
+    assert.equal(
+      $("#case-libra img").length,
+      C.FDA_LIBRA_STEPS.filter((step) => C.FDA_LANDING_MEDIA[step.media]).length,
+      "Render only configured case images",
+    )
+    assert.equal(
+      $("#documents img").length,
+      ["registration", "certificate"].filter((key) => C.FDA_LANDING_MEDIA[key]).length,
+    )
+    for (const [key, path] of Object.entries(C.FDA_LANDING_MEDIA)) {
+      if (!path) continue
+      assert.ok(existsSync(`public${path}`), `Missing configured media: ${key}`)
+      const bytes = readFileSync(`public${path}`)
+      if (path.endsWith(".webp")) {
+        assert.equal(bytes.toString("ascii", 0, 4), "RIFF", `Wrong image format: ${path}`)
+        assert.equal(bytes.toString("ascii", 8, 12), "WEBP", `Wrong image format: ${path}`)
+      }
+      if (path.endsWith(".png"))
+        assert.equal(bytes.subarray(0, 8).toString("hex"), "89504e470d0a1a0a", `Wrong image format: ${path}`)
+      const image = $(`main img[src="${path}"]`)
+      assert.equal(image.length, 1, `Configured media not rendered exactly once: ${key}`)
+      assert.ok(image.attr("alt"), `Missing alternative text: ${key}`)
+      assert.equal((await fetch(`${base}${path}`)).status, 200, `Media URL: ${path}`)
+      if (!key.startsWith("partner"))
+        assert.equal(image.closest("a").attr("href"), path, "Documents/case images must open their full-size image")
+    }
+    assert.ok(!$("#documents, #case-libra").text().includes("Ảnh sẽ được bổ sung"))
     assert.ok($("#case-libra").text().includes(C.FDA_LIBRA_CASE.company))
     const mainText = $("main").text()
     assert.ok(!/20\s*%|98%|99%|500\+|10\+|1-31\/10|chính xác 100%/.test(mainText))
@@ -154,7 +184,7 @@ try {
     ]
     for (const path of internal) assert.equal((await fetch(`${base}${path}`)).status, 200, `Internal link ${path}`)
     console.log(
-      `PASS: SSR metadata/schema/FAQ exactly match source; reference section order, photo hero, two inline forms, no discount or fabricated case images; ${internal.length} internal links return 200`,
+      `PASS: SSR metadata/schema/FAQ exactly match source; reference section order, photo hero, two inline forms, uploaded media/full-size links and no discount; ${internal.length} internal links return 200`,
     )
   }
 } finally {

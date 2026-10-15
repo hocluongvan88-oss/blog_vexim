@@ -53,6 +53,16 @@ try {
   assert.equal(await page.$$eval('main [data-testid="fda-lead-form"]', (forms) => forms.length), 2)
   const hero = '[data-form-location="hero"]',
     contact = '[data-form-location="contact"]'
+  // Below-the-fold case and logo images are lazy-loaded; load them before checking for broken media.
+  await page.evaluate(async () => {
+    await Promise.all(
+      [...document.images].map(async (image) => {
+        image.loading = "eager"
+        await image.decode()
+      }),
+    )
+  })
+  assert.equal(await page.$$eval("#documents img, #case-libra img, #partners img", (images) => images.length), 11)
   for (const width of [320, 390, 768, 1440]) {
     await page.setViewport({ width, height: 1000 })
     const layout = await page.evaluate(() => ({

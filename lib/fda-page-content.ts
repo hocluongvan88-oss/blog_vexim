@@ -74,7 +74,7 @@ export const FDA_SOURCES = [
   },
 ] as const
 
-/** Public case, authorized by the owner. Images are deliberately omitted until uploaded. */
+/** Public case and imagery supplied by the website owner. */
 export const FDA_LIBRA_CASE = {
   company: "CÔNG TY TNHH LIBRA VIỆT NAM",
   product: "Bánh kẹo xuất khẩu sang Mỹ",
@@ -83,19 +83,19 @@ export const FDA_LIBRA_CASE = {
   note: "Thông tin trường hợp được dẫn từ hồ sơ năng lực của Vexim. Kết quả từng hồ sơ không phải cam kết về thời gian, phê duyệt sản phẩm hoặc thông quan cho mọi doanh nghiệp.",
 } as const
 
-/** Populate with approved local file paths after the owner uploads the real documents. */
+/** Local documents and partner logos uploaded by the website owner. Keep null for unfilled slots. */
 export const FDA_LANDING_MEDIA: Record<string, string | null> = {
-  registration: null,
-  certificate: null,
-  libraFactory: null,
-  libraDossier: null,
-  libraRegistration: null,
-  libraShipment: null,
-  partnerLibra: null,
-  partnerGreenFoods: null,
-  partnerBimiFoods: null,
-  partnerDannFood: null,
-  partnerPhamGia: null,
+  registration: "/images/fda/form-fda-3537.webp",
+  certificate: "/images/fda/xac-nhan-dang-ky.webp",
+  libraFactory: "/images/fda/libra-factory.webp",
+  libraDossier: "/images/fda/libra-dossier.webp",
+  libraRegistration: "/images/fda/libra-registration.webp",
+  libraShipment: "/images/fda/libra-shipment.webp",
+  partnerLibra: "/images/fda/logo-libra.png",
+  partnerGreenFoods: "/images/fda/logo-green-foods.png",
+  partnerBimiFoods: "/images/fda/logo-bimifoods.png",
+  partnerDannFood: "/images/fda/logo-dann-food.png",
+  partnerPhamGia: "/images/fda/logo-pham-gia.png",
 }
 
 export const FDA_HERO_IMAGE = "/china-customs-port-container-shipping-trade.jpg"
