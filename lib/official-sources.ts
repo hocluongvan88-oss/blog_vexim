@@ -71,6 +71,36 @@ const MFDS_SOURCES: OfficialSource[] = [
   },
 ]
 
+/**
+ * Nguồn FDA cho các quy định MỸ mà trang chủ nhắc tới (MoCRA, FSVP, US Agent).
+ *
+ * Trang chủ trước khi sửa có 0 link ra ngoài. Với nội dung dạng quy định pháp lý
+ * (Google xếp vào YMYL), dẫn nguồn tới cơ quan ban hành là tín hiệu E-E-A-T rõ
+ * nhất và cũng là cách để người đọc tự kiểm chứng — không phải "link cho có".
+ */
+export const FDA_US_MARKET_SOURCES: OfficialSource[] = [
+  {
+    title: "FDA — Registration of Food Facilities",
+    url: "https://www.fda.gov/food/food-facility-registration",
+    note: "Cơ sở pháp lý của Food Facility Registration",
+  },
+  {
+    title: "FDA — Foreign Supplier Verification Programs (FSVP)",
+    url: "https://www.fda.gov/food/food-safety-modernization-act-fsma/foreign-supplier-verification-programs-fsvp",
+    note: "Quy định FSVP cho nhà nhập khẩu",
+  },
+  {
+    title: "FDA — MoCRA: Cosmetics Regulation",
+    url: "https://www.fda.gov/cosmetics/cosmetics-laws-regulations/modernization-cosmetics-regulation-act-2022",
+    note: "Đạo luật Hiện đại hóa Mỹ phẩm 2022",
+  },
+  {
+    title: "FDA — US Agent for Foreign Food Facilities",
+    url: "https://www.fda.gov/food/food-facility-registration/us-agent-foreign-food-facilities",
+    note: "Yêu cầu về đại diện tại Mỹ",
+  },
+]
+
 const GENERAL_SOURCES: OfficialSource[] = [
   {
     title: "Tổng cục Hải quan Việt Nam",

@@ -1,3 +1,4 @@
+import { getService } from "@/lib/business-profile"
 import { Card } from "@/components/ui/card"
 import Image from "next/image"
 import Link from "next/link"
@@ -6,63 +7,54 @@ import { ArrowRight, CheckCircle2 } from "lucide-react"
 /**
  * Ảnh dịch vụ đều là ảnh vuông 1024x1024, chủ thể (người) nằm lệch phía trên.
  * `focus` = object-position để khung 4:3 không cắt mất đầu/chủ thể.
+ *
+ * Danh sách dịch vụ lấy từ `SERVICE_CATALOG` (lib/business-profile.ts) — cùng nguồn
+ * với `hasOfferCatalog` trong schema trang chủ, nên card trên trang và node Service
+ * trong JSON-LD không bao giờ lệch nhau. File này chỉ giữ phần TRÌNH BÀY
+ * (ảnh, vị trí cắt ảnh, gạch đầu dòng).
  */
-const services = [
-  {
+const PRESENTATION: Record<string, { image: string; focus: string; items: string[] }> = {
+  "fda-registration": {
     image: "/fda-food-safety-inspection-laboratory-professional.jpg",
     focus: "50% 20%",
-    title: "Đăng ký FDA & DUNS",
-    description:
-      "Xuất khẩu thực phẩm sang Mỹ bắt buộc phải có FDA Registration và DUNS lâm định danh (UFI). Vexim hỗ trợ trong gói từ đăng ký mã DUNS đến hoàn tất hồ sơ FDA.",
     items: ["Đăng ký mã DUNS miễn phí", "Food Facility Registration", "Gia hạn FDA định kỳ"],
-    link: "/services/fda",
   },
-  {
+  mocra: {
     image: "/mocra-cosmetics-fda-registration.jpg",
     focus: "50% 30%",
-    title: "Tuân thủ MoCRA",
-    description:
-      "Đáp ứng Đạo luật hiện đại hóa Mỹ phẩm (MoCRA) năm 2022. Thực hiện đăng ký cơ sở sản xuất và Listing sản phẩm bắt buộc lên hệ thống FDA Mỹ.",
-    items: ["Cosmetic Product Listing", "Đăng ký cơ sở Mỹ phẩm", "Tư vấn Adverse Event"],
-    link: "/services/cosmetics/mocra-registration",
+    items: ["Cosmetic Product Listing", "Đăng ký cơ sở mỹ phẩm", "Tư vấn Adverse Event"],
   },
-  {
+  "us-agent": {
     image: "/us-customs-broker-agent-import-export-documentatio.jpg",
     focus: "50% 25%",
-    title: "US Agent & RP",
-    description:
-      "Cung cấp đại diện pháp lý tại Mỹ cho thực phẩm (US Agent) và người chịu trách nhiệm cho mỹ phẩm (Responsible Person) theo đúng quy định liên bang.",
     items: ["Đại diện liên lạc 24/7", "Phản hồi thông báo từ FDA", "Hỗ trợ thanh tra cơ sở"],
-    link: "/services/us-agent",
   },
-  {
+  "export-sales": {
     image: "/landing/audience-team.jpg",
     focus: "50% 35%",
-    title: "Phòng Sale Xuất Khẩu",
-    description:
-      "Phòng kinh doanh xuất khẩu thuê ngoài trọn gói cho nhà máy Việt sang Mỹ. Tìm buyer thẩm định, đàm phán thương mại và hỗ trợ tuân thủ.",
     items: ["Tiếp cận buyer Mỹ phù hợp ngành hàng", "Hỗ trợ tuân thủ & đàm phán", "Tối ưu nguồn lực vận hành"],
-    link: "/services/export-sales",
   },
-  {
+  fsvp: {
     image: "/fsvp-compliance-food-import.jpg",
     focus: "50% 10%",
-    title: "FSVP Importer & Plan",
-    description:
-      "Đóng vai trò là đơn vị nhập khẩu FSVP tại Mỹ, xây dựng kế hoạch kiểm soát nhà cung cấp nước ngoài đáp ứng quy định khắt khe của FSMA.",
     items: ["Chỉ định FSVP Importer", "Thiết lập FSVP Plan", "Đánh giá nhà cung cấp"],
-    link: "/services/fsvp",
   },
-  {
+  "llc-ein": {
     image: "/llc-formation-usa-business.jpg",
     focus: "50% 30%",
-    title: "Thành lập LLC & EIN",
-    description:
-      "Hỗ trợ thành lập công ty LLC tại Mỹ, xin mã số thuế EIN để doanh nghiệp tự đứng tên nhập khẩu và vận hành chuyên nghiệp, thời gian nhanh chóng.",
     items: ["Đăng ký công ty LLC", "Xin mã số thuế EIN", "Mở tài khoản ngân hàng Mỹ"],
-    link: "/services/llc-ein",
   },
-]
+}
+
+/** Thứ tự hiển thị trên trang chủ (giữ đúng thứ tự cũ). */
+const CARD_ORDER = ["fda-registration", "mocra", "us-agent", "export-sales", "fsvp", "llc-ein"]
+
+const services = CARD_ORDER.map((key) => {
+  const service = getService(key)
+  const presentation = PRESENTATION[key]
+  if (!service || !presentation) return null
+  return { ...service, ...presentation }
+}).filter((service): service is NonNullable<typeof service> => service !== null)
 
 export function ServicesGrid() {
   return (
@@ -81,14 +73,20 @@ export function ServicesGrid() {
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-          {services.map((service, index) => (
-            <Link key={index} href={service.link} className="group h-full">
-              <Card className="overflow-hidden rounded-xl border-border/80 shadow-sm hover:shadow-xl hover:border-sky-200 transition-all duration-300 p-0 cursor-pointer hover:-translate-y-1.5 h-full flex flex-col">
+          {services.map((service) => (
+            /*
+              Card là <div>, không bọc ngoài bằng <Link>: nếu bọc thì anchor
+              "xem chi tiết" bên trong sẽ nằm TRONG một <a> khác — HTML không hợp lệ
+              (nested <a>), trình duyệt tự phá cấu trúc và cả hai link đều hỏng.
+              Link thật nằm ở tiêu đề (H3) và ở anchor chứa từ khóa phía dưới.
+            */
+            <div key={service.key} className="group h-full">
+              <Card className="overflow-hidden rounded-xl border-border/80 shadow-sm hover:shadow-xl hover:border-sky-200 transition-all duration-300 p-0 hover:-translate-y-1.5 h-full flex flex-col">
                 {/* Khung ảnh 4:3 + vị trí cắt riêng từng ảnh để không cắt đầu chủ thể */}
                 <div className="relative aspect-[4/3] overflow-hidden bg-secondary">
                   <Image
                     src={service.image || "/placeholder.svg"}
-                    alt={service.title}
+                    alt={`${service.name} — Vexim Global`}
                     fill
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     style={{ objectPosition: service.focus }}
@@ -100,7 +98,12 @@ export function ServicesGrid() {
 
                 <div className="p-6 flex-1 flex flex-col">
                   <h3 className="text-xl font-bold text-navy-900 mb-3 group-hover:text-accent transition-colors">
-                    {service.title}
+                    <Link
+                      href={service.path}
+                      className="hover:text-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded"
+                    >
+                      {service.name}
+                    </Link>
                   </h3>
                   <p className="text-muted-foreground mb-4 leading-relaxed text-sm">{service.description}</p>
                   <ul className="space-y-2 mb-5">
@@ -111,13 +114,24 @@ export function ServicesGrid() {
                       </li>
                     ))}
                   </ul>
-                  <div className="mt-auto text-accent font-semibold inline-flex items-center gap-2 group-hover:gap-3 transition-all text-sm">
-                    Tìm hiểu thêm
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  {/*
+                    Anchor có chứa từ khóa thay cho "Tìm hiểu thêm" chung chung:
+                    anchor text là tín hiệu ngữ cảnh mạnh nhất mà trang chủ truyền
+                    cho landing page, và "Tìm hiểu thêm" thì không nói lên trang đích
+                    là trang gì. Mỗi dịch vụ trỏ tới landing page riêng của nó.
+                  */}
+                  <div className="mt-auto pt-1">
+                    <Link
+                      href={service.path}
+                      className="text-accent font-semibold inline-flex items-center gap-2 hover:gap-3 transition-all text-sm underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded"
+                    >
+                      {service.anchor}
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </Link>
                   </div>
                 </div>
               </Card>
-            </Link>
+            </div>
           ))}
         </div>
       </div>

@@ -6,9 +6,12 @@ import { CheckCircle2, Building2, FileText, CreditCard, ShieldCheck, Clock, Arro
 import Image from "next/image"
 import { ConsultationDialog } from "@/components/consultation-dialog"
 import type { Metadata } from "next"
+import { JsonLd } from "@/components/json-ld"
+import { buildServiceNode } from "@/lib/schema"
+import { getService } from "@/lib/business-profile"
 
 export const metadata: Metadata = {
-  title: "Thành lập LLC & Xin mã EIN tại Hoa Kỳ | Vexim Global",
+  title: "Thành lập LLC & Xin mã EIN tại Hoa Kỳ",
   description:
     "Dịch vụ thành lập công ty LLC tại Mỹ và xin mã số thuế EIN từ IRS. Hỗ trợ doanh nghiệp Việt Nam có pháp nhân hợp pháp để nhập khẩu và kinh doanh tại thị trường Hoa Kỳ.",
   keywords: [
@@ -34,7 +37,18 @@ export const metadata: Metadata = {
 }
 
 export default function LLCEINPage() {
+  /** Node Service của trang này — @id trùng với mục trong hasOfferCatalog ở trang chủ. */
+  const service = getService("llc-ein")
+  const serviceNode = service ? buildServiceNode(service) : null
+
   return (
+    <>
+      {/*
+        Node Service có @id cố định — TRÙNG với @id của dịch vụ này trong
+        hasOfferCatalog ở trang chủ, nên Google gộp hai node thành MỘT thực thể
+        thay vì coi là hai dịch vụ khác nhau. Nội dung lấy từ SERVICE_CATALOG.
+      */}
+      <JsonLd id="service-llc-ein-schema" data={serviceNode} />
     <div className="min-h-screen flex flex-col">
       <Header />
 
@@ -556,5 +570,6 @@ export default function LLCEINPage() {
 
       <Footer />
     </div>
+    </>
   )
 }

@@ -5,6 +5,8 @@
 // Trước đây nằm inline trong app/api/consultation/route.ts
 // ============================================================
 
+import { SITE_URL } from "@/lib/business-profile"
+
 export interface ConsultationParams {
   name: string
   phone: string
@@ -78,7 +80,8 @@ export function getConsultationCustomerHTML(params: ConsultationParams): string 
 
           <p>Trong thời gian chờ đợi, bạn có thể:</p>
           <ul class="list">
-            <li>Tham khảo thêm các dịch vụ trên website: <a href="https://veximglobal.com">veximglobal.com</a></li>
+            {/* SITE_URL = bản www: link non-www sẽ bị 301, thêm một hop không cần thiết */}
+            <li>Tham khảo thêm các dịch vụ trên website: <a href={SITE_URL}>veximglobal.com</a></li>
             <li>Liên hệ hotline: <strong style="color: #4d7c0f;">0373 685 634</strong> (8h-17h30 T2-T6)</li>
             <li>Email: <a href="mailto:contact@veximglobal.com">contact@veximglobal.com</a></li>
           </ul>

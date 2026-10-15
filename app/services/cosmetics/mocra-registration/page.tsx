@@ -7,9 +7,12 @@ import Image from "next/image"
 import Link from "next/link"
 import { ConsultationDialog } from "@/components/consultation-dialog"
 import type { Metadata } from "next"
+import { JsonLd } from "@/components/json-ld"
+import { buildServiceNode } from "@/lib/schema"
+import { getService } from "@/lib/business-profile"
 
 export const metadata: Metadata = {
-  title: "Đăng ký MoCRA - Tuân thủ Đạo luật Hiện đại hóa Mỹ phẩm | Vexim Global",
+  title: "Đăng ký MoCRA - Tuân thủ Đạo luật Hiện đại hóa Mỹ phẩm",
   description:
     "Dịch vụ đăng ký MoCRA với FDA theo Modernization of Cosmetics Regulation Act 2022. Facility Registration, Product Listing, Responsible Person cho mỹ phẩm xuất khẩu Hoa Kỳ.",
   keywords: [
@@ -35,7 +38,18 @@ export const metadata: Metadata = {
 }
 
 export default function MoCRARegistrationPage() {
+  /** Node Service của trang này — @id trùng với mục trong hasOfferCatalog ở trang chủ. */
+  const service = getService("mocra")
+  const serviceNode = service ? buildServiceNode(service) : null
+
   return (
+    <>
+      {/*
+        Node Service có @id cố định — TRÙNG với @id của dịch vụ này trong
+        hasOfferCatalog ở trang chủ, nên Google gộp hai node thành MỘT thực thể
+        thay vì coi là hai dịch vụ khác nhau. Nội dung lấy từ SERVICE_CATALOG.
+      */}
+      <JsonLd id="service-mocra-schema" data={serviceNode} />
     <div className="min-h-screen flex flex-col">
       <Header />
 
@@ -468,5 +482,6 @@ export default function MoCRARegistrationPage() {
 
       <Footer />
     </div>
+    </>
   )
 }

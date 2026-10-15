@@ -91,12 +91,22 @@ export function HeroSection() {
               <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
               Regulatory Compliance & Market Access
             </span>
+            {/*
+              H1 cũ là câu lợi ích ("Giảm rào cản pháp lý...") — không chứa từ khóa nào,
+              và H2 ngay dưới là một câu dài dùng làm tiêu đề. Nay:
+                - H1 chứa đúng cụm người dùng tìm: đăng ký FDA / tư vấn pháp lý / xuất khẩu sang Mỹ;
+                - câu lợi ích cũ chuyển xuống thành tagline dạng <p> (giữ nguyên giao diện);
+                - H2 dài thành <p> để heading chỉ dành cho khối nội dung thật.
+            */}
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-balance leading-tight">
-              Giảm rào cản pháp lý, sẵn sàng đưa sản phẩm ra thị trường quốc tế
+              Dịch vụ đăng ký FDA &amp; tư vấn pháp lý xuất khẩu sang Mỹ
             </h1>
-            <h2 className="text-2xl md:text-3xl font-bold mb-6 text-yellow-400 drop-shadow-lg">
+            <p className="text-2xl md:text-3xl font-bold mb-6 text-yellow-400 drop-shadow-lg">
+              Giảm rào cản pháp lý, sẵn sàng đưa sản phẩm ra thị trường quốc tế
+            </p>
+            <p className="text-lg md:text-xl font-semibold mb-6 text-white/95 leading-relaxed">
               Từ tuân thủ pháp lý, hoàn thiện hồ sơ đến hỗ trợ doanh nghiệp tiếp cận thị trường Hoa Kỳ và các thị trường quốc tế.
-            </h2>
+            </p>
             <p className="text-lg md:text-xl mb-8 text-white/90 leading-relaxed">
               Vexim Global tư vấn và hỗ trợ doanh nghiệp Việt Nam trong các yêu cầu pháp lý khi đưa sản phẩm ra thị trường quốc tế. Với thị trường Hoa Kỳ, chúng tôi tập trung vào{" "}
               <strong className="font-semibold text-white">FDA, FSVP và MOCRA</strong>, giúp doanh nghiệp xác định đúng yêu cầu, chuẩn bị đúng hồ sơ và xử lý theo quy trình rõ ràng.

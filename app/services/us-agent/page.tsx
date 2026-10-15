@@ -7,6 +7,9 @@ import { CheckCircle2, AlertTriangle, Shield, FileText, Clock, UserCheck } from 
 import ConsultationDialog from "@/components/consultation-dialog"
 import Image from "next/image"
 import type { Metadata } from "next"
+import { JsonLd } from "@/components/json-ld"
+import { buildServiceNode } from "@/lib/schema"
+import { getService } from "@/lib/business-profile"
 
 export const metadata: Metadata = {
   title: "Dịch vụ US Agent - Đại diện pháp lý tại Mỹ",
@@ -34,8 +37,18 @@ export const metadata: Metadata = {
 }
 
 export default function USAgentPage() {
+  /** Node Service của trang này — @id trùng với mục trong hasOfferCatalog ở trang chủ. */
+  const service = getService("us-agent")
+  const serviceNode = service ? buildServiceNode(service) : null
+
   return (
     <>
+      {/*
+        Node Service có @id cố định — TRÙNG với @id của dịch vụ này trong
+        hasOfferCatalog ở trang chủ, nên Google gộp hai node thành MỘT thực thể
+        thay vì coi là hai dịch vụ khác nhau. Nội dung lấy từ SERVICE_CATALOG.
+      */}
+      <JsonLd id="service-us-agent-schema" data={serviceNode} />
       <Header />
       <main className="min-h-screen">
         {/* Hero Section */}

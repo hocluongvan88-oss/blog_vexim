@@ -34,6 +34,9 @@ import {
 import Link from "next/link"
 import Image from "next/image"
 import type { Metadata } from "next"
+import { JsonLd } from "@/components/json-ld"
+import { buildServiceNode } from "@/lib/schema"
+import { getService } from "@/lib/business-profile"
 import { ExportSalesFaq } from "@/components/export-sales/export-sales-faq"
 import {
   ExportSalesBookingButton,
@@ -41,7 +44,7 @@ import {
 } from "@/components/export-sales/export-sales-consultation"
 
 export const metadata: Metadata = {
-  title: "Dịch Vụ Phòng Sale Xuất Khẩu Thuê Ngoài Sang Mỹ | Vexim Global",
+  title: "Dịch Vụ Phòng Sale Xuất Khẩu Thuê Ngoài Sang Mỹ",
   description:
     "Vexim trở thành phòng sale xuất khẩu thuê ngoài, đại diện cho Supplier tiếp cận và kết nối trực tiếp với buyer tại thị trường Mỹ dựa trên dữ liệu hải quan thực tế và chuyên gia tuân thủ tại Hoa Kỳ.",
   keywords: [
@@ -243,27 +246,19 @@ const SUPPLIER_OPPORTUNITIES = [
 ]
 
 export default function ExportSalesServicePage() {
-  const serviceSchema = {
-    "@context": "https://schema.org",
-    "@type": "Service",
-    serviceType: "Dịch Vụ Phòng Sale Xuất Khẩu Thuê Ngoài (Outsourced Export Sales)",
-    provider: {
-      "@type": "ProfessionalService",
-      name: "Vexim Global",
-      url: "https://www.veximglobal.com",
-      telephone: "+84-373-685-634",
-    },
-    areaServed: ["VN", "US"],
-    description:
-      "Vexim trở thành phòng sale xuất khẩu thuê ngoài, đại diện cho Supplier tiếp cận và kết nối trực tiếp với buyer tại thị trường Mỹ dựa trên phân tích dữ liệu chuyên sâu.",
-  }
+  /**
+   * Node Service của trang này — @id trùng với mục "export-sales" trong
+   * hasOfferCatalog ở trang chủ, nên Google gộp hai node thành MỘT thực thể.
+   *
+   * Bản cũ tự viết tay schema: provider là một ProfessionalService lồng inline
+   * (không @id, trùng lặp với node ở layout) và thiếu `@id` cho chính Service.
+   */
+  const service = getService("export-sales")
+  const serviceNode = service ? buildServiceNode(service) : null
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
-      />
+      <JsonLd id="service-export-sales-schema" data={serviceNode} />
       <Header />
 
       <main className="min-h-screen bg-background w-full max-w-full overflow-x-hidden">

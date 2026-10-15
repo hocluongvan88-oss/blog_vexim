@@ -4,7 +4,7 @@ import { Footer } from "@/components/footer"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "FDA Tracker - Theo dõi Cảnh báo FDA | Vexim Global",
+  title: "FDA Tracker - Theo dõi Cảnh báo FDA",
   description:
     "Theo dõi cảnh báo thu hồi thực phẩm, dược phẩm, mỹ phẩm từ FDA (Mỹ). Cập nhật realtime cho người nhập khẩu và tiêu dùng hàng xách tay.",
   alternates: {

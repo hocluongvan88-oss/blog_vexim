@@ -1,6 +1,29 @@
 "use client"
 
-import { Mail, Phone, MapPin, Facebook, Linkedin, Youtube } from "lucide-react"
+import type React from "react"
+import { Mail, Phone, MapPin, Facebook, Linkedin } from "lucide-react"
+import {
+  ADDRESS,
+  ORGANIZATION_NAME,
+  PHONE_DISPLAY,
+  OPENING_HOURS_LABELS,
+  PUBLIC_EMAIL,
+  SOCIAL_PROFILES,
+} from "@/lib/business-profile"
+import { VEXIM_PHONE_TEL_URL } from "@/lib/contact-info"
+
+/**
+ * Tiêu đề cột ở footer dùng <p> + class, KHÔNG dùng <h3>.
+ *
+ * Footer có mặt trên MỌI trang, nên 4 thẻ <h3> ("Vexim Global", "Dịch vụ",
+ * "Liên hệ", "Giờ làm việc") từng được cộng vào outline heading của toàn site,
+ * chen ngang sau heading của nội dung chính và làm loãng cấu trúc tài liệu.
+ * Đây là nhãn điều hướng, không phải tiêu đề mục nội dung.
+ * Class `footer-heading` giữ nguyên giao diện cũ (text-xl font-bold mb-4).
+ */
+function FooterHeading({ children }: { children: React.ReactNode }) {
+  return <p className="footer-heading text-xl font-bold mb-4">{children}</p>
+}
 
 export function Footer() {
   return (
@@ -9,39 +32,50 @@ export function Footer() {
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           {/* Company Info */}
           <div>
-            <h3 className="text-xl font-bold mb-4">Vexim Global</h3>
+            <FooterHeading>{ORGANIZATION_NAME}</FooterHeading>
             <p className="text-white/80 leading-relaxed mb-4">
               Đối tác tin cậy trong lĩnh vực tư vấn pháp lý xuất nhập khẩu quốc tế. Chúng tôi cam kết mang đến giải pháp
               tối ưu nhất cho doanh nghiệp.
             </p>
             <div className="flex gap-4">
+              {/*
+                Trước đây cả 3 icon đều trỏ href="#" — link chết, không truyền tín hiệu
+                nào và khiến `sameAs` trong schema trỏ tới profile không được link từ trang.
+                YouTube đã bỏ vì site chưa có kênh khai báo ở đâu trong code.
+              */}
               <a
-                href="#"
+                href={SOCIAL_PROFILES.facebook}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-cta hover:text-cta-foreground transition-colors"
-                aria-label="Facebook"
+                aria-label="Facebook Vexim Global"
               >
                 <Facebook className="w-5 h-5" />
               </a>
               <a
-                href="#"
+                href={SOCIAL_PROFILES.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-cta hover:text-cta-foreground transition-colors"
-                aria-label="LinkedIn"
+                aria-label="LinkedIn Vexim Global"
               >
                 <Linkedin className="w-5 h-5" />
               </a>
               <a
-                href="#"
-                className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-cta hover:text-cta-foreground transition-colors"
-                aria-label="YouTube"
+                href={SOCIAL_PROFILES.zalo}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-cta hover:text-cta-foreground transition-colors text-sm font-semibold"
+                aria-label="Zalo Vexim Global"
               >
-                <Youtube className="w-5 h-5" />
+                Zalo
               </a>
             </div>
           </div>
 
           {/* Services */}
           <div>
-            <h3 className="text-xl font-bold mb-4">Dịch vụ</h3>
+            <FooterHeading>Dịch vụ</FooterHeading>
             <ul className="space-y-2">
               <li>
                 <a href="/services/fda" className="text-white/80 hover:text-accent transition-colors">
@@ -49,7 +83,7 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <a href="/services/food/fsvp-plan" className="text-white/80 hover:text-accent transition-colors">
+                <a href="/services/fsvp" className="text-white/80 hover:text-accent transition-colors">
                   FSVP Compliance
                 </a>
               </li>
@@ -68,21 +102,30 @@ export function Footer() {
 
           {/* Contact Info */}
           <div>
-            <h3 className="text-xl font-bold mb-4">Liên hệ</h3>
+            <FooterHeading>Liên hệ</FooterHeading>
             <ul className="space-y-3">
               <li className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 mt-1 flex-shrink-0" />
-                <span className="text-white/80">25/6/51 Ngọa Long, Tây Tựu, Hà Nội</span>
+                <span className="text-white/80">
+                  {ADDRESS.streetAddress}, {ADDRESS.addressLocality}
+                </span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="w-5 h-5 flex-shrink-0" />
-                <a href="tel:+842812345678" className="text-white/80 hover:text-accent transition-colors">
-                  0373 685 634                </a>
+                {/*
+                  `tel:` cũ là +842812345678 (số bàn TP.HCM) trong khi text hiển thị
+                  là 0373 685 634 — bấm gọi trên mobile sẽ gọi SAI số. Nay cả hai
+                  lấy từ cùng một nguồn.
+                */}
+                <a href={VEXIM_PHONE_TEL_URL} className="text-white/80 hover:text-accent transition-colors">
+                  {PHONE_DISPLAY}
+                </a>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="w-5 h-5 flex-shrink-0" />
-                <a href="mailto: contact@veximglobal.vn" className="text-white/80 hover:text-accent transition-colors">
-                  contact@veximglobal.vn
+                {/* `mailto:` cũ có dấu cách thừa: "mailto: contact@..." — không mở được mail client */}
+                <a href={`mailto:${PUBLIC_EMAIL}`} className="text-white/80 hover:text-accent transition-colors">
+                  {PUBLIC_EMAIL}
                 </a>
               </li>
             </ul>
@@ -90,18 +133,19 @@ export function Footer() {
 
           {/* Working Hours */}
           <div>
-            <h3 className="text-xl font-bold mb-4">Giờ làm việc</h3>
+            <FooterHeading>Giờ làm việc</FooterHeading>
+            {/* Sinh từ OPENING_HOURS_LABELS — cùng nguồn với openingHoursSpecification trong schema */}
             <ul className="space-y-2 text-white/80">
-              <li>Thứ 2 - Thứ 6: 8:00 - 18:00</li>
-              <li>Thứ 7: 8:00 - 12:00</li>
-              <li>Chủ nhật: Nghỉ</li>
+              {OPENING_HOURS_LABELS.map((line) => (
+                <li key={line}>{line}</li>
+              ))}
               <li className="text-amber-400 font-semibold pt-2">Hỗ trợ khẩn cấp: 24/7</li>
             </ul>
           </div>
         </div>
 
         <div className="border-t border-white/20 pt-8 text-center text-white/80">
-          <p>&copy; {new Date().getFullYear()} Vexim Global. Bản quyền thuộc về Công ty.</p>
+          <p>&copy; {new Date().getFullYear()} {ORGANIZATION_NAME}. Bản quyền thuộc về Công ty.</p>
         </div>
       </div>
     </footer>

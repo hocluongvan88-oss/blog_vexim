@@ -4,57 +4,69 @@ import { ServicesGrid } from "@/components/services-grid"
 import { WhyChooseUs } from "@/components/why-choose-us"
 import { WorkflowSection } from "@/components/workflow-section"
 import { Statistics } from "@/components/statistics"
+import { TrustSources } from "@/components/trust-sources"
 import { NewsPreview } from "@/components/news-preview"
 import { Footer } from "@/components/footer"
 import { BackToTop } from "@/components/back-to-top"
+import { JsonLd } from "@/components/json-ld"
+import { buildBreadcrumbSchema, buildHomeServiceSchema } from "@/lib/schema"
+import { SITE_DESCRIPTION, SITE_TITLE, SITE_URL_WITH_SLASH } from "@/lib/business-profile"
 import type { Metadata } from "next"
 
+/**
+ * Metadata trang chủ.
+ *
+ * Title/description lấy từ `lib/business-profile.ts` — cùng chuỗi với `app/layout.tsx`
+ * (title.default, og:description, twitter:description) nên không thể lệch nhau.
+ *
+ * Hai thay đổi so với bản cũ:
+ *  1. Title/description cũ ("Giải Pháp Xuất Nhập Khẩu Toàn Cầu", liệt kê GACC/MFDS/CE)
+ *     không chứa từ khóa nào mà trang thực sự phục vụ, và nhắc dịch vụ trang chủ
+ *     không có. Nay nhắm đúng cụm có nhu cầu tìm kiếm: đăng ký FDA, US Agent,
+ *     xuất khẩu sang Mỹ.
+ *  2. canonical "/" -> URL tuyệt đối có "/" ở cuối, khớp og:url, sitemap.xml và
+ *     đích của redirect 301 từ bản không-www.
+ */
 export const metadata: Metadata = {
-  title: "Vexim Global - Giải Pháp Xuất Nhập Khẩu Toàn Cầu",
-  description:
-    "Chuyên gia tư vấn pháp lý xuất nhập khẩu hàng đầu Việt Nam. Dịch vụ đăng ký FDA, GACC, MFDS, CE và giấy phép xuất khẩu quốc tế.",
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
+  keywords: [
+    "đăng ký FDA",
+    "dịch vụ đăng ký FDA",
+    "US Agent FDA",
+    "FSVP",
+    "MoCRA",
+    "xuất khẩu sang Mỹ",
+    "tư vấn xuất khẩu Mỹ",
+    "thành lập LLC tại Mỹ",
+  ],
   alternates: {
-    canonical: "/",
+    canonical: SITE_URL_WITH_SLASH,
+  },
+  openGraph: {
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    url: SITE_URL_WITH_SLASH,
+  },
+  twitter: {
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
   },
 }
 
 export default function Home() {
-  const serviceSchema = {
-    "@context": "https://schema.org",
-    "@type": "ProfessionalService",
-    name: "Vexim Global",
-    image: "https://www.veximglobal.com/logo.png",
-    "@id": "https://www.veximglobal.com/#service",
-    provider: { "@id": "https://www.veximglobal.com/#organization" },
-    url: "https://www.veximglobal.com",
-    telephone: "+84-xxx-xxx-xxx",
-    priceRange: "$$",
-    address: {
-      "@type": "PostalAddress",
-      addressLocality: "Hồ Chí Minh",
-      addressCountry: "VN",
-    },
-    geo: {
-      "@type": "GeoCoordinates",
-      latitude: 10.8231,
-      longitude: 106.6297,
-    },
-    openingHoursSpecification: {
-      "@type": "OpeningHoursSpecification",
-      dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-      opens: "08:00",
-      closes: "17:00",
-    },
-    sameAs: [
-      "https://www.facebook.com/veximglobal",
-      "https://www.linkedin.com/company/veximglobal",
-      "https://zalo.me/0373685634",
-    ],
-  }
-
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }} />
+      {/*
+        ProfessionalService của trang chủ + danh mục 6 dịch vụ (hasOfferCatalog).
+        Mỗi Service mang @id ổn định trùng với node Service trên landing page
+        của chính dịch vụ đó — xem `lib/schema.ts` và `lib/business-profile.ts`.
+      */}
+      <JsonLd id="home-service-schema" data={buildHomeServiceSchema()} />
+      <JsonLd
+        id="home-breadcrumb-schema"
+        data={buildBreadcrumbSchema([{ name: "Trang chủ", path: "/" }])}
+      />
       <main className="min-h-screen">
         <Header />
         <HeroSection />
@@ -62,6 +74,8 @@ export default function Home() {
         <WhyChooseUs />
         <WorkflowSection />
         <Statistics />
+        {/* Căn cứ pháp lý (link ra fda.gov) — trang chủ trước đây có 0 link ra ngoài */}
+        <TrustSources />
         <NewsPreview />
         <Footer />
         <BackToTop />

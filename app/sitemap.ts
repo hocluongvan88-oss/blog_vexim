@@ -62,6 +62,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   const staticPages: MetadataRoute.Sitemap = STATIC_ROUTES.map((route) => ({
+    // Trang chủ dùng `baseUrl` KHÔNG có "/" ở cuối — khớp từng ký tự với canonical
+    // và og:url mà Next xuất cho "/" (Next bỏ "/" khi pathname là "/"). Xem ghi chú
+    // về SITE_URL_WITH_SLASH trong lib/business-profile.ts.
     url: route.path === "/" ? baseUrl : `${baseUrl}${route.path}`,
     // Trang tĩnh: ngày sửa thật nằm trong code, không đo được ở runtime → bỏ lastModified
     // thay vì gửi `new Date()` giả (Google chỉ tin lastmod khi nó chính xác).

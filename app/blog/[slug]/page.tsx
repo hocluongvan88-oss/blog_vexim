@@ -1,4 +1,5 @@
 import { createClient, createStaticClient } from "@/lib/supabase/server"
+import { LOGO } from "@/lib/business-profile"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
 import { BackToTop } from "@/components/back-to-top"
@@ -199,12 +200,14 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
       "@id": "https://www.veximglobal.com/#organization",
       name: "Vexim Global",
       url: "https://www.veximglobal.com",
-      // File logo phải tồn tại thật và crawl được (trước đây trỏ /logo.png không có)
+      // File logo phải tồn tại thật và crawl được (trước đây trỏ /logo.png không có).
+      // width/height phải là kích thước THẬT của file: public/logo.png là 824x543,
+      // không phải 512x512 như bản cũ (khai sai khiến Google bỏ qua khai báo logo).
       logo: {
         "@type": "ImageObject",
-        url: "https://www.veximglobal.com/logo.png",
-        width: 512,
-        height: 512,
+        url: LOGO.url,
+        width: LOGO.width,
+        height: LOGO.height,
       },
     },
     mainEntityOfPage: {

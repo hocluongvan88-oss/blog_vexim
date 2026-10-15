@@ -6,6 +6,9 @@ import { CheckCircle2, FileCheck, Clock, Shield, ArrowRight } from "lucide-react
 import Image from "next/image"
 import { ConsultationDialog } from "@/components/consultation-dialog"
 import type { Metadata } from "next"
+import { JsonLd } from "@/components/json-ld"
+import { buildServiceNode } from "@/lib/schema"
+import { getService } from "@/lib/business-profile"
 
 export const metadata: Metadata = {
   title: "Đăng ký FDA",
@@ -33,7 +36,18 @@ export const metadata: Metadata = {
 }
 
 export default function FDAPage() {
+  /** Node Service của trang này — @id trùng với mục trong hasOfferCatalog ở trang chủ. */
+  const service = getService("fda-registration")
+  const serviceNode = service ? buildServiceNode(service) : null
+
   return (
+    <>
+      {/*
+        Node Service có @id cố định — TRÙNG với @id của dịch vụ này trong
+        hasOfferCatalog ở trang chủ, nên Google gộp hai node thành MỘT thực thể
+        thay vì coi là hai dịch vụ khác nhau. Nội dung lấy từ SERVICE_CATALOG.
+      */}
+      <JsonLd id="service-fda-registration-schema" data={serviceNode} />
     <div className="min-h-screen flex flex-col">
       <Header />
 
@@ -350,5 +364,6 @@ export default function FDAPage() {
 
       <Footer />
     </div>
+    </>
   )
 }
