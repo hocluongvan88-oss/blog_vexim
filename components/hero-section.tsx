@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { useState } from "react"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
@@ -56,31 +57,19 @@ export function HeroSection() {
 
   return (
     <section id="hero" className="relative pt-24 md:pt-32 pb-16 md:pb-24 overflow-hidden bg-navy-950">
-      {/* Background Image — logistics / cảng biển */}
-      <div
-        className="absolute inset-0 z-0"
-        style={{
-          backgroundImage: "url(https://images.unsplash.com/photo-1566576721346-d4a3b4eaeb55?q=80&w=2000)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        {/* Lớp phủ navy đậm dần sang phải để ảnh vẫn lộ ra, không còn một màu xanh phẳng */}
-        <div className="absolute inset-0 bg-gradient-to-r from-navy-950/97 via-navy-900/92 to-navy-800/70" />
-      </div>
-
-      {/* Điểm nhấn xanh nhạt — glow + grid trang trí */}
-      <div className="pointer-events-none absolute inset-0 z-0" aria-hidden="true">
-        <div className="absolute -top-32 right-[-10%] w-[480px] h-[480px] rounded-full bg-sky-400/20 blur-[120px]" />
-        <div className="absolute bottom-[-20%] left-[15%] w-[420px] h-[420px] rounded-full bg-amber-400/10 blur-[120px]" />
-        <div
-          className="absolute inset-0 opacity-[0.07]"
-          style={{
-            backgroundImage:
-              "linear-gradient(to right, #7dd3fc 1px, transparent 1px), linear-gradient(to bottom, #7dd3fc 1px, transparent 1px)",
-            backgroundSize: "56px 56px",
-          }}
+      {/* Ảnh có sẵn trên website, không phụ thuộc dịch vụ ảnh bên ngoài. */}
+      <div className="absolute inset-0 z-0">
+        <Image
+          src="/china-customs-port-container-shipping-trade.jpg"
+          alt="Minh họa cảng container và hoạt động xuất khẩu hàng hóa"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center"
         />
+        {/* Phủ tối vừa đủ để đọc chữ, giữ hình ảnh cảng biển nhìn thấy rõ. */}
+        <div className="absolute inset-0 bg-black/35" aria-hidden="true" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/35 to-black/5" aria-hidden="true" />
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
