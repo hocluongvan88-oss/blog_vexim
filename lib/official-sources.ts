@@ -80,22 +80,22 @@ const MFDS_SOURCES: OfficialSource[] = [
  */
 export const FDA_US_MARKET_SOURCES: OfficialSource[] = [
   {
-    title: "FDA — Registration of Food Facilities",
+    title: "FDA: Registration of Food Facilities",
     url: "https://www.fda.gov/food/food-facility-registration",
     note: "Cơ sở pháp lý của Food Facility Registration",
   },
   {
-    title: "FDA — Foreign Supplier Verification Programs (FSVP)",
+    title: "FDA: Foreign Supplier Verification Programs (FSVP)",
     url: "https://www.fda.gov/food/food-safety-modernization-act-fsma/foreign-supplier-verification-programs-fsvp",
     note: "Quy định FSVP cho nhà nhập khẩu",
   },
   {
-    title: "FDA — MoCRA: Cosmetics Regulation",
+    title: "FDA: MoCRA: Cosmetics Regulation",
     url: "https://www.fda.gov/cosmetics/cosmetics-laws-regulations/modernization-cosmetics-regulation-act-2022",
     note: "Đạo luật Hiện đại hóa Mỹ phẩm 2022",
   },
   {
-    title: "FDA — US Agent for Foreign Food Facilities",
+    title: "FDA: US Agent for Foreign Food Facilities",
     url: "https://www.fda.gov/food/food-facility-registration/us-agent-foreign-food-facilities",
     note: "Yêu cầu về đại diện tại Mỹ",
   },

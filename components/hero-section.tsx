@@ -117,7 +117,8 @@ export function HeroSection() {
                   <Shield className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-white/90">
-                  <strong className="font-semibold text-white">Cập nhật quy định</strong> — Theo dõi các yêu cầu và thay đổi pháp lý có thể ảnh hưởng đến sản phẩm và kế hoạch xuất khẩu.
+                  <strong className="block font-semibold text-white mb-1">Cập nhật quy định</strong>
+                  <span className="block leading-relaxed">Theo dõi các yêu cầu và thay đổi pháp lý có thể ảnh hưởng đến sản phẩm và kế hoạch xuất khẩu.</span>
                 </span>
               </li>
               <li className="flex items-start gap-3">
@@ -125,7 +126,8 @@ export function HeroSection() {
                   <FileCheck className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-white/90">
-                  <strong className="font-semibold text-white">Rà soát hồ sơ</strong> — Kiểm tra thông tin doanh nghiệp, sản phẩm, nhãn mác và tài liệu trước khi xử lý.
+                  <strong className="block font-semibold text-white mb-1">Rà soát hồ sơ</strong>
+                  <span className="block leading-relaxed">Kiểm tra thông tin doanh nghiệp, sản phẩm, nhãn mác và tài liệu trước khi xử lý.</span>
                 </span>
               </li>
               <li className="flex items-start gap-3">
@@ -133,7 +135,8 @@ export function HeroSection() {
                   <Clock className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-white/90">
-                  <strong className="font-semibold text-white">Quy trình rõ ràng</strong> — Xác định từng bước cần thực hiện, minh bạch phạm vi công việc và cập nhật tiến độ trong quá trình xử lý.
+                  <strong className="block font-semibold text-white mb-1">Quy trình rõ ràng</strong>
+                  <span className="block leading-relaxed">Xác định từng bước cần thực hiện, minh bạch phạm vi công việc và cập nhật tiến độ trong quá trình xử lý.</span>
                 </span>
               </li>
             </ul>
