@@ -1,3 +1,4 @@
+import { PUBLIC_EMAIL } from "@/lib/business-profile"
 import { NextResponse } from "next/server"
 import nodemailer from "nodemailer"
 import {
@@ -115,6 +116,7 @@ export async function POST(request: Request) {
     await transporter.sendMail({
       from: `"${process.env.MAIL_FROM_NAME || "Vexim Global"}" <${process.env.MAIL_FROM_ADDRESS || process.env.MAIL_USERNAME}>`,
       to: email,
+      replyTo: PUBLIC_EMAIL,
       subject: "Xác nhận đăng ký tư vấn - Vexim Global",
       html: getConsultationCustomerHTML(consultationParams),
     })

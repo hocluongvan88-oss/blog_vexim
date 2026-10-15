@@ -55,6 +55,9 @@ export const HOME_SERVICE_ID = `${SITE_URL}/#service`
 
 export const ORGANIZATION_NAME = "Vexim Global"
 
+/** Slogan thương hiệu dùng chung trên website và email. */
+export const BRAND_SLOGAN = "Tử Tế - Tận Tâm - Trách Nhiệm"
+
 /** Số điện thoại dạng quốc tế E.164 — bắt buộc cho schema `telephone`. */
 export const PHONE_E164 = "+84373685634"
 

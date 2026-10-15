@@ -2,7 +2,6 @@ import { NextResponse } from "next/server"
 import { createServerClient } from "@/lib/supabase-server"
 import type { FDACategory } from "@/types/fda"
 import { emailService } from "@/lib/email-service-zoho"
-import nodemailer from "nodemailer"
 
 // Generate random token
 function generateToken(): string {
@@ -105,10 +104,9 @@ export async function POST(request: Request) {
 
       // Resend verification email
       console.log("[v0] Resending verification email to:", email)
-      try {
-        await emailService.sendVerificationEmail(email, verificationToken)
-      } catch (emailError) {
-        console.error("[v0] Error resending verification email:", emailError)
+      const emailSent = await emailService.sendVerificationEmail(email, verificationToken)
+      if (!emailSent) {
+        return NextResponse.json({ error: "Chưa gửi được email xác nhận. Vui lòng thử đăng ký lại sau ít phút." }, { status: 503 })
       }
 
       return NextResponse.json({
@@ -161,18 +159,10 @@ export async function POST(request: Request) {
     console.log("[v0] - MAIL_HOST:", process.env.MAIL_HOST || "smtp.zoho.com (default)")
     console.log("[v0] - MAIL_PORT:", process.env.MAIL_PORT || "587 (default)")
     
-    try {
-      const emailSent = await emailService.sendVerificationEmail(email, verificationToken)
-      if (emailSent) {
-        console.log("[v0] ✓ Verification email sent successfully")
-      } else {
-        console.error("[v0] ✗ Email service returned false")
-      }
-    } catch (emailError) {
-      console.error("[v0] === EMAIL SENDING FAILED ===")
-      console.error("[v0] Error:", emailError)
-      console.error("[v0] Error message:", emailError instanceof Error ? emailError.message : String(emailError))
-      // Don't fail the subscription - user can still verify later
+    const emailSent = await emailService.sendVerificationEmail(email, verificationToken)
+    if (!emailSent) {
+      // Keep the unverified record so a retry can rotate the token and resend.
+      return NextResponse.json({ error: "Chưa gửi được email xác nhận. Vui lòng thử đăng ký lại sau ít phút." }, { status: 503 })
     }
 
 
@@ -230,15 +220,21 @@ export async function DELETE(request: Request) {
 
     const supabase = await createServerClient()
 
-    const { error } = await supabase
+    const { data: cancelled, error } = await supabase
       .from("fda_subscriptions")
       .update({ is_active: false })
       .eq("email", email)
       .eq("verification_token", token)
+      .select("id")
+      .maybeSingle()
 
     if (error) {
       console.error("[v0] Error unsubscribing:", error)
       return NextResponse.json({ error: "Failed to unsubscribe" }, { status: 500 })
+    }
+
+    if (!cancelled) {
+      return NextResponse.json({ error: "Liên kết hủy đăng ký không hợp lệ." }, { status: 404 })
     }
 
     // Send unsubscribe confirmation email

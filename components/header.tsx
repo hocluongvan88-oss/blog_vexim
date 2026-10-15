@@ -1,5 +1,7 @@
 "use client"
 
+import { BRAND_SLOGAN } from "@/lib/business-profile"
+
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Menu, X, User, ChevronDown, Shield } from "lucide-react"
@@ -63,7 +65,7 @@ export function Header() {
                   <span className="text-accent ml-1.5">GLOBAL</span>
                 </span>
                 <span className="hidden md:block text-[11px] font-medium tracking-[0.18em] text-muted-foreground uppercase mt-1">
-                  Tử Tế - Tận Tâm - Trách Nhiệm
+                  {BRAND_SLOGAN}
                 </span>
               </span>
             </Link>
