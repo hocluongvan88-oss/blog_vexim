@@ -60,8 +60,8 @@ export function HeroSection() {
       {/* Ảnh có sẵn trên website, không phụ thuộc dịch vụ ảnh bên ngoài. */}
       <div className="absolute inset-0 z-0">
         <Image
-          src="/china-customs-port-container-shipping-trade.jpg"
-          alt="Minh họa cảng container và hoạt động xuất khẩu hàng hóa"
+          src="/international-trade-export-logistics-cargo-shippin.jpg"
+          alt="Minh họa bãi container, nhân sự và hoạt động logistics xuất nhập khẩu"
           fill
           priority
           sizes="100vw"
