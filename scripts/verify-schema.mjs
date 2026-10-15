@@ -78,7 +78,10 @@ try {
     assert.ok(home.$('footer').text().includes(P.ADDRESS.streetAddress))
     for (const item of P.SERVICE_CATALOG) {
       const { nodes } = await getPage(item.path)
-      assert.deepEqual(nodes.find(node => node['@id'] === P.serviceId(item.key)), B.buildServiceSchema(item))
+      const node = nodes.find(node => node['@id'] === P.serviceId(item.key))
+      assert.ok(node)
+      const { '@context': _context, ...serviceNode } = node
+      assert.deepEqual(serviceNode, B.buildServiceNode(item))
       assert.equal(nodes.filter(node => node['@id'] === P.ORGANIZATION_ID).length, 1)
     }
     console.log('PASS: homepage SSR matches standalone export; canonical/OG/title/H1/footer match; all 6 landing pages emit the same service identities')

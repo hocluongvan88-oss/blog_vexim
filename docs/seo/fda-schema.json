@@ -1,0 +1,243 @@
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": [
+        "Organization",
+        "LocalBusiness"
+      ],
+      "@id": "https://www.veximglobal.com/#organization",
+      "name": "Vexim Global",
+      "alternateName": "Vexim",
+      "url": "https://www.veximglobal.com",
+      "slogan": "Tử Tế - Tận Tâm - Trách Nhiệm",
+      "logo": {
+        "@id": "https://www.veximglobal.com/#logo"
+      },
+      "image": {
+        "@id": "https://www.veximglobal.com/#logo"
+      },
+      "description": "Vexim Global hỗ trợ doanh nghiệp Việt đăng ký FDA, DUNS, US Agent, FSVP, tuân thủ MoCRA và lập LLC tại Mỹ. Quy trình rõ ràng, tư vấn miễn phí trong 24h.",
+      "telephone": "+84373685634",
+      "email": "contact@veximglobal.com",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "25/6/51 Ngọa Long, Tây Tựu",
+        "addressLocality": "Hà Nội",
+        "addressCountry": "VN"
+      },
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "https://schema.org/Monday",
+            "https://schema.org/Tuesday",
+            "https://schema.org/Wednesday",
+            "https://schema.org/Thursday",
+            "https://schema.org/Friday"
+          ],
+          "opens": "08:00",
+          "closes": "18:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "https://schema.org/Saturday"
+          ],
+          "opens": "08:00",
+          "closes": "12:00"
+        }
+      ],
+      "contactPoint": [
+        {
+          "@type": "ContactPoint",
+          "contactType": "customer support",
+          "telephone": "+84373685634",
+          "email": "contact@veximglobal.com",
+          "areaServed": [
+            "VN",
+            "US"
+          ],
+          "availableLanguage": [
+            "Vietnamese",
+            "English"
+          ]
+        }
+      ],
+      "areaServed": [
+        {
+          "@type": "Country",
+          "name": "Việt Nam",
+          "identifier": "VN"
+        },
+        {
+          "@type": "Country",
+          "name": "Hoa Kỳ",
+          "identifier": "US"
+        }
+      ],
+      "sameAs": [
+        "https://www.facebook.com/profile.php?id=61568290953268",
+        "https://www.linkedin.com/company/143976436/",
+        "https://zalo.me/0373685634"
+      ]
+    },
+    {
+      "@type": "ImageObject",
+      "@id": "https://www.veximglobal.com/#logo",
+      "url": "https://www.veximglobal.com/logo.png",
+      "contentUrl": "https://www.veximglobal.com/logo.png",
+      "width": 824,
+      "height": 543,
+      "caption": "Vexim Global"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://www.veximglobal.com/#website",
+      "name": "Vexim Global",
+      "url": "https://www.veximglobal.com",
+      "inLanguage": "vi-VN",
+      "publisher": {
+        "@id": "https://www.veximglobal.com/#organization"
+      }
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://www.veximglobal.com/services/fda#webpage",
+      "url": "https://www.veximglobal.com/services/fda",
+      "name": "Đăng ký FDA: Chi phí, hồ sơ & US Agent | Vexim Global",
+      "description": "Vexim Global tư vấn đăng ký FDA, DUNS và US Agent cho doanh nghiệp xuất khẩu Mỹ. Xem hồ sơ, chi phí, quy trình và nhận tư vấn miễn phí.",
+      "inLanguage": "vi-VN",
+      "isPartOf": {
+        "@id": "https://www.veximglobal.com/#website"
+      },
+      "about": {
+        "@id": "https://www.veximglobal.com/#service-fda-registration"
+      },
+      "publisher": {
+        "@id": "https://www.veximglobal.com/#organization"
+      },
+      "mainEntity": {
+        "@id": "https://www.veximglobal.com/#service-fda-registration"
+      },
+      "breadcrumb": {
+        "@id": "https://www.veximglobal.com/services/fda#breadcrumb"
+      },
+      "primaryImageOfPage": {
+        "@id": "https://www.veximglobal.com/services/fda#primaryimage"
+      }
+    },
+    {
+      "@type": "Service",
+      "@id": "https://www.veximglobal.com/#service-fda-registration",
+      "name": "Đăng ký FDA & DUNS",
+      "serviceType": "FDA Food Facility Registration & DUNS",
+      "description": "Đăng ký mã DUNS (UFI) và Food Facility Registration với FDA cho doanh nghiệp Việt xuất khẩu thực phẩm sang Mỹ, kèm gia hạn định kỳ 2 năm.",
+      "url": "https://www.veximglobal.com/services/fda",
+      "provider": {
+        "@id": "https://www.veximglobal.com/#organization"
+      },
+      "areaServed": [
+        {
+          "@type": "Country",
+          "name": "Việt Nam",
+          "identifier": "VN"
+        },
+        {
+          "@type": "Country",
+          "name": "Hoa Kỳ",
+          "identifier": "US"
+        }
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Trang chủ",
+          "item": "https://www.veximglobal.com"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Đăng ký FDA",
+          "item": "https://www.veximglobal.com/services/fda"
+        }
+      ],
+      "@id": "https://www.veximglobal.com/services/fda#breadcrumb"
+    },
+    {
+      "@type": "ImageObject",
+      "@id": "https://www.veximglobal.com/services/fda#primaryimage",
+      "url": "https://www.veximglobal.com/images/og-fda.png",
+      "contentUrl": "https://www.veximglobal.com/images/og-fda.png",
+      "width": 1200,
+      "height": 630,
+      "caption": "Đăng ký FDA, hồ sơ và US Agent cho hàng xuất khẩu Mỹ tại Vexim Global"
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://www.veximglobal.com/services/fda#faq",
+      "url": "https://www.veximglobal.com/services/fda#faq",
+      "inLanguage": "vi-VN",
+      "isPartOf": {
+        "@id": "https://www.veximglobal.com/services/fda#webpage"
+      },
+      "about": {
+        "@id": "https://www.veximglobal.com/#service-fda-registration"
+      },
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Đăng ký FDA mất bao lâu?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Thời gian phụ thuộc vào nhóm sản phẩm, tình trạng DUNS/UFI, việc xác nhận của US Agent và mức độ đầy đủ của hồ sơ. Vexim xác nhận lịch dự kiến sau khi rà soát thông tin. Không áp dụng một cam kết 2–5 ngày cho mọi thủ tục; thời gian bổ sung hồ sơ và phản hồi từ cơ quan quản lý cần được tính riêng."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Chi phí đăng ký FDA gồm những khoản nào?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Chi phí dịch vụ được báo theo phạm vi công việc: đăng ký cơ sở, hỗ trợ DUNS, US Agent, rà soát nhãn hoặc thủ tục bổ sung nếu cần. FDA không thu phí đăng ký hoặc gia hạn cơ sở thực phẩm; phí dịch vụ của Vexim và phí US Agent là các khoản riêng. Mức phí của lĩnh vực khác phải được đối chiếu riêng, không suy ra từ đăng ký thực phẩm."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Doanh nghiệp Việt Nam có cần US Agent không?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Cơ sở thực phẩm ở ngoài Hoa Kỳ thuộc diện phải đăng ký cần chỉ định US Agent theo quy định FDA. US Agent là đầu mối liên lạc với FDA, không đồng nghĩa được FDA chứng nhận hoặc bảo lãnh chất lượng sản phẩm. Vai trò US Agent cũng khác FSVP Importer và nhà nhập khẩu đứng tên lô hàng."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Đăng ký cơ sở thực phẩm FDA gia hạn khi nào?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Cơ sở thực phẩm thuộc diện đăng ký phải gia hạn trong khoảng 01/10 đến 31/12 của mỗi năm chẵn. Mốc này không có nghĩa mọi đăng ký đều có hiệu lực tròn hai năm kể từ ngày cấp và không áp dụng chung cho mỹ phẩm, thiết bị y tế hay dược phẩm."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Đăng ký FDA có phải là phê duyệt hoặc chứng nhận chất lượng không?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Không. Đăng ký cơ sở thực phẩm không phải FDA phê duyệt chất lượng cơ sở hoặc sản phẩm. FDA không cấp chứng nhận đăng ký cơ sở thực phẩm. Giấy xác nhận do đơn vị dịch vụ phát hành, nếu có, phải ghi rõ đơn vị phát hành và không được trình bày như chứng nhận do FDA cấp."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Food Facility Registration khác FCE/SID như thế nào?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Food Facility Registration là thủ tục đăng ký cơ sở thực phẩm. FCE/SID liên quan đến đăng ký cơ sở và hồ sơ quy trình chế biến đối với một số thực phẩm đóng hộp ít axit hoặc thực phẩm axit hóa thuộc diện áp dụng. Không phải mọi thực phẩm đều cần FCE/SID; cần rà soát loại sản phẩm, quy trình và điều kiện bảo quản để xác định nghĩa vụ riêng."
+          }
+        }
+      ]
+    }
+  ]
+}
