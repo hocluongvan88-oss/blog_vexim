@@ -116,6 +116,7 @@ export function Footer() {
             {[
               { name: "Facebook", href: SOCIAL_PROFILES.facebook, icon: "/facebook.png" },
               { name: "LinkedIn", href: SOCIAL_PROFILES.linkedin, icon: "/linkedin.png" },
+              { name: "Zalo", href: SOCIAL_PROFILES.zalo, icon: "/Icon_of_Zalo.svg.webp" },
             ].map(({ name, href, icon }) => (
               <a
                 key={name}
@@ -129,9 +130,6 @@ export function Footer() {
                 <span>{name}</span>
               </a>
             ))}
-            <a href={SOCIAL_PROFILES.zalo} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center rounded-lg px-3 py-2 hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
-              Zalo
-            </a>
           </nav>
           <p>&copy; {new Date().getFullYear()} {ORGANIZATION_NAME}. Bản quyền thuộc về Công ty.</p>
         </div>
