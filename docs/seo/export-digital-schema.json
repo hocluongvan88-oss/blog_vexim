@@ -1,0 +1,247 @@
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": [
+        "Organization",
+        "LocalBusiness"
+      ],
+      "@id": "https://www.veximglobal.com/#organization",
+      "name": "Vexim Global",
+      "alternateName": "Vexim",
+      "url": "https://www.veximglobal.com",
+      "slogan": "Tử Tế - Tận Tâm - Trách Nhiệm",
+      "logo": {
+        "@id": "https://www.veximglobal.com/#logo"
+      },
+      "image": {
+        "@id": "https://www.veximglobal.com/#logo"
+      },
+      "description": "Vexim Global hỗ trợ doanh nghiệp Việt đăng ký FDA, DUNS, US Agent, FSVP, tuân thủ MoCRA và lập LLC tại Mỹ. Quy trình rõ ràng, tư vấn miễn phí trong 24h.",
+      "telephone": "+84373685634",
+      "email": "contact@veximglobal.com",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "25/6/51 Ngọa Long, Tây Tựu",
+        "addressLocality": "Hà Nội",
+        "addressCountry": "VN"
+      },
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "https://schema.org/Monday",
+            "https://schema.org/Tuesday",
+            "https://schema.org/Wednesday",
+            "https://schema.org/Thursday",
+            "https://schema.org/Friday"
+          ],
+          "opens": "08:00",
+          "closes": "18:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "https://schema.org/Saturday"
+          ],
+          "opens": "08:00",
+          "closes": "12:00"
+        }
+      ],
+      "contactPoint": [
+        {
+          "@type": "ContactPoint",
+          "contactType": "customer support",
+          "telephone": "+84373685634",
+          "email": "contact@veximglobal.com",
+          "areaServed": [
+            "VN",
+            "US"
+          ],
+          "availableLanguage": [
+            "Vietnamese",
+            "English"
+          ]
+        }
+      ],
+      "areaServed": [
+        {
+          "@type": "Country",
+          "name": "Việt Nam",
+          "identifier": "VN"
+        },
+        {
+          "@type": "Country",
+          "name": "Hoa Kỳ",
+          "identifier": "US"
+        }
+      ],
+      "sameAs": [
+        "https://www.facebook.com/profile.php?id=61568290953268",
+        "https://www.linkedin.com/company/143976436/",
+        "https://zalo.me/0373685634"
+      ]
+    },
+    {
+      "@type": "ImageObject",
+      "@id": "https://www.veximglobal.com/#logo",
+      "url": "https://www.veximglobal.com/logo.png",
+      "contentUrl": "https://www.veximglobal.com/logo.png",
+      "width": 824,
+      "height": 543,
+      "caption": "Vexim Global"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://www.veximglobal.com/#website",
+      "name": "Vexim Global",
+      "url": "https://www.veximglobal.com",
+      "inLanguage": "vi-VN",
+      "publisher": {
+        "@id": "https://www.veximglobal.com/#organization"
+      }
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://www.veximglobal.com/services/export-digital#webpage",
+      "url": "https://www.veximglobal.com/services/export-digital",
+      "name": "Website xuất khẩu & hiện diện số | Vexim Export Digital",
+      "description": "Buyer và AI đang thấy gì về doanh nghiệp bạn? Nhận báo cáo đánh giá website, câu chuyện sản phẩm và 3 việc nên làm — miễn phí trong 2 ngày làm việc.",
+      "inLanguage": "vi-VN",
+      "isPartOf": {
+        "@id": "https://www.veximglobal.com/#website"
+      },
+      "about": {
+        "@id": "https://www.veximglobal.com/#organization"
+      },
+      "publisher": {
+        "@id": "https://www.veximglobal.com/#organization"
+      },
+      "mainEntity": {
+        "@id": "https://www.veximglobal.com/services/export-digital#service"
+      },
+      "breadcrumb": {
+        "@id": "https://www.veximglobal.com/services/export-digital#breadcrumb"
+      },
+      "hasPart": {
+        "@id": "https://www.veximglobal.com/services/export-digital#faq"
+      }
+    },
+    {
+      "@type": "Service",
+      "@id": "https://www.veximglobal.com/services/export-digital#service",
+      "name": "Vexim Export Digital",
+      "serviceType": "Website xuất khẩu và hiện diện số cho doanh nghiệp Việt Nam",
+      "description": "Buyer và AI đang thấy gì về doanh nghiệp bạn? Nhận báo cáo đánh giá website, câu chuyện sản phẩm và 3 việc nên làm — miễn phí trong 2 ngày làm việc.",
+      "url": "https://www.veximglobal.com/services/export-digital",
+      "provider": {
+        "@id": "https://www.veximglobal.com/#organization"
+      },
+      "audience": {
+        "@type": "BusinessAudience",
+        "audienceType": "Doanh nghiệp Việt Nam đang hoặc sắp xuất khẩu"
+      },
+      "areaServed": {
+        "@type": "Country",
+        "name": "Việt Nam",
+        "identifier": "VN"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Trang chủ",
+          "item": "https://www.veximglobal.com"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Vexim Export Digital",
+          "item": "https://www.veximglobal.com/services/export-digital"
+        }
+      ],
+      "@id": "https://www.veximglobal.com/services/export-digital#breadcrumb"
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://www.veximglobal.com/services/export-digital#faq",
+      "url": "https://www.veximglobal.com/services/export-digital#cau-hoi",
+      "inLanguage": "vi-VN",
+      "isPartOf": {
+        "@id": "https://www.veximglobal.com/services/export-digital#webpage"
+      },
+      "about": {
+        "@id": "https://www.veximglobal.com/services/export-digital#service"
+      },
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Tôi đã có gian hàng trên Alibaba, có cần website không?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sàn giúp buyer tìm thấy bạn; website riêng là nơi trình bày sâu hơn về nhà máy, sản phẩm, bằng chứng và cách hợp tác. Hai kênh bổ trợ nhau, không thay thế nhau. Vexim tư vấn đồng bộ thông tin để khoản đầu tư trên sàn có thêm điểm tựa khi buyer kiểm tra doanh nghiệp."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Vexim làm tuân thủ, sao lại làm website?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Vexim bắt đầu từ tư vấn tuân thủ FDA, GACC và các yêu cầu xuất khẩu. Website là nơi thể hiện những gì doanh nghiệp thực sự có: sản phẩm, quy trình, hồ sơ và năng lực. Chúng tôi kết hợp cách kể câu chuyện với việc rà soát nội dung, không biến đăng ký FDA hay một giấy chứng nhận thành cam kết chất lượng hoặc thông quan cho mọi sản phẩm."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Bao lâu thì thấy kết quả?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Hồ sơ và website có thể dùng để gửi buyer ngay sau khi hoàn thiện và nghiệm thu. SEO cần được theo dõi theo tháng, phụ thuộc thị trường, mức cạnh tranh và nền tảng website; không có một mốc 4–9 tháng bảo đảm cho mọi doanh nghiệp. Danh sách buyer và lịch triển khai được thống nhất theo phạm vi hợp tác, không phải lời hứa có đơn hàng ngay tháng đầu."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Có cam kết lên top Google hay ChatGPT không?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Không. Vexim không cam kết vị trí trên Google, ChatGPT, Gemini hay Perplexity, và không hứa một số đơn hàng cụ thể. Chúng tôi tập trung vào nội dung kiểm chứng được, website dễ truy cập, cấu trúc rõ ràng và theo dõi các yêu cầu báo giá. Kết quả từ AI thay đổi theo truy vấn, thời điểm và nguồn dữ liệu."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Doanh nghiệp tôi nhỏ, có phù hợp không?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Có, nếu doanh nghiệp đang hoặc sắp xuất khẩu và cần tài liệu đáng tin để buyer kiểm tra. Gói Hồ sơ xuất khẩu có thể là bước nhỏ để bắt đầu; chưa cần làm website lớn ngay. Báo cáo miễn phí giúp xác định việc nào nên làm trước theo nguồn lực thực tế."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Tôi xuất sang Trung Quốc thì sao?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Vexim sẽ trao đổi riêng về kênh phù hợp như Baidu, WeChat hoặc 1688 tùy mô hình và khách hàng mục tiêu. Không áp dụng một lời hứa SEO Google cho mọi thị trường. Nội dung, hồ sơ và claims cũng cần được đối chiếu với yêu cầu tại thị trường nhập khẩu."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Báo cáo miễn phí gồm những gì?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Báo cáo gồm kiểm tra nền tảng website, thông tin buyer và AI có thể tìm thấy qua các truy vấn được ghi nhận, đánh giá sáu yếu tố câu chuyện, tham khảo đối thủ trong kết quả tìm kiếm và ba việc nên ưu tiên. Nếu chưa có website, Vexim đánh giá dấu vết số theo tên doanh nghiệp và kênh hiện có. Báo cáo do chuyên viên thực hiện, gửi trong 2 ngày làm việc qua kênh liên hệ đã cung cấp; kết quả là ảnh chụp tại thời điểm kiểm tra, không đại diện cho mọi câu trả lời AI."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Thông tin tôi để lại có được bảo mật không?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Vexim sử dụng thông tin để thực hiện báo cáo và liên hệ trao đổi về yêu cầu của bạn, không bán hoặc chia sẻ cho đối tác tiếp thị. Hạ tầng lưu chuyển email được sử dụng để tiếp nhận yêu cầu. Không gửi mật khẩu, dữ liệu khách hàng hoặc hồ sơ mật qua form này; bạn có thể yêu cầu điều chỉnh hoặc xóa thông tin bằng cách liên hệ Vexim."
+          }
+        }
+      ]
+    }
+  ]
+}

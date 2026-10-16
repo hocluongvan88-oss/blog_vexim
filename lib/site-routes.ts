@@ -21,6 +21,9 @@ export const STATIC_ROUTES: StaticRoute[] = [
   { path: "/blog", priority: 0.9, changeFrequency: "weekly" },
   { path: "/fda-tracker", priority: 0.8, changeFrequency: "daily" },
 
+  { path: "/services/export-digital", priority: 0.8, changeFrequency: "monthly" },
+  { path: "/services/export-digital/goc-nhin-buyer", priority: 0.6, changeFrequency: "monthly" },
+
   // Dịch vụ theo thị trường
   { path: "/services/fda", priority: 0.9, changeFrequency: "weekly" },
   { path: "/services/gacc", priority: 0.9, changeFrequency: "weekly" },
