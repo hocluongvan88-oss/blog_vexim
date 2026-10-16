@@ -42,7 +42,7 @@ try {
   assert.equal(service['@type'], 'Service')
   assert.equal(service.provider['@id'], P.ORGANIZATION_ID)
   assert.equal(service.hasOfferCatalog.itemListElement.length, 6)
-  for (const item of P.SERVICE_CATALOG) {
+  for (const item of P.HOME_SERVICE_CATALOG) {
     const node = definitions.get(P.serviceId(item.key))
     assert.deepEqual(node, normalize(B.buildServiceNode(item)))
     assert.equal(node.url, `${P.SITE_URL}${item.path}`)
@@ -76,6 +76,16 @@ try {
     assert.equal(home.$('h1').text().trim(), service.name)
     assert.ok(home.$('footer').text().includes(P.PUBLIC_EMAIL))
     assert.ok(home.$('footer').text().includes(P.ADDRESS.streetAddress))
+    const cards = home.$('#services h3 a').toArray().map(element => ({
+      name: home.$(element).text().trim(), path: home.$(element).attr('href'),
+    }))
+    assert.equal(cards.length, 6)
+    assert.ok(!cards.some(card => card.path === '/services/fsvp'))
+    assert.equal(cards[4].name, 'Vexim Export Digital')
+    assert.equal(cards[4].path, '/services/export-digital')
+    for (const item of P.HOME_SERVICE_CATALOG) {
+      assert.ok(cards.some(card => card.name === item.name && card.path === item.path))
+    }
     for (const item of P.SERVICE_CATALOG) {
       const { nodes } = await getPage(item.path)
       const node = nodes.find(node => node['@id'] === P.serviceId(item.key))
@@ -84,7 +94,7 @@ try {
       assert.deepEqual(serviceNode, B.buildServiceNode(item))
       assert.equal(nodes.filter(node => node['@id'] === P.ORGANIZATION_ID).length, 1)
     }
-    console.log('PASS: homepage SSR matches standalone export; canonical/OG/title/H1/footer match; all 6 landing pages emit the same service identities')
+    console.log('PASS: homepage SSR matches standalone export; canonical/OG/title/H1/footer match; 6 homepage cards match schema; all 7 landing pages emit the same service identities (FSVP preserved)')
   }
 } finally {
   cleanup()

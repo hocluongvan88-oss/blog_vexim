@@ -162,7 +162,7 @@ Hai khối JSON-LD khác nhau vẫn liên kết được qua @id; không bắt b
       "@id": "https://www.veximglobal.com/#service",
       "name": "Dịch vụ đăng ký FDA & tư vấn pháp lý xuất khẩu sang Mỹ",
       "serviceType": "Regulatory Compliance & Market Access",
-      "description": "Tư vấn và hỗ trợ doanh nghiệp Việt Nam về FDA, DUNS, MoCRA, US Agent, FSVP, thành lập LLC & EIN và phòng sale xuất khẩu thuê ngoài sang Mỹ.",
+      "description": "Tư vấn và hỗ trợ doanh nghiệp Việt Nam về FDA, DUNS, MoCRA, US Agent, thành lập LLC & EIN, phòng sale xuất khẩu thuê ngoài sang Mỹ và website xuất khẩu.",
       "url": "https://www.veximglobal.com",
       "provider": {
         "@id": "https://www.veximglobal.com/#organization"
@@ -274,14 +274,14 @@ Hai khối JSON-LD khác nhau vẫn liên kết được qua @id; không bắt b
           },
           {
             "@type": "Offer",
-            "url": "https://www.veximglobal.com/services/fsvp",
+            "url": "https://www.veximglobal.com/services/export-digital",
             "itemOffered": {
               "@type": "Service",
-              "@id": "https://www.veximglobal.com/#service-fsvp",
-              "name": "FSVP Importer & Plan",
-              "serviceType": "Foreign Supplier Verification Program (FSVP) Compliance",
-              "description": "Đảm nhận vai trò FSVP Importer và xây dựng FSVP Plan, đánh giá nhà cung cấp nước ngoài theo FSMA cho lô thực phẩm nhập vào Mỹ.",
-              "url": "https://www.veximglobal.com/services/fsvp",
+              "@id": "https://www.veximglobal.com/#service-export-digital",
+              "name": "Vexim Export Digital",
+              "serviceType": "Website xuất khẩu và hiện diện số cho doanh nghiệp Việt Nam",
+              "description": "Xây dựng website xuất khẩu và câu chuyện doanh nghiệp để buyer có cơ sở kiểm tra, tin tưởng và lựa chọn bạn. Bắt đầu bằng báo cáo đánh giá miễn phí trong 2 ngày làm việc.",
+              "url": "https://www.veximglobal.com/services/export-digital",
               "provider": {
                 "@id": "https://www.veximglobal.com/#organization"
               },

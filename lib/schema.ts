@@ -19,7 +19,7 @@ import {
   PHONE_E164,
   PUBLIC_EMAIL,
   SAME_AS,
-  SERVICE_CATALOG,
+  HOME_SERVICE_CATALOG,
   SITE_DESCRIPTION,
   SITE_TITLE,
   SITE_URL,
@@ -118,7 +118,7 @@ export function buildHomeServiceSchema() {
     "@id": HOME_SERVICE_ID,
     name: "Dịch vụ đăng ký FDA & tư vấn pháp lý xuất khẩu sang Mỹ",
     serviceType: "Regulatory Compliance & Market Access",
-    description: "Tư vấn và hỗ trợ doanh nghiệp Việt Nam về FDA, DUNS, MoCRA, US Agent, FSVP, thành lập LLC & EIN và phòng sale xuất khẩu thuê ngoài sang Mỹ.",
+    description: "Tư vấn và hỗ trợ doanh nghiệp Việt Nam về FDA, DUNS, MoCRA, US Agent, thành lập LLC & EIN, phòng sale xuất khẩu thuê ngoài sang Mỹ và website xuất khẩu.",
     url: SITE_URL,
     provider: { "@id": ORGANIZATION_ID },
     mainEntityOfPage: { "@id": HOME_PAGE_ID },
@@ -131,7 +131,7 @@ export function buildHomeServiceSchema() {
       "@type": "OfferCatalog",
       "@id": `${SITE_URL}/#offer-catalog`,
       name: "Dịch vụ của Vexim Global",
-      itemListElement: SERVICE_CATALOG.map((service) => ({
+      itemListElement: HOME_SERVICE_CATALOG.map((service) => ({
         "@type": "Offer",
         url: `${SITE_URL}${service.path}`,
         itemOffered: buildServiceNode(service),

@@ -118,7 +118,7 @@
         "@id": "https://www.veximglobal.com/#organization"
       },
       "mainEntity": {
-        "@id": "https://www.veximglobal.com/services/export-digital#service"
+        "@id": "https://www.veximglobal.com/#service-export-digital"
       },
       "breadcrumb": {
         "@id": "https://www.veximglobal.com/services/export-digital#breadcrumb"
@@ -129,23 +129,26 @@
     },
     {
       "@type": "Service",
-      "@id": "https://www.veximglobal.com/services/export-digital#service",
+      "@id": "https://www.veximglobal.com/#service-export-digital",
       "name": "Vexim Export Digital",
       "serviceType": "Website xuất khẩu và hiện diện số cho doanh nghiệp Việt Nam",
-      "description": "Buyer và AI đang thấy gì về doanh nghiệp bạn? Nhận báo cáo đánh giá website, câu chuyện sản phẩm và 3 việc nên làm — miễn phí trong 2 ngày làm việc.",
+      "description": "Xây dựng website xuất khẩu và câu chuyện doanh nghiệp để buyer có cơ sở kiểm tra, tin tưởng và lựa chọn bạn. Bắt đầu bằng báo cáo đánh giá miễn phí trong 2 ngày làm việc.",
       "url": "https://www.veximglobal.com/services/export-digital",
       "provider": {
         "@id": "https://www.veximglobal.com/#organization"
       },
-      "audience": {
-        "@type": "BusinessAudience",
-        "audienceType": "Doanh nghiệp Việt Nam đang hoặc sắp xuất khẩu"
-      },
-      "areaServed": {
-        "@type": "Country",
-        "name": "Việt Nam",
-        "identifier": "VN"
-      }
+      "areaServed": [
+        {
+          "@type": "Country",
+          "name": "Việt Nam",
+          "identifier": "VN"
+        },
+        {
+          "@type": "Country",
+          "name": "Hoa Kỳ",
+          "identifier": "US"
+        }
+      ]
     },
     {
       "@type": "BreadcrumbList",
@@ -174,7 +177,7 @@
         "@id": "https://www.veximglobal.com/services/export-digital#webpage"
       },
       "about": {
-        "@id": "https://www.veximglobal.com/services/export-digital#service"
+        "@id": "https://www.veximglobal.com/#service-export-digital"
       },
       "mainEntity": [
         {

@@ -1,9 +1,10 @@
-import { ORGANIZATION_ID, SITE_URL } from "./business-profile"
-import { buildBreadcrumbSchema, buildWebPageSchema } from "./schema"
+import { getService, serviceId, SITE_URL } from "./business-profile"
+import { buildBreadcrumbSchema, buildServiceNode, buildWebPageSchema } from "./schema"
 import { EXPORT_DIGITAL, EXPORT_FAQS } from "./export-digital-content"
 
 export function buildExportDigitalSchema() {
   const url = `${SITE_URL}${EXPORT_DIGITAL.path}`
+  const service = buildServiceNode(getService("export-digital")!)
   const { "@context": _context, ...page } = buildWebPageSchema({
     path: EXPORT_DIGITAL.path,
     name: EXPORT_DIGITAL.title,
@@ -18,21 +19,11 @@ export function buildExportDigitalSchema() {
     "@graph": [
       {
         ...page,
-        mainEntity: { "@id": `${url}#service` },
+        mainEntity: { "@id": serviceId("export-digital") },
         breadcrumb: { "@id": `${url}#breadcrumb` },
         hasPart: { "@id": `${url}#faq` },
       },
-      {
-        "@type": "Service",
-        "@id": `${url}#service`,
-        name: "Vexim Export Digital",
-        serviceType: "Website xuất khẩu và hiện diện số cho doanh nghiệp Việt Nam",
-        description: EXPORT_DIGITAL.description,
-        url,
-        provider: { "@id": ORGANIZATION_ID },
-        audience: { "@type": "BusinessAudience", audienceType: "Doanh nghiệp Việt Nam đang hoặc sắp xuất khẩu" },
-        areaServed: { "@type": "Country", name: "Việt Nam", identifier: "VN" },
-      },
+      service,
       { ...breadcrumb, "@id": `${url}#breadcrumb` },
       {
         "@type": "FAQPage",
@@ -40,7 +31,7 @@ export function buildExportDigitalSchema() {
         url: `${url}#cau-hoi`,
         inLanguage: "vi-VN",
         isPartOf: { "@id": `${url}#webpage` },
-        about: { "@id": `${url}#service` },
+        about: { "@id": serviceId("export-digital") },
         mainEntity: EXPORT_FAQS.map((faq) => ({
           "@type": "Question",
           name: faq.question,
