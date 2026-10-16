@@ -13,7 +13,7 @@ import { ArrowRight, CheckCircle2 } from "lucide-react"
  * trong JSON-LD không bao giờ lệch nhau. File này chỉ giữ phần TRÌNH BÀY
  * (ảnh, vị trí cắt ảnh, gạch đầu dòng).
  */
-const PRESENTATION: Record<string, { image: string; focus: string; fit?: "contain"; items: string[] }> = {
+const PRESENTATION: Record<string, { image: string; focus: string; items: string[] }> = {
   "fda-registration": {
     image: "/fda-food-safety-inspection-laboratory-professional.jpg",
     focus: "50% 20%",
@@ -34,11 +34,10 @@ const PRESENTATION: Record<string, { image: string; focus: string; fit?: "contai
     focus: "50% 35%",
     items: ["Tiếp cận buyer Mỹ phù hợp ngành hàng", "Hỗ trợ tuân thủ & đàm phán", "Tối ưu nguồn lực vận hành"],
   },
-  "export-digital": {
-    image: "/images/og-export-digital.png",
-    focus: "50% 50%",
-    fit: "contain",
-    items: ["Website & câu chuyện xuất khẩu", "Bổ trợ gian hàng B2B", "Báo cáo miễn phí trong 2 ngày làm việc"],
+  fsvp: {
+    image: "/fsvp-compliance-food-import.jpg",
+    focus: "50% 10%",
+    items: ["Chỉ định FSVP Importer", "Thiết lập FSVP Plan", "Đánh giá nhà cung cấp"],
   },
   "llc-ein": {
     image: "/llc-formation-usa-business.jpg",
@@ -47,8 +46,8 @@ const PRESENTATION: Record<string, { image: string; focus: string; fit?: "contai
   },
 }
 
-/** Giữ vị trí các card; Export Digital thay cho FSVP. */
-const CARD_ORDER = ["fda-registration", "mocra", "us-agent", "export-sales", "export-digital", "llc-ein"]
+/** Thứ tự hiển thị trên trang chủ (giữ đúng thứ tự cũ). */
+const CARD_ORDER = ["fda-registration", "mocra", "us-agent", "export-sales", "fsvp", "llc-ein"]
 
 const services = CARD_ORDER.map((key) => {
   const service = getService(key)
@@ -91,7 +90,7 @@ export function ServicesGrid() {
                     fill
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     style={{ objectPosition: service.focus }}
-                    className={`${service.fit === "contain" ? "object-contain" : "object-cover"} w-full group-hover:scale-105 transition-transform duration-500`}
+                    className="object-cover w-full group-hover:scale-105 transition-transform duration-500"
                   />
                   {/* Viền chuyển nhẹ đáy ảnh */}
                   <div className="absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-navy-950/25 to-transparent" aria-hidden="true" />

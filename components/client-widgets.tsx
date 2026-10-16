@@ -29,8 +29,7 @@ const SHOW_ZALO_BUTTON = true
 export function ClientWidgets() {
   const pathname = usePathname()
 
-  // This focused landing has its own Zalo links and mobile CTA; avoid overlapping widgets.
-  if (pathname?.startsWith("/admin") || pathname === "/services/export-digital") return null
+  if (pathname?.startsWith("/admin")) return null
 
   return (
     <>

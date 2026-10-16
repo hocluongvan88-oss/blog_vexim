@@ -14,10 +14,7 @@
     "test:schema": "node scripts/verify-schema.mjs",
     "test:emails": "node scripts/verify-emails.mjs",
     "preview:emails": "node scripts/generate-email-preview.mjs",
-    "start": "next start",
-    "schema:export-digital": "node scripts/verify-export-digital.mjs --export",
-    "test:export-digital": "node scripts/verify-export-digital.mjs",
-    "test:export-digital:browser": "node scripts/verify-export-digital-browser.mjs"
+    "start": "next start"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -102,7 +99,6 @@
     "postcss": "^8.5",
     "tailwindcss": "^4.1.9",
     "typescript": "^5",
-    "tw-animate-css": "1.3.3",
-    "@types/nodemailer": "^7.0.12"
+    "tw-animate-css": "1.3.3"
   }
 }

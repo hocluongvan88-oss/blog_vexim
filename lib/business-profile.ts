@@ -139,8 +139,6 @@ export const AVAILABLE_LANGUAGES = ["Vietnamese", "English"] as const
 export interface ServiceCatalogItem {
   /** Khóa nội bộ, đồng thời là slug của `@id` */
   key: string
-  /** Có hiển thị trong danh mục dịch vụ trang chủ hay không. Mặc định: có. */
-  featured?: boolean
   /** Tên dịch vụ hiển thị */
   name: string
   /** Giá trị cho `serviceType` */
@@ -183,22 +181,12 @@ export const SERVICE_CATALOG: ServiceCatalogItem[] = [
   },
   {
     key: "fsvp",
-    featured: false,
     name: "FSVP Importer & Plan",
     serviceType: "Foreign Supplier Verification Program (FSVP) Compliance",
     description:
       "Đảm nhận vai trò FSVP Importer và xây dựng FSVP Plan, đánh giá nhà cung cấp nước ngoài theo FSMA cho lô thực phẩm nhập vào Mỹ.",
     path: "/services/fsvp",
     anchor: "Dịch vụ tuân thủ FSVP cho thực phẩm nhập khẩu",
-  },
-  {
-    key: "export-digital",
-    name: "Vexim Export Digital",
-    serviceType: "Website xuất khẩu và hiện diện số cho doanh nghiệp Việt Nam",
-    description:
-      "Xây dựng website xuất khẩu và câu chuyện doanh nghiệp để buyer có cơ sở kiểm tra, tin tưởng và lựa chọn bạn. Bắt đầu bằng báo cáo đánh giá miễn phí trong 2 ngày làm việc.",
-    path: "/services/export-digital",
-    anchor: "Website xuất khẩu & báo cáo đánh giá miễn phí",
   },
   {
     key: "llc-ein",
@@ -219,9 +207,6 @@ export const SERVICE_CATALOG: ServiceCatalogItem[] = [
     anchor: "Dịch vụ phòng sale xuất khẩu thuê ngoài sang Mỹ",
   },
 ]
-
-/** Danh mục xuất hiện trên trang chủ; dịch vụ không nổi bật vẫn giữ landing và định danh riêng. */
-export const HOME_SERVICE_CATALOG = SERVICE_CATALOG.filter((service) => service.featured !== false)
 
 /** `@id` ổn định cho một dịch vụ — dùng chung ở trang chủ và landing page. */
 export function serviceId(key: string): string {
