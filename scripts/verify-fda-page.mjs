@@ -35,7 +35,13 @@ try {
     faq.mainEntity.map((q) => [q.name, q.acceptedAnswer.text]),
     C.FDA_FAQS.map((q) => [q.question, q.answer]),
   )
-  assert.equal(faq.mainEntity.length, 8)
+  assert.equal(faq.mainEntity.length, 9)
+  assert.ok(!C.FDA_FAQS.some((item) => item.question === "Vexim Global có phải là đại lý chính thức của FDA không?"))
+  assert.equal(C.FDA_FAQS.filter((item) => item.question === "US Agent là ai, họ có nhiệm vụ gì?").length, 1)
+  const duns = C.FDA_FAQS.find((item) => item.question === "Mã DUNS là gì, tại sao bắt buộc phải có?")
+  assert.ok(duns)
+  assert.ok(duns.answer.includes("9 chữ số") && duns.answer.includes("Dun & Bradstreet"))
+  assert.ok(duns.answer.includes("cơ sở thực phẩm") && duns.answer.includes("không có nghĩa mọi doanh nghiệp"))
   assert.equal(C.FDA_LIBRA_CASE.company, "CÔNG TY TNHH LIBRA VIỆT NAM")
   assert.ok(!JSON.stringify(C.FDA_LIBRA_CASE).includes("Cổ phần"))
   assert.deepEqual(JSON.parse(readFileSync("docs/seo/fda-schema.json", "utf8")), data)
@@ -47,7 +53,7 @@ try {
   assert.equal(og.readUInt32BE(20), 630)
   assert.ok(statSync(`public${C.FDA_PAGE.image}`).size < 300_000)
   console.log(
-    "PASS: metadata lengths; real 1200×630 OG <300KB; schema export, all references, 8 FAQ answers and TNHH company name",
+    "PASS: metadata lengths; real 1200×630 OG <300KB; schema export, all references, 9 FAQ answers and TNHH company name",
   )
 
   const base = process.env.SCHEMA_TEST_BASE_URL
@@ -148,7 +154,7 @@ try {
       C.FDA_PARTNERS.filter((partner) => C.FDA_LANDING_MEDIA[partner.media]).length,
       "Render every configured partner logo",
     )
-    assert.equal($("#faq details").length, 8)
+    assert.equal($("#faq details").length, 9)
     for (const form of $('[data-testid="fda-lead-form"]').toArray()) {
       for (const name of ["name", "phone", "email", "product"])
         assert.ok($(form).find(`[name="${name}"]`).is("[required]"))

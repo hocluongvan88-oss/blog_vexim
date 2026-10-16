@@ -223,10 +223,18 @@
         },
         {
           "@type": "Question",
-          "name": "Vexim Global có phải là đại lý chính thức của FDA không?",
+          "name": "US Agent là ai, họ có nhiệm vụ gì?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Vexim là đơn vị tư vấn và hỗ trợ thủ tục; không đại diện cho FDA và không được hiểu là được FDA chứng nhận hay bảo trợ. US Agent là đầu mối liên lạc tại Mỹ do cơ sở chỉ định. Việc có pháp nhân hoặc EIN tại Mỹ không đồng nghĩa FDA phê duyệt đơn vị dịch vụ. US Agent cũng khác với FSVP Importer hoặc nhà nhập khẩu đứng tên lô hàng."
+            "text": "US Agent là cá nhân hoặc tổ chức cư trú hoặc có cơ sở kinh doanh tại Mỹ và hiện diện thực tế tại Mỹ, được cơ sở nước ngoài chỉ định làm đầu mối liên lạc với FDA. Trong đăng ký cơ sở thực phẩm, US Agent xác nhận đồng ý đảm nhận vai trò này; tiếp nhận, chuyển tiếp thông báo và hỗ trợ trao đổi thông tin giữa FDA với cơ sở, đồng thời phối hợp sắp xếp lịch thanh tra khi cần. Cơ sở thực phẩm nước ngoài thuộc diện đăng ký phải chỉ định US Agent. Vai trò này khác với FSVP Importer và không mặc định là nhà nhập khẩu đứng tên lô hàng."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Mã DUNS là gì, tại sao bắt buộc phải có?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "DUNS (Data Universal Numbering System) là mã định danh gồm 9 chữ số do Dun & Bradstreet (D&B) cấp và quản lý. Trong thủ tục đăng ký hoặc gia hạn cơ sở thực phẩm FDA, cơ sở thuộc diện áp dụng phải khai mã định danh cơ sở duy nhất (UFI) được FDA chấp nhận; hiện FDA chấp nhận mã DUNS cho mục đích này. Mã giúp FDA xác minh đúng cơ sở và đối chiếu địa chỉ, vì vậy thông tin tên, địa chỉ trong hồ sơ DUNS cần khớp với hồ sơ đăng ký FDA. DUNS không phải mã đăng ký FDA hoặc chứng nhận chất lượng, và không có nghĩa mọi doanh nghiệp hay mọi thủ tục FDA đều bắt buộc có DUNS."
           }
         },
         {

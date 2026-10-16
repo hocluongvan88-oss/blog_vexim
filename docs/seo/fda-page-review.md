@@ -1,6 +1,6 @@
 # Xây lại trang `/services/fda` theo landing FDA
 
-Cập nhật: 15/10/2026.
+Cập nhật: 16/10/2026.
 
 ## Phạm vi và giao diện
 
@@ -22,7 +22,7 @@ Thứ tự section được kiểm thử:
 7. Hành trình Libra bốn bước, nội dung và ảnh xen kẽ trên desktop.
 8. Dải đối tác.
 9. Thông tin liên hệ + form đầy đủ.
-10. Tám FAQ + liên kết nguồn FDA chính thức.
+10. Chín FAQ + liên kết nguồn FDA chính thức.
 
 Anchor form cuối trang là `#fda-contact`, tránh trùng `#contact` của Footer dùng chung.
 
@@ -43,7 +43,7 @@ Giữ metadata riêng của trang: title, description, canonical `https://www.ve
 - Một H1, main landmark, breadcrumb, heading theo section, alt ảnh, ảnh hero priority/sizes.
 - Layout xuất Organization/LocalBusiness, Logo và WebSite một lần.
 - Page graph gồm WebPage, Service (cùng ID với danh mục dịch vụ), BreadcrumbList, ImageObject cho ảnh chia sẻ và FAQPage.
-- Tám FAQ trong HTML SSR và schema lấy từ **cùng một mảng**, không hai bản chép tay khác nhau.
+- Chín FAQ trong HTML SSR và schema lấy từ **cùng một mảng**, không hai bản chép tay khác nhau.
 - Không có Review, AggregateRating, giá, khuyến mãi hoặc kết quả đăng ký giả trong schema.
 - `docs/seo/fda-schema.json` là bản gộp để kiểm tra; **không chèn lại** file này vào app.
 - FAQPage chỉ mô tả nội dung hỏi đáp, không hứa rich results hoặc thứ hạng tìm kiếm.
@@ -70,10 +70,14 @@ LD_LIBRARY_PATH=/tmp/al2023/lib BROWSER_EXECUTABLE_PATH=/tmp/chromium npm run te
 git diff --check
 ```
 
-- SSR: đúng thứ tự 10 section, banner ảnh, hai form, tám FAQ/schema khớp, không ưu đãi giảm giá, không ID trùng, anchor có đích, liên kết nội bộ trả 200, ảnh OG hợp lệ và toàn bộ tham chiếu schema được giải quyết.
+- SSR: đúng thứ tự 10 section, banner ảnh, hai form, chín FAQ/schema khớp, không ưu đãi giảm giá, không ID trùng, anchor có đích, liên kết nội bộ trả 200, ảnh OG hợp lệ và toàn bộ tham chiếu schema được giải quyết.
 - Chromium: 320/390/768/1440px không tràn ngang trang, ảnh tải được. Đã xem screenshot desktop/mobile. Bảng rộng cuộn trong vùng riêng trên mobile.
 - Form: required, hero lỗi/retry/thành công, hai form độc lập, reset, trường công ty trong payload, giới hạn/bộ đếm 500 ký tự, chặn gửi trùng khi đang chờ, lỗi mạng/JSON không hợp lệ/`success: false` không đếm lead, event lead đúng nguồn và không có PII.
 - FAQ bằng bàn phím; không JavaScript page error. Dialog trigger và header controlled ở trang US Agent vẫn hoạt động.
 - Schema toàn site và bộ kiểm tra email hiện có đều pass.
 
 **Giới hạn kiểm chứng:** Browser test dùng API và analytics mô phỏng, không gửi email thật. Chưa kiểm tra SMTP, GA4/GTM hoặc triển khai production. `tsc --noEmit` toàn repo vẫn thất bại với lỗi ở các khu vực khác; không có lỗi được báo ở các file FDA page/form/content/schema/conversion vừa sửa. Không coi đây là full build thành công; sandbox có giới hạn tải Google Fonts.
+
+## Cập nhật FAQ US Agent và DUNS
+
+Thay câu hỏi về “đại lý chính thức của FDA” bằng “US Agent là ai, họ có nhiệm vụ gì?”, bổ sung câu hỏi “Mã DUNS là gì, tại sao bắt buộc phải có?”. Tổng cộng chín FAQ, dùng chung dữ liệu cho HTML SSR và JSON-LD. Làm rõ phạm vi UFI/DUNS ở đăng ký/gia hạn cơ sở thực phẩm, không áp dụng chung cho mọi doanh nghiệp hoặc mọi lĩnh vực FDA. Bổ sung hai nguồn FDA về US Agent và UFI/DUNS; không thay đổi bố cục.

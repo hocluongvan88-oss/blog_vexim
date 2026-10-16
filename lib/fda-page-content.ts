@@ -30,9 +30,14 @@ export const FDA_FAQS = [
       "Với cơ sở thực phẩm thuộc diện đăng ký, kỳ gia hạn diễn ra từ 01/10 đến 31/12 mỗi năm chẵn. Không mặc định đăng ký có hiệu lực tròn hai năm kể từ ngày cấp, và không áp dụng lịch này cho mọi lĩnh vực. FDA không cấp chứng nhận đăng ký cơ sở thực phẩm; giấy xác nhận của đơn vị dịch vụ, nếu có, phải ghi rõ chủ thể phát hành.",
   },
   {
-    question: "Vexim Global có phải là đại lý chính thức của FDA không?",
+    question: "US Agent là ai, họ có nhiệm vụ gì?",
     answer:
-      "Vexim là đơn vị tư vấn và hỗ trợ thủ tục; không đại diện cho FDA và không được hiểu là được FDA chứng nhận hay bảo trợ. US Agent là đầu mối liên lạc tại Mỹ do cơ sở chỉ định. Việc có pháp nhân hoặc EIN tại Mỹ không đồng nghĩa FDA phê duyệt đơn vị dịch vụ. US Agent cũng khác với FSVP Importer hoặc nhà nhập khẩu đứng tên lô hàng.",
+      "US Agent là cá nhân hoặc tổ chức cư trú hoặc có cơ sở kinh doanh tại Mỹ và hiện diện thực tế tại Mỹ, được cơ sở nước ngoài chỉ định làm đầu mối liên lạc với FDA. Trong đăng ký cơ sở thực phẩm, US Agent xác nhận đồng ý đảm nhận vai trò này; tiếp nhận, chuyển tiếp thông báo và hỗ trợ trao đổi thông tin giữa FDA với cơ sở, đồng thời phối hợp sắp xếp lịch thanh tra khi cần. Cơ sở thực phẩm nước ngoài thuộc diện đăng ký phải chỉ định US Agent. Vai trò này khác với FSVP Importer và không mặc định là nhà nhập khẩu đứng tên lô hàng.",
+  },
+  {
+    question: "Mã DUNS là gì, tại sao bắt buộc phải có?",
+    answer:
+      "DUNS (Data Universal Numbering System) là mã định danh gồm 9 chữ số do Dun & Bradstreet (D&B) cấp và quản lý. Trong thủ tục đăng ký hoặc gia hạn cơ sở thực phẩm FDA, cơ sở thuộc diện áp dụng phải khai mã định danh cơ sở duy nhất (UFI) được FDA chấp nhận; hiện FDA chấp nhận mã DUNS cho mục đích này. Mã giúp FDA xác minh đúng cơ sở và đối chiếu địa chỉ, vì vậy thông tin tên, địa chỉ trong hồ sơ DUNS cần khớp với hồ sơ đăng ký FDA. DUNS không phải mã đăng ký FDA hoặc chứng nhận chất lượng, và không có nghĩa mọi doanh nghiệp hay mọi thủ tục FDA đều bắt buộc có DUNS.",
   },
   {
     question: "Tôi cần chuẩn bị những giấy tờ gì để đăng ký FDA?",
@@ -52,6 +57,14 @@ export const FDA_FAQS = [
 ] as const
 
 export const FDA_SOURCES = [
+  {
+    title: "US Agent và xác nhận đại diện cho cơ sở thực phẩm",
+    url: "https://www.fda.gov/media/142968/download",
+  },
+  {
+    title: "Yêu cầu UFI/DUNS khi đăng ký và gia hạn cơ sở thực phẩm",
+    url: "https://www.fda.gov/food/hfp-constituent-updates/fda-reminds-food-facilities-biennial-renewal-requirements",
+  },
   {
     title: "Đăng ký cơ sở thực phẩm",
     url: "https://www.fda.gov/food/registration-food-facilities-and-other-submissions/online-registration-food-facilities",
