@@ -133,11 +133,39 @@
       "height": 630
     },
     {
+      "@type": "Organization",
+      "@id": "https://veximtrade.com/#organization",
+      "name": "Vexim Trade",
+      "url": "https://veximtrade.com/",
+      "logo": "https://www.veximglobal.com/trade/logo.svg",
+      "description": "Danh bạ nhà cung cấp nông sản Việt Nam dành cho người mua nước ngoài.",
+      "parentOrganization": {
+        "@id": "https://www.veximglobal.com/#organization"
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Số 25/6/51 Ngõa Long, Tây Tựu",
+        "addressLocality": "Bắc Từ Liêm",
+        "addressRegion": "Hà Nội",
+        "addressCountry": "VN"
+      },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+84373685634",
+        "email": "contact@veximglobal.com",
+        "contactType": "customer service",
+        "availableLanguage": [
+          "vi",
+          "en"
+        ]
+      }
+    },
+    {
       "@type": "Service",
       "@id": "https://www.veximglobal.com/#service",
       "name": "Dịch vụ đăng ký FDA & tư vấn pháp lý xuất khẩu sang Mỹ",
       "serviceType": "Regulatory Compliance & Market Access",
-      "description": "Tư vấn và hỗ trợ doanh nghiệp Việt Nam về FDA, DUNS, MoCRA, US Agent, FSVP, thành lập LLC & EIN và phòng sale xuất khẩu thuê ngoài sang Mỹ.",
+      "description": "Tư vấn và hỗ trợ doanh nghiệp Việt Nam về FDA, DUNS, MoCRA, US Agent, FSVP, thành lập LLC & EIN và hồ sơ nhà cung cấp nông sản trên Vexim Trade.",
       "url": "https://www.veximglobal.com",
       "provider": {
         "@id": "https://www.veximglobal.com/#organization"
@@ -307,25 +335,41 @@
             "itemOffered": {
               "@type": "Service",
               "@id": "https://www.veximglobal.com/#service-export-sales",
-              "name": "Phòng Sale Xuất Khẩu",
-              "serviceType": "Outsourced Export Sales Team",
-              "description": "Phòng kinh doanh xuất khẩu thuê ngoài trọn gói: tiếp cận buyer Mỹ phù hợp ngành hàng, hỗ trợ đàm phán và tuân thủ cho nhà máy Việt.",
+              "name": "Vexim Trade",
+              "serviceType": "Danh bạ nhà cung cấp nông sản Việt Nam",
+              "description": "Hồ sơ nhà cung cấp nông sản Việt Nam với quy cách chuẩn ngành, xác minh từng bước và yêu cầu báo giá gửi thẳng đến doanh nghiệp.",
               "url": "https://www.veximglobal.com/services/export-sales",
               "provider": {
-                "@id": "https://www.veximglobal.com/#organization"
+                "@id": "https://veximtrade.com/#organization"
               },
-              "areaServed": [
-                {
-                  "@type": "Country",
-                  "name": "Việt Nam",
-                  "identifier": "VN"
-                },
-                {
-                  "@type": "Country",
-                  "name": "Hoa Kỳ",
-                  "identifier": "US"
-                }
-              ]
+              "areaServed": "VN",
+              "audience": {
+                "@type": "BusinessAudience",
+                "audienceType": "Doanh nghiệp sản xuất, xuất khẩu nông sản Việt Nam"
+              },
+              "hasOfferCatalog": {
+                "@type": "OfferCatalog",
+                "name": "Danh mục đang mở",
+                "itemListElement": [
+                  {
+                    "@type": "OfferCatalog",
+                    "name": "Hạt điều nhân"
+                  },
+                  {
+                    "@type": "OfferCatalog",
+                    "name": "Hồ tiêu"
+                  },
+                  {
+                    "@type": "OfferCatalog",
+                    "name": "Quế, hồi"
+                  }
+                ]
+              },
+              "potentialAction": {
+                "@type": "RegisterAction",
+                "target": "https://veximtrade.com/supplier/register",
+                "name": "Đăng ký nhà cung cấp"
+              }
             }
           }
         ]

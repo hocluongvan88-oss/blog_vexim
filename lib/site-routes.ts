@@ -30,7 +30,6 @@ export const STATIC_ROUTES: StaticRoute[] = [
   { path: "/services/export-delegation", priority: 0.7, changeFrequency: "monthly" },
   { path: "/services/fsvp", priority: 0.8, changeFrequency: "monthly" },
   { path: "/services/export-sales", priority: 0.8, changeFrequency: "weekly" },
-  { path: "/services/fda-label-check", priority: 0.7, changeFrequency: "monthly" },
   { path: "/services/llc-ein", priority: 0.7, changeFrequency: "monthly" },
 
   // Dịch vụ thực phẩm (FDA Mỹ)

@@ -159,7 +159,7 @@ export function ConsultationDialog({ open, onOpenChange, children, trigger, defa
               <option value="">Chọn dịch vụ</option>
               <option value="fda">Đăng ký FDA</option>
               <option value="gacc">Mã GACC</option>
-              <option value="export-sales">Phòng sale xuất khẩu</option>
+              <option value="export-sales">Vexim Trade — Nhà cung cấp nông sản</option>
               <option value="agent-us">Dịch vụ Agent Hoa Kỳ</option>
               <option value="other">Khác</option>
             </select>

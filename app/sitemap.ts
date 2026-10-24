@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next"
 import { createStaticClient } from "@/lib/supabase/server"
 import { BLOG_CATEGORIES } from "@/lib/blog-categories"
+import { TRADE } from "@/lib/vexim-trade-content"
 import { STATIC_ROUTES } from "@/lib/site-routes"
 
 /**
@@ -68,7 +69,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     url: route.path === "/" ? baseUrl : `${baseUrl}${route.path}`,
     // Trang tĩnh: ngày sửa thật nằm trong code, không đo được ở runtime → bỏ lastModified
     // thay vì gửi `new Date()` giả (Google chỉ tin lastmod khi nó chính xác).
-    lastModified: route.path === "/blog" ? blogLastModified : undefined,
+    lastModified: route.path === "/blog" ? blogLastModified : route.path === TRADE.path ? new Date(`${TRADE.updated}T00:00:00+07:00`) : undefined,
     changeFrequency: route.changeFrequency,
     priority: route.priority,
   }))

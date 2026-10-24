@@ -199,12 +199,12 @@ export const SERVICE_CATALOG: ServiceCatalogItem[] = [
   },
   {
     key: "export-sales",
-    name: "Phòng Sale Xuất Khẩu",
-    serviceType: "Outsourced Export Sales Team",
+    name: "Vexim Trade",
+    serviceType: "Danh bạ nhà cung cấp nông sản Việt Nam",
     description:
-      "Phòng kinh doanh xuất khẩu thuê ngoài trọn gói: tiếp cận buyer Mỹ phù hợp ngành hàng, hỗ trợ đàm phán và tuân thủ cho nhà máy Việt.",
+      "Hồ sơ nhà cung cấp nông sản Việt Nam với quy cách chuẩn ngành, xác minh từng bước và yêu cầu báo giá gửi thẳng đến doanh nghiệp.",
     path: "/services/export-sales",
-    anchor: "Dịch vụ phòng sale xuất khẩu thuê ngoài sang Mỹ",
+    anchor: "Đăng ký nhà cung cấp nông sản trên Vexim Trade",
   },
 ]
 

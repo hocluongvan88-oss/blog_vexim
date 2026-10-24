@@ -1,4 +1,4 @@
-import Link from "next/link"
+import { ServiceLink as Link } from "@/components/service-link"
 import { ArrowRight, FileCheck, Globe, Shield, Cpu, Package, ScanLine, TrendingUp } from "lucide-react"
 import { Card } from "@/components/ui/card"
 
@@ -17,8 +17,8 @@ const categoryToServices: Record<string, Array<{
       icon: FileCheck,
     },
     {
-      title: "Phòng sale xuất khẩu",
-      description: "Đội ngũ sales xuất khẩu thuê ngoài, kết nối buyer Mỹ theo ngành hàng và thu USD",
+      title: "Vexim Trade",
+      description: "Hồ sơ nhà cung cấp nông sản Việt Nam, xác minh từng bước và yêu cầu báo giá gửi thẳng",
       href: "/services/export-sales",
       icon: TrendingUp,
     },
@@ -61,8 +61,8 @@ const categoryToServices: Record<string, Array<{
   ],
   "Xuất nhập khẩu": [
     {
-      title: "Phòng sale xuất khẩu",
-      description: "Phòng kinh doanh xuất khẩu sang Mỹ trọn gói, kết nối buyer Mỹ phù hợp ngành hàng",
+      title: "Vexim Trade",
+      description: "Hồ sơ nhà cung cấp nông sản Việt Nam, xác minh từng bước và yêu cầu báo giá gửi thẳng",
       href: "/services/export-sales",
       icon: TrendingUp,
     },
@@ -101,8 +101,8 @@ const categoryToServices: Record<string, Array<{
   ],
   "Tin tức thị trường": [
     {
-      title: "Phòng sale xuất khẩu",
-      description: "Đội ngũ sales chuyên trách đưa hàng vào chuỗi bán lẻ Mỹ",
+      title: "Vexim Trade",
+      description: "Hồ sơ nhà cung cấp nông sản Việt Nam, xác minh từng bước và yêu cầu báo giá gửi thẳng",
       href: "/services/export-sales",
       icon: TrendingUp,
     },
@@ -130,8 +130,8 @@ const defaultServices = [
     icon: Globe,
   },
   {
-    title: "Phòng sale xuất khẩu",
-    description: "Phòng kinh doanh xuất khẩu thuê ngoài trọn gói sang Mỹ",
+    title: "Vexim Trade",
+    description: "Hồ sơ nhà cung cấp nông sản Việt Nam, xác minh từng bước và yêu cầu báo giá gửi thẳng",
     href: "/services/export-sales",
     icon: TrendingUp,
   },

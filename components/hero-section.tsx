@@ -211,7 +211,7 @@ export function HeroSection() {
                 >
                   <option value="">Chọn dịch vụ</option>
                   <option value="fda">Đăng ký FDA</option>
-                  <option value="export-sales">Phòng sale xuất khẩu</option>
+                  <option value="export-sales">Vexim Trade — Nhà cung cấp nông sản</option>
                   <option value="fsvp">FSVP Compliance</option>
                   <option value="agent-us">Dịch vụ US Agent</option>
                   <option value="mocra">MOCRA Registration</option>

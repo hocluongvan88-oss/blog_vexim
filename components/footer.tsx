@@ -44,6 +44,7 @@ export function Footer() {
           <div>
             <FooterHeading>Dịch vụ</FooterHeading>
             <ul className="space-y-2">
+              <li><a href="/services/export-sales" className="text-white/80 hover:text-accent transition-colors">Vexim Trade</a></li>
               <li>
                 <a href="/services/fda" className="text-white/80 hover:text-accent transition-colors">
                   Đăng ký FDA

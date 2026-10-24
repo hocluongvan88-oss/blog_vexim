@@ -12,7 +12,7 @@ export function loadSchemaBuilders() {
   const dir = mkdtempSync(path.join(tmpdir(), "vexim-schema-"))
   const require = createRequire(import.meta.url)
   try {
-    for (const name of ["contact-info", "business-profile", "schema", "fda-page-content", "fda-page-schema"]) {
+    for (const name of ["contact-info", "vexim-trade-content", "business-profile", "schema", "fda-page-content", "fda-page-schema", "vexim-trade-assets", "vexim-trade-styles", "vexim-trade-page"]) {
       const result = ts.transpileModule(readFileSync(path.join(root, "lib", `${name}.ts`), "utf8"), {
         compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 },
       })
@@ -22,6 +22,7 @@ export function loadSchemaBuilders() {
       builders: { ...require(path.join(dir, "schema.js")), ...require(path.join(dir, "fda-page-schema.js")) },
       fdaContent: require(path.join(dir, "fda-page-content.js")),
       profile: require(path.join(dir, "business-profile.js")),
+      trade: { ...require(path.join(dir, "vexim-trade-content.js")), ...require(path.join(dir, "vexim-trade-page.js")) },
       cleanup: () => rmSync(dir, { recursive: true, force: true }),
     }
   } catch (error) {

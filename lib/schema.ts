@@ -28,6 +28,8 @@ import {
   type ServiceCatalogItem,
 } from "./business-profile"
 
+import { TRADE, TRADE_CATEGORIES, buildTradeOrganization } from "./vexim-trade-content"
+
 const HOME_PAGE_ID = `${SITE_URL}/#webpage`
 const HOME_IMAGE_ID = `${SITE_URL}/#primaryimage`
 
@@ -118,7 +120,7 @@ export function buildHomeServiceSchema() {
     "@id": HOME_SERVICE_ID,
     name: "Dịch vụ đăng ký FDA & tư vấn pháp lý xuất khẩu sang Mỹ",
     serviceType: "Regulatory Compliance & Market Access",
-    description: "Tư vấn và hỗ trợ doanh nghiệp Việt Nam về FDA, DUNS, MoCRA, US Agent, FSVP, thành lập LLC & EIN và phòng sale xuất khẩu thuê ngoài sang Mỹ.",
+    description: "Tư vấn và hỗ trợ doanh nghiệp Việt Nam về FDA, DUNS, MoCRA, US Agent, FSVP, thành lập LLC & EIN và hồ sơ nhà cung cấp nông sản trên Vexim Trade.",
     url: SITE_URL,
     provider: { "@id": ORGANIZATION_ID },
     mainEntityOfPage: { "@id": HOME_PAGE_ID },
@@ -149,8 +151,13 @@ export function buildServiceNode(service: ServiceCatalogItem) {
     serviceType: service.serviceType,
     description: service.description,
     url: `${SITE_URL}${service.path}`,
-    provider: { "@id": ORGANIZATION_ID },
-    areaServed: servedCountries(),
+    provider: service.key === "export-sales" ? { "@id": TRADE.organizationId } : { "@id": ORGANIZATION_ID },
+    areaServed: service.key === "export-sales" ? "VN" : servedCountries(),
+    ...(service.key === "export-sales" ? {
+      audience: { "@type": "BusinessAudience", audienceType: "Doanh nghiệp sản xuất, xuất khẩu nông sản Việt Nam" },
+      hasOfferCatalog: { "@type": "OfferCatalog", name: "Danh mục đang mở", itemListElement: TRADE_CATEGORIES.map(category => ({ "@type": "OfferCatalog", name: category.name })) },
+      potentialAction: { "@type": "RegisterAction", target: TRADE.register, name: "Đăng ký nhà cung cấp" },
+    } : {}),
   }
 }
 
@@ -180,6 +187,7 @@ export function buildHomePageSchema() {
         width: OG_IMAGE.width,
         height: OG_IMAGE.height,
       },
+      buildTradeOrganization(ORGANIZATION_ID),
       service,
     ],
   }

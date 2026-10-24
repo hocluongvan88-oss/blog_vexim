@@ -1,7 +1,7 @@
 import { getService } from "@/lib/business-profile"
 import { Card } from "@/components/ui/card"
 import Image from "next/image"
-import Link from "next/link"
+import { ServiceLink } from "@/components/service-link"
 import { ArrowRight, CheckCircle2 } from "lucide-react"
 
 /**
@@ -30,9 +30,9 @@ const PRESENTATION: Record<string, { image: string; focus: string; items: string
     items: ["Đại diện liên lạc 24/7", "Phản hồi thông báo từ FDA", "Hỗ trợ thanh tra cơ sở"],
   },
   "export-sales": {
-    image: "/landing/audience-team.jpg",
-    focus: "50% 35%",
-    items: ["Tiếp cận buyer Mỹ phù hợp ngành hàng", "Hỗ trợ tuân thủ & đàm phán", "Tối ưu nguồn lực vận hành"],
+    image: "/trade/service-card.svg",
+    focus: "50% 50%",
+    items: ["Quy cách sản phẩm chuẩn ngành", "Xác minh nhà cung cấp từng bước", "Yêu cầu báo giá gửi thẳng"],
   },
   fsvp: {
     image: "/fsvp-compliance-food-import.jpg",
@@ -98,12 +98,12 @@ export function ServicesGrid() {
 
                 <div className="p-6 flex-1 flex flex-col">
                   <h3 className="text-xl font-bold text-navy-900 mb-3 group-hover:text-accent transition-colors">
-                    <Link
+                    <ServiceLink
                       href={service.path}
                       className="hover:text-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded"
                     >
                       {service.name}
-                    </Link>
+                    </ServiceLink>
                   </h3>
                   <p className="text-muted-foreground mb-4 leading-relaxed text-sm">{service.description}</p>
                   <ul className="space-y-2 mb-5">
@@ -121,13 +121,13 @@ export function ServicesGrid() {
                     là trang gì. Mỗi dịch vụ trỏ tới landing page riêng của nó.
                   */}
                   <div className="mt-auto pt-1">
-                    <Link
+                    <ServiceLink
                       href={service.path}
                       className="text-accent font-semibold inline-flex items-center gap-2 hover:gap-3 transition-all text-sm underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded"
                     >
                       {service.anchor}
                       <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </Link>
+                    </ServiceLink>
                   </div>
                 </div>
               </Card>

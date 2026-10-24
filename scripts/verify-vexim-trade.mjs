@@ -1,0 +1,259 @@
+import assert from "node:assert/strict"
+import { readFileSync, writeFileSync, statSync, readdirSync } from "node:fs"
+import { createHash } from "node:crypto"
+import { gzipSync } from "node:zlib"
+import { load } from "cheerio"
+import { loadSchemaBuilders } from "./schema-loader.mjs"
+
+const { trade: T, builders: B, profile: P, cleanup } = loadSchemaBuilders()
+const normalize = (value) => JSON.parse(JSON.stringify(value))
+try {
+  const html = T.renderTradePage()
+  const $ = load(html)
+  const schema = normalize(T.buildTradePageSchema())
+  if (process.argv.includes("--export"))
+    writeFileSync("docs/seo/vexim-trade-schema.json", JSON.stringify(schema, null, 2) + "\n")
+  assert.deepEqual(JSON.parse(readFileSync("docs/seo/vexim-trade-schema.json", "utf8")), schema)
+  assert.equal($("html").attr("lang"), "vi")
+  assert.equal($("h1").length, 1)
+  assert.equal($("h1").text(), T.TRADE.h1)
+  assert.equal($("title").text(), T.TRADE.title)
+  assert.ok(T.TRADE.title.length <= 60)
+  assert.ok(T.TRADE.description.length >= 140 && T.TRADE.description.length <= 160)
+  assert.equal($("meta[name=description]").attr("content"), T.TRADE.description)
+  assert.equal($("link[rel=canonical]").attr("href"), P.SITE_URL + T.TRADE.path)
+  assert.equal($("head script[type='application/ld+json']").length, 1)
+  assert.equal($("script[type='application/ld+json']").length, 1)
+  assert.equal($("body > :first-child").attr("href"), "#noi-dung-chinh")
+  assert.equal($("main > section").length, 7)
+  assert.equal($("header").length, 1)
+  assert.equal($("footer").length, 1)
+  assert.equal($("form").length, 0)
+  assert.equal($("[data-register]").length, 3)
+  assert.deepEqual(
+    $("[data-register]")
+      .toArray()
+      .map((el) => $(el).attr("data-position")),
+    ["header", "hero", "footer_cta"],
+  )
+  assert.ok(
+    $("[data-register]")
+      .toArray()
+      .every((el) => el.tagName === "a" && $(el).attr("href") === T.TRADE.register),
+  )
+  const headings = $("h1,h2,h3")
+    .toArray()
+    .map((el) => Number(el.tagName.slice(1)))
+  assert.ok(headings.every((level, i) => !i || level <= headings[i - 1] + 1))
+  assert.equal($(".hero-description").text().replace(/\s+/g, " "), T.TRADE.hero)
+  assert.equal($("figure figcaption").text(), "Hồ sơ minh họa")
+  assert.equal($(".illustrated-rfq").get(0).tagName, "span")
+  assert.equal($(".illustrated-rfq").attr("tabindex"), undefined)
+  assert.equal($("#xac-minh ol > li").length, 3)
+  assert.equal($("#dang-ky ol > li").length, 4)
+  assert.ok(
+    $(".step-number")
+      .toArray()
+      .every((el) => $(el).attr("aria-hidden") === "true"),
+  )
+  assert.equal($(".closing-title").get(0).tagName, "p")
+  assert.ok(
+    $("#xac-minh")
+      .text()
+      .includes("Vexim Trade xác minh nhà cung cấp, không chứng nhận chất lượng sản phẩm."),
+  )
+  assert.ok(
+    !/Không bán thứ hạng|aggregateRating|"review"|priceCurrency|Phòng Sale Xuất Khẩu|__next_f|fonts.googleapis.com|fonts.gstatic.com/.test(
+      html,
+    ),
+  )
+  assert.equal($(".commitments li").length, 2)
+  assert.equal($("link[rel=preload][as=font]").length, 1)
+  assert.ok($("link[rel=preload][as=font]").attr("href").includes("vietnamese-700"))
+  const fontFiles = readdirSync("public/trade/fonts").filter((name) => name.endsWith(".woff2"))
+  assert.equal(fontFiles.length, 8)
+  for (const font of fontFiles)
+    assert.ok(/-(latin|vietnamese)-(400|500|600|700)-normal\.[a-f0-9]+\.woff2$/.test(font))
+  const script = $("script[src]").attr("src")
+  assert.equal($("script[src]").length, 1)
+  const scriptBytes = readFileSync(`public${script}`)
+  assert.ok(script.includes(createHash("sha256").update(scriptBytes).digest("hex").slice(0, 10)))
+  assert.equal(
+    load(T.renderTradePage({ analytics: true }))("script[data-vercel-analytics]").attr(
+      "data-vercel-analytics",
+    ),
+    "true",
+  )
+  const tokens = Object.fromEntries(
+    [
+      ...$("style")
+        .text()
+        .matchAll(/--([a-z0-9-]+):\s*(#[0-9a-f]{6})/gi),
+    ].map((match) => [match[1], match[2]]),
+  )
+  const luminance = (hex) => {
+    const channels = [1, 3, 5]
+      .map((start) => parseInt(hex.slice(start, start + 2), 16) / 255)
+      .map((v) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4))
+    return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722
+  }
+  for (const [foreground, background] of [
+    ["ink", "bg"],
+    ["text-2", "bg"],
+    ["text-3", "bg"],
+    ["text-3", "bg-soft"],
+    ["primary", "bg"],
+    ["primary", "bg-soft"],
+    ["eyebrow", "bg"],
+    ["eyebrow", "bg-soft"],
+    ["eyebrow-dark", "ink"],
+    ["bg-soft", "ink"],
+    ["bg", "primary"],
+    ["bg", "primary-hover"],
+  ]) {
+    const a = luminance(tokens[foreground]),
+      b = luminance(tokens[background])
+    assert.ok(
+      (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05) >= 4.5,
+      `${foreground}/${background} contrast`,
+    )
+  }
+
+  assert.ok(gzipSync(scriptBytes).byteLength < 50000)
+  assert.ok(!/localStorage|sessionStorage|fetch\(|XMLHttpRequest/.test(scriptBytes.toString()))
+  const weight =
+    gzipSync(Buffer.from(html)).byteLength +
+    gzipSync(scriptBytes).byteLength +
+    fontFiles.reduce((sum, f) => sum + statSync(`public/trade/fonts/${f}`).size, 0)
+  assert.ok(weight < 500000)
+  const png = readFileSync("public/trade/og-nha-cung-cap.png")
+  assert.deepEqual([...png.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10])
+  assert.equal(png.readUInt32BE(16), 1200)
+  assert.equal(png.readUInt32BE(20), 630)
+  assert.ok(png.byteLength < 300000)
+  const definitions = new Map(),
+    refs = []
+  function visit(value) {
+    if (!value || typeof value !== "object") return
+    if (Array.isArray(value)) return value.forEach(visit)
+    if (value["@id"]) {
+      if (Object.keys(value).length === 1) refs.push(value["@id"])
+      else {
+        assert.ok(!definitions.has(value["@id"]))
+        definitions.set(value["@id"], value)
+      }
+    }
+    Object.values(value).forEach(visit)
+  }
+  visit(schema)
+  refs.forEach((ref) => assert.ok(definitions.has(ref), `Unresolved schema ID: ${ref}`))
+  assert.deepEqual(
+    definitions.get(P.serviceId("export-sales")),
+    normalize(B.buildServiceNode(P.getService("export-sales"))),
+  )
+  const organization = definitions.get(T.TRADE.organizationId)
+  assert.ok($("address").text().includes(T.TRADE.legalName))
+  for (const field of ["streetAddress", "addressLocality", "addressRegion"])
+    assert.ok($("address").text().includes(organization.address[field]))
+  assert.equal($("address a[href^='tel:']").text(), organization.contactPoint.telephone)
+  assert.equal($("address a[href^='mailto:']").text(), organization.contactPoint.email)
+  const catalog = definitions
+    .get(P.serviceId("export-sales"))
+    .hasOfferCatalog.itemListElement.map((item) => item.name)
+  assert.deepEqual(
+    catalog,
+    T.TRADE_CATEGORIES.map((category) => category.name),
+  )
+  assert.equal($("#danh-muc article").length, catalog.length)
+  assert.equal($("#danh-muc h3 a").length, 0, "No category URLs have been confirmed")
+  for (const category of T.TRADE_CATEGORIES)
+    assert.ok($("#danh-muc h3").text().includes(category.exportTitle))
+  for (const invalid of ["javascript:alert(1)", "https://evil.example/", "https://[bad]"]) {
+    T.TRADE_CATEGORIES[0].href = invalid
+    assert.equal(load(T.renderTradePage())("#danh-muc h3 a").length, 0)
+  }
+  delete T.TRADE_CATEGORIES[0].href
+  // Opening another category changes the UI/count/copy/schema from configuration alone.
+  T.TRADE_CATEGORIES.push({
+    key: "test-new",
+    name: "Danh mục thử",
+    exportTitle: "Danh mục mới",
+    text: "Chỉ dùng trong test",
+    specs: "Thông tin mới",
+  })
+  const expanded = load(T.renderTradePage())
+  assert.equal(expanded("#danh-muc article").length, 4)
+  assert.equal(expanded("#danh-muc h2").text(), "4 danh mục, số chỗ có hạn")
+  assert.ok(expanded(".hero-note").text().includes("Đang mở 4 danh mục"))
+  assert.ok(expanded("meta[property='og:description']").attr("content").includes("danh mục thử"))
+  T.TRADE_CATEGORIES.pop()
+  const utms = new URLSearchParams({
+    utm_source: "zalo",
+    utm_campaign: '<script>alert("test")</script>',
+    email: "not-forwarded@example.com",
+    next: "https://bad.example",
+  })
+  const attributed = load(T.renderTradePage({ params: utms }))
+  attributed("[data-register]").each((_, el) => {
+    const url = new URL(attributed(el).attr("href"))
+    assert.equal(url.origin, "https://veximtrade.com")
+    assert.equal(url.pathname, "/supplier/register")
+    assert.equal(url.searchParams.get("utm_source"), "zalo")
+    assert.equal(url.searchParams.get("utm_campaign"), utms.get("utm_campaign"))
+    assert.equal(url.searchParams.has("email"), false)
+    assert.equal(url.searchParams.has("next"), false)
+  })
+  assert.ok(
+    load(T.renderTradePage({ noindex: true }))("meta[name=robots]")
+      .attr("content")
+      .includes("noindex"),
+  )
+  assert.equal($("meta[name=robots]").attr("content"), "index, follow, max-image-preview:large")
+  console.log(
+    `PASS: SSR/no hydration; exact head/hero; 9 blocks; semantics; accessible illustration; 3 register links; UTM allowlist; private fixed events; ${Math.round(weight / 1024)} KiB asset budget; fonts/OG; complete linked schema and catalog parity`,
+  )
+  const base = process.env.SCHEMA_TEST_BASE_URL
+  if (base) {
+    const response = await fetch(`${base}${T.TRADE.path}?utm_source=zalo`)
+    assert.equal(response.status, 200)
+    assert.ok(response.headers.get("cache-control").includes("max-age=600"))
+    const live = load(await response.text())
+    assert.equal(live("h1").text(), T.TRADE.h1)
+    assert.deepEqual(JSON.parse(live("script[type='application/ld+json']").html()), schema)
+    assert.ok(
+      live("[data-register]")
+        .toArray()
+        .every((el) => new URL(live(el).attr("href")).searchParams.get("utm_source") === "zalo"),
+    )
+    const capital = await fetch(`${base}/SERVICES/EXPORT-SALES?utm_source=test`, { redirect: "manual" })
+    assert.equal(capital.status, 301)
+    assert.equal(new URL(capital.headers.get("location"), base).pathname, T.TRADE.path)
+    const legacyLabel = await fetch(`${base}/services/fda-label-check`, { redirect: "manual" })
+    assert.equal(legacyLabel.status, 308)
+    assert.equal(legacyLabel.headers.get("location"), "/services/food/label-compliance")
+    const home = load(await (await fetch(base)).text())
+    assert.ok(home('#services a[href="/services/export-sales"]').text().includes("Vexim Trade"))
+    assert.equal(
+      home('#services img[alt="Vexim Trade — Vexim Global"]').attr("src"),
+      "/trade/service-card.svg",
+    )
+    const sitemap = await (await fetch(`${base}/sitemap.xml`)).text()
+    assert.ok(sitemap.includes(`${P.SITE_URL}${T.TRADE.path}`))
+    assert.ok(sitemap.includes("2026-10-23T17:00:00.000Z"))
+    for (const path of [
+      script,
+      $("link[rel=preload]").attr("href"),
+      "/trade/og-nha-cung-cap.png",
+      "/trade/apple-touch-icon.png",
+      "/trade/logo.svg",
+      "/trade/service-card.svg",
+    ])
+      assert.equal((await fetch(base + path)).status, 200, path)
+    assert.ok(!(await (await fetch(`${base}/robots.txt`)).text()).includes("Disallow: /trade"))
+    console.log(
+      "PASS: actual route, UTM SSR, 301 uppercase, homepage card/artwork, assets, sitemap content timestamp and robots",
+    )
+  }
+} finally {
+  cleanup()
+}
