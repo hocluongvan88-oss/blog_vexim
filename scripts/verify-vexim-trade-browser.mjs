@@ -53,7 +53,7 @@ try {
         url: el.href,
         height: el.getBoundingClientRect().height,
       })),
-      font: document.fonts.check('700 34px "Be Vietnam Pro"'),
+      font: document.fonts.check('700 34px "Inter"'),
     }))
     assert.equal(geometry.overflow, false, `overflow at ${width}`)
     assert.ok(geometry.headerHeight <= 72)
@@ -95,6 +95,49 @@ try {
       await page.screenshot({ path: `${screenshots}/${width}-full.png`, fullPage: true })
     }
   }
+  // A CSS family/check() alone can pass even when individual glyphs silently
+  // fall back. Inspect the actual rendered fonts, including decomposed accents.
+  await page.evaluate(() => {
+    const vietnamese =
+      "ăâđêôơưĂÂĐÊÔƠƯ " +
+      String.fromCodePoint(...Array.from({ length: 0x1ef9 - 0x1ea0 + 1 }, (_, i) => 0x1ea0 + i))
+    const probes = {
+      ascii: "ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789",
+      nfc: vietnamese + " Quế, hồi — ₫",
+      nfd: (vietnamese + " Quế, hồi — ₫").normalize("NFD"),
+    }
+    for (const [name, text] of Object.entries(probes)) {
+      const node = document.createElement("p")
+      node.id = `font-probe-${name}`
+      node.textContent = text
+      document.body.append(node)
+    }
+  })
+  await page.evaluate(() => document.fonts.ready)
+  const cdp = await page.createCDPSession()
+  await cdp.send("DOM.enable")
+  await cdp.send("CSS.enable")
+  const { root } = await cdp.send("DOM.getDocument")
+  for (const selector of [
+    "h1",
+    ".hero-description",
+    "#font-probe-ascii",
+    "#font-probe-nfc",
+    "#font-probe-nfd",
+  ]) {
+    const { nodeId } = await cdp.send("DOM.querySelector", {
+      nodeId: root.nodeId,
+      selector,
+    })
+    const { fonts } = await cdp.send("CSS.getPlatformFontsForNode", { nodeId })
+    assert.ok(fonts.length > 0, `No rendered font for ${selector}`)
+    assert.ok(
+      fonts.every((font) => font.isCustomFont && /^Inter(?: |$)/.test(font.familyName)),
+      `Mixed/fallback glyphs in ${selector}: ${JSON.stringify(fonts)}`,
+    )
+  }
+  await cdp.detach()
+  await page.evaluate(() => document.querySelectorAll('[id^="font-probe-"]').forEach((node) => node.remove()))
   await page.setViewport({ width: 390, height: 844 })
   await page.goto(`${base}/services/export-sales?utm_source=zalo`, { waitUntil: "networkidle0" })
   await page.keyboard.press("Tab")
@@ -228,7 +271,7 @@ try {
   }
   assert.deepEqual(errors, [])
   console.log(
-    "PASS: 320–1920px/no overflow; correct breakpoints; self-hosted fonts/no framework JS; sticky/keyboard/native menu/no-JS; UTMs; 3 CTA events and deduplicated private scroll events; real homepage document navigation",
+    "PASS: 320–1920px/no overflow; correct breakpoints; self-hosted Inter/actual ASCII+Vietnamese NFC+NFD glyphs/no framework JS; sticky/keyboard/native menu/no-JS; UTMs; 3 CTA events and deduplicated private scroll events; real homepage document navigation",
   )
 } finally {
   await browser.close()

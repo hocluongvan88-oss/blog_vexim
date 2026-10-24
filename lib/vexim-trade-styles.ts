@@ -18,9 +18,9 @@ export const TRADE_CSS = String.raw`
 @font-face {
   font-family: Trade Fallback;
   src: local(Arial);
-  size-adjust: 99%;
-  ascent-override: 110%;
-  descent-override: 28%;
+  size-adjust: 107.4%;
+  ascent-override: 90.2%;
+  descent-override: 22.48%;
   line-gap-override: 0%;
 }
 * {
@@ -34,11 +34,12 @@ body {
   background: var(--bg);
   color: var(--ink);
   font-family:
-    Be Vietnam Pro,
+    Inter,
     Trade Fallback,
     sans-serif;
   font-size: clamp(16px, 1.67vw, 17px);
   line-height: 1.65;
+  font-synthesis: none;
   -webkit-font-smoothing: antialiased;
 }
 h1,
@@ -99,22 +100,22 @@ section {
 h1 {
   font-size: clamp(38px, 4.2vw, 60px);
   font-weight: 700;
-  line-height: 1.12;
-  letter-spacing: -0.055em;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
   text-wrap: balance;
 }
 h2 {
   font-size: clamp(32px, 3.65vw, 50px);
   font-weight: 700;
-  line-height: 1.16;
-  letter-spacing: -0.045em;
+  line-height: 1.24;
+  letter-spacing: -0.025em;
   text-wrap: balance;
 }
 h3 {
   font-size: clamp(19px, 1.6vw, 22px);
   font-weight: 600;
   line-height: 1.4;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.015em;
 }
 .section-head {
   max-width: 800px;
@@ -448,7 +449,7 @@ h3 {
 .profile-title {
   font-size: 18px;
   font-weight: 600;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.015em;
   margin-top: 7px;
 }
 .company {
@@ -847,8 +848,8 @@ section[aria-labelledby="van-de-title"] {
 .closing-title {
   font-size: clamp(30px, 3.3vw, 46px);
   font-weight: 600;
-  line-height: 1.18;
-  letter-spacing: -0.04em;
+  line-height: 1.25;
+  letter-spacing: -0.025em;
   max-width: 760px;
 }
 .closing .small {
@@ -1074,8 +1075,8 @@ section[aria-labelledby="van-de-title"] {
   }
   .hero h1 {
     font-size: 34px;
-    line-height: 1.15;
-    letter-spacing: -0.045em;
+    line-height: 1.24;
+    letter-spacing: -0.015em;
   }
   .hero-description {
     font-size: 16px;

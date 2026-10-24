@@ -15,7 +15,7 @@ Theo trả lời của chủ website: **thay trang và ảnh dịch vụ Phòng 
 
 Theo yêu cầu tiếp theo của chủ website, giao diện đã chuyển sang ngôn ngữ thiết kế lấy cảm hứng từ trang giới thiệu sản phẩm Apple, không sao chép logo/tài sản của Apple:
 
-- Hero căn giữa, tiêu đề hai tông lớn, khoảng trắng rộng, CTA dạng pill, thanh điều hướng kính mờ. Be Vietnam Pro vẫn là font địa phương tự host.
+- Hero căn giữa, tiêu đề hai tông lớn, khoảng trắng rộng, CTA dạng pill, thanh điều hướng kính mờ. Inter là font tự host dành riêng cho Trade; không đổi font của FDA hay các trang khác.
 - Ảnh hạt điều làm sân khấu sản phẩm; hồ sơ HTML nổi trên ảnh. Các tính năng là thẻ nhẹ, khối xác minh bo lớn, khối cam kết tối và CTA cuối tối giản.
 - Ba ảnh hạt điều, hồ tiêu, quế/hồi là **ảnh minh họa do AI tạo**, không phải ảnh sản phẩm thật của nhà cung cấp và không dùng để chứng minh xác minh. Có chú thích ngay dưới hero.
 - Ảnh trang/ô dịch vụ đều là WebP, tạo bằng Sharp; không đưa PNG nguồn nặng vào Git. Ảnh lớn nhất khoảng **47 KiB**, ảnh danh mục **8–21 KiB**, ảnh ô dịch vụ khoảng **14 KiB**. Manifest nằm trong `lib/vexim-trade-assets.ts`.
@@ -41,7 +41,7 @@ Chưa có link Canvas; chủ website cho phép dựng theo đặc tả và đề
 - `lib/vexim-trade-page.ts`: renderer, escape HTML, schema, kiểm tra link danh mục và bảo toàn UTM.
 - `lib/vexim-trade-content.ts`: nội dung, liên hệ, danh mục, ngày sửa. UI, số lượng, mô tả danh mục và OfferCatalog đọc cùng nguồn; test bổ sung thử danh mục thứ tư mà không sửa renderer.
 - `lib/vexim-trade-styles.ts`: CSS quan trọng inline, token màu trên `:root`, responsive, focus, reduced motion.
-- `lib/vexim-trade-assets.ts`: tên file font/JS có content hash; font Be Vietnam Pro 400/500/600/700 chỉ subset latin/vietnamese. Fontsource 5.2.7; giấy phép OFL đi kèm `public/trade/fonts/OFL.txt`.
+- `lib/vexim-trade-assets.ts`: tên file font/JS có content hash; Inter v4.1 chính thức, một WOFF2 biến thiên 100–900 (125 KiB), bao phủ Latin, tiếng Việt và dấu tổ hợp NFC/NFD; preload cùng file. Giấy phép OFL và hướng dẫn tái tạo subset tại `public/trade/fonts/`.
 - `public/trade/`: font WOFF2, SVG logo, WebP ảnh sản phẩm/ô dịch vụ, PNG OG 1200×630 dưới 300 KB, Apple touch icon, JS nhỏ có content hash. JS không phải phụ thuộc React/framework.
 - `components/service-link.tsx`: đường dẫn Trade dùng `a` thật, tránh Next client router cố tải tài liệu HTML dưới dạng RSC. Các đường dẫn dịch vụ khác vẫn dùng Next Link như trước. Đã áp dụng cho card trang chủ và link liên quan trong blog.
 - Middleware bỏ qua refresh phiên Supabase cho tài liệu/asset công khai này: không phụ thuộc đăng nhập và không tạo cookie phiên cho HTML cache công khai.
@@ -92,9 +92,9 @@ npm run schema:export
 
 - Test Trade: HTML không hydration; 1 H1; thứ bậc heading; 9 khối; 3 href thật; copy; UTM an toàn; các cặp tương phản ≥4.5; font, hash JS, ngân sách dung lượng gồm mọi biến thể WebP, OG PNG; graph có mọi @id tham chiếu được định nghĩa; category UI/schema cùng nguồn.
 - Test SSR: status/cache/canonical, JSON-LD khớp bản xuất, asset 200, redirect viết hoa, alias nhãn, homepage card/ảnh mới, sitemap/ngày sửa thật, robots không chặn asset.
-- Browser: 320/360/390/639/640/768/1023/1024/1440/1920px không tràn ngang; breakpoints đúng; Tab/skip link/menu/neo/sticky/Escape; font local; không tải Next JS; đọc và mở menu được khi tắt JS; UTM; sự kiện GA/Vercel mock và mốc scroll không trùng. Không tạo đăng ký thật.
-- Ngân sách tài liệu + font + JS + **toàn bộ biến thể WebP** khoảng **311 KiB nén ước tính** (bảo thủ, tính cả ảnh ô dịch vụ trang chủ và các biến thể không tải đồng thời). Lighthouse local ghi nhận khoảng **229 KiB truyền tải** cho lượt đọc đầu. Chưa tính SDK analytics/toolbar do môi trường production/preview chèn.
-- Lighthouse mobile cục bộ với Chromium 133: **Performance 100, Accessibility 100, Best Practices 100**, LCP **1,3 giây**, CLS **0**, TBT **70 ms** ở lượt đo cuối sau thiết kế lại; LCP element là H1. Đây là lab trên Next dev, không phải số liệu hiện trường hay cam kết mọi thiết bị.
+- Browser: 320/360/390/639/640/768/1023/1024/1440/1920px không tràn ngang; breakpoints đúng; Tab/skip link/menu/neo/sticky/Escape; font local, xác nhận glyph thực sự dùng Inter bằng CDP cho ASCII/chữ Việt NFC/NFD (không chỉ kiểm tra CSS family); không tải Next JS; đọc và mở menu được khi tắt JS; UTM; sự kiện GA/Vercel mock và mốc scroll không trùng. Không tạo đăng ký thật.
+- Ngân sách tài liệu + font + JS + **toàn bộ biến thể WebP** khoảng **303 KiB nén ước tính** (bảo thủ, tính cả ảnh ô dịch vụ trang chủ và các biến thể không tải đồng thời). Lighthouse local ghi nhận khoảng **216 KiB truyền tải** cho lượt đọc đầu. Chưa tính SDK analytics/toolbar do môi trường production/preview chèn.
+- Lighthouse mobile cục bộ với Chromium 133: **Performance 99, Accessibility 100, Best Practices 100**, LCP **2,0 giây**, CLS **0**, TBT **0 ms** ở lượt đo sau thay Inter; LCP element là H1. Đây là lab trên Next dev, không phải số liệu hiện trường hay cam kết mọi thiết bị.
 - **SEO 69 trên staging/dev là chủ đích do meta + header noindex.** Các kiểm tra SEO khác đạt ở lần đo này; cần chạy lại Lighthouse trên production có index trước kết luận đạt SEO ≥90. Không tắt noindex staging chỉ để lấy điểm.
 - INP thực tế chưa có dữ liệu hiện trường; TBT không thay thế INP. Cần theo dõi CrUX/RUM sau đủ traffic.
 - `npm run build` hiện bị chặn ở `app/layout.tsx`: font Google của website chính không tải được trong môi trường hạn chế mạng. Landing Trade tự host font và không phụ thuộc request này. Chưa thể tuyên bố full production build đạt; TypeScript toàn repo còn lỗi ngoài phần Trade.
@@ -109,3 +109,10 @@ npm run schema:export
 - [ ] Production xác nhận đúng môi trường, robots cho phép index, đo lại Lighthouse và dashboard analytics/custom events/consent.
 - [ ] Nếu sau này chuyển sang `https://veximtrade.com/nha-cung-cap`, triển khai ở đúng repo/domain đó và cập nhật canonical/schema/asset/sitemap; lập kế hoạch redirect từ URL Vexim Global nếu chuyển hẳn. Chưa thực hiện đổi domain trong bản này.
 - [ ] Chủ tài khoản gửi URL production qua Search Console; không coi schema hợp lệ là bảo đảm được Google lập chỉ mục.
+
+### Sửa lỗi chữ Việt (24/10/2026)
+
+- Lỗi thực tế: các face “latin” cũ khai báo phạm vi Latin mở rộng, thiếu ASCII. CDP ghi nhận H1 dùng 10 glyph Be Vietnam Pro và 57 glyph DejaVu Sans, khiến chữ bị trộn nét và dấu không đồng nhất.
+- Thay bằng Inter tự host và bỏ các file Be Vietnam Pro chỉ dành cho Trade. Không đụng font website chính/FDA.
+- Dùng cùng một file cho Latin và tiếng Việt, kể cả dấu tổ hợp U+0302/U+0306/U+031B; không chỉ đổi tên family. Có kiểm thử glyph để ngăn lỗi quay lại.
+- Nới tracking H1 từ −0,055em còn −0,03em, H2 từ −0,045em còn −0,025em; tăng line-height H1 lên 1,2 và H2 lên 1,24. Tiêu đề di động có line-height 1,24, tracking −0,015em. OG PNG cũng được vẽ lại với Inter.

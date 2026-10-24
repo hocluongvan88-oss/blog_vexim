@@ -69,11 +69,36 @@ try {
   )
   assert.equal($(".commitments li").length, 2)
   assert.equal($("link[rel=preload][as=font]").length, 1)
-  assert.ok($("link[rel=preload][as=font]").attr("href").includes("vietnamese-700"))
+  assert.equal($("link[rel=preload][as=font]").attr("href"), T.TRADE_PRELOAD_FONT)
   const fontFiles = readdirSync("public/trade/fonts").filter((name) => name.endsWith(".woff2"))
-  assert.equal(fontFiles.length, 8)
-  for (const font of fontFiles)
-    assert.ok(/-(latin|vietnamese)-(400|500|600|700)-normal\.[a-f0-9]+\.woff2$/.test(font))
+  assert.equal(fontFiles.length, 1, "One complete Latin/Vietnamese variable font")
+  for (const font of fontFiles) {
+    assert.match(font, /^inter-vietnamese-latin-variable\.[a-f0-9]{10}\.woff2$/)
+    const bytes = readFileSync(`public/trade/fonts/${font}`)
+    assert.equal(bytes.toString("ascii", 0, 4), "wOF2")
+    assert.ok(font.includes(createHash("sha256").update(bytes).digest("hex").slice(0, 10)))
+    assert.ok(T.TRADE_FONT_CSS.includes(`/trade/fonts/${font}`))
+  }
+  assert.match(T.TRADE_FONT_CSS, /font-family:\s*"Inter"/)
+  assert.match(T.TRADE_FONT_CSS, /font-weight:\s*100 900/)
+  assert.match(T.TRADE_FONT_CSS, /font-display:\s*swap/)
+  const ranges = T.TRADE_FONT_CSS.match(/unicode-range:\s*([^;]+);/)[1]
+    .split(",")
+    .map((range) => {
+      const [start, end = start] = range.trim().replace(/^U\+/, "").split("-")
+      return [parseInt(start, 16), parseInt(end, 16)]
+    })
+  // Guard against the previous Latin-ext-as-Latin declaration: ASCII and all
+  // Vietnamese letters/combining marks must be eligible for this same font.
+  for (const text of [$("body").text(), $("body").text().normalize("NFD")]) {
+    for (const character of text) {
+      const code = character.codePointAt(0)
+      assert.ok(
+        ranges.some(([start, end]) => code >= start && code <= end),
+        `Missing font Unicode coverage U+${code.toString(16).toUpperCase()}`,
+      )
+    }
+  }
   const script = $("script[src]").attr("src")
   assert.equal($("script[src]").length, 1)
   const scriptBytes = readFileSync(`public${script}`)
