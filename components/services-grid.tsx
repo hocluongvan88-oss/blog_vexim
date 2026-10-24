@@ -1,3 +1,4 @@
+import { TRADE_IMAGES } from "@/lib/vexim-trade-assets"
 import { getService } from "@/lib/business-profile"
 import { Card } from "@/components/ui/card"
 import Image from "next/image"
@@ -30,7 +31,7 @@ const PRESENTATION: Record<string, { image: string; focus: string; items: string
     items: ["Đại diện liên lạc 24/7", "Phản hồi thông báo từ FDA", "Hỗ trợ thanh tra cơ sở"],
   },
   "export-sales": {
-    image: "/trade/service-card.svg",
+    image: TRADE_IMAGES.service.src,
     focus: "50% 50%",
     items: ["Quy cách sản phẩm chuẩn ngành", "Xác minh nhà cung cấp từng bước", "Yêu cầu báo giá gửi thẳng"],
   },

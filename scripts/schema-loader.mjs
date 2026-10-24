@@ -22,7 +22,7 @@ export function loadSchemaBuilders() {
       builders: { ...require(path.join(dir, "schema.js")), ...require(path.join(dir, "fda-page-schema.js")) },
       fdaContent: require(path.join(dir, "fda-page-content.js")),
       profile: require(path.join(dir, "business-profile.js")),
-      trade: { ...require(path.join(dir, "vexim-trade-content.js")), ...require(path.join(dir, "vexim-trade-page.js")) },
+      trade: { ...require(path.join(dir, "vexim-trade-assets.js")), ...require(path.join(dir, "vexim-trade-content.js")), ...require(path.join(dir, "vexim-trade-page.js")) },
       cleanup: () => rmSync(dir, { recursive: true, force: true }),
     }
   } catch (error) {

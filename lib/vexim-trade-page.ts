@@ -14,7 +14,7 @@ import {
   tradeOgDescription,
 } from "./vexim-trade-content"
 import { TRADE_CSS } from "./vexim-trade-styles"
-import { TRADE_FONT_CSS, TRADE_PRELOAD_FONT, TRADE_SCRIPT } from "./vexim-trade-assets"
+import { TRADE_FONT_CSS, TRADE_PRELOAD_FONT, TRADE_SCRIPT, TRADE_IMAGES } from "./vexim-trade-assets"
 
 export const tradeCanonical = `${SITE_URL}${TRADE.path}`
 const escape = (value: unknown) =>
@@ -46,45 +46,10 @@ function registration(position: "header" | "hero" | "footer_cta", href: string, 
   return `<a class="button ${extraClass}" href="${escape(href)}" data-register data-position="${position}">Đăng ký nhà cung cấp${icon("arrow", 17)}</a>`
 }
 function categoryArt(key: string) {
-  // Decorative botanical illustrations, not photographs or certification evidence.
-  const nut =
-    '<path d="M-24-22c-18 13-22 39-5 53 12 10 31 8 41-4 7-9 5-17-1-20-7-3-10 3-16 3-13-1-12-16-3-24 6-6-5-16-16-8Z" fill="var(--nut)" stroke="var(--nut-dark)" stroke-width="1.2"/><path d="M-25-13c-12 10-12 30-2 38 7 5 16 5 22 0" fill="none" stroke="var(--nut-light)" stroke-width="4" stroke-linecap="round"/>'
-  let shapes = ""
-  if (key === "cashew")
-    shapes = `<ellipse cx="197" cy="151" rx="111" ry="12" fill="var(--line)"/><g transform="translate(130 91) rotate(-32)">${nut}</g><g transform="translate(202 67) rotate(18)">${nut}</g><g transform="translate(259 109) rotate(55)">${nut}</g><g transform="translate(187 128) rotate(-65)">${nut}</g><path d="M270 37c-19 0-28 9-30 24 20 1 28-8 30-24Z" fill="var(--primary)"/>`
-  else if (key === "pepper") {
-    const points = [
-      [130, 112],
-      [151, 124],
-      [174, 116],
-      [197, 133],
-      [218, 113],
-      [241, 130],
-      [263, 116],
-      [147, 101],
-      [169, 92],
-      [191, 108],
-      [214, 91],
-      [237, 104],
-      [175, 140],
-      [220, 147],
-      [150, 144],
-      [247, 149],
-    ]
-    shapes =
-      '<path d="M187 86c-9-26 7-40 29-54-1 23-9 41-29 54Z" fill="var(--primary)"/><path d="M193 91c13-26 36-30 63-22-15 24-34 32-63 22Z" fill="var(--primary)"/>' +
-      points
-        .map(
-          ([x, y], i) =>
-            `<circle cx="${x}" cy="${y}" r="${(i % 3) + 8}" fill="var(--pepper)"/><path d="m${x - 3} ${y - 3} 2-2" stroke="var(--text-3)" stroke-width="2"/>`,
-        )
-        .join("")
-  } else if (key === "spices")
-    shapes = `<g transform="rotate(-18 190 90)"><rect x="105" y="68" width="167" height="25" rx="12" fill="var(--spice)"/><rect x="121" y="100" width="145" height="25" rx="12" fill="var(--nut-dark)"/><path d="M120 76h136M138 108h111" stroke="var(--spice-light)" stroke-width="2"/><ellipse cx="112" cy="80" rx="7" ry="11" fill="var(--spice-light)"/><ellipse cx="112" cy="80" rx="3" ry="6" fill="var(--nut-dark)"/></g><g transform="translate(273 119)" fill="var(--spice)" stroke="var(--nut-dark)" stroke-width="1">${Array.from({ length: 8 }, (_, i) => `<ellipse cx="0" cy="-18" rx="7" ry="18" transform="rotate(${i * 45})"/>`).join("")}<circle r="6" fill="var(--spice-light)"/></g>`
-  else
-    shapes =
-      '<path d="M164 133c-13-55 9-87 65-94 2 53-20 84-65 94Z" fill="var(--primary)"/><path d="m159 146 49-81" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>'
-  return `<svg viewBox="0 0 400 180" role="presentation" aria-hidden="true">${shapes}</svg>`
+  const photo = TRADE_IMAGES[key as "cashew" | "pepper" | "spices"]
+  if (!photo)
+    return `<svg viewBox="0 0 400 260" aria-hidden="true"><path d="M160 185c-13-65 12-105 75-115 2 65-23 103-75 115Z" fill="var(--primary)"/></svg>`
+  return `<img src="${photo.src}" srcset="${photo.srcset}" sizes="(max-width: 639px) calc(100vw - 48px), (max-width: 1023px) 45vw, 380px" width="${photo.width}" height="${photo.height}" alt="${escape(photo.alt)}" loading="lazy" decoding="async">`
 }
 export function buildTradePageSchema() {
   const pageId = `${tradeCanonical}#webpage`
@@ -166,13 +131,13 @@ export function renderTradePage({
 <body><a href="#noi-dung-chinh" class="skip">Bỏ qua đến nội dung chính</a>
 <header class="site-header"><div class="wrap header-inner">${brand()}<nav class="desktop-nav" aria-label="Điều hướng chính">${nav}</nav>${registration("header", register, "header-register")}<details class="mobile-menu" id="mobile-menu"><summary class="menu-summary" aria-label="Mở menu điều hướng" aria-controls="mobile-nav">${icon("menu")}</summary><nav id="mobile-nav" aria-label="Điều hướng trên điện thoại">${nav}</nav></details></div></header>
 <main id="noi-dung-chinh" tabindex="-1">
-<section class="hero soft" id="top"><div class="wrap"><div class="hero-grid"><div class="hero-copy"><p class="eyebrow">Danh bạ nhà cung cấp nông sản Việt Nam</p><h1>Người mua đang tìm hàng Việt Nam. <span>Hãy để họ tìm thấy doanh nghiệp bạn.</span></h1><p class="hero-description">${TRADE.hero
+<section class="hero soft" id="top"><div class="wrap"><div class="hero-grid"><div class="hero-copy"><p class="eyebrow">Danh bạ nhà cung cấp nông sản Việt Nam</p><h1><span class="hero-intro-line">Người mua đang tìm hàng Việt Nam.</span> <br><span class="hero-accent">Hãy để họ tìm thấy doanh nghiệp bạn.</span></h1><p class="hero-description">${TRADE.hero
     .split(/(?<=ngoài,) |(?<=sánh:) /)
     .map((line) => `<span class="hero-copy-line">${escape(line)}</span>`)
     .join(
       " ",
     )}</p><div class="actions">${registration("hero", register)}<a href="#cach-hoat-dong" class="button outline" data-learn>Xem cách hoạt động${icon("arrow", 17)}</a></div><p class="hero-note">${icon("globe", 16)}<span>${escape(tradeCategorySummary())}</span></p></div>
-<figure class="hero-aside"><div class="profile"><div class="profile-top"><span class="brand">${tradeMark()}<span>Vexim Trade</span></span><span class="sample-pill">HỒ SƠ NHÀ CUNG CẤP</span></div><div class="product-art"><span class="product-label">HẠT ĐIỀU NHÂN · VIỆT NAM</span>${categoryArt("cashew")}</div><div class="profile-body"><p class="origin">${icon("globe", 13)}Nhà cung cấp Việt Nam</p><p class="profile-title">Hạt điều nhân trắng</p><p class="company">Doanh nghiệp minh họa · Không phải hồ sơ thật</p><dl class="specs"><div><dt>Phân hạng ví dụ</dt><dd>WW320</dd></div><div><dt>Đóng gói</dt><dd>Theo yêu cầu</dd></div></dl><p class="sample-check">${icon("shield", 15)}Trạng thái xác minh được hiển thị riêng</p><span class="illustrated-rfq">Gửi yêu cầu báo giá${icon("arrow", 15)}</span></div></div><figcaption>Hồ sơ minh họa</figcaption></figure></div><div class="hero-bottom"><span>${icon("specs", 16)}Thông tin cụ thể, dễ đối chiếu</span><span>${icon("shield", 16)}Xác minh nhà cung cấp từng bước</span><span>${icon("direct", 16)}Kết nối thẳng với doanh nghiệp</span></div></div></section>
+<figure class="hero-aside"><div class="hero-stage"><div class="stage-media"><img class="stage-photo" src="${TRADE_IMAGES.hero.src}" srcset="${TRADE_IMAGES.hero.srcset}" sizes="(max-width: 639px) calc(100vw - 32px), (max-width: 1279px) calc(100vw - 48px), 1200px" width="${TRADE_IMAGES.hero.width}" height="${TRADE_IMAGES.hero.height}" alt="${escape(TRADE_IMAGES.hero.alt)}" loading="lazy" decoding="async"></div><p class="stage-caption" aria-hidden="true">Từ sản phẩm tốt.<br>Đến hồ sơ rõ ràng.</p><div class="profile"><div class="profile-top"><span class="brand">${tradeMark()}<span>Vexim Trade</span></span><span class="sample-pill">HỒ SƠ NHÀ CUNG CẤP</span></div><div class="product-art"><span class="product-label">HẠT ĐIỀU NHÂN · VIỆT NAM</span>${categoryArt("cashew")}</div><div class="profile-body"><p class="origin">${icon("globe", 13)}Nhà cung cấp Việt Nam</p><p class="profile-title">Hạt điều nhân trắng</p><p class="company">Doanh nghiệp minh họa · Không phải hồ sơ thật</p><dl class="specs"><div><dt>Phân hạng ví dụ</dt><dd>WW320</dd></div><div><dt>Đóng gói</dt><dd>Theo yêu cầu</dd></div></dl><p class="sample-check">${icon("shield", 15)}Trạng thái xác minh được hiển thị riêng</p><span class="illustrated-rfq">Gửi yêu cầu báo giá${icon("arrow", 15)}</span></div></div></div><figcaption>Hồ sơ minh họa</figcaption><p class="image-disclosure">Ảnh sản phẩm minh họa do AI tạo, không đại diện nhà cung cấp cụ thể.</p></figure></div><div class="hero-bottom"><span>${icon("specs", 16)}Thông tin cụ thể, dễ đối chiếu</span><span>${icon("shield", 16)}Xác minh nhà cung cấp từng bước</span><span>${icon("direct", 16)}Kết nối thẳng với doanh nghiệp</span></div></div></section>
 <section aria-labelledby="van-de-title"><div class="wrap"><div class="section-head"><p class="eyebrow">Từ góc nhìn người mua</p><h2 id="van-de-title">Hàng tốt chưa đủ, người mua cần đọc được hồ sơ</h2></div><div class="grid-3">${TRADE_PROBLEMS.map((item, i) => `<article class="problem"><span class="index" aria-hidden="true">0${i + 1} /</span><h3>${escape(item.title)}</h3><p>${escape(item.text)}</p></article>`).join("")}</div></div></section>
 <section class="soft" id="cach-hoat-dong" aria-labelledby="hoat-dong-title"><div class="wrap"><div class="section-head"><p class="eyebrow">Một hồ sơ. Một ngôn ngữ chung.</p><h2 id="hoat-dong-title">Hồ sơ trình bày theo cách người mua đọc và so sánh</h2></div><div class="feature-grid">${TRADE_FEATURES.map((item) => `<article class="feature"><div class="icon-box">${icon(item.icon, 24)}</div><h3>${escape(item.title)}</h3><p>${escape(item.text)}</p></article>`).join("")}</div><p class="feature-note">${icon("direct", 18)}<span>Để tìm người mua nước ngoài, hãy bắt đầu bằng thông tin họ cần. Yêu cầu báo giá được gửi trực tiếp đến doanh nghiệp bạn.</span></p></div></section>
 <section id="xac-minh" aria-labelledby="xac-minh-title"><div class="wrap verification-layout"><div class="section-head"><p class="eyebrow">Xác minh có phạm vi rõ ràng</p><h2 id="xac-minh-title">Ba bước, mỗi bước duyệt riêng</h2><p>Không gộp mọi thông tin vào một dấu xác nhận chung. Từng bước cho biết nhà cung cấp đã cung cấp loại bằng chứng nào.</p><p class="disclaimer">Vexim Trade xác minh nhà cung cấp, không chứng nhận chất lượng sản phẩm.</p></div><ol class="verification-list">${TRADE_VERIFICATION.map((item) => `<li><div><h3>${escape(item.title)}</h3><p>${escape(item.text)}</p></div></li>`).join("")}</ol></div></section>

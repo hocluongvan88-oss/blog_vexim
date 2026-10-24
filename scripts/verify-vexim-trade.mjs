@@ -125,6 +125,31 @@ try {
     gzipSync(Buffer.from(html)).byteLength +
     gzipSync(scriptBytes).byteLength +
     fontFiles.reduce((sum, f) => sum + statSync(`public/trade/fonts/${f}`).size, 0)
+  const imageFiles = readdirSync("public/trade/images").filter((name) => name.endsWith(".webp"))
+  let imageBytes = 0
+  for (const file of imageFiles) {
+    const data = readFileSync(`public/trade/images/${file}`)
+    assert.equal(data.toString("ascii", 0, 4), "RIFF")
+    assert.equal(data.toString("ascii", 8, 12), "WEBP")
+    assert.ok(file.includes(createHash("sha256").update(data).digest("hex").slice(0, 10)))
+    assert.ok(data.byteLength < 60000)
+    imageBytes += data.byteLength
+  }
+  assert.ok(imageFiles.length >= 8)
+  assert.ok(weight + imageBytes < 500000)
+  assert.ok($("img").length >= 5)
+  assert.ok(
+    $("img")
+      .toArray()
+      .every(
+        (el) =>
+          $(el).attr("src").endsWith(".webp") &&
+          $(el).attr("width") &&
+          $(el).attr("height") &&
+          $(el).attr("loading") === "lazy" &&
+          $(el).attr("alt"),
+      ),
+  )
   assert.ok(weight < 500000)
   const png = readFileSync("public/trade/og-nha-cung-cap.png")
   assert.deepEqual([...png.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10])
@@ -210,7 +235,7 @@ try {
   )
   assert.equal($("meta[name=robots]").attr("content"), "index, follow, max-image-preview:large")
   console.log(
-    `PASS: SSR/no hydration; exact head/hero; 9 blocks; semantics; accessible illustration; 3 register links; UTM allowlist; private fixed events; ${Math.round(weight / 1024)} KiB asset budget; fonts/OG; complete linked schema and catalog parity`,
+    `PASS: SSR/no hydration; exact head/hero; 9 blocks; semantics; accessible illustration; 3 register links; UTM allowlist; private fixed events; ${Math.round((weight + imageBytes) / 1024)} KiB worst-case asset budget including all WebP variants; fonts/OG; complete linked schema and catalog parity`,
   )
   const base = process.env.SCHEMA_TEST_BASE_URL
   if (base) {
@@ -235,7 +260,7 @@ try {
     assert.ok(home('#services a[href="/services/export-sales"]').text().includes("Vexim Trade"))
     assert.equal(
       home('#services img[alt="Vexim Trade — Vexim Global"]').attr("src"),
-      "/trade/service-card.svg",
+      T.TRADE_IMAGES.service.src,
     )
     const sitemap = await (await fetch(`${base}/sitemap.xml`)).text()
     assert.ok(sitemap.includes(`${P.SITE_URL}${T.TRADE.path}`))
@@ -246,7 +271,7 @@ try {
       "/trade/og-nha-cung-cap.png",
       "/trade/apple-touch-icon.png",
       "/trade/logo.svg",
-      "/trade/service-card.svg",
+      T.TRADE_IMAGES.service.src,
     ])
       assert.equal((await fetch(base + path)).status, 200, path)
     assert.ok(!(await (await fetch(`${base}/robots.txt`)).text()).includes("Disallow: /trade"))

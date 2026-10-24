@@ -8,6 +8,7 @@ const nextConfig = {
   },
   async headers() {
     return [
+      { source: "/trade/images/:asset(.*[.]webp)", headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }] },
       { source: "/trade/fonts/:asset(.*[.]woff2)", headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }] },
       { source: "/trade/:asset(trade[.][a-f0-9]+[.]js)", headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }] },
     ]

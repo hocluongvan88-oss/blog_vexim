@@ -36,6 +36,13 @@ try {
     const geometry = await page.evaluate(() => ({
       overflow: document.documentElement.scrollWidth > innerWidth,
       headerHeight: document.querySelector("header").getBoundingClientRect().height,
+      headerControlsFit: [
+        ...document.querySelectorAll("header .brand, header [data-register], header summary"),
+      ].every((el) => {
+        const r = el.getBoundingClientRect(),
+          h = document.querySelector("header").getBoundingClientRect()
+        return r.height === 0 || (r.top >= h.top && r.bottom <= h.bottom)
+      }),
       columns: getComputedStyle(document.querySelector(".feature-grid")).gridTemplateColumns.split(" ")
         .length,
       categories: getComputedStyle(document.querySelector("#danh-muc .grid-3")).gridTemplateColumns.split(" ")
@@ -50,9 +57,10 @@ try {
     }))
     assert.equal(geometry.overflow, false, `overflow at ${width}`)
     assert.ok(geometry.headerHeight <= 72)
+    assert.ok(geometry.headerControlsFit, `header button clipped at ${width}`)
     assert.equal(geometry.columns, width < 640 ? 1 : width < 1024 ? 2 : 4)
     assert.equal(geometry.categories, width < 640 ? 1 : width < 1024 ? 2 : 3)
-    assert.equal(geometry.heroColumns, width < 1024 ? 1 : 2)
+    assert.equal(geometry.heroColumns, 1, "Centered product-launch hero")
     assert.ok(geometry.font)
     geometry.buttons.forEach((button) => {
       assert.ok(button.height >= 48)
@@ -68,6 +76,19 @@ try {
       requests
         .filter((url) => url.endsWith(".js"))
         .every((url) => /\/trade\/trade\.[a-f0-9]+\.js$/.test(url)),
+    )
+    await page.$$eval("img", async (imgs) => {
+      for (const img of imgs) {
+        img.loading = "eager"
+        await img.decode()
+      }
+    })
+    assert.ok(
+      await page.$$eval("img", (imgs) =>
+        imgs.every(
+          (img) => img.complete && img.naturalWidth > 0 && new URL(img.currentSrc).pathname.endsWith(".webp"),
+        ),
+      ),
     )
     if (screenshots && [390, 1440].includes(width)) {
       await page.screenshot({ path: `${screenshots}/${width}-hero.png` })
