@@ -95,6 +95,16 @@ try {
       await page.screenshot({ path: `${screenshots}/${width}-full.png`, fullPage: true })
     }
   }
+  // Favicon SVG embeds the original raster mark; ensure browsers decode it,
+  // as well as the PNG used by Apple touch icons and Organization schema.
+  await page.evaluate(async () => {
+    for (const rel of ["icon", "apple-touch-icon"]) {
+      const image = new Image()
+      image.src = document.querySelector(`link[rel="${rel}"]`).href
+      await image.decode()
+      if (!image.naturalWidth || !image.naturalHeight) throw new Error(`Invalid ${rel}`)
+    }
+  })
   // A CSS family/check() alone can pass even when individual glyphs silently
   // fall back. Inspect the actual rendered fonts, including decomposed accents.
   await page.evaluate(() => {

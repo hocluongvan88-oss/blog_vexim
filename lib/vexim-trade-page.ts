@@ -14,7 +14,7 @@ import {
   tradeOgDescription,
 } from "./vexim-trade-content"
 import { TRADE_CSS } from "./vexim-trade-styles"
-import { TRADE_FONT_CSS, TRADE_PRELOAD_FONT, TRADE_SCRIPT, TRADE_IMAGES } from "./vexim-trade-assets"
+import { TRADE_FONT_CSS, TRADE_PRELOAD_FONT, TRADE_SCRIPT, TRADE_IMAGES, TRADE_MARK } from "./vexim-trade-assets"
 
 export const tradeCanonical = `${SITE_URL}${TRADE.path}`
 const escape = (value: unknown) =>
@@ -38,7 +38,7 @@ function icon(name: string, size = 22) {
   return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || paths.check}</svg>`
 }
 export function tradeMark() {
-  return '<svg width="34" height="34" viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M7 9c9 0 14 5 14 16C12 25 7 19 7 9Z" fill="currentColor"/><path d="M33 4c0 15-5 23-14 28C17 17 22 7 33 4Z" fill="currentColor"/><path d="M20 34V20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>'
+  return `<img class="brand-mark" src="${TRADE_MARK}" width="34" height="29" alt="" aria-hidden="true" decoding="async">`
 }
 const brand = () =>
   `<a class="brand" href="#top" aria-label="Vexim Trade — về đầu trang">${tradeMark()}<span>Vexim <span class="trade-word">Trade</span></span></a>`
@@ -126,7 +126,7 @@ export function renderTradePage({
 <html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${escape(TRADE.title)}</title>
 <meta name="description" content="${escape(TRADE.description)}"><link rel="canonical" href="${tradeCanonical}"><meta name="robots" content="${noindex ? "noindex, nofollow" : "index, follow, max-image-preview:large"}"><meta name="theme-color" content="#1E5A3A">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Vexim Trade"><meta property="og:locale" content="vi_VN"><meta property="og:url" content="${tradeCanonical}"><meta property="og:title" content="${escape(TRADE.title)}"><meta property="og:description" content="${escape(tradeOgDescription())}"><meta property="og:image" content="${SITE_URL}/trade/og-nha-cung-cap.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="Vexim Trade, danh bạ nhà cung cấp nông sản Việt Nam"><meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="/trade/logo.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/trade/apple-touch-icon.png"><link rel="preload" href="${TRADE_PRELOAD_FONT}" as="font" type="font/woff2" crossorigin>
+<link rel="icon" href="/trade/logo.svg?v=vexim" type="image/svg+xml"><link rel="apple-touch-icon" href="/trade/apple-touch-icon.png?v=vexim"><link rel="preload" href="${TRADE_PRELOAD_FONT}" as="font" type="font/woff2" crossorigin>
 <style>${TRADE_FONT_CSS}\n${TRADE_CSS}</style><script type="application/ld+json">${schema}</script><script src="${TRADE_SCRIPT}" data-vercel-analytics="${analytics}" defer></script></head>
 <body><a href="#noi-dung-chinh" class="skip">Bỏ qua đến nội dung chính</a>
 <header class="site-header"><div class="wrap header-inner">${brand()}<nav class="desktop-nav" aria-label="Điều hướng chính">${nav}</nav>${registration("header", register, "header-register")}<details class="mobile-menu" id="mobile-menu"><summary class="menu-summary" aria-label="Mở menu điều hướng" aria-controls="mobile-nav">${icon("menu")}</summary><nav id="mobile-nav" aria-label="Điều hướng trên điện thoại">${nav}</nav></details></div></header>

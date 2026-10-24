@@ -49,3 +49,6 @@ export const TRADE_IMAGES = {
     height: 480,
   },
 } as const
+
+/** Original Vexim V symbol, cropped from public/logo.png without redrawing. */
+export const TRADE_MARK = "/trade/images/vexim-mark-160.9c6b959ff0.webp"

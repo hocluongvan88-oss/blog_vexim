@@ -164,7 +164,7 @@ try {
   assert.ok(weight + imageBytes < 500000)
   assert.ok($("img").length >= 5)
   assert.ok(
-    $("img")
+    $("img:not(.brand-mark)")
       .toArray()
       .every(
         (el) =>
@@ -175,6 +175,16 @@ try {
           $(el).attr("alt"),
       ),
   )
+  assert.equal($("img.brand-mark").length, 3, "Vexim mark in header, profile and footer")
+  assert.ok(
+    $("img.brand-mark").toArray().every((el) =>
+      $(el).attr("src") === T.TRADE_MARK && $(el).attr("alt") === "" &&
+      $(el).attr("aria-hidden") === "true" && $(el).attr("width") && $(el).attr("height")),
+  )
+  assert.ok(!html.includes('d="M7 9c9 0 14 5 14 16'), "No placeholder leaf in the page")
+  assert.ok(readFileSync("public/trade/logo.svg", "utf8").includes("data:image/png;base64,"))
+  assert.equal($("link[rel=icon]").attr("href"), "/trade/logo.svg?v=vexim")
+  assert.equal($("link[rel=apple-touch-icon]").attr("href"), "/trade/apple-touch-icon.png?v=vexim")
   assert.ok(weight < 500000)
   const png = readFileSync("public/trade/og-nha-cung-cap.png")
   assert.deepEqual([...png.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10])
@@ -297,6 +307,7 @@ try {
       "/trade/apple-touch-icon.png",
       "/trade/logo.svg",
       T.TRADE_IMAGES.service.src,
+      T.TRADE_MARK,
     ])
       assert.equal((await fetch(base + path)).status, 200, path)
     assert.ok(!(await (await fetch(`${base}/robots.txt`)).text()).includes("Disallow: /trade"))

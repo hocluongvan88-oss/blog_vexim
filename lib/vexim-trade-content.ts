@@ -143,7 +143,7 @@ export function buildTradeOrganization(parentId: string) {
     "@id": TRADE.organizationId,
     name: TRADE.name,
     url: `${TRADE.platform}/`,
-    logo: `${parentId.split("/#")[0]}/trade/logo.svg`,
+    logo: `${parentId.split("/#")[0]}/trade/apple-touch-icon.png?v=vexim`,
     description: "Danh bạ nhà cung cấp nông sản Việt Nam dành cho người mua nước ngoài.",
     parentOrganization: { "@id": parentId },
     address: { "@type": "PostalAddress", ...TRADE.address },

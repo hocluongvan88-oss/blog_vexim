@@ -215,10 +215,11 @@ h3 {
   letter-spacing: -0.04em;
   text-decoration: none;
 }
-.brand svg {
-  color: var(--primary);
-  width: 29px;
+.brand .brand-mark {
+  width: 34px;
   height: 29px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 .brand .trade-word {
   font-weight: 500;
@@ -400,8 +401,8 @@ h3 {
   gap: 5px;
   min-height: 0;
 }
-.profile-top .brand svg {
-  width: 19px;
+.profile-top .brand .brand-mark {
+  width: 24px;
   height: 19px;
 }
 .sample-pill {
@@ -1053,7 +1054,7 @@ section[aria-labelledby="van-de-title"] {
     font-size: 14px;
     letter-spacing: 0;
   }
-  .brand svg {
+  .brand .brand-mark {
     width: 28px;
     height: 28px;
   }
@@ -1355,7 +1356,7 @@ section[aria-labelledby="van-de-title"] {
   .header-inner {
     gap: 7px;
   }
-  .brand svg {
+  .brand .brand-mark {
     width: 25px;
     height: 25px;
   }

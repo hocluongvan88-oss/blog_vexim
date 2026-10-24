@@ -162,7 +162,7 @@ Hai khối JSON-LD khác nhau vẫn liên kết được qua @id; không bắt b
       "@id": "https://veximtrade.com/#organization",
       "name": "Vexim Trade",
       "url": "https://veximtrade.com/",
-      "logo": "https://www.veximglobal.com/trade/logo.svg",
+      "logo": "https://www.veximglobal.com/trade/apple-touch-icon.png?v=vexim",
       "description": "Danh bạ nhà cung cấp nông sản Việt Nam dành cho người mua nước ngoài.",
       "parentOrganization": {
         "@id": "https://www.veximglobal.com/#organization"
