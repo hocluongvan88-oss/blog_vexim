@@ -14,6 +14,23 @@ try {
   if (process.argv.includes("--export"))
     writeFileSync("docs/seo/vexim-trade-schema.json", JSON.stringify(schema, null, 2) + "\n")
   assert.deepEqual(JSON.parse(readFileSync("docs/seo/vexim-trade-schema.json", "utf8")), schema)
+  // Independent editorial fixture: changing implementation constants alone cannot
+  // silently rewrite the owner's approved October 25 copy.
+  const approved = JSON.parse(readFileSync("docs/vexim-trade-copy-2026-10-25.json", "utf8"))
+  assert.equal($("title").text(), approved.head.title)
+  assert.equal($("meta[name=description]").attr("content"), approved.head.description)
+  assert.equal($("meta[property='og:description']").attr("content"), approved.head.ogDescription)
+  assert.equal($("meta[property='og:image:alt']").attr("content"), approved.head.ogAlt)
+  for (const [selector, expected] of Object.entries(approved.selectors)) {
+    const actual = $(selector).toArray().map((el) => {
+      const clone = $(el).clone()
+      clone.find("br").replaceWith(" ")
+      return clone.text().replace(/\s+/g, " ").trim()
+    })
+    assert.deepEqual(actual, expected, `Approved copy: ${selector}`)
+  }
+  assert.ok($("address").text().includes("Số 25/6/51 Ngoạ Long, Tây Tựu"))
+  assert.ok(!$("body").text().includes("số chỗ có hạn"), "Old scarcity copy removed")
   assert.equal($("html").attr("lang"), "vi")
   assert.equal($("h1").length, 1)
   assert.equal($("h1").text(), T.TRADE.h1)
@@ -224,7 +241,9 @@ try {
     catalog,
     T.TRADE_CATEGORIES.map((category) => category.name),
   )
-  assert.equal($("#danh-muc article").length, catalog.length)
+  assert.equal($("#danh-muc article:not(.category-other)").length, catalog.length)
+  assert.equal($("#danh-muc article.category-other").length, 1)
+  assert.ok(!catalog.includes("Ngành hàng khác"), "Consultation is not an invented product category")
   assert.equal($("#danh-muc h3 a").length, 0, "No category URLs have been confirmed")
   for (const category of T.TRADE_CATEGORIES)
     assert.ok($("#danh-muc h3").text().includes(category.exportTitle))
@@ -242,8 +261,8 @@ try {
     specs: "Thông tin mới",
   })
   const expanded = load(T.renderTradePage())
-  assert.equal(expanded("#danh-muc article").length, 4)
-  assert.equal(expanded("#danh-muc h2").text(), "4 danh mục, số chỗ có hạn")
+  assert.equal(expanded("#danh-muc article").length, 5)
+  assert.equal(expanded("#danh-muc h2").text(), "Mỗi ngành hàng, một bộ hồ sơ đúng chuẩn")
   assert.ok(expanded(".hero-note").text().includes("Đang mở 4 danh mục"))
   assert.ok(expanded("meta[property='og:description']").attr("content").includes("danh mục thử"))
   T.TRADE_CATEGORIES.pop()
@@ -270,7 +289,7 @@ try {
   )
   assert.equal($("meta[name=robots]").attr("content"), "index, follow, max-image-preview:large")
   console.log(
-    `PASS: SSR/no hydration; exact head/hero; 9 blocks; semantics; accessible illustration; 3 register links; UTM allowlist; private fixed events; ${Math.round((weight + imageBytes) / 1024)} KiB worst-case asset budget including all WebP variants; fonts/OG; complete linked schema and catalog parity`,
+    `PASS: SSR/no hydration; approved October 25 copy/head/hero; 9 blocks; semantics; accessible illustration; 3 register links; UTM allowlist; private fixed events; ${Math.round((weight + imageBytes) / 1024)} KiB worst-case asset budget including all WebP variants; fonts/OG; complete linked schema and catalog parity`,
   )
   const base = process.env.SCHEMA_TEST_BASE_URL
   if (base) {
@@ -299,7 +318,7 @@ try {
     )
     const sitemap = await (await fetch(`${base}/sitemap.xml`)).text()
     assert.ok(sitemap.includes(`${P.SITE_URL}${T.TRADE.path}`))
-    assert.ok(sitemap.includes("2026-10-23T17:00:00.000Z"))
+    assert.ok(sitemap.includes("2026-10-24T17:00:00.000Z"))
     for (const path of [
       script,
       $("link[rel=preload]").attr("href"),

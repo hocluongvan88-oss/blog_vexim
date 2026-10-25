@@ -23,14 +23,14 @@ Theo yêu cầu tiếp theo của chủ website, giao diện đã chuyển sang 
 - OG dùng ảnh/thiết kế mới, vẫn **PNG 1200×630 khoảng 90 KiB** để tương thích chia sẻ mạng xã hội. OG không tải trong lượt đọc trang bình thường.
 - Không thêm thư viện animation, parallax, video, slideshow hay JavaScript nặng. Nội dung, CTA đăng ký/UTM, schema và các giới hạn nghiệp vụ không đổi.
 
-## Nội dung và tài sản cần duyệt
+## Nội dung đã được cập nhật ngày 25/10/2026
 
-Chưa có link Canvas; chủ website cho phép dựng theo đặc tả và đề xuất phần còn thiếu. Các câu đã cung cấp được giữ nguyên. Những đoạn bổ sung ở phần vấn đề, tính năng, xác minh, hai cam kết và bốn bước là **bản biên tập đề xuất**, không phải bản thiết kế đã đối chiếu hoặc bằng chứng về hệ thống đang vận hành.
+Chủ website đã cung cấp bản sửa đổi đầy đủ ngày 25/10/2026. Nội dung trang được thay theo bản đó, không còn dùng các đoạn biên tập đề xuất trước đây. Bản đối chiếu độc lập tại `docs/vexim-trade-copy-2026-10-25.json` lưu SEO và nội dung theo selector để kiểm thử từng phần. Chỉ sửa lỗi gõ “xác mình nhà máy” thành “xác minh nhà máy”. Việc cập nhật landing không phải bằng chứng kiểm toán các tính năng của nền tảng Trade.
 
 - Chỉ hiển thị **hai** cam kết. Câu thứ ba về bán thứ hạng chưa được phép nên không xuất hiện.
 - Hồ sơ hạt điều được ghi rõ minh họa, không phải doanh nghiệp thật; “Gửi yêu cầu báo giá” trong hình là `span`, không phải CTA, không nhận focus.
-- Logo lá cây, ảnh minh họa AI và OG là tài sản cho bản dựng, không phải ảnh nhà máy/chứng từ/khách hàng được xác minh. Không sử dụng ảnh stock thay tài liệu của chủ website.
-- Pháp nhân/địa chỉ/điện thoại/email trên landing lấy từ cấu hình Trade theo văn bản mới, khớp từng chữ với graph Trade. Footer website chính giữ thông tin đã được duyệt trước đó. Cần chủ website xác nhận lại pháp nhân và cách viết địa chỉ trước công bố chính thức.
+- Dùng biểu tượng V từ logo Vexim gốc đã duyệt. Ảnh sản phẩm AI và OG vẫn là minh họa, không phải ảnh nhà máy/chứng từ/khách hàng được xác minh. Không sử dụng ảnh stock thay tài liệu của chủ website.
+- Pháp nhân/địa chỉ/điện thoại/email trên landing lấy từ cấu hình Trade theo văn bản mới, khớp từng chữ với graph Trade. Footer website chính giữ thông tin đã được duyệt trước đó. Địa chỉ Trade theo bản mới là “Số 25/6/51 Ngoạ Long, Tây Tựu”; không đổi cách viết của pháp nhân mẹ trên website chính/FDA.
 - **Chưa có URL chính sách bảo mật và điều khoản.** Hai nhãn đang là văn bản, không tạo liên kết giả hoặc đưa ra chính sách pháp lý tự soạn. Bổ sung URL đã xác nhận tại `TRADE.privacy` và `TRADE.terms` trước mở quảng bá.
 - Chưa có URL danh mục công khai được xác nhận: tiêu đề danh mục chưa là link, vì vậy chưa có `category_click` thực tế. Khi thêm `href` hợp lệ trong cấu hình, renderer tự tạo link và sự kiện tương ứng. Hiện chỉ cho phép URL HTTPS cùng origin `https://veximtrade.com`.
 - Không đặt giá/phí, review, aggregateRating, số nhà cung cấp, số đơn hàng, huy hiệu chứng nhận sản phẩm hoặc lời hứa thứ hạng. Cần bộ phận kinh doanh xác nhận phạm vi xác minh, cơ chế hiển thị và giới hạn tiếp nhận hồ sơ trước phát hành.
@@ -90,18 +90,18 @@ npm run schema:trade
 npm run schema:export
 ```
 
-- Test Trade: HTML không hydration; 1 H1; thứ bậc heading; 9 khối; 3 href thật; copy; UTM an toàn; các cặp tương phản ≥4.5; font, hash JS, ngân sách dung lượng gồm mọi biến thể WebP, OG PNG; graph có mọi @id tham chiếu được định nghĩa; category UI/schema cùng nguồn.
+- Test Trade: HTML không hydration; 1 H1; thứ bậc heading; 9 khối; 3 href thật; copy đối chiếu fixture 25/10; UTM an toàn; các cặp tương phản ≥4.5; font, hash JS, ngân sách dung lượng gồm mọi biến thể WebP, OG PNG; graph có mọi @id tham chiếu được định nghĩa; category UI/schema cùng nguồn.
 - Test SSR: status/cache/canonical, JSON-LD khớp bản xuất, asset 200, redirect viết hoa, alias nhãn, homepage card/ảnh mới, sitemap/ngày sửa thật, robots không chặn asset.
 - Browser: 320/360/390/639/640/768/1023/1024/1440/1920px không tràn ngang; breakpoints đúng; Tab/skip link/menu/neo/sticky/Escape; font local, xác nhận glyph thực sự dùng Inter bằng CDP cho ASCII/chữ Việt NFC/NFD (không chỉ kiểm tra CSS family); không tải Next JS; đọc và mở menu được khi tắt JS; UTM; sự kiện GA/Vercel mock và mốc scroll không trùng. Không tạo đăng ký thật.
-- Ngân sách tài liệu + font + JS + **toàn bộ biến thể WebP** khoảng **309 KiB nén ước tính** (bảo thủ, tính cả ảnh ô dịch vụ trang chủ và các biến thể không tải đồng thời). Lighthouse local ghi nhận khoảng **216 KiB truyền tải** cho lượt đọc đầu. Chưa tính SDK analytics/toolbar do môi trường production/preview chèn.
-- Lighthouse mobile cục bộ với Chromium 133: **Performance 99, Accessibility 100, Best Practices 100**, LCP **2,0 giây**, CLS **0**, TBT **0 ms** ở lượt đo sau thay Inter; LCP element là H1. Đây là lab trên Next dev, không phải số liệu hiện trường hay cam kết mọi thiết bị.
+- Ngân sách tài liệu + font + JS + **toàn bộ biến thể WebP** khoảng **309 KiB nén ước tính** (bảo thủ, tính cả ảnh ô dịch vụ trang chủ và các biến thể không tải đồng thời). Lighthouse local ghi nhận khoảng **223 KiB truyền tải** cho lượt đọc đầu. Chưa tính SDK analytics/toolbar do môi trường production/preview chèn.
+- Lighthouse mobile cục bộ với Chromium 133: **Performance 99, Accessibility 100, Best Practices 100**, LCP **2,1 giây**, CLS **0**, TBT **0 ms** ở lượt đo sau cập nhật nội dung ngày 25/10/2026; LCP element là H1. Đây là lab trên Next dev, không phải số liệu hiện trường hay cam kết mọi thiết bị.
 - **SEO 69 trên staging/dev là chủ đích do meta + header noindex.** Các kiểm tra SEO khác đạt ở lần đo này; cần chạy lại Lighthouse trên production có index trước kết luận đạt SEO ≥90. Không tắt noindex staging chỉ để lấy điểm.
 - INP thực tế chưa có dữ liệu hiện trường; TBT không thay thế INP. Cần theo dõi CrUX/RUM sau đủ traffic.
 - `npm run build` hiện bị chặn ở `app/layout.tsx`: font Google của website chính không tải được trong môi trường hạn chế mạng. Landing Trade tự host font và không phụ thuộc request này. Chưa thể tuyên bố full production build đạt; TypeScript toàn repo còn lỗi ngoài phần Trade.
 
 ## Trước khi public/triển khai domain Trade
 
-- [ ] Chủ website duyệt các đoạn copy bổ sung, logo/artwork, các cam kết và thông tin pháp nhân/địa chỉ.
+- [x] Áp dụng bản nội dung mới do chủ website cung cấp ngày 25/10/2026; giữ font Inter, logo Vexim và thiết kế đã duyệt.
 - [ ] Cung cấp hai URL chính sách thực tế; chỉ thêm link danh mục khi trang đích đã public.
 - [ ] Kiểm tra trang đăng ký Trade hoạt động, nhận UTM và có thông báo/chính sách dữ liệu thích hợp. Chưa kiểm tra đăng ký thật trên hệ thống bên ngoài.
 - [ ] CI/build của toàn repo đạt trong môi trường triển khai; kiểm tra HTML, canonical/OG/schema/sitemap/cache/compression thực tế sau deploy.
@@ -122,4 +122,14 @@ npm run schema:export
 - Thay biểu tượng chiếc lá tạm bằng biểu tượng V lấy từ `public/logo.png` hiện có của website: chỉ cắt phần biểu tượng, không vẽ lại, không đổi màu hay bóp méo. Giữ chữ “Vexim Trade” bên cạnh để tránh lặp chữ Vexim trong logo gốc.
 - WebP nền trong suốt, rộng 160px, khoảng 5,5 KiB, có content hash và cache immutable. Dùng chung tại đầu trang, chân trang và mẫu hồ sơ; ảnh có kích thước cố định và `object-fit: contain`, trang vẫn đọc được khi tắt JS.
 - Favicon SVG và Apple touch icon PNG cũng dùng biểu tượng V; Organization schema trỏ tới PNG 180×180. Query phiên bản giúp tránh favicon chiếc lá còn lưu trong cache cũ.
-- Không sửa file logo gốc hoặc logo trên các trang khác. Ngân sách 309 KiB đã tính thêm WebP logo; số đo Lighthouse 99/100/100 và 216 KiB phía trên là lượt sau thay Inter, trước thay logo.
+- Không sửa file logo gốc hoặc logo trên các trang khác. Ngân sách 309 KiB đã tính thêm WebP logo; số đo Lighthouse phía trên đã được cập nhật cho bản nội dung ngày 25/10/2026.
+
+### Bản nội dung 25/10/2026
+
+- Thay mô tả hero, thẻ hồ sơ minh họa, các đoạn vấn đề/giải pháp/xác minh, tiêu đề và mô tả danh mục, CTA cuối trang, địa chỉ và chân trang theo bản mới. Giữ nguyên title, meta/OG description, H1, menu và các nội dung không đổi trong bản cung cấp.
+- Thêm tính năng “Biểu đồ thông tin mùa vụ” (icon biểu đồ) và “RFQ gửi trực tiếp đến Supp”. Đây là mô tả dịch vụ do chủ website cung cấp; không tạo biểu đồ số liệu giả hoặc xây backend RFQ trong landing.
+- Danh mục có bốn thẻ UI: ba ngành hàng hiện có và “Ngành hàng khác”, trình bày 2×2 từ 640px, một cột trên điện thoại. Thẻ tư vấn dùng đồ họa globe nhẹ, không thêm ảnh sản phẩm chưa được nêu và không khai một ngành hàng giả trong OfferCatalog. OG/hero vẫn nêu ba danh mục cụ thể đúng bản cung cấp.
+- Giữ ba ảnh WebP hạt điều, hồ tiêu, quế/hồi. Vẽ lại PNG OG với logo Vexim và lời kêu gọi mới, không dùng thông điệp cũ. Bỏ nội dung giới hạn chỗ và các đoạn cuối trang không còn trong bản mới.
+- Vẫn chỉ có ba CTA đăng ký thật; không tạo URL danh mục/chính sách/tư vấn chưa được xác nhận. Mẫu RFQ là minh họa không tương tác; nhãn minh họa và ghi chú AI còn đầy đủ.
+- `TRADE.updated = 2026-10-25`; sitemap chuyển lastmod sang ngày sửa mới. Tạo lại các bản xuất schema; chỉ thay địa chỉ của Organization Trade, không sửa thông tin Organization Vexim Global/FDA.
+- Kiểm tra lại Trade, schema, FDA, email và browser đều đạt. Lighthouse mobile Chromium 133: 99/100/100/69 (SEO staging noindex), LCP 2,1s, CLS 0, TBT 0ms, 223 KiB truyền tải. TypeScript toàn repo vẫn có 45 lỗi cũ, không có lỗi tại phần Trade; không tuyên bố toàn bộ production build đạt.

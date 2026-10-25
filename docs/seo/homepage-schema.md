@@ -169,7 +169,7 @@ Hai khối JSON-LD khác nhau vẫn liên kết được qua @id; không bắt b
       },
       "address": {
         "@type": "PostalAddress",
-        "streetAddress": "Số 25/6/51 Ngõa Long, Tây Tựu",
+        "streetAddress": "Số 25/6/51 Ngoạ Long, Tây Tựu",
         "addressLocality": "Bắc Từ Liêm",
         "addressRegion": "Hà Nội",
         "addressCountry": "VN"

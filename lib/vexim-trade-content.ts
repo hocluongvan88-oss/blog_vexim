@@ -1,4 +1,4 @@
-/** Copy and launch configuration. Missing design copy is an editorial draft for owner review. */
+/** Owner-approved copy revision, 25 October 2026. */
 export const TRADE = {
   name: "Vexim Trade",
   path: "/services/export-sales",
@@ -9,17 +9,17 @@ export const TRADE = {
   description:
     "Đưa hồ sơ doanh nghiệp nông sản Việt Nam đến người mua nước ngoài. Quy cách chuẩn ngành, xác minh từng bước, yêu cầu báo giá gửi thẳng đến doanh nghiệp.",
   h1: "Người mua đang tìm hàng Việt Nam. Hãy để họ tìm thấy doanh nghiệp bạn.",
-  hero: "Vexim Trade giới thiệu nhà cung cấp nông sản Việt Nam đến người mua nước ngoài, với hồ sơ trình bày theo cách người mua đọc và so sánh: quy cách chuẩn ngành, xác minh rõ ràng, yêu cầu báo giá gửi thẳng đến doanh nghiệp.",
+  hero: "Vexim Trade giới thiệu nhà cung cấp nông sản Việt Nam đến người mua nước ngoài, với hồ sơ trình bày theo quy cách chuẩn ngành, xác minh rõ ràng, yêu cầu báo giá gửi thẳng đến doanh nghiệp.",
   legalName: "Công ty TNHH Vexim Global",
   address: {
-    streetAddress: "Số 25/6/51 Ngõa Long, Tây Tựu",
+    streetAddress: "Số 25/6/51 Ngoạ Long, Tây Tựu",
     addressLocality: "Bắc Từ Liêm",
     addressRegion: "Hà Nội",
     addressCountry: "VN",
   },
   phone: "+84373685634",
   email: "contact@veximglobal.com",
-  updated: "2026-10-24",
+  updated: "2026-10-25",
   // Set only after the owner supplies confirmed public policy URLs.
   privacy: "",
   terms: "",
@@ -38,21 +38,21 @@ export const TRADE_CATEGORIES: readonly {
     key: "cashew",
     name: "Hạt điều nhân",
     exportTitle: "Xuất khẩu hạt điều",
-    text: "Hồ sơ dành cho doanh nghiệp xuất khẩu hạt điều, trình bày rõ phân hạng, quy cách và khả năng cung ứng.",
+    text: "Phân hạng, cỡ hạt, quy cách đóng gói và sản lượng cung ứng, trình bày theo đúng cách buyer điều thường so sánh.",
     specs: "Phân hạng · Cỡ hạt · Đóng gói",
   },
   {
     key: "pepper",
     name: "Hồ tiêu",
     exportTitle: "Xuất khẩu hồ tiêu",
-    text: "Thông tin phục vụ xuất khẩu hồ tiêu: chủng loại, dung trọng, độ ẩm và phương án đóng gói để người mua đối chiếu.",
+    text: "Chủng loại, dung trọng, độ ẩm và cách đóng bao, đủ để buyer đối chiếu ngay với yêu cầu của mình.",
     specs: "Chủng loại · Dung trọng · Độ ẩm",
   },
   {
     key: "spices",
     name: "Quế, hồi",
     exportTitle: "Xuất khẩu quế hồi",
-    text: "Hồ sơ xuất khẩu quế hồi thể hiện nguồn gốc, dạng sản phẩm, quy cách và điều kiện cung ứng thực tế.",
+    text: "Vùng nguyên liệu, dạng sản phẩm, quy cách và khả năng cung ứng thực tế của từng doanh nghiệp.",
     specs: "Nguồn gốc · Dạng sản phẩm · Quy cách",
   },
 ]
@@ -61,7 +61,7 @@ export function tradeCategorySummary() {
   return `Đang mở ${count} danh mục: ${TRADE_CATEGORIES.map((category) => category.name.toLocaleLowerCase("vi")).join("; ")}.`
 }
 export function tradeCategoryHeading() {
-  return `${TRADE_CATEGORIES.length === 3 ? "Ba" : TRADE_CATEGORIES.length} danh mục, số chỗ có hạn`
+  return "Mỗi ngành hàng, một bộ hồ sơ đúng chuẩn"
 }
 export function tradeOgDescription() {
   return `Hồ sơ nhà cung cấp trình bày theo cách người mua nước ngoài đọc và so sánh. ${tradeCategorySummary()}`
@@ -69,15 +69,15 @@ export function tradeOgDescription() {
 export const TRADE_PROBLEMS = [
   {
     title: "Thông tin thiếu cụ thể",
-    text: "Một lời giới thiệu “hàng chất lượng cao” chưa giúp người mua biết sản phẩm có phù hợp không. Họ cần quy cách, khả năng cung ứng và đầu mối liên hệ rõ ràng.",
+    text: "Một lời giới thiệu “hàng chất lượng cao” chưa giúp người mua biết sản phẩm có phù hợp hay không. Họ cần quy cách, khả năng cung ứng và đầu mối liên hệ rõ ràng.",
   },
   {
     title: "Người mua tìm trên Google",
-    text: "Khi tìm người mua nước ngoài, doanh nghiệp cũng cần nghĩ về chiều ngược lại: người mua có thể tìm và kiểm tra nhà cung cấp qua công cụ tìm kiếm.",
+    text: "Người mua quốc tế không biết doanh nghiệp của bạn là ai, điều đầu tiên họ sẽ tìm và kiểm tra nhà cung cấp qua google hay các công cụ tìm kiếm khác.",
   },
   {
-    title: "Hồ sơ cần có mặt ở đó",
-    text: "Một hồ sơ công khai, dễ đọc và có thông tin cụ thể tạo thêm điểm chạm để người mua tìm hiểu bạn. Không phải lời hứa về thứ hạng tìm kiếm hay số đơn hàng.",
+    title: "Hồ sơ chuyên nghiệp",
+    text: "Một hồ sơ chuyên nghiệp, dễ đọc và có thông tin cụ thể tạo điểm chạm để người mua tìm hiểu bạn. Không phải chỉ là lời hứa về thứ hạng tìm kiếm hay số đơn hàng.",
   },
 ] as const
 export const TRADE_FEATURES = [
@@ -87,18 +87,18 @@ export const TRADE_FEATURES = [
     icon: "specs",
   },
   {
-    title: "Xác minh từng bước",
-    text: "Giấy tờ, nhà máy và lịch sử giao hàng được xem xét riêng. Hồ sơ thể hiện rõ bước nào đã được duyệt.",
+    title: "Xác minh nhà cung cấp",
+    text: "Giấy tờ, nhà máy và lịch sử giao hàng được đội ngũ kiểm duyệt. Đảm bảo tính minh bạch và chất lượng nhà cung cấp.",
     icon: "shield",
   },
   {
-    title: "Hiển thị công bằng",
-    text: "Thông tin nhà cung cấp được trình bày theo cùng một cấu trúc, để người mua đối chiếu năng lực và mức độ phù hợp.",
-    icon: "compare",
+    title: "Biểu đồ thông tin mùa vụ",
+    text: "Thông tin mùa vụ được cập nhật thường xuyên tới người mua hàng, thúc đẩy khả năng tạo ra doanh thu tối đa.",
+    icon: "season",
   },
   {
-    title: "Báo giá gửi thẳng",
-    text: "Yêu cầu báo giá đi thẳng đến doanh nghiệp. Bạn chủ động trao đổi quy cách, giá và điều kiện hợp tác với người mua.",
+    title: "RFQ gửi trực tiếp đến Supp",
+    text: "Yêu cầu báo giá gửi thẳng đến doanh nghiệp. Bạn chủ động trao đổi quy cách, giá và điều kiện hợp tác với người mua.",
     icon: "mail",
   },
 ] as const
@@ -108,12 +108,12 @@ export const TRADE_VERIFICATION = [
     text: "Đối chiếu thông tin pháp nhân và giấy tờ doanh nghiệp cung cấp. Đây là bước kiểm tra danh tính nhà cung cấp.",
   },
   {
-    title: "Thăm nhà máy",
-    text: "Ghi nhận cơ sở và hoạt động sản xuất qua việc thăm nhà máy, theo phạm vi được thống nhất. Kết quả của bước này được duyệt riêng.",
+    title: "Xác minh nhà máy",
+    text: "Ghi nhận cơ sở và hoạt động sản xuất qua việc thăm hoặc xác minh nhà máy, theo phạm vi được thống nhất.",
   },
   {
     title: "Lịch sử giao hàng",
-    text: "Xem xét tài liệu giao hàng có thể đối chiếu, trong phạm vi doanh nghiệp được phép cung cấp. Không công bố thông tin thương mại mật.",
+    text: "Xem xét tài liệu giao hàng có thể đối chiếu, trong phạm vi doanh nghiệp được phép cung cấp. Tuyệt đối không công khai thông tin thương mại mật.",
   },
 ] as const
 /** The unapproved third claim about selling rankings is intentionally absent. */
@@ -156,3 +156,24 @@ export function buildTradeOrganization(parentId: string) {
     },
   }
 }
+
+/** Generic consultation card, not an additional confirmed product category. */
+export const TRADE_OTHER_CATEGORY = {
+  name: "Ngành hàng khác",
+  text: "Chưa thấy ngành hàng của bạn? Cứ gửi đăng ký, đội ngũ Vexim Trade sẽ xem hồ sơ và trao đổi về mẫu thông tin phù hợp.",
+  specs: "Liên hệ tư vấn",
+} as const
+
+export const TRADE_SECTIONS = {
+  featureNote:
+    "Hãy tiếp cận buyer bằng thông tin họ cần. Quy cách rõ ràng, nhà cung cấp đã được xác minh, mùa vụ cập nhật đều đặn. Buyer có thể gửi RFQ cho bạn ngay.",
+  verificationTitle: "Ba bước xét duyệt nâng cao uy tín",
+  verificationDescription:
+    "Uy tín không nằm ở lời giới thiệu, mà ở những gì kiểm chứng được. Bước nào bạn hoàn thành, hồ sơ ghi nhận bước đó, để buyer yên tâm ngay từ lần đầu tìm hiểu.",
+  categoryEyebrow: "Thế mạnh nông sản Việt Nam",
+  categoryDescription:
+    "Mỗi ngành hàng có mẫu hồ sơ riêng, theo đúng những thông số buyer quốc tế quen hỏi. Dưới đây là một số ngành hàng tiêu biểu, danh mục vẫn đang tiếp tục mở rộng.",
+  closingTitle: "Sản phẩm bạn đã có. Giờ là lúc để buyer tìm thấy bạn.",
+  closingDescription:
+    "Tạo hồ sơ trên Vexim Trade, để quy cách và uy tín của doanh nghiệp tự lên tiếng với người mua quốc tế.",
+} as const

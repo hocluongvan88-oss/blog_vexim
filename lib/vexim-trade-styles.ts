@@ -737,6 +737,26 @@ section[aria-labelledby="van-de-title"] {
 #danh-muc .section-head {
   max-width: 820px;
 }
+/* Four cards: three confirmed product categories plus a generic consultation card. */
+#danh-muc .category-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.category-art.category-consult-art {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  background: linear-gradient(135deg, #edf4ee, #f5f5f7);
+}
+.category-art.category-consult-art svg {
+  width: 72px;
+  height: 72px;
+}
+@media (max-width: 639px) {
+  #danh-muc .category-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
 .category {
   border-radius: 24px;
   background: var(--bg-soft);

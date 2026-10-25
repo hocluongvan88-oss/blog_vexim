@@ -59,7 +59,7 @@ try {
     assert.ok(geometry.headerHeight <= 72)
     assert.ok(geometry.headerControlsFit, `header button clipped at ${width}`)
     assert.equal(geometry.columns, width < 640 ? 1 : width < 1024 ? 2 : 4)
-    assert.equal(geometry.categories, width < 640 ? 1 : width < 1024 ? 2 : 3)
+    assert.equal(geometry.categories, width < 640 ? 1 : 2)
     assert.equal(geometry.heroColumns, 1, "Centered product-launch hero")
     assert.ok(geometry.font)
     geometry.buttons.forEach((button) => {
@@ -215,7 +215,7 @@ try {
   await nojs.setJavaScriptEnabled(false)
   await nojs.setViewport({ width: 320, height: 844 })
   await nojs.goto(`${base}/services/export-sales?utm_source=email`, { waitUntil: "networkidle0" })
-  assert.ok((await nojs.$eval("main", (el) => el.textContent)).includes("Ba bước, mỗi bước duyệt riêng"))
+  assert.ok((await nojs.$eval("main", (el) => el.textContent)).includes("Ba bước xét duyệt nâng cao uy tín"))
   await nojs.click("#mobile-menu summary")
   assert.ok(await nojs.$eval("#mobile-menu", (el) => el.open))
   assert.equal(await nojs.$$eval("[data-register]", (els) => els.length), 3)
