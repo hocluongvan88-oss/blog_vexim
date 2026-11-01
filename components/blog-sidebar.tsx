@@ -10,7 +10,7 @@ import { Mail, Phone, CheckCircle2, TrendingUp, Award, Clock, User } from "lucid
 import { Badge } from "@/components/ui/badge"
 import { motion } from "framer-motion"
 import { useRef } from "react"
-import Link from "next/link"
+import { ServiceLink as Link } from "@/components/service-link"
 
 /**
  * Dịch vụ nổi bật ở sidebar blog.
@@ -21,7 +21,7 @@ const featuredServices = [
   { label: "Đăng ký FDA thực phẩm, mỹ phẩm, dược phẩm", href: "/services/fda" },
   { label: "Đại lý chính thức tại Hoa Kỳ (US Agent)", href: "/services/us-agent" },
   { label: "Tư vấn đăng ký GACC Trung Quốc", href: "/services/gacc" },
-  { label: "Phòng sale xuất khẩu", href: "/services/export-sales" },
+  { label: "Vexim Trade", href: "/services/export-sales" },
 ]
 
 export default function BlogSidebar() {

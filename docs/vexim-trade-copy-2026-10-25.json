@@ -1,0 +1,127 @@
+{
+  "revision": "2026-10-25",
+  "editorialCorrections": [
+    "Sửa lỗi gõ ‘xác mình nhà máy’ thành ‘xác minh nhà máy’; các nội dung còn lại theo bản chủ website cung cấp."
+  ],
+  "head": {
+    "title": "Đăng ký nhà cung cấp nông sản xuất khẩu | Vexim Trade",
+    "description": "Đưa hồ sơ doanh nghiệp nông sản Việt Nam đến người mua nước ngoài. Quy cách chuẩn ngành, xác minh từng bước, yêu cầu báo giá gửi thẳng đến doanh nghiệp.",
+    "ogDescription": "Hồ sơ nhà cung cấp trình bày theo cách người mua nước ngoài đọc và so sánh. Đang mở ba danh mục: hạt điều nhân; hồ tiêu; quế, hồi.",
+    "ogAlt": "Vexim Trade, danh bạ nhà cung cấp nông sản Việt Nam"
+  },
+  "selectors": {
+    ".desktop-nav a": ["Cách hoạt động", "Xác minh", "Danh mục", "Đăng ký"],
+    "h1": ["Người mua đang tìm hàng Việt Nam. Hãy để họ tìm thấy doanh nghiệp bạn."],
+    ".hero-copy > .eyebrow": ["Danh bạ nhà cung cấp nông sản Việt Nam"],
+    ".hero-description": [
+      "Vexim Trade giới thiệu nhà cung cấp nông sản Việt Nam đến người mua nước ngoài, với hồ sơ trình bày theo quy cách chuẩn ngành, xác minh rõ ràng, yêu cầu báo giá gửi thẳng đến doanh nghiệp."
+    ],
+    "[data-register]": ["Đăng ký nhà cung cấp", "Đăng ký nhà cung cấp", "Đăng ký nhà cung cấp"],
+    "[data-learn]": ["Xem cách hoạt động"],
+    ".hero-note": ["Đang mở ba danh mục: hạt điều nhân; hồ tiêu; quế, hồi."],
+    ".stage-caption": ["Từ sản phẩm tốt. Đến hồ sơ rõ ràng."],
+    ".sample-pill": ["HỒ SƠ NHÀ CUNG CẤP"],
+    ".product-label": ["HẠT ĐIỀU NHÂN · VIỆT NAM"],
+    ".profile .origin": ["Nhà cung cấp Việt Nam"],
+    ".profile-title": ["Hạt điều nhân trắng"],
+    ".profile .company": ["Doanh nghiệp minh họa"],
+    ".profile dt": ["Phân hạng", "Đóng gói"],
+    ".profile dd": ["WW320", "Theo yêu cầu"],
+    ".sample-check": ["Trạng thái xác minh được hiển thị riêng"],
+    ".illustrated-rfq": ["Gửi yêu cầu báo giá"],
+    "figcaption": ["Hồ sơ minh họa"],
+    ".image-disclosure": ["Ảnh sản phẩm minh họa do AI tạo, không đại diện nhà cung cấp cụ thể."],
+    ".hero-bottom span": [
+      "Thông tin cụ thể, dễ đối chiếu",
+      "Xác minh nhà cung cấp từng bước",
+      "Kết nối thẳng với doanh nghiệp"
+    ],
+    "h2": [
+      "Hàng tốt chưa đủ, người mua cần đọc được hồ sơ",
+      "Hồ sơ trình bày theo cách người mua đọc và so sánh",
+      "Ba bước xét duyệt nâng cao uy tín",
+      "Cuộc trao đổi bắt đầu từ chỗ khác",
+      "Mỗi ngành hàng, một bộ hồ sơ đúng chuẩn",
+      "Bắt đầu trong bốn bước"
+    ],
+    "section[aria-labelledby='van-de-title'] .eyebrow": ["Từ góc nhìn người mua"],
+    ".problem h3": ["Thông tin thiếu cụ thể", "Người mua tìm trên Google", "Hồ sơ chuyên nghiệp"],
+    ".problem p": [
+      "Một lời giới thiệu “hàng chất lượng cao” chưa giúp người mua biết sản phẩm có phù hợp hay không. Họ cần quy cách, khả năng cung ứng và đầu mối liên hệ rõ ràng.",
+      "Người mua quốc tế không biết doanh nghiệp của bạn là ai, điều đầu tiên họ sẽ tìm và kiểm tra nhà cung cấp qua google hay các công cụ tìm kiếm khác.",
+      "Một hồ sơ chuyên nghiệp, dễ đọc và có thông tin cụ thể tạo điểm chạm để người mua tìm hiểu bạn. Không phải chỉ là lời hứa về thứ hạng tìm kiếm hay số đơn hàng."
+    ],
+    "#cach-hoat-dong .eyebrow": ["Một hồ sơ. Một ngôn ngữ chung."],
+    ".feature h3": [
+      "Quy cách chuẩn ngành",
+      "Xác minh nhà cung cấp",
+      "Biểu đồ thông tin mùa vụ",
+      "RFQ gửi trực tiếp đến Supp"
+    ],
+    ".feature p": [
+      "Mỗi danh mục có các trường thông tin phù hợp, giúp người mua đọc và so sánh sản phẩm trên cùng một cấu trúc.",
+      "Giấy tờ, nhà máy và lịch sử giao hàng được đội ngũ kiểm duyệt. Đảm bảo tính minh bạch và chất lượng nhà cung cấp.",
+      "Thông tin mùa vụ được cập nhật thường xuyên tới người mua hàng, thúc đẩy khả năng tạo ra doanh thu tối đa.",
+      "Yêu cầu báo giá gửi thẳng đến doanh nghiệp. Bạn chủ động trao đổi quy cách, giá và điều kiện hợp tác với người mua."
+    ],
+    ".feature-note": [
+      "Hãy tiếp cận buyer bằng thông tin họ cần. Quy cách rõ ràng, nhà cung cấp đã được xác minh, mùa vụ cập nhật đều đặn. Buyer có thể gửi RFQ cho bạn ngay."
+    ],
+    "#xac-minh .eyebrow": ["Xác minh có phạm vi rõ ràng"],
+    "#xac-minh .section-head > p:not(.eyebrow):not(.disclaimer)": [
+      "Uy tín không nằm ở lời giới thiệu, mà ở những gì kiểm chứng được. Bước nào bạn hoàn thành, hồ sơ ghi nhận bước đó, để buyer yên tâm ngay từ lần đầu tìm hiểu."
+    ],
+    "#xac-minh .disclaimer": ["Vexim Trade xác minh nhà cung cấp, không chứng nhận chất lượng sản phẩm."],
+    ".verification-list h3": ["Giấy tờ doanh nghiệp", "Xác minh nhà máy", "Lịch sử giao hàng"],
+    ".verification-list p": [
+      "Đối chiếu thông tin pháp nhân và giấy tờ doanh nghiệp cung cấp. Đây là bước kiểm tra danh tính nhà cung cấp.",
+      "Ghi nhận cơ sở và hoạt động sản xuất qua việc thăm hoặc xác minh nhà máy, theo phạm vi được thống nhất.",
+      "Xem xét tài liệu giao hàng có thể đối chiếu, trong phạm vi doanh nghiệp được phép cung cấp. Tuyệt đối không công khai thông tin thương mại mật."
+    ],
+    "section[aria-labelledby='cam-ket-title'] .eyebrow": ["Rõ vai trò, rõ kỳ vọng"],
+    "section[aria-labelledby='cam-ket-title'] .section-head > p:not(.eyebrow)": [
+      "Từ quy cách, năng lực cung ứng và thông tin có thể đối chiếu. Để hai doanh nghiệp có cơ sở bắt đầu một cuộc trao đổi thực chất."
+    ],
+    ".commitment-title": ["Những việc Vexim Trade không làm"],
+    ".commitments h3": ["Không hứa có đơn hàng", "Không thay bạn đàm phán"],
+    ".commitments p": [
+      "Vexim Trade tạo nơi giới thiệu và kết nối. Quyết định mua bán phụ thuộc vào sản phẩm, nhu cầu và thỏa thuận giữa hai doanh nghiệp.",
+      "Doanh nghiệp chủ động phản hồi yêu cầu báo giá, trao đổi với người mua và quyết định giá, điều kiện giao hàng, hợp đồng."
+    ],
+    "#danh-muc .eyebrow": ["Thế mạnh nông sản Việt Nam"],
+    "#danh-muc .section-head > p:not(.eyebrow)": [
+      "Mỗi ngành hàng có mẫu hồ sơ riêng, theo đúng những thông số buyer quốc tế quen hỏi. Dưới đây là một số ngành hàng tiêu biểu, danh mục vẫn đang tiếp tục mở rộng."
+    ],
+    ".category-kicker": ["Xuất khẩu hạt điều", "Xuất khẩu hồ tiêu", "Xuất khẩu quế hồi"],
+    ".category-other h3": ["Ngành hàng khác"],
+    ".category p.description": [
+      "Phân hạng, cỡ hạt, quy cách đóng gói và sản lượng cung ứng, trình bày theo đúng cách buyer điều thường so sánh.",
+      "Chủng loại, dung trọng, độ ẩm và cách đóng bao, đủ để buyer đối chiếu ngay với yêu cầu của mình.",
+      "Vùng nguyên liệu, dạng sản phẩm, quy cách và khả năng cung ứng thực tế của từng doanh nghiệp.",
+      "Chưa thấy ngành hàng của bạn? Cứ gửi đăng ký, đội ngũ Vexim Trade sẽ xem hồ sơ và trao đổi về mẫu thông tin phù hợp."
+    ],
+    ".category-specs": [
+      "Phân hạng · Cỡ hạt · Đóng gói",
+      "Chủng loại · Dung trọng · Độ ẩm",
+      "Nguồn gốc · Dạng sản phẩm · Quy cách",
+      "Liên hệ tư vấn"
+    ],
+    "#dang-ky .eyebrow": ["Đến lượt doanh nghiệp bạn"],
+    ".steps h3": ["Tạo tài khoản", "Hoàn thiện hồ sơ", "Gửi để xem xét", "Sẵn sàng trao đổi"],
+    ".steps p": [
+      "Bắt đầu tại trang đăng ký nhà cung cấp của Vexim Trade.",
+      "Điền thông tin doanh nghiệp, sản phẩm và quy cách theo danh mục.",
+      "Cung cấp tài liệu phù hợp; từng bước xác minh được xét duyệt riêng.",
+      "Sau khi hồ sơ được duyệt và công khai, chủ động phản hồi yêu cầu của người mua."
+    ],
+    ".closing-title": ["Sản phẩm bạn đã có. Giờ là lúc để buyer tìm thấy bạn."],
+    ".closing .small": [
+      "Tạo hồ sơ trên Vexim Trade, để quy cách và uy tín của doanh nghiệp tự lên tiếng với người mua quốc tế."
+    ],
+    ".footer-brand-note": ["Danh bạ nhà cung cấp nông sản Việt Nam dành cho người mua nước ngoài."],
+    "address strong": ["Công ty TNHH Vexim Global"],
+    "address a": ["+84373685634", "contact@veximglobal.com"],
+    ".footer-links > *": ["veximglobal.com", "Chính sách bảo mật", "Điều khoản sử dụng"],
+    ".footer-bottom": ["© 2026 Vexim Trade · Thuộc Vexim Global"]
+  }
+}

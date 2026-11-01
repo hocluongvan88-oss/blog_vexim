@@ -6,7 +6,7 @@ import { BackToTop } from "@/components/back-to-top"
 import { CheckCircle2 } from "lucide-react"
 
 export const metadata: Metadata = {
-  title: "Đánh giá hồ sơ GACC - Vexim Global",
+  title: "Đánh giá hồ sơ GACC",
   description:
     "Form đánh giá hồ sơ đăng ký GACC cho sản phẩm thực phẩm xuất khẩu sang Trung Quốc. Đánh giá miễn phí bởi chuyên gia Vexim Global.",
   alternates: {

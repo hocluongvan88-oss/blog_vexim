@@ -2,6 +2,18 @@ import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
 
 export async function middleware(request: NextRequest) {
+  // This public, cookieless document and its self-hosted assets need no auth refresh.
+  const tradePath = "/services/export-sales"
+  if (request.nextUrl.pathname.toLowerCase() === tradePath) {
+    if (request.nextUrl.pathname !== tradePath) {
+      const canonical = request.nextUrl.clone()
+      canonical.pathname = tradePath
+      return NextResponse.redirect(canonical, 301)
+    }
+    return NextResponse.next()
+  }
+  if (request.nextUrl.pathname.startsWith("/trade/")) return NextResponse.next()
+
   let supabaseResponse = NextResponse.next({
     request,
   })

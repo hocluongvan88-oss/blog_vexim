@@ -1,3 +1,4 @@
+import { PUBLIC_EMAIL } from "@/lib/business-profile"
 // Email Service for FDA Alerts using Zoho SMTP
 // Alternative to Resend API - uses standard SMTP
 
@@ -71,7 +72,7 @@ export class EmailServiceZoho {
     try {
       const config = getSmtpConfig()
       const verificationLink = `${config.baseUrl}/api/fda/verify?email=${encodeURIComponent(email)}&token=${token}`
-      const unsubscribeLink = `${config.baseUrl}/api/fda/subscribe?email=${encodeURIComponent(email)}&token=${token}`
+      const unsubscribeLink = `${config.baseUrl}/fda-tracker/unsubscribe?email=${encodeURIComponent(email)}&token=${token}`
 
       const html = getVerificationEmailHTML({
         email,
@@ -79,14 +80,13 @@ export class EmailServiceZoho {
         unsubscribeLink,
       })
 
-      await this.sendEmail({
+      const sent = await this.sendEmail({
         to: email,
         subject: "Xác nhận đăng ký cảnh báo FDA - Vexim Global",
         html,
       })
 
-      console.log(`[v0] Verification email sent to ${email}`)
-      return true
+      return sent
     } catch (error) {
       console.error("[v0] Error sending verification email:", error)
       return false
@@ -128,7 +128,7 @@ export class EmailServiceZoho {
             continue
           }
 
-          const unsubscribeLink = `${config.baseUrl}/api/fda/subscribe?email=${encodeURIComponent(subscriber.email)}&token=${subscriber.verification_token}`
+          const unsubscribeLink = `${config.baseUrl}/fda-tracker/unsubscribe?email=${encodeURIComponent(subscriber.email)}&token=${subscriber.verification_token}`
 
           const html = getAlertEmailHTML({
             email: subscriber.email,
@@ -188,7 +188,7 @@ export class EmailServiceZoho {
 
       for (const subscriber of subscribers) {
         try {
-          const unsubscribeLink = `${config.baseUrl}/api/fda/subscribe?email=${encodeURIComponent(subscriber.email)}&token=${subscriber.verification_token}`
+          const unsubscribeLink = `${config.baseUrl}/fda-tracker/unsubscribe?email=${encodeURIComponent(subscriber.email)}&token=${subscriber.verification_token}`
 
           const html = getImmediateAlertEmailHTML({
             email: subscriber.email,
@@ -265,7 +265,7 @@ export class EmailServiceZoho {
         console.log(`  To: ${to}`)
         console.log(`  Subject: ${subject}`)
         console.log(`  HTML length: ${html.length} chars`)
-        return true
+        return false
       }
 
       const transporter = this.getTransporter()
@@ -278,6 +278,7 @@ export class EmailServiceZoho {
       const info = await transporter.sendMail({
         from: `"${config.fromName}" <${config.fromEmail}>`,
         to,
+        replyTo: PUBLIC_EMAIL,
         subject,
         html,
       })

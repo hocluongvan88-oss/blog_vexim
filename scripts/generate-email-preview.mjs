@@ -1,45 +1,18 @@
-// Generates a visual preview of all Vexim email templates (yellow-green design)
+// Generates a visual preview of all Vexim email templates (navy / neutral, light and dark mode)
 // Usage: node scripts/generate-email-preview.mjs
 // Output: public/email-preview/*.html (open index.html in a browser)
 
-import ts from "typescript"
-import { mkdirSync, writeFileSync, readFileSync, rmSync } from "node:fs"
-import { createRequire } from "node:module"
+import { mkdirSync, writeFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import path from "node:path"
+import { loadEmailTemplates } from "./email-template-loader.mjs"
 
-const require = createRequire(import.meta.url)
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
 const outDir = path.join(root, "public", "email-preview")
-const buildDir = path.join(root, "scripts", ".email-preview-build")
-rmSync(buildDir, { recursive: true, force: true })
-mkdirSync(buildDir, { recursive: true })
 mkdirSync(outDir, { recursive: true })
+const { templates: T, cleanup } = loadEmailTemplates()
 
-// Transpile each self-contained template lib to CJS
-const templateFiles = {
-  emailTemplates: "lib/email-templates.tsx",
-  emailGacc: "lib/email-gacc.tsx",
-  emailFdaRegistration: "lib/email-fda-registration.tsx",
-  emailConsultation: "lib/email-consultation.tsx",
-}
-
-const T = {}
-for (const [key, rel] of Object.entries(templateFiles)) {
-  const source = readFileSync(path.join(root, rel), "utf8")
-  const result = ts.transpileModule(source, {
-    compilerOptions: {
-      module: ts.ModuleKind.CommonJS,
-      target: ts.ScriptTarget.ES2020,
-      esModuleInterop: true,
-    },
-  })
-  const outPath = path.join(buildDir, `${key}.js`)
-  writeFileSync(outPath, result.outputText)
-  Object.assign(T, require(outPath))
-}
-
-const EMAIL = "doanhan@veximglobal.vn"
+const EMAIL = "nguoidung@example.com"
 const BASE = "https://www.veximglobal.com"
 
 const sampleAlerts = [
@@ -105,7 +78,7 @@ const gaccParams = {
   hsCode: "0303.54.90",
   submissionId: "a1b2c3d4e5f6a7b8",
   submittedAt: "19/09/2026 14:30",
-  email: "expora@anvietfood.vn",
+  email: "xuatkhau@example.com",
   phone: "0912 345 678",
   taxCode: "0101 234 567",
 }
@@ -113,7 +86,7 @@ const gaccParams = {
 const consultationParams = {
   name: "Nguyễn Thu Hà",
   phone: "0934 567 890",
-  email: "ha.nguyen@doanhnghiep.vn",
+  email: "khachhang@example.com",
   serviceName: "Đăng ký FDA (Mỹ)",
   product: "Mật ong hoa cà phê 500g",
   description: "Công ty tôi có 2 dòng sản phẩm (mật ong + trà hoa cúc) muốn xuất sang Mỹ.\nVui lòng tư vấn hồ sơ và thời gian dự kiến.",
@@ -126,7 +99,7 @@ const pages = [
     html: T.getVerificationEmailHTML({
       email: EMAIL,
       verificationLink: `${BASE}/api/fda/verify?email=${encodeURIComponent(EMAIL)}&token=DEMO_TOKEN_123`,
-      unsubscribeLink: `${BASE}/api/fda/subscribe?email=${encodeURIComponent(EMAIL)}&token=DEMO_TOKEN_123`,
+      unsubscribeLink: `${BASE}/fda-tracker/unsubscribe?email=${encodeURIComponent(EMAIL)}&token=DEMO_TOKEN_123`,
     }),
   },
   {
@@ -137,7 +110,7 @@ const pages = [
       alerts: sampleAlerts,
       alertCount: 12,
       frequency: "daily",
-      unsubscribeLink: `${BASE}/api/fda/subscribe?email=${encodeURIComponent(EMAIL)}&token=DEMO_TOKEN_123`,
+      unsubscribeLink: `${BASE}/fda-tracker/unsubscribe?email=${encodeURIComponent(EMAIL)}&token=DEMO_TOKEN_123`,
     }),
   },
   {
@@ -146,7 +119,7 @@ const pages = [
     html: T.getImmediateAlertEmailHTML({
       email: EMAIL,
       alert: sampleAlerts[0],
-      unsubscribeLink: `${BASE}/api/fda/subscribe?email=${encodeURIComponent(EMAIL)}&token=DEMO_TOKEN_123`,
+      unsubscribeLink: `${BASE}/fda-tracker/unsubscribe?email=${encodeURIComponent(EMAIL)}&token=DEMO_TOKEN_123`,
     }),
   },
   {
@@ -224,68 +197,18 @@ const cards = pages
   .join("\n")
 
 const indexHtml = `<!DOCTYPE html>
-<html lang="vi">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vexim Global — Thư viện email (Vàng Xanh)</title>
-  <style>
-    * { box-sizing: border-box; }
-    body { margin: 0; background: #1c2410; color: #eef2e2; font-family: 'Segoe UI', Arial, sans-serif; }
-    .topbar {
-      position: sticky; top: 0; z-index: 10;
-      background: linear-gradient(90deg, #365314, #4d7c0f 55%, #65a30d);
-      padding: 18px 28px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
-      border-bottom: 3px solid #facc15;
-    }
-    .topbar .logo { font-weight: 800; letter-spacing: 2px; font-size: 15px; color: #fef9c3; }
-    .topbar h1 { font-size: 17px; margin: 0; font-weight: 700; color: white; }
-    .topbar .swatches { display: flex; gap: 6px; margin-left: auto; }
-    .topbar .sw { width: 22px; height: 22px; border-radius: 6px; border: 1px solid rgba(255,255,255,.35); }
-    .palette-note { width: 100%; font-size: 12px; color: #d9f99d; margin-top: 2px; }
-    .grid {
-      max-width: 1400px; margin: 0 auto; padding: 24px;
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(680px, 1fr)); gap: 24px;
-    }
-    @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
-    .card { background: #242e14; border: 1px solid #3a4a1e; border-radius: 14px; overflow: hidden; }
-    .card-head {
-      display: flex; align-items: center; gap: 12px; padding: 12px 16px;
-      background: #2c3818; border-bottom: 1px solid #3a4a1e;
-    }
-    .num {
-      background: #facc15; color: #1a2e05; font-weight: 800; font-size: 12px;
-      border-radius: 8px; padding: 4px 8px;
-    }
-    .card-title { font-weight: 700; font-size: 14px; }
-    .card-file { font-size: 11px; color: #9db078; }
-    .open { margin-left: auto; font-size: 12px; color: #bef264; text-decoration: none; white-space: nowrap; }
-    .open:hover { text-decoration: underline; }
-    iframe { width: 100%; height: 980px; border: 0; display: block; background: #f4f6ec; }
-  </style>
-</head>
-<body>
-  <div class="topbar">
-    <span class="logo">VEXIM GLOBAL</span>
-    <h1>📧 Thư viện email — thiết kế lại ton màu vàng xanh</h1>
-    <div class="swatches">
-      <span class="sw" style="background:#facc15" title="#facc15"></span>
-      <span class="sw" style="background:#eab308" title="#eab308"></span>
-      <span class="sw" style="background:#a3e635" title="#a3e635"></span>
-      <span class="sw" style="background:#84cc16" title="#84cc16"></span>
-      <span class="sw" style="background:#4d7c0f" title="#4d7c0f"></span>
-      <span class="sw" style="background:#365314" title="#365314"></span>
-    </div>
-    <div class="palette-note">
-      Palette: vàng #facc15 → #eab308 · xanh vàng #a3e635 → #84cc16 → #4d7c0f · xanh rêu đậm #365314 (bản tin khẩn) · nền #f4f6ec
-    </div>
-  </div>
-  <div class="grid">
-${cards}
-  </div>
-</body>
-</html>`
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow"><title>Vexim — xem trước email</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f1f5f9;color:#243247;font-family:Arial,sans-serif}header{padding:28px;max-width:1200px;margin:auto}h1{font-size:26px}p{line-height:1.6}label{font-size:14px}select{padding:10px;margin-left:8px} .grid{max-width:1400px;margin:auto;padding:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:24px}.card{background:white;border:1px solid #dbe3ed;border-radius:8px;overflow:hidden}.card-head{padding:16px;display:flex;gap:12px;flex-wrap:wrap}.card-title{font-weight:bold}.card-file,.num{display:none}.open{color:#17365d;font-size:14px}iframe{width:100%;height:1000px;border:0;display:block;max-width:100%;margin:0 auto}
+</style></head><body><header><h1>Vexim Global · Xem trước email</h1>
+<p><strong>Dữ liệu minh họa, không phải cảnh báo FDA thật.</strong> Mẫu dùng nền trung tính, điểm nhấn navy và slogan “Tử Tế - Tận Tâm - Trách Nhiệm”.</p>
+<p>Chế độ tối theo cài đặt hệ thống/trình duyệt. Đây là bản xem trước HTML, không thay thế kiểm thử Apple Mail/Gmail trên iPhone thật.</p>
+<label>Chiều rộng email <select id="width"><option value="100%">Co giãn</option><option value="320px">320px</option><option value="375px">iPhone 375px</option><option value="390px">iPhone 390px</option><option value="430px">iPhone 430px</option></select></label>
+</header><div class="grid">${cards}</div>
+<script>document.getElementById('width').addEventListener('change', function(){document.querySelectorAll('iframe').forEach(frame=>frame.style.width=this.value)})</script>
+</body></html>`
 
 writeFileSync(path.join(outDir, "index.html"), indexHtml)
-rmSync(buildDir, { recursive: true, force: true })
+cleanup()
 console.log(`✓ Generated ${pages.length} email previews + index.html in public/email-preview/`)

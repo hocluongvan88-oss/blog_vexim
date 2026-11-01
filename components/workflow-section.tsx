@@ -48,48 +48,41 @@ export function WorkflowSection() {
         </div>
 
         <div className="max-w-5xl mx-auto">
-          {/* Desktop View - Horizontal Flow */}
-          <div className="hidden md:grid md:grid-cols-4 gap-4 mb-8">
-            {workflowSteps.map((step, index) => (
-              <div key={index} className="relative">
-                <Card className="p-6 h-full border-2 hover:border-primary/30 transition-all duration-300">
-                  <div
-                    className={`w-16 h-16 rounded-full bg-gradient-to-br ${step.color} text-white flex items-center justify-center text-2xl font-bold mb-4 mx-auto shadow-lg`}
-                  >
-                    {step.number}
-                  </div>
-                  <h3 className="text-lg font-bold text-primary mb-2 text-center">{step.title}</h3>
-                  <p className="text-sm text-muted-foreground text-center leading-relaxed">{step.description}</p>
-                </Card>
-                {index < workflowSteps.length - 1 && (
-                  <div className="absolute top-1/2 -right-2 transform -translate-y-1/2 z-10">
-                    <div className="w-4 h-4 border-t-4 border-r-4 border-accent rotate-45"></div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+          {/*
+            MỘT khối duy nhất cho cả desktop lẫn mobile.
 
-          {/* Mobile View - Vertical Flow */}
-          <div className="md:hidden space-y-6">
+            Trước đây có hai khối render song song (`hidden md:grid` và `md:hidden`),
+            mỗi khối lặp lại 4 tiêu đề bước — kết quả là 4 H3 "Tiếp nhận & Tư vấn",
+            "Chuẩn bị hồ sơ", "Nộp hồ sơ & Theo dõi", "Nhận kết quả & Hỗ trợ" XUẤT HIỆN
+            HAI LẦN trong HTML. CSS chỉ ẩn một khối về mặt hiển thị, còn crawler vẫn
+            đọc thấy cả hai -> nội dung trùng lặp và cấu trúc heading bị nhiễu.
+
+            Nay dùng grid responsive: 1 cột trên mobile, 4 cột từ `md` trở lên.
+            Mũi tên nối giữa các bước chỉ hiện trên desktop (nơi các bước nằm ngang).
+          */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-4 mb-8">
             {workflowSteps.map((step, index) => (
-              <div key={index} className="relative">
-                <Card className="p-6 border-2 hover:border-primary/30 transition-all duration-300">
-                  <div className="flex items-start gap-4">
+              <div key={step.number} className="relative">
+                <Card className="p-6 h-full border-2 hover:border-primary/30 transition-all duration-300">
+                  <div className="flex items-start gap-4 md:block">
                     <div
-                      className={`w-14 h-14 flex-shrink-0 rounded-full bg-gradient-to-br ${step.color} text-white flex items-center justify-center text-xl font-bold shadow-lg`}
+                      className={`w-14 h-14 md:w-16 md:h-16 flex-shrink-0 rounded-full bg-gradient-to-br ${step.color} text-white flex items-center justify-center text-xl md:text-2xl font-bold md:mb-4 md:mx-auto shadow-lg`}
                     >
                       {step.number}
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 md:text-center">
                       <h3 className="text-lg font-bold text-primary mb-2">{step.title}</h3>
                       <p className="text-sm text-muted-foreground leading-relaxed">{step.description}</p>
                     </div>
                   </div>
                 </Card>
+                {/* Mũi tên nối: chỉ ở desktop, giữa các cột */}
                 {index < workflowSteps.length - 1 && (
-                  <div className="flex justify-center my-2">
-                    <div className="w-1 h-6 bg-accent"></div>
+                  <div
+                    className="absolute top-1/2 -right-2 transform -translate-y-1/2 z-10 hidden md:block"
+                    aria-hidden="true"
+                  >
+                    <div className="w-4 h-4 border-t-4 border-r-4 border-accent rotate-45"></div>
                   </div>
                 )}
               </div>

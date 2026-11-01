@@ -1,3 +1,4 @@
+import { PUBLIC_EMAIL } from "@/lib/business-profile"
 import { NextResponse } from "next/server"
 import nodemailer from "nodemailer"
 import {
@@ -93,8 +94,8 @@ export async function POST(request: Request) {
     const serviceNames: Record<string, string> = {
       fda: "Đăng ký FDA (Mỹ)",
       gacc: "Mã GACC (Trung Quốc)",
-      "export-sales": "Phòng sale xuất khẩu (Mỹ)",
-      "fda-label-check": "Phòng sale xuất khẩu (Mỹ)",
+      "export-sales": "Vexim Trade — Nhà cung cấp nông sản",
+      "fda-label-check": "Kiểm tra nhãn FDA",
       "agent-us": "Dịch vụ Agent Hoa Kỳ",
       fsvp: "FSVP Compliance",
       mocra: "MOCRA Registration",
@@ -115,6 +116,7 @@ export async function POST(request: Request) {
     await transporter.sendMail({
       from: `"${process.env.MAIL_FROM_NAME || "Vexim Global"}" <${process.env.MAIL_FROM_ADDRESS || process.env.MAIL_USERNAME}>`,
       to: email,
+      replyTo: PUBLIC_EMAIL,
       subject: "Xác nhận đăng ký tư vấn - Vexim Global",
       html: getConsultationCustomerHTML(consultationParams),
     })

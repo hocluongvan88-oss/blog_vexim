@@ -1,3 +1,4 @@
+import { PUBLIC_EMAIL } from "@/lib/business-profile"
 // Email Service for FDA Alerts
 // Uses Resend API for sending emails
 
@@ -11,7 +12,7 @@ import {
 import type { FDAItem } from "@/types/fda"
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY || ""
-const FROM_EMAIL = "FDA Tracker <alerts@veximglobal.vn>"
+const FROM_EMAIL = process.env.FROM_EMAIL || `FDA Tracker <${PUBLIC_EMAIL}>`
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://www.veximglobal.com"
 
 export class EmailService {
@@ -19,7 +20,7 @@ export class EmailService {
   async sendVerificationEmail(email: string, token: string) {
     try {
       const verificationLink = `${BASE_URL}/api/fda/verify?email=${encodeURIComponent(email)}&token=${token}`
-      const unsubscribeLink = `${BASE_URL}/api/fda/subscribe?email=${encodeURIComponent(email)}&token=${token}`
+      const unsubscribeLink = `${BASE_URL}/fda-tracker/unsubscribe?email=${encodeURIComponent(email)}&token=${token}`
 
       const html = getVerificationEmailHTML({
         email,
@@ -27,14 +28,13 @@ export class EmailService {
         unsubscribeLink,
       })
 
-      await this.sendEmail({
+      const sent = await this.sendEmail({
         to: email,
         subject: "Xác nhận đăng ký cảnh báo FDA - Vexim Global",
         html,
       })
 
-      console.log(`[v0] Verification email sent to ${email}`)
-      return true
+      return sent
     } catch (error) {
       console.error("[v0] Error sending verification email:", error)
       return false
@@ -74,7 +74,7 @@ export class EmailService {
             continue
           }
 
-          const unsubscribeLink = `${BASE_URL}/api/fda/subscribe?email=${encodeURIComponent(subscriber.email)}&token=${subscriber.verification_token}`
+          const unsubscribeLink = `${BASE_URL}/fda-tracker/unsubscribe?email=${encodeURIComponent(subscriber.email)}&token=${subscriber.verification_token}`
 
           const html = getAlertEmailHTML({
             email: subscriber.email,
@@ -131,7 +131,7 @@ export class EmailService {
 
       for (const subscriber of subscribers) {
         try {
-          const unsubscribeLink = `${BASE_URL}/api/fda/subscribe?email=${encodeURIComponent(subscriber.email)}&token=${subscriber.verification_token}`
+          const unsubscribeLink = `${BASE_URL}/fda-tracker/unsubscribe?email=${encodeURIComponent(subscriber.email)}&token=${subscriber.verification_token}`
 
           const html = getImmediateAlertEmailHTML({
             email: subscriber.email,
@@ -197,7 +197,7 @@ export class EmailService {
         console.log(`  To: ${to}`)
         console.log(`  Subject: ${subject}`)
         console.log(`  HTML length: ${html.length} chars`)
-        return true
+        return false
       }
 
       // Send via Resend API
@@ -209,6 +209,7 @@ export class EmailService {
         },
         body: JSON.stringify({
           from: FROM_EMAIL,
+          reply_to: PUBLIC_EMAIL,
           to,
           subject,
           html,

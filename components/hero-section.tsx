@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { useState } from "react"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
@@ -56,31 +57,19 @@ export function HeroSection() {
 
   return (
     <section id="hero" className="relative pt-24 md:pt-32 pb-16 md:pb-24 overflow-hidden bg-navy-950">
-      {/* Background Image — logistics / cảng biển */}
-      <div
-        className="absolute inset-0 z-0"
-        style={{
-          backgroundImage: "url(https://images.unsplash.com/photo-1566576721346-d4a3b4eaeb55?q=80&w=2000)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        {/* Lớp phủ navy đậm dần sang phải để ảnh vẫn lộ ra, không còn một màu xanh phẳng */}
-        <div className="absolute inset-0 bg-gradient-to-r from-navy-950/97 via-navy-900/92 to-navy-800/70" />
-      </div>
-
-      {/* Điểm nhấn xanh nhạt — glow + grid trang trí */}
-      <div className="pointer-events-none absolute inset-0 z-0" aria-hidden="true">
-        <div className="absolute -top-32 right-[-10%] w-[480px] h-[480px] rounded-full bg-sky-400/20 blur-[120px]" />
-        <div className="absolute bottom-[-20%] left-[15%] w-[420px] h-[420px] rounded-full bg-amber-400/10 blur-[120px]" />
-        <div
-          className="absolute inset-0 opacity-[0.07]"
-          style={{
-            backgroundImage:
-              "linear-gradient(to right, #7dd3fc 1px, transparent 1px), linear-gradient(to bottom, #7dd3fc 1px, transparent 1px)",
-            backgroundSize: "56px 56px",
-          }}
+      {/* Ảnh có sẵn trên website, không phụ thuộc dịch vụ ảnh bên ngoài. */}
+      <div className="absolute inset-0 z-0">
+        <Image
+          src="/international-trade-export-logistics-cargo-shippin.jpg"
+          alt="Minh họa bãi container, nhân sự và hoạt động logistics xuất nhập khẩu"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center"
         />
+        {/* Phủ tối vừa đủ để đọc chữ, giữ hình ảnh cảng biển nhìn thấy rõ. */}
+        <div className="absolute inset-0 bg-black/35" aria-hidden="true" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/35 to-black/5" aria-hidden="true" />
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
@@ -91,12 +80,22 @@ export function HeroSection() {
               <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
               Regulatory Compliance & Market Access
             </span>
+            {/*
+              H1 cũ là câu lợi ích ("Giảm rào cản pháp lý...") — không chứa từ khóa nào,
+              và H2 ngay dưới là một câu dài dùng làm tiêu đề. Nay:
+                - H1 chứa đúng cụm người dùng tìm: đăng ký FDA / tư vấn pháp lý / xuất khẩu sang Mỹ;
+                - câu lợi ích cũ chuyển xuống thành tagline dạng <p> (giữ nguyên giao diện);
+                - H2 dài thành <p> để heading chỉ dành cho khối nội dung thật.
+            */}
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-balance leading-tight">
-              Giảm rào cản pháp lý, sẵn sàng đưa sản phẩm ra thị trường quốc tế
+              Dịch vụ đăng ký FDA &amp; tư vấn pháp lý xuất khẩu sang Mỹ
             </h1>
-            <h2 className="text-2xl md:text-3xl font-bold mb-6 text-yellow-400 drop-shadow-lg">
+            <p className="text-2xl md:text-3xl font-bold mb-6 text-yellow-400 drop-shadow-lg">
+              Giảm rào cản pháp lý, sẵn sàng đưa sản phẩm ra thị trường quốc tế
+            </p>
+            <p className="text-lg md:text-xl font-semibold mb-6 text-white/95 leading-relaxed">
               Từ tuân thủ pháp lý, hoàn thiện hồ sơ đến hỗ trợ doanh nghiệp tiếp cận thị trường Hoa Kỳ và các thị trường quốc tế.
-            </h2>
+            </p>
             <p className="text-lg md:text-xl mb-8 text-white/90 leading-relaxed">
               Vexim Global tư vấn và hỗ trợ doanh nghiệp Việt Nam trong các yêu cầu pháp lý khi đưa sản phẩm ra thị trường quốc tế. Với thị trường Hoa Kỳ, chúng tôi tập trung vào{" "}
               <strong className="font-semibold text-white">FDA, FSVP và MOCRA</strong>, giúp doanh nghiệp xác định đúng yêu cầu, chuẩn bị đúng hồ sơ và xử lý theo quy trình rõ ràng.
@@ -107,7 +106,8 @@ export function HeroSection() {
                   <Shield className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-white/90">
-                  <strong className="font-semibold text-white">Cập nhật quy định</strong> — Theo dõi các yêu cầu và thay đổi pháp lý có thể ảnh hưởng đến sản phẩm và kế hoạch xuất khẩu.
+                  <strong className="block font-semibold text-white mb-1">Cập nhật quy định</strong>
+                  <span className="block leading-relaxed">Theo dõi các yêu cầu và thay đổi pháp lý có thể ảnh hưởng đến sản phẩm và kế hoạch xuất khẩu.</span>
                 </span>
               </li>
               <li className="flex items-start gap-3">
@@ -115,7 +115,8 @@ export function HeroSection() {
                   <FileCheck className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-white/90">
-                  <strong className="font-semibold text-white">Rà soát hồ sơ</strong> — Kiểm tra thông tin doanh nghiệp, sản phẩm, nhãn mác và tài liệu trước khi xử lý.
+                  <strong className="block font-semibold text-white mb-1">Rà soát hồ sơ</strong>
+                  <span className="block leading-relaxed">Kiểm tra thông tin doanh nghiệp, sản phẩm, nhãn mác và tài liệu trước khi xử lý.</span>
                 </span>
               </li>
               <li className="flex items-start gap-3">
@@ -123,7 +124,8 @@ export function HeroSection() {
                   <Clock className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-white/90">
-                  <strong className="font-semibold text-white">Quy trình rõ ràng</strong> — Xác định từng bước cần thực hiện, minh bạch phạm vi công việc và cập nhật tiến độ trong quá trình xử lý.
+                  <strong className="block font-semibold text-white mb-1">Quy trình rõ ràng</strong>
+                  <span className="block leading-relaxed">Xác định từng bước cần thực hiện, minh bạch phạm vi công việc và cập nhật tiến độ trong quá trình xử lý.</span>
                 </span>
               </li>
             </ul>
@@ -209,7 +211,7 @@ export function HeroSection() {
                 >
                   <option value="">Chọn dịch vụ</option>
                   <option value="fda">Đăng ký FDA</option>
-                  <option value="export-sales">Phòng sale xuất khẩu</option>
+                  <option value="export-sales">Vexim Trade — Nhà cung cấp nông sản</option>
                   <option value="fsvp">FSVP Compliance</option>
                   <option value="agent-us">Dịch vụ US Agent</option>
                   <option value="mocra">MOCRA Registration</option>
