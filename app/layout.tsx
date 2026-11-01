@@ -7,6 +7,7 @@ import { ClientWidgets } from "@/components/client-widgets"
 import { Toaster } from "@/components/ui/sonner"
 import { JsonLd } from "@/components/json-ld"
 import { buildSiteSchema } from "@/lib/schema"
+import { SITE_ICONS } from "@/lib/site-icons"
 import {
   OG_IMAGE,
   OG_IMAGE_ALT,
@@ -83,16 +84,7 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
     images: [OG_IMAGE.url],
   },
-  icons: {
-    icon: [
-      {
-        url: "/favicon.png",
-        type: "image/png",
-        sizes: "500x500",
-      },
-    ],
-    apple: "/apple-icon.png",
-  },
+  icons: SITE_ICONS,
   manifest: "/manifest.json",
   generator: 'v0.app'
 }
