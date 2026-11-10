@@ -9,16 +9,16 @@ const graph = normalize(B.buildCompleteHomeSchema())
 const definitions = new Map()
 const references = []
 
-function visit(value) {
-  if (Array.isArray(value)) return value.forEach(visit)
+function visit(value, nodes = definitions, refs = references) {
+  if (Array.isArray(value)) return value.forEach(item => visit(item, nodes, refs))
   if (!value || typeof value !== "object") return
   if (value['@id']) {
     if (Object.keys(value).length > 1) {
-      assert.ok(!definitions.has(value['@id']), `Duplicate definition: ${value['@id']}`)
-      definitions.set(value['@id'], value)
-    } else references.push(value['@id'])
+      assert.ok(!nodes.has(value['@id']), `Duplicate definition: ${value['@id']}`)
+      nodes.set(value['@id'], value)
+    } else refs.push(value['@id'])
   }
-  for (const child of Object.values(value)) visit(child)
+  for (const child of Object.values(value)) visit(child, nodes, refs)
 }
 
 try {
@@ -41,7 +41,7 @@ try {
   const service = definitions.get(P.HOME_SERVICE_ID)
   assert.equal(service['@type'], 'Service')
   assert.equal(service.provider['@id'], P.ORGANIZATION_ID)
-  assert.equal(service.name, 'Global B2B Digital Infrastructure & Export Acceleration Engine')
+  assert.equal(service.name, 'Global B2B Digital Infrastructure & Export Acceleration')
   assert.equal(definitions.get(`${P.SITE_URL}/#webpage`).inLanguage, 'en')
   assert.deepEqual(definitions.get(P.WEBSITE_ID).inLanguage, ['en', 'vi-VN'])
   assert.equal(service.hasOfferCatalog.itemListElement.length, 3)
@@ -60,7 +60,18 @@ try {
   const serialized = JSON.stringify(graph)
   assert.ok(!/https:\/\/veximglobal\.com|ProfessionalService|priceRange|admin\/dashboard|aggregateRating|postalCode/.test(serialized))
   assert.deepEqual(JSON.parse(readFileSync('docs/seo/homepage-schema.json', 'utf8')), graph)
-  console.log(`PASS: ${graph['@graph'].length} top-level entities; all ${references.length} @id references resolve; 3 digital engagement scopes; 6 legacy landing identities preserved; export current`)
+  const viGraph = normalize({ '@context': 'https://schema.org', '@graph': [...B.buildSiteSchema()['@graph'], ...B.buildVietnameseHomePageSchema()['@graph']] })
+  const viNodes = new Map(), viReferences = []
+  visit(viGraph, viNodes, viReferences)
+  for (const ref of viReferences) assert.ok(viNodes.has(ref), `Unresolved VI @id: ${ref}`)
+  assert.equal(viNodes.get(`${P.SITE_URL}/vi#webpage`).inLanguage, 'vi-VN')
+  assert.equal(viNodes.get(`${P.SITE_URL}/vi#webpage`).mainEntity['@id'], `${P.SITE_URL}/vi#service`)
+  assert.equal(viNodes.get(`${P.SITE_URL}/vi#service`).name, 'Hạ tầng số B2B toàn cầu & Tăng tốc xuất khẩu')
+  assert.equal(viNodes.get(`${P.SITE_URL}/vi#service`).hasOfferCatalog.itemListElement.length, 3)
+  assert.deepEqual(viNodes.get(P.ORGANIZATION_ID), organization, 'Business identity must be shared across languages')
+  assert.deepEqual(JSON.parse(readFileSync('docs/seo/homepage-schema-vi.json', 'utf8')), viGraph)
+  assert.ok(readFileSync('public/og-image-vi.jpg').length < 300_000)
+  console.log(`PASS: EN/VI page graphs, ${references.length} + ${viReferences.length} resolved @id references, unchanged business entity, 3 engagement scopes each, schema exports current`)
 
   // Optional integration check against actual SSR HTML, not an assumption from source.
   const base = process.env.SCHEMA_TEST_BASE_URL
@@ -87,6 +98,18 @@ try {
     assert.equal(home.$('h1').text().trim(), service.name)
     assert.ok(home.$('footer').text().includes(P.PUBLIC_EMAIL))
     assert.ok(home.$('footer').text().includes(P.ADDRESS.streetAddress))
+    const viHome = await getPage('/vi')
+    assert.deepEqual(viHome.nodes, viGraph['@graph'])
+    assert.equal(viHome.$('link[rel="canonical"]').attr('href'), `${P.SITE_URL}/vi`)
+    assert.equal(viHome.$('meta[property="og:url"]').attr('content'), `${P.SITE_URL}/vi`)
+    assert.equal(viHome.$('meta[property="og:locale"]').attr('content'), 'vi_VN')
+    assert.equal(viHome.$('html').attr('lang'), 'vi')
+    assert.equal(viHome.$('main').first().attr('lang'), 'vi')
+    assert.equal(viHome.$('h1').text().trim(), viNodes.get(`${P.SITE_URL}/vi#service`).name)
+    for (const page of [home.$, viHome.$]) {
+      assert.equal(page('link[rel="alternate"][hreflang="en"]').attr('href'), P.SITE_URL)
+      assert.equal(page('link[rel="alternate"][hreflang="vi"]').attr('href'), `${P.SITE_URL}/vi`)
+    }
     for (const item of P.SERVICE_CATALOG) {
       const { nodes, $ } = await getPage(item.path)
       const node = nodes.find(node => node['@id'] === P.serviceId(item.key))
@@ -96,7 +119,7 @@ try {
       assert.equal(nodes.filter(node => node['@id'] === P.ORGANIZATION_ID).length, 1)
       assert.equal($('html').attr('lang'), 'vi')
     }
-    console.log('PASS: English homepage SSR matches standalone export; canonical/OG/title/H1/footer match; all 6 legacy landing pages retain service identities and Vietnamese document language')
+    console.log('PASS: EN/VI homepage SSR matches schema exports and reciprocal hreflang; all 6 legacy landing pages retain service identities and Vietnamese document language')
   }
 } finally {
   cleanup()

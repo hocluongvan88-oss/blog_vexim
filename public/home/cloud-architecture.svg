@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 410" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Structured export web architecture</title><desc id="desc">Isometric cloud server cluster linked to structured product catalog cards.</desc>
+  <defs>
+    <linearGradient id="tile" x1="100" y1="210" x2="570" y2="390" gradientUnits="userSpaceOnUse"><stop stop-color="#fff"/><stop offset="1" stop-color="#D7E4FA"/></linearGradient>
+    <linearGradient id="server" x1="225" y1="67" x2="438" y2="328" gradientUnits="userSpaceOnUse"><stop stop-color="#fff"/><stop offset="1" stop-color="#D2E3FF"/></linearGradient>
+    <linearGradient id="face" x1="370" y1="145" x2="445" y2="350" gradientUnits="userSpaceOnUse"><stop stop-color="#86B6F5"/><stop offset="1" stop-color="#4D84D9"/></linearGradient>
+    <filter id="shadow" x="-35%" y="-40%" width="170%" height="190%"><feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#365BA5" flood-opacity=".17"/></filter>
+  </defs>
+  <ellipse cx="361" cy="342" rx="285" ry="47" fill="#B9CFFA" opacity=".34"/>
+  <g filter="url(#shadow)">
+    <path d="m66 268 260-136 311 139-266 136Z" fill="url(#tile)" stroke="#BACFF0" stroke-width="2"/>
+    <path d="m66 268 305 139v-20L66 249z" fill="#B6CCEE"/>
+    <path d="m371 407 266-136v-19L371 387z" fill="#719AD9"/>
+    <path d="m66 249 260-137 311 140-266 135Z" fill="url(#tile)" stroke="#ADCAEF" stroke-width="2"/>
+  </g>
+  <g stroke="#BDD0ED" opacity=".7"><path d="m118 276 249-128m-178 163 245-127m-171 164 245-127m-164 165 242-125"/><path d="m138 211 299 136m-230-172 298 137m-231-172 297 136"/></g>
+  <!-- Three tiers of isometric servers. -->
+  <g filter="url(#shadow)">
+    <path d="m240 185 84 39 83-43-85-40z" fill="#F8FBFF" stroke="#AFC8EC" stroke-width="2"/>
+    <path d="m240 185 84 39v82l-84-40z" fill="url(#server)" stroke="#A9C8F1" stroke-width="2"/>
+    <path d="m324 224 83-43v81l-83 44z" fill="url(#face)" stroke="#5C92D9" stroke-width="2"/>
+    <path d="m240 140 84 39 83-42-85-40z" fill="#fff" stroke="#AFC8EC" stroke-width="2"/>
+    <path d="m240 140 84 39v41l-84-40z" fill="#EAF3FF" stroke="#A9C8F1" stroke-width="2"/>
+    <path d="m324 179 83-42v41l-83 42z" fill="#7AACEB" stroke="#5C92D9" stroke-width="2"/>
+    <path d="m240 97 84 39 83-43-85-40z" fill="#fff" stroke="#AFC8EC" stroke-width="2"/>
+    <path d="m240 97 84 39v39l-84-39z" fill="#F5F9FF" stroke="#A9C8F1" stroke-width="2"/>
+    <path d="m324 136 83-43v40l-83 42z" fill="#9CC5FA" stroke="#5C92D9" stroke-width="2"/>
+    <path d="m261 113 41 19m-41 25 41 19m-41 25 41 19m-41 24 41 20" stroke="#A7C8F3" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="357" cy="151" r="5" fill="#D7FFEB"/><circle cx="357" cy="194" r="5" fill="#D7FFEB"/><circle cx="357" cy="239" r="5" fill="#D7FFEB"/>
+  </g>
+  <!-- Structured catalog sheets and a routed connection. -->
+  <path d="M402 240c54-27 73-3 89-15" stroke="#6B9FEA" stroke-width="3" stroke-dasharray="4 9"/>
+  <g filter="url(#shadow)">
+    <rect x="471" y="134" width="140" height="167" rx="18" fill="#fff" stroke="#BDCEF0" stroke-width="2"/>
+    <rect x="488" y="151" width="105" height="52" rx="10" fill="#E6F1FF"/>
+    <path d="m511 173 26-13 29 14-27 14z" fill="#fff" stroke="#4C87D5" stroke-width="2"/><path d="m511 173 28 15v13l-28-15z" fill="#91BDF4"/><path d="m539 188 27-14v13l-27 14z" fill="#3E80D2"/>
+    <rect x="489" y="220" width="87" height="6" rx="3" fill="#779FDA"/><rect x="489" y="237" width="64" height="5" rx="2.5" fill="#CCDDF4"/><rect x="489" y="251" width="99" height="5" rx="2.5" fill="#CCDDF4"/>
+    <circle cx="584" cy="280" r="10" fill="#E2F8EC"/><path d="m579 280 4 4 6-8" stroke="#20975C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <g fill="#fff" stroke="#9CBFEB" stroke-width="2"><circle cx="115" cy="168" r="9"/><circle cx="622" cy="108" r="7"/></g><circle cx="115" cy="168" r="3" fill="#0071E3"/><circle cx="622" cy="108" r="2.5" fill="#5E5CE6"/>
+</svg>

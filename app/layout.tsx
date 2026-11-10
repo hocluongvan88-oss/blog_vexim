@@ -20,7 +20,7 @@ import {
 } from "@/lib/business-profile"
 
 // Same Be Vietnam Pro typeface, now self-hosted (OFL) so builds do not depend on
-// Google Fonts being reachable. No eager preload on the English/Inter homepage.
+// Google Fonts being reachable. No eager font preload on public landing pages.
 const beVietnamPro = localFont({
   src: [
     { path: "./fonts/BeVietnamPro-Light.woff2", weight: "300" },
@@ -104,13 +104,14 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const englishPage = (await headers()).get("x-vexim-english-page") === "1"
+  const requestHeaders = await headers()
+  const englishPage = requestHeaders.get("x-vexim-english-page") === "1"
+  const publicLanding = requestHeaders.get("x-vexim-public-landing") === "1"
   return (
     <html lang={englishPage ? "en" : "vi"}>
-      <head>
-        {englishPage && <link rel="preload" href="/fonts/inter-home-latin.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />}
-      </head>
-      <body className={`${beVietnamPro.variable} font-sans antialiased`}>
+      {/* Each public route's optional display font loads without blocking its
+          critical CSS/hero image. The Vietnamese service font is unchanged. */}
+      <body className={`${beVietnamPro.variable} ${publicLanding ? "" : "font-sans"} antialiased`}>
         {/* Một khối @graph duy nhất: Organization, Logo và WebSite tham chiếu nhau được */}
         <JsonLd id="site-schema" data={siteSchema} />
         {children}

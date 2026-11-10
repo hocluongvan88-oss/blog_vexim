@@ -22,6 +22,7 @@ const ZaloChatButton = dynamic(() => import("@/components/zalo-chat-button").the
  * và chuông thông báo cho admin vẫn hoạt động nguyên vẹn.
  */
 const SHOW_ZALO_BUTTON = true
+const LANDING_PATHS = new Set(["/", "/privacy", "/vi", "/vi/privacy"])
 
 /**
  * Các kênh liên hệ hiển thị trên website (ẩn trong trang quản trị /admin).
@@ -37,11 +38,15 @@ export function ClientWidgets() {
   // aligned with the current page after navigation from a Vietnamese Next Link.
   useEffect(() => {
     document.documentElement.lang = pathname === "/" || pathname === "/privacy" ? "en" : "vi"
+    // Root layouts persist on client navigation; match the server's public
+    // landing font rule when moving between home and service/blog pages.
+    document.body.classList.toggle("font-sans", !LANDING_PATHS.has(pathname))
   }, [pathname])
 
-  // English pages use their own contact flow. The Vietnamese chat/Zalo overlays
-  // would both dilute positioning and load extra JS on the export homepage.
-  if (pathname === "/" || pathname === "/privacy" || pathname?.startsWith("/admin")) return null
+  // Both localized landing/privacy pairs share the audit/contact flow. Keep
+  // Vietnamese chat/Zalo overlays (and their third-party SDK) on the existing
+  // service/blog routes, not over either editorial homepage.
+  if (LANDING_PATHS.has(pathname) || pathname?.startsWith("/admin")) return null
 
   return (
     <>

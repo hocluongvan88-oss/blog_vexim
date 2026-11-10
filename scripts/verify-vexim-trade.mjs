@@ -311,11 +311,10 @@ try {
     assert.equal(legacyLabel.status, 308)
     assert.equal(legacyLabel.headers.get("location"), "/services/food/label-compliance")
     const home = load(await (await fetch(base)).text())
-    assert.ok(home('#services a[href="/services/export-sales"]').text().includes("Vexim Trade"))
-    assert.equal(
-      home('#services img[alt="Vexim Trade — Vexim Global"]').attr("src"),
-      T.TRADE_IMAGES.service.src,
-    )
+    // The new English homepage links to the separate Trade platform from its hero and bento.
+    assert.ok(home('a[href="https://veximtrade.com"]').length >= 2)
+    assert.ok(home('#solutions a[href="https://veximtrade.com"]').text().includes("Vexim Trade"))
+    assert.equal(home('#solutions img[src="/home/trade-connect.svg"]').length, 1)
     const sitemap = await (await fetch(`${base}/sitemap.xml`)).text()
     assert.ok(sitemap.includes(`${P.SITE_URL}${T.TRADE.path}`))
     assert.ok(sitemap.includes("2026-10-24T17:00:00.000Z"))

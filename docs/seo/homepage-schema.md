@@ -2,17 +2,18 @@
 
 Được sinh từ code hiện tại. Không chép lại dữ liệu cũ và không tự thêm giá, tọa độ, số liệu thứ hạng hoặc chứng nhận.
 
-- Canonical / OG / sitemap: **https://www.veximglobal.com**.
-- Trang chủ WebPage: **en**; WebSite: tiếng Anh và tiếng Việt (blog/dịch vụ còn bằng tiếng Việt).
+- Trang chủ tiếng Anh: canonical/OG **https://www.veximglobal.com**, WebPage **en**.
+- Trang chủ tiếng Việt: canonical/OG **https://www.veximglobal.com/vi**, WebPage **vi-VN**; hai trang có hreflang hai chiều và trong sitemap. JSON-LD tiếng Việt nằm tại `homepage-schema-vi.json`.
+- WebSite: tiếng Anh và tiếng Việt; blog và trang dịch vụ vẫn chỉ có tiếng Việt cho đến khi có bản dịch được biên tập và duyệt.
 - Organization / LocalBusiness: một node chung toàn website, số điện thoại **+84373685634**, email **contact@veximglobal.com**, địa chỉ **25/6/51 Ngọa Long, Tây Tựu, Hà Nội**.
-- Slogan doanh nghiệp được giữ như thông tin thương hiệu đã xác nhận; phần chữ nhìn thấy trên trang chủ đều tiếng Anh.
-- Service chính: hạ tầng xuất khẩu B2B và Buyer-Intent SEO; ba phạm vi hợp tác được đề xuất: Core Launchpad, Global Growth Engine, Enterprise Dominance. Không có giá hoặc cam kết thứ hạng.
+- Slogan doanh nghiệp được giữ như thông tin thương hiệu đã xác nhận; nội dung mỗi trang chủ theo ngôn ngữ của URL.
+- Service chính: hạ tầng xuất khẩu B2B và Buyer-Intent SEO; ba phạm vi hợp tác được đề xuất: B2B Launchpad, Global Growth Engine, Enterprise Dominance. Không có giá hoặc cam kết thứ hạng.
 - FDA, GACC, MoCRA và US Agent là liên kết phụ; 6 định danh service trang dịch vụ trước đây vẫn giữ nguyên trên từng landing page, không còn là catalog chính của trang chủ.
-- Ảnh trang chủ/OG là tệp thực 1200×630, không chứa số liệu minh họa như hiệu suất thật.
+- Ảnh OG cho mỗi ngôn ngữ là tệp thực 1200×630, không chứa số liệu minh họa như hiệu suất thật.
 
 ## Cách sử dụng
 
-Root layout xuất Organization/LocalBusiness, Logo và WebSite. Trang chủ xuất WebPage, ImageObject, Vexim Trade Organization và Service. Dùng chung @id nhưng **không chèn** bản gộp này thêm lần nữa vào Next.js.
+Root layout xuất Organization/LocalBusiness, Logo và WebSite. Mỗi trang chủ xuất WebPage, ImageObject, Vexim Trade Organization và Service theo ngôn ngữ của mình. Dùng chung @id doanh nghiệp nhưng mỗi WebPage/Service có @id riêng; **không chèn** bản gộp này thêm lần nữa vào Next.js.
 
 ## JSON-LD hoàn chỉnh
 
@@ -186,7 +187,7 @@ Root layout xuất Organization/LocalBusiness, Logo và WebSite. Trang chủ xu�
     {
       "@type": "Service",
       "@id": "https://www.veximglobal.com/#service",
-      "name": "Global B2B Digital Infrastructure & Export Acceleration Engine",
+      "name": "Global B2B Digital Infrastructure & Export Acceleration",
       "serviceType": "B2B Digital Export Infrastructure & Buyer-Intent SEO",
       "description": "Vexim Global builds B2B export websites, buyer-intent SEO and Vexim Trade connections for Vietnamese manufacturers entering international markets.",
       "url": "https://www.veximglobal.com",
@@ -211,8 +212,8 @@ Root layout xuất Organization/LocalBusiness, Logo và WebSite. Trang chủ xu�
             "itemOffered": {
               "@type": "Service",
               "@id": "https://www.veximglobal.com/#service-core",
-              "name": "B2B Core Launchpad",
-              "description": "A focused starting point for an export-ready category.",
+              "name": "B2B Launchpad",
+              "description": "A focused digital export starting point for one product line.",
               "serviceType": "Digital export infrastructure",
               "url": "https://www.veximglobal.com/#services",
               "provider": {
@@ -227,7 +228,7 @@ Root layout xuất Organization/LocalBusiness, Logo và WebSite. Trang chủ xu�
               "@type": "Service",
               "@id": "https://www.veximglobal.com/#service-growth",
               "name": "Global Growth Engine",
-              "description": "A coordinated web, search and content operation for a broader portfolio.",
+              "description": "An ongoing search, content and inquiry operation across a broader catalog.",
               "serviceType": "Digital export infrastructure",
               "url": "https://www.veximglobal.com/#services",
               "provider": {
@@ -242,7 +243,7 @@ Root layout xuất Organization/LocalBusiness, Logo và WebSite. Trang chủ xu�
               "@type": "Service",
               "@id": "https://www.veximglobal.com/#service-enterprise",
               "name": "Enterprise Dominance",
-              "description": "An export agency retainer built around your operating complexity.",
+              "description": "A tailored export agency retainer aligned with your product and market complexity.",
               "serviceType": "Digital export infrastructure",
               "url": "https://www.veximglobal.com/#services",
               "provider": {
