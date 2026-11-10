@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Calendar, User, ArrowRight, FolderOpen } from "lucide-react"
 import Link from "next/link"
 import { BlogSearch } from "@/components/blog-search"
-import { PopularPosts } from "@/components/popular-posts"
+import { RecentPosts } from "@/components/recent-posts"
+import { BlogSidebarRail } from "@/components/blog-sidebar-rail"
 import BlogSidebar from "@/components/blog-sidebar"
 import { BLOG_CATEGORY_SLUGS } from "@/lib/blog-categories"
 
@@ -122,7 +123,7 @@ export default async function BlogPage({ searchParams }: { searchParams: Promise
         </section>
 
         {/* Categories Filter */}
-        <section className="py-6 border-b bg-white sticky top-[68px] md:top-[84px] z-30">
+        <section id="blog-category-filter" className="py-6 border-b bg-white sticky top-[68px] md:top-[84px] z-30">
           <div className="container mx-auto px-4">
             <div className="flex flex-wrap gap-2.5 justify-center">
               {categories.map((cat) => {
@@ -215,11 +216,11 @@ export default async function BlogPage({ searchParams }: { searchParams: Promise
               </div>
 
               {/* Sidebar */}
-              <aside className="lg:sticky lg:top-32 h-fit space-y-6">
-                <PopularPosts />
+              <BlogSidebarRail offsetElementId="blog-category-filter">
+                <RecentPosts />
 
                 {/* Danh mục */}
-                <Card className="overflow-hidden">
+                <Card className="gap-0 overflow-hidden p-0">
                   <div className="relative bg-gradient-to-r from-navy-900 to-navy-800 px-6 py-4 overflow-hidden">
                     <div className="pointer-events-none absolute -right-6 -top-8 w-28 h-28 rounded-full bg-sky-400/20 blur-2xl" aria-hidden="true" />
                     <div className="flex items-center gap-2.5 relative">
@@ -252,9 +253,9 @@ export default async function BlogPage({ searchParams }: { searchParams: Promise
                   </div>
                 </Card>
 
-                {/* Form tư vấn + thống kê + dịch vụ nổi bật */}
+                {/* Form tư vấn + dịch vụ nổi bật */}
                 <BlogSidebar />
-              </aside>
+              </BlogSidebarRail>
             </div>
           </div>
         </section>

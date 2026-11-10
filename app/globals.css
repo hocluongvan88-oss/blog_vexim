@@ -194,6 +194,14 @@ html {
   max-width: 100vw;
 }
 
+/* Keep blog sidebars/TOC sticky to the viewport. `overflow-x: hidden` on
+   body also computes overflow-y to auto, creating a non-scrolling ancestor.
+   Clip still prevents horizontal overflow without creating that scroll box;
+   scope this to blog pages so other layouts keep their existing behavior. */
+body:has([data-blog-sidebar-rail]) {
+  overflow-x: clip;
+}
+
 /* Thêm styles cho Rich Text Editor để hiển thị định dạng đẹp */
 /* Rich Text Editor Styles */
 .prose {

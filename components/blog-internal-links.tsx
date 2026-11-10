@@ -17,7 +17,7 @@ const categoryToServices: Record<string, Array<{
       icon: FileCheck,
     },
     {
-      title: "Vexim Trade",
+      title: "Nền tảng kết nối B2B",
       description: "Hồ sơ nhà cung cấp nông sản Việt Nam, xác minh từng bước và yêu cầu báo giá gửi thẳng",
       href: "/services/export-sales",
       icon: TrendingUp,
@@ -61,7 +61,7 @@ const categoryToServices: Record<string, Array<{
   ],
   "Xuất nhập khẩu": [
     {
-      title: "Vexim Trade",
+      title: "Nền tảng kết nối B2B",
       description: "Hồ sơ nhà cung cấp nông sản Việt Nam, xác minh từng bước và yêu cầu báo giá gửi thẳng",
       href: "/services/export-sales",
       icon: TrendingUp,
@@ -101,7 +101,7 @@ const categoryToServices: Record<string, Array<{
   ],
   "Tin tức thị trường": [
     {
-      title: "Vexim Trade",
+      title: "Nền tảng kết nối B2B",
       description: "Hồ sơ nhà cung cấp nông sản Việt Nam, xác minh từng bước và yêu cầu báo giá gửi thẳng",
       href: "/services/export-sales",
       icon: TrendingUp,
@@ -130,7 +130,7 @@ const defaultServices = [
     icon: Globe,
   },
   {
-    title: "Vexim Trade",
+    title: "Nền tảng kết nối B2B",
     description: "Hồ sơ nhà cung cấp nông sản Việt Nam, xác minh từng bước và yêu cầu báo giá gửi thẳng",
     href: "/services/export-sales",
     icon: TrendingUp,

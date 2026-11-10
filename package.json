@@ -20,7 +20,8 @@
     "start": "next start",
     "schema:trade": "node scripts/verify-vexim-trade.mjs --export",
     "test:trade": "node scripts/verify-vexim-trade.mjs",
-    "test:trade:browser": "node scripts/verify-vexim-trade-browser.mjs"
+    "test:trade:browser": "node scripts/verify-vexim-trade-browser.mjs",
+    "test:blog-sidebar": "node scripts/verify-blog-sidebar.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

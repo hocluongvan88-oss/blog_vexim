@@ -6,10 +6,8 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Mail, Phone, CheckCircle2, TrendingUp, Award, Clock, User } from "lucide-react"
+import { Mail, Phone, CheckCircle2, Award, User } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { motion } from "framer-motion"
-import { useRef } from "react"
 import { ServiceLink as Link } from "@/components/service-link"
 
 /**
@@ -21,7 +19,7 @@ const featuredServices = [
   { label: "Đăng ký FDA thực phẩm, mỹ phẩm, dược phẩm", href: "/services/fda" },
   { label: "Đại lý chính thức tại Hoa Kỳ (US Agent)", href: "/services/us-agent" },
   { label: "Tư vấn đăng ký GACC Trung Quốc", href: "/services/gacc" },
-  { label: "Vexim Trade", href: "/services/export-sales" },
+  { label: "Nền tảng kết nối B2B", href: "/services/export-sales" },
 ]
 
 export default function BlogSidebar() {
@@ -32,10 +30,6 @@ export default function BlogSidebar() {
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
-  const containerRef = useRef(null)
-  const y1 = 0
-  const y2 = 0
-  const y3 = 0
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -81,14 +75,11 @@ export default function BlogSidebar() {
   }
 
   return (
-    <aside className="h-full">
-      {/* Wrapper group for sticky behavior - ensures all 3 cards stay together */}
-      <div className="sticky top-24 space-y-6">
-
-        {/* CTA Card — navy đậm + điểm nhấn xanh nhạt, CTA vàng/cam */}
-        <Card className="relative p-6 bg-gradient-to-br from-navy-950 via-navy-900 to-navy-800 text-white overflow-hidden">
-          <div className="pointer-events-none absolute -top-12 -right-12 w-40 h-40 rounded-full bg-sky-400/20 blur-3xl" aria-hidden="true" />
-          <div className="relative">
+    <div className="space-y-6">
+      {/* CTA Card — navy đậm + điểm nhấn xanh nhạt, CTA vàng/cam */}
+      <Card className="relative p-6 bg-gradient-to-br from-navy-950 via-navy-900 to-navy-800 text-white overflow-hidden">
+        <div className="pointer-events-none absolute -top-12 -right-12 w-40 h-40 rounded-full bg-sky-400/20 blur-3xl" aria-hidden="true" />
+        <div className="relative">
           <div className="flex items-center gap-2 mb-4">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
               <Award className="w-5 h-5 text-navy-950" />
@@ -186,65 +177,26 @@ export default function BlogSidebar() {
               <p className="text-white/90 text-sm">Chúng tôi sẽ liên hệ với bạn trong 24h</p>
             </div>
           )}
-          </div>
-        </Card>
+        </div>
+      </Card>
 
-        {/* Stats Card */}
-        <Card className="p-6">
-          <h4 className="font-bold text-lg mb-4 text-primary">Tại sao chọn Vexim Global?</h4>
+      {/* Services Quick Links */}
+      <Card className="gap-0 p-6">
+        <h4 className="font-bold text-lg mb-4 text-primary">Dịch vụ nổi bật</h4>
 
-          <div className="space-y-4">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
-                <TrendingUp className="w-5 h-5 text-accent" />
-              </div>
-              <div>
-                <div className="font-bold text-2xl text-primary">500+</div>
-                <div className="text-sm text-muted-foreground">Doanh nghiệp tin dùng</div>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <Award className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <div className="font-bold text-2xl text-primary">98%</div>
-                <div className="text-sm text-muted-foreground">Hồ sơ được chấp thuận</div>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
-                <Clock className="w-5 h-5 text-accent" />
-              </div>
-              <div>
-                <div className="font-bold text-2xl text-primary">10+</div>
-                <div className="text-sm text-muted-foreground">Năm kinh nghiệm</div>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* Services Quick Links */}
-        <Card className="p-6">
-          <h4 className="font-bold text-lg mb-4 text-primary">Dịch vụ nổi bật</h4>
-
-          <div className="space-y-3">
-            {featuredServices.map((service) => (
-              <Link
-                key={service.href}
-                href={service.href}
-                className="flex items-center gap-2 p-3 rounded-lg hover:bg-accent/5 transition-colors group"
-              >
-                <CheckCircle2 className="w-4 h-4 text-accent flex-shrink-0" />
-                <span className="text-sm group-hover:text-accent transition-colors">{service.label}</span>
-              </Link>
-            ))}
-          </div>
-        </Card>
-
-      </div>
-    </aside>
+        <div className="space-y-3">
+          {featuredServices.map((service) => (
+            <Link
+              key={service.href}
+              href={service.href}
+              className="flex items-center gap-2 p-3 rounded-lg hover:bg-accent/5 transition-colors group"
+            >
+              <CheckCircle2 className="w-4 h-4 text-accent flex-shrink-0" />
+              <span className="text-sm group-hover:text-accent transition-colors">{service.label}</span>
+            </Link>
+          ))}
+        </div>
+      </Card>
+    </div>
   )
 }
