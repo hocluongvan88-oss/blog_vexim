@@ -88,12 +88,18 @@ try {
       width: document.documentElement.scrollWidth, viewport: innerWidth,
       h1: document.querySelector("h1")?.textContent,
       cls: window.__homeCLS || 0,
+      heroTextAlign: getComputedStyle(document.querySelector('[class*="heroCopy"]')).textAlign,
+      heroCopy: document.querySelector('[class*="heroCopy"]').getBoundingClientRect().toJSON(),
+      heroStage: document.querySelector('figure[class*="heroStage"]').getBoundingClientRect().toJSON(),
       solution: getComputedStyle(document.querySelector('#solutions')).backgroundColor,
       header: getComputedStyle(document.querySelector('header')).position,
     }))
     assert.equal(state.lang, "en")
     assert.equal(state.width, state.viewport, `horizontal overflow at ${width}px`)
     assert.equal(state.h1, heading)
+    assert.equal(state.heroTextAlign, "left", `editorial headline alignment at ${width}px`)
+    if (width > 960) assert.ok(state.heroStage.left >= state.heroCopy.right + 16, `illustration belongs beside the headline at ${width}px`)
+    else assert.ok(state.heroStage.top >= state.heroCopy.bottom + 20, `illustration belongs below the copy at ${width}px`)
     assert.ok(state.cls < 0.01, `initial layout shift ${state.cls} at ${width}px`)
     assert.equal(state.solution, "rgb(255, 255, 255)")
     assert.equal(state.header, "sticky")

@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowRight, ArrowUpRight, Check, CircleHelp, Globe2, Rocket, Search, ShieldCheck } from "lucide-react"
+import { ArrowDown, ArrowRight, ArrowUpRight, Check, CircleHelp, Globe2, Search, ShieldCheck } from "lucide-react"
 import { ADDRESS, ORGANIZATION_NAME, PHONE_DISPLAY, PUBLIC_EMAIL, SAME_AS } from "@/lib/business-profile"
 import { VEXIM_PHONE_TEL_URL } from "@/lib/contact-info"
 import { EXPORT_PILLARS, EXPORT_TIERS, HOME_POSITIONING } from "@/lib/homepage-content"
@@ -15,25 +15,27 @@ export function HomeHero() {
   return <section className={styles.hero} aria-labelledby="hero-title">
     <div className={styles.heroGlow} aria-hidden="true" />
     <div className={`${styles.container} ${styles.heroInner}`}>
-      <div className={styles.heroCopy}>
-        <p className={styles.heroBadge}><Rocket size={16} aria-hidden="true" /><span>The Next-Gen Export Acceleration Engine</span><ArrowUpRight size={15} aria-hidden="true" /></p>
-        <h1 id="hero-title">Global B2B Digital <span>Infrastructure</span> &amp; Export Acceleration</h1>
-        <p className={styles.heroDescription}>{HOME_POSITIONING.description}</p>
-        <div className={styles.heroActions}>
-          <AuditButton className={styles.heroPrimary}>Request Digital Audit <ArrowUpRight size={18} aria-hidden="true" /></AuditButton>
-          <a className={styles.heroSecondary} {...tradeLink}>Explore Vexim Trade Platform <ArrowUpRight size={17} aria-hidden="true" /></a>
+      <div className={styles.heroLead}>
+        <div className={styles.heroCopy}>
+          <p className={styles.heroBadge}>The Next-Gen Export Acceleration Engine</p>
+          <h1 id="hero-title">Global B2B Digital <span>Infrastructure</span> &amp; Export Acceleration</h1>
+          <p className={styles.heroDescription}>{HOME_POSITIONING.description}</p>
+          <div className={styles.heroActions}>
+            <AuditButton className={styles.heroPrimary}>Request Digital Audit <ArrowUpRight size={18} aria-hidden="true" /></AuditButton>
+            <a className={styles.heroSecondary} {...tradeLink}>Explore Vexim Trade Platform <ArrowUpRight size={17} aria-hidden="true" /></a>
+          </div>
+          <p className={styles.heroFootnote}><span className={styles.statusDot} /> Built for Vietnamese manufacturers. Designed for international buyers.</p>
         </div>
-        <p className={styles.heroFootnote}><span className={styles.statusDot} /> Built for Vietnamese manufacturers. Designed for international buyers.</p>
+        <figure className={styles.heroStage}>
+          <span className={styles.stageTagStart} aria-hidden="true"><span className={styles.stageTagIcon}><Globe2 size={16} /></span><span>Built in Vietnam<small>Official supplier presence</small></span></span>
+          <img className={styles.heroScene} src="/home/export-network.svg" width="1160" height="540" alt="Isometric illustration connecting a Vietnamese factory and product catalog with buyers in North America and Europe" fetchPriority="high" decoding="sync" />
+          <span className={styles.stageTagEnd} aria-hidden="true"><span className={styles.stageTagIcon}><ArrowUpRight size={16} /></span><span>Ready for global discovery<small>North America · Europe</small></span></span>
+          <figcaption>Concept illustration · no live buyer or ranking data</figcaption>
+        </figure>
       </div>
-      <figure className={styles.heroStage}>
-        <span className={styles.stageTagStart} aria-hidden="true"><span className={styles.stageTagIcon}><Globe2 size={16} /></span><span>Built in Vietnam<small>Official supplier presence</small></span></span>
-        <img className={styles.heroScene} src="/home/export-network.svg" width="1160" height="540" alt="Isometric illustration connecting a Vietnamese factory and product catalog with buyers in North America and Europe" fetchPriority="high" />
-        <span className={styles.stageTagEnd} aria-hidden="true"><span className={styles.stageTagIcon}><ArrowUpRight size={16} /></span><span>Ready for global discovery<small>North America · Europe</small></span></span>
-        <figcaption>Concept illustration · no live buyer or ranking data</figcaption>
-      </figure>
       <div className={styles.heroPathway} aria-label="The connected export system"><span>Owned foundation</span><ArrowRight size={16} aria-hidden="true" /><span>Buyer-intent discovery</span><ArrowRight size={16} aria-hidden="true" /><span>Trade connection</span></div>
+      <a className={styles.heroScroll} href="#solutions">Explore the system <ArrowDown size={16} aria-hidden="true" /></a>
     </div>
-    <a className={styles.heroScroll} href="#solutions">Explore the system <ArrowDown size={16} aria-hidden="true" /></a>
   </section>
 }
 
