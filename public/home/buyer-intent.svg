@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 410" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Global buyer-intent discovery</title><desc id="desc">Isometric search lens above a globe with selected buyer markets and a connected search route.</desc>
+  <defs>
+    <linearGradient id="base" x1="85" y1="212" x2="650" y2="379" gradientUnits="userSpaceOnUse"><stop stop-color="#fff"/><stop offset="1" stop-color="#D9DEFA"/></linearGradient>
+    <linearGradient id="globe" x1="232" y1="74" x2="456" y2="303" gradientUnits="userSpaceOnUse"><stop stop-color="#F7FAFF"/><stop offset=".5" stop-color="#B8CEFF"/><stop offset="1" stop-color="#7E95E1"/></linearGradient>
+    <linearGradient id="lens" x1="380" y1="51" x2="507" y2="231" gradientUnits="userSpaceOnUse"><stop stop-color="#fff"/><stop offset="1" stop-color="#8EADF8"/></linearGradient>
+    <linearGradient id="handle" x1="441" y1="186" x2="559" y2="321" gradientUnits="userSpaceOnUse"><stop stop-color="#92B3F8"/><stop offset="1" stop-color="#4246AE"/></linearGradient>
+    <filter id="shadow" x="-35%" y="-40%" width="170%" height="190%"><feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#5A63B4" flood-opacity=".18"/></filter>
+  </defs>
+  <ellipse cx="369" cy="347" rx="279" ry="48" fill="#BFC8F3" opacity=".38"/>
+  <g filter="url(#shadow)">
+    <path d="m72 273 264-134 309 136-263 134Z" fill="url(#base)" stroke="#C6CFF0" stroke-width="2"/>
+    <path d="m72 273 310 136v-19L72 253z" fill="#BFC8ED"/>
+    <path d="m382 409 263-134v-21L382 390z" fill="#899DDF"/>
+    <path d="m72 253 264-133 309 134-263 136Z" fill="url(#base)" stroke="#B9C7EE" stroke-width="2"/>
+  </g>
+  <path d="M135 254c64-52 131-59 189-21s92 63 170 27" stroke="#7AA9F3" stroke-width="3" stroke-dasharray="4 8"/>
+  <g filter="url(#shadow)">
+    <circle cx="314" cy="194" r="110" fill="url(#globe)" stroke="#8EADE8" stroke-width="3"/>
+    <ellipse cx="314" cy="194" rx="106" ry="35" stroke="#E8F1FF" stroke-width="3" opacity=".85"/>
+    <ellipse cx="314" cy="194" rx="52" ry="107" stroke="#ECF3FF" stroke-width="3" opacity=".8"/>
+    <path d="M211 194h207m-185-51h163m-167 101h171" stroke="#E7EEFF" stroke-width="2" opacity=".9"/>
+    <path d="m260 128 20-16 24 7 17 20-9 13-23-3-10 19-22-7zm78 71 27-13 26 13-2 21-17 7-11 25-27-4-8-21z" fill="#EAF1FF" opacity=".83"/>
+    <circle cx="250" cy="176" r="7" fill="#fff" stroke="#5E5CE6" stroke-width="3"/>
+    <circle cx="354" cy="151" r="7" fill="#fff" stroke="#0071E3" stroke-width="3"/>
+    <circle cx="367" cy="238" r="7" fill="#fff" stroke="#22A567" stroke-width="3"/>
+  </g>
+  <!-- The glass search lens casts a colored, dimensional shadow. -->
+  <g filter="url(#shadow)">
+    <path d="m437 240 39-35 116 98c11 9 12 18 4 27l-6 6c-8 9-18 8-28 0z" fill="url(#handle)" stroke="#656AC6" stroke-width="3"/>
+    <path d="m459 224 26-25 106 90-29 26z" fill="#D6DEFF" opacity=".6"/>
+    <circle cx="418" cy="144" r="90" fill="#fff" stroke="#A9BFF5" stroke-width="5"/>
+    <circle cx="418" cy="144" r="69" fill="url(#lens)" stroke="#F4F7FF" stroke-width="3"/>
+    <circle cx="418" cy="144" r="48" fill="#E5EDFF" opacity=".65"/>
+    <path d="m383 143 18 15 43-40" stroke="#3A55C0" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M374 90c21-23 55-30 82-17" stroke="#fff" stroke-width="8" stroke-linecap="round" opacity=".82"/>
+  </g>
+  <g fill="#fff" stroke="#B6C4EF" stroke-width="2"><circle cx="140" cy="142" r="9"/><circle cx="584" cy="147" r="8"/></g><circle cx="140" cy="142" r="3.5" fill="#0071E3"/><circle cx="584" cy="147" r="3" fill="#5E5CE6"/>
+</svg>

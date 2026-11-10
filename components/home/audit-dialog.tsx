@@ -8,7 +8,7 @@ import styles from "./home.module.css"
 
 const AuditContext = createContext<((scope?: string) => void) | null>(null)
 
-export function AuditButton({ children = "Request Free Digital Audit", className, scope }: { children?: ReactNode; className?: string; scope?: string }) {
+export function AuditButton({ children = "Request Digital Audit", className, scope }: { children?: ReactNode; className?: string; scope?: string }) {
   const open = useContext(AuditContext)
   return <button type="button" className={className || styles.primaryButton} onClick={() => open?.(scope)}>{children}</button>
 }

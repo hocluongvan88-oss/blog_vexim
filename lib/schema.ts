@@ -29,7 +29,7 @@ import {
 } from "./business-profile"
 
 import { TRADE, TRADE_CATEGORIES, buildTradeOrganization } from "./vexim-trade-content"
-import { EXPORT_TIERS } from "./homepage-content"
+import { EXPORT_TIERS, HOME_POSITIONING } from "./homepage-content"
 
 const HOME_PAGE_ID = `${SITE_URL}/#webpage`
 const HOME_IMAGE_ID = `${SITE_URL}/#primaryimage`
@@ -119,7 +119,7 @@ export function buildHomeServiceSchema() {
     "@context": "https://schema.org",
     "@type": "Service",
     "@id": HOME_SERVICE_ID,
-    name: "Global B2B Digital Infrastructure & Export Acceleration Engine",
+    name: HOME_POSITIONING.headline,
     serviceType: "B2B Digital Export Infrastructure & Buyer-Intent SEO",
     description: SITE_DESCRIPTION,
     url: SITE_URL,

@@ -11,6 +11,7 @@
     "test:icons": "node scripts/verify-favicons.mjs",
     "test:post-editor:browser": "node scripts/verify-post-editor-layout.mjs",
     "schema:export": "node scripts/generate-home-schema.mjs",
+    "og:home": "node scripts/generate-home-og.mjs",
     "test:fda:browser": "node scripts/verify-fda-browser.mjs",
     "test:fda": "node scripts/verify-fda-page.mjs",
     "og:fda": "node scripts/generate-fda-og.mjs",

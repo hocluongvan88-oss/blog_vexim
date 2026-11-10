@@ -41,7 +41,7 @@ try {
   const service = definitions.get(P.HOME_SERVICE_ID)
   assert.equal(service['@type'], 'Service')
   assert.equal(service.provider['@id'], P.ORGANIZATION_ID)
-  assert.equal(service.name, 'Global B2B Digital Infrastructure & Export Acceleration Engine')
+  assert.equal(service.name, 'Global B2B Digital Infrastructure & Export Acceleration')
   assert.equal(definitions.get(`${P.SITE_URL}/#webpage`).inLanguage, 'en')
   assert.deepEqual(definitions.get(P.WEBSITE_ID).inLanguage, ['en', 'vi-VN'])
   assert.equal(service.hasOfferCatalog.itemListElement.length, 3)

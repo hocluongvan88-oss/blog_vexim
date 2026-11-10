@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Vexim Trade connection</title><desc id="desc">Isometric shipping containers and a digital buyer profile connected by a blue marketplace route.</desc>
+  <defs>
+    <linearGradient id="tile" x1="70" y1="243" x2="728" y2="414" gradientUnits="userSpaceOnUse"><stop stop-color="#fff"/><stop offset="1" stop-color="#D9E8FF"/></linearGradient>
+    <linearGradient id="container" x1="166" y1="170" x2="421" y2="310" gradientUnits="userSpaceOnUse"><stop stop-color="#8CC8FF"/><stop offset="1" stop-color="#1878D2"/></linearGradient>
+    <linearGradient id="card" x1="472" y1="93" x2="628" y2="309" gradientUnits="userSpaceOnUse"><stop stop-color="#fff"/><stop offset="1" stop-color="#E4F0FF"/></linearGradient>
+    <filter id="shadow" x="-35%" y="-40%" width="170%" height="190%"><feDropShadow dx="0" dy="15" stdDeviation="18" flood-color="#3567AD" flood-opacity=".17"/></filter>
+  </defs>
+  <ellipse cx="411" cy="365" rx="323" ry="53" fill="#B0CFF9" opacity=".36"/>
+  <g filter="url(#shadow)">
+    <path d="m61 272 289-148 385 151-288 151Z" fill="url(#tile)" stroke="#C0D6F3" stroke-width="2"/>
+    <path d="m61 272 386 154v-20L61 252z" fill="#AFCBF0"/>
+    <path d="m447 426 288-151v-20L447 406z" fill="#78A2DF"/>
+    <path d="m61 252 289-149 385 152-288 151Z" fill="url(#tile)" stroke="#AFCCF0" stroke-width="2"/>
+  </g>
+  <g opacity=".48" stroke="#C3D6F2"><path d="m139 288 284-144m-180 185 284-144m-174 186 284-144"/><path d="m161 201 384 153m-281-209 383 152"/></g>
+  <!-- Blue shipping container and a smaller emerald shipment. -->
+  <g filter="url(#shadow)">
+    <path d="m142 219 139 56v79l-139-56z" fill="url(#container)" stroke="#2F7CCF" stroke-width="2"/>
+    <path d="m281 275 115-58v78l-115 59z" fill="#2E6BBE" stroke="#2359A5" stroke-width="2"/>
+    <path d="m142 219 115-60 139 58-115 58z" fill="#E4F4FF" stroke="#6CACE9" stroke-width="2"/>
+    <path d="m158 230 1 60m21-52v61m21-52v61m21-52v62m21-53v62m20-53v61" stroke="#B7E0FF" stroke-width="3"/>
+    <path d="m298 286 1 51m19-60v50m19-59v50m19-60v50m19-58v49" stroke="#80B1F0" stroke-width="3"/>
+    <path d="m207 169 59-30 64 25-59 30z" fill="#EBFFF6" stroke="#61C392" stroke-width="2"/>
+    <path d="m207 169 64 25v34l-64-26z" fill="#B3E8CE" stroke="#5AB884" stroke-width="2"/>
+    <path d="m271 194 59-30v35l-59 29z" fill="#5FBB90" stroke="#4F9F79" stroke-width="2"/>
+    <path d="m228 177 22 9m-1-19 23 9" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <path d="M358 145c63-44 108-30 133 14 21 36 27 43 66 24" stroke="#D0E5FF" stroke-width="22" stroke-linecap="round"/>
+  <path d="M358 145c63-44 108-30 133 14 21 36 27 43 66 24" stroke="#0071E3" stroke-width="4" stroke-dasharray="4 10" stroke-linecap="round"/>
+  <circle cx="362" cy="145" r="7" fill="#fff" stroke="#0071E3" stroke-width="3"/>
+  <!-- Buyer profile is illustrative, not a live account or transaction. -->
+  <g filter="url(#shadow)">
+    <rect x="506" y="124" width="192" height="191" rx="25" fill="url(#card)" stroke="#ABC9F1" stroke-width="2"/>
+    <rect x="521" y="140" width="162" height="53" rx="14" fill="#E5F1FF"/>
+    <circle cx="549" cy="165" r="17" fill="#BBD8FB"/><circle cx="549" cy="162" r="6" fill="#fff"/><path d="M539 175c0-7 20-7 20 0" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+    <rect x="578" y="156" width="77" height="7" rx="3.5" fill="#6895D2"/><rect x="578" y="171" width="53" height="5" rx="2.5" fill="#B0C9EC"/>
+    <rect x="524" y="214" width="145" height="12" rx="6" fill="#DEE9F9"/><rect x="524" y="237" width="104" height="10" rx="5" fill="#DEE9F9"/>
+    <rect x="524" y="264" width="145" height="34" rx="12" fill="#DFEFEA"/>
+    <circle cx="545" cy="281" r="10" fill="#34C759"/><path d="m540 281 4 4 7-8" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="564" y="278" width="69" height="7" rx="3.5" fill="#5BA884"/>
+  </g>
+  <g fill="#fff" stroke="#A5C7F3" stroke-width="2"><circle cx="103" cy="163" r="8"/><circle cx="719" cy="187" r="9"/></g><circle cx="103" cy="163" r="3" fill="#0071E3"/><circle cx="719" cy="187" r="3" fill="#34C759"/>
+</svg>

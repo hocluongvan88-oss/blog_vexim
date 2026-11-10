@@ -166,7 +166,7 @@
     {
       "@type": "Service",
       "@id": "https://www.veximglobal.com/#service",
-      "name": "Global B2B Digital Infrastructure & Export Acceleration Engine",
+      "name": "Global B2B Digital Infrastructure & Export Acceleration",
       "serviceType": "B2B Digital Export Infrastructure & Buyer-Intent SEO",
       "description": "Vexim Global builds B2B export websites, buyer-intent SEO and Vexim Trade connections for Vietnamese manufacturers entering international markets.",
       "url": "https://www.veximglobal.com",
@@ -191,8 +191,8 @@
             "itemOffered": {
               "@type": "Service",
               "@id": "https://www.veximglobal.com/#service-core",
-              "name": "B2B Core Launchpad",
-              "description": "A focused starting point for an export-ready category.",
+              "name": "B2B Launchpad",
+              "description": "A focused digital export starting point for one product line.",
               "serviceType": "Digital export infrastructure",
               "url": "https://www.veximglobal.com/#services",
               "provider": {
@@ -207,7 +207,7 @@
               "@type": "Service",
               "@id": "https://www.veximglobal.com/#service-growth",
               "name": "Global Growth Engine",
-              "description": "A coordinated web, search and content operation for a broader portfolio.",
+              "description": "An ongoing search, content and inquiry operation across a broader catalog.",
               "serviceType": "Digital export infrastructure",
               "url": "https://www.veximglobal.com/#services",
               "provider": {
@@ -222,7 +222,7 @@
               "@type": "Service",
               "@id": "https://www.veximglobal.com/#service-enterprise",
               "name": "Enterprise Dominance",
-              "description": "An export agency retainer built around your operating complexity.",
+              "description": "A tailored export agency retainer aligned with your product and market complexity.",
               "serviceType": "Digital export infrastructure",
               "url": "https://www.veximglobal.com/#services",
               "provider": {

@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { AuditProvider } from "@/components/home/audit-dialog"
 import { HomeHeader } from "@/components/home/home-header"
-import { ComplianceUtilities, DigitalGap, DualEngine, ExportTiers, HomeFooter, HomeHero, ProofOfPerformance, SystemsStrip } from "@/components/home/home-sections"
+import { ComplianceUtilities, CoreSolutions, ExportTiers, HomeFooter, HomeHero, VerificationGap } from "@/components/home/home-sections"
 import { JsonLd } from "@/components/json-ld"
 import { buildHomePageSchema } from "@/lib/schema"
 import { OG_IMAGE, OG_IMAGE_ALT, SITE_DESCRIPTION, SITE_TITLE, SITE_URL_WITH_SLASH } from "@/lib/business-profile"
@@ -31,10 +31,8 @@ export default function Home() {
         <HomeHeader />
         <main lang="en">
           <HomeHero />
-          <SystemsStrip />
-          <DigitalGap />
-          <DualEngine />
-          <ProofOfPerformance />
+          <CoreSolutions />
+          <VerificationGap />
           <ExportTiers />
           <ComplianceUtilities />
         </main>
