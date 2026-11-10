@@ -8,6 +8,7 @@
     "lint": "eslint .",
     "icons:generate": "node scripts/generate-site-icons.mjs",
     "test:icons": "node scripts/verify-favicons.mjs",
+    "test:post-editor:browser": "node scripts/verify-post-editor-layout.mjs",
     "schema:export": "node scripts/generate-home-schema.mjs",
     "test:fda:browser": "node scripts/verify-fda-browser.mjs",
     "test:fda": "node scripts/verify-fda-page.mjs",

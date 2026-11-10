@@ -239,7 +239,7 @@ export function SEOChecker({
       {/* Hai thang điểm độc lập: kỹ thuật (bắt buộc) và khả năng được AI trích dẫn */}
       <div className="grid grid-cols-2 gap-2.5 mb-4">
         <div className="rounded-lg border p-2.5">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-1">
             <span className={`text-xl font-bold ${scoreColor(scores.technical)}`}>{scores.technical}</span>
             <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
               {scoreLabel(scores.technical)}
@@ -252,7 +252,7 @@ export function SEOChecker({
         </div>
 
         <div className="rounded-lg border p-2.5">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-1">
             <span className={`text-xl font-bold ${scoreColor(scores.readiness)}`}>{scores.readiness}</span>
             <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
               {scoreLabel(scores.readiness)}
@@ -307,7 +307,7 @@ export function SEOChecker({
             {metaDescription || excerpt || "Mô tả ngắn của bài viết..."}
           </div>
         </div>
-        <div className="mt-2 flex items-center gap-2 text-[10px] text-muted-foreground">
+        <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-muted-foreground">
           <span>Tiêu đề ~{info.titlePixelWidth}px / 600px</span>
           <span>·</span>
           <span>Mô tả {info.descriptionLength} / 158 ký tự</span>

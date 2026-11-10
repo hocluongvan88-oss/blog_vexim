@@ -154,7 +154,7 @@ export function HeadingBlock({
     ref: editorRef,
     contentEditable: true,
     suppressContentEditableWarning: true,
-    className: `flex-1 ${alignClass} ${
+    className: `min-w-0 w-full flex-1 break-words [overflow-wrap:anywhere] leading-snug ${alignClass} ${
       level === 2 ? "text-2xl md:text-3xl" : level === 3 ? "text-xl md:text-2xl" : level === 1 ? "text-3xl md:text-4xl" : "text-lg md:text-xl"
     } font-bold text-primary outline-none empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground/50 empty:before:font-semibold`,
     "data-placeholder": placeholderText,
@@ -183,7 +183,7 @@ export function HeadingBlock({
   }
 
   return (
-    <div className="group/heading flex items-baseline gap-2 pt-2">
+    <div className="group/heading flex min-w-0 flex-col items-start gap-2 pt-2 sm:flex-row sm:items-baseline">
       {renderHeading()}
       {/* Bộ nút chuyển nhanh H2 / H3 / H4 nhỏ gọn, không chiếm dòng riêng */}
       <div className="flex items-center gap-0.5 rounded-md border bg-muted/40 p-0.5 opacity-60 group-hover/heading:opacity-100 focus-within:opacity-100 transition-opacity flex-shrink-0">

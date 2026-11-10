@@ -1036,7 +1036,7 @@ export function BlockEditor({ value, onChange, onSelectBlock }: BlockEditorProps
         key={block.id}
         data-block-id={block.id}
         data-multi-selected={isMultiSelected ? "true" : undefined}
-        className={`group relative rounded-lg transition-colors px-2 py-1 ${
+        className={`group relative min-w-0 rounded-lg transition-colors px-2 py-1 ${
           isMultiSelected
             ? "bg-primary/[0.09] ring-1 ring-primary/40"
             : isSelected
@@ -1058,7 +1058,7 @@ export function BlockEditor({ value, onChange, onSelectBlock }: BlockEditorProps
         onDrop={(e) => handleDrop(e, index)}
       >
         {/* Nút kéo thả & Thêm khối bên lề trái kiểu Notion */}
-        <div className="absolute -left-9 top-2 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex items-center gap-0.5">
+        <div className="absolute -left-9 top-2 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity hidden sm:flex items-center gap-0.5">
           <Button
             type="button"
             variant="ghost"
@@ -1178,7 +1178,7 @@ export function BlockEditor({ value, onChange, onSelectBlock }: BlockEditorProps
     <div
       ref={containerRef}
       tabIndex={-1}
-      className="block-editor-container border rounded-xl bg-white min-h-[560px] flex flex-col shadow-xs outline-none"
+      className="block-editor-container min-w-0 w-full border rounded-xl bg-white min-h-[560px] flex flex-col shadow-xs outline-none"
       onClick={() => {
         selectBlock(null)
         clearBlockSelection()
@@ -1575,10 +1575,10 @@ export function BlockEditor({ value, onChange, onSelectBlock }: BlockEditorProps
       )}
 
       {/* Vùng soạn thảo các khối */}
-      <div className="flex-1 p-6 pl-12 space-y-2">{blocks.map((block, index) => renderBlock(block, index))}</div>
+      <div className="flex-1 min-w-0 space-y-2 px-3 py-5 sm:px-10 sm:py-6">{blocks.map((block, index) => renderBlock(block, index))}</div>
 
       {/* Nút thêm khối ở cuối bài */}
-      <div className="px-12 pb-6 pt-2" onClick={(e) => e.stopPropagation()}>
+      <div className="px-5 pb-6 pt-2 sm:px-12" onClick={(e) => e.stopPropagation()}>
         <Button
           type="button"
           variant="ghost"
