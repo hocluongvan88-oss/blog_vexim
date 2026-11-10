@@ -17,7 +17,7 @@
       "image": {
         "@id": "https://www.veximglobal.com/#logo"
       },
-      "description": "Vexim Global hỗ trợ doanh nghiệp Việt đăng ký FDA, DUNS, US Agent, FSVP, tuân thủ MoCRA và lập LLC tại Mỹ. Quy trình rõ ràng, tư vấn miễn phí trong 24h.",
+      "description": "Vexim Global builds digital export foundations for Vietnamese manufacturers: B2B web infrastructure, buyer-intent SEO and connections to the Vexim Trade ecosystem. Regulatory resources remain available separately.",
       "telephone": "+84373685634",
       "email": "contact@veximglobal.com",
       "address": {
@@ -96,7 +96,10 @@
       "@id": "https://www.veximglobal.com/#website",
       "name": "Vexim Global",
       "url": "https://www.veximglobal.com",
-      "inLanguage": "vi-VN",
+      "inLanguage": [
+        "en",
+        "vi-VN"
+      ],
       "publisher": {
         "@id": "https://www.veximglobal.com/#organization"
       }

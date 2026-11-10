@@ -29,6 +29,7 @@ import {
 } from "./business-profile"
 
 import { TRADE, TRADE_CATEGORIES, buildTradeOrganization } from "./vexim-trade-content"
+import { EXPORT_TIERS } from "./homepage-content"
 
 const HOME_PAGE_ID = `${SITE_URL}/#webpage`
 const HOME_IMAGE_ID = `${SITE_URL}/#primaryimage`
@@ -105,7 +106,7 @@ export function buildSiteSchema() {
         "@id": WEBSITE_ID,
         name: ORGANIZATION_NAME,
         url: SITE_URL,
-        inLanguage: "vi-VN",
+        inLanguage: ["en", "vi-VN"],
         publisher: { "@id": ORGANIZATION_ID },
       },
     ],
@@ -118,31 +119,38 @@ export function buildHomeServiceSchema() {
     "@context": "https://schema.org",
     "@type": "Service",
     "@id": HOME_SERVICE_ID,
-    name: "Dịch vụ đăng ký FDA & tư vấn pháp lý xuất khẩu sang Mỹ",
-    serviceType: "Regulatory Compliance & Market Access",
-    description: "Tư vấn và hỗ trợ doanh nghiệp Việt Nam về FDA, DUNS, MoCRA, US Agent, FSVP, thành lập LLC & EIN và hồ sơ nhà cung cấp nông sản trên Vexim Trade.",
+    name: "Global B2B Digital Infrastructure & Export Acceleration Engine",
+    serviceType: "B2B Digital Export Infrastructure & Buyer-Intent SEO",
+    description: SITE_DESCRIPTION,
     url: SITE_URL,
     provider: { "@id": ORGANIZATION_ID },
     mainEntityOfPage: { "@id": HOME_PAGE_ID },
     audience: {
       "@type": "BusinessAudience",
-      audienceType: "Doanh nghiệp Việt Nam xuất khẩu sang Mỹ",
+      audienceType: "Vietnamese manufacturers exporting to international buyers",
     },
-    areaServed: servedCountries(),
     hasOfferCatalog: {
       "@type": "OfferCatalog",
       "@id": `${SITE_URL}/#offer-catalog`,
-      name: "Dịch vụ của Vexim Global",
-      itemListElement: SERVICE_CATALOG.map((service) => ({
+      name: "Digital export infrastructure engagement scopes",
+      itemListElement: EXPORT_TIERS.map((tier) => ({
         "@type": "Offer",
-        url: `${SITE_URL}${service.path}`,
-        itemOffered: buildServiceNode(service),
+        url: `${SITE_URL}/#services`,
+        itemOffered: {
+          "@type": "Service",
+          "@id": `${SITE_URL}/#service-${tier.id}`,
+          name: tier.name,
+          description: tier.description,
+          serviceType: "Digital export infrastructure",
+          url: `${SITE_URL}/#services`,
+          provider: { "@id": ORGANIZATION_ID },
+        },
       })),
     },
   }
 }
 
-/** Same service identity in the homepage catalog and its landing page. */
+/** Stable service identity for existing Vietnamese service landing pages. */
 export function buildServiceNode(service: ServiceCatalogItem) {
   return {
     "@type": "Service",
@@ -173,7 +181,7 @@ export function buildHomePageSchema() {
     "@context": "https://schema.org",
     "@graph": [
       {
-        ...buildWebPageSchema({ path: "/", name: SITE_TITLE, description: SITE_DESCRIPTION }),
+        ...buildWebPageSchema({ path: "/", name: SITE_TITLE, description: SITE_DESCRIPTION, inLanguage: "en" }),
         "@context": undefined,
         "@id": HOME_PAGE_ID,
         mainEntity: { "@id": HOME_SERVICE_ID },

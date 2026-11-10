@@ -1,8 +1,12 @@
 "use client"
 
+import { useEffect } from "react"
 import { usePathname } from "next/navigation"
-import { ChatWidget } from "@/components/chat-widget"
-import { ZaloChatButton } from "@/components/zalo-chat-button"
+import dynamic from "next/dynamic"
+
+// Keep the Vietnamese floating widgets out of the new homepage's JS bundle.
+const ChatWidget = dynamic(() => import("@/components/chat-widget").then(mod => mod.ChatWidget), { ssr: false })
+const ZaloChatButton = dynamic(() => import("@/components/zalo-chat-button").then(mod => mod.ZaloChatButton), { ssr: false })
 
 /**
  * Bật/tắt nút Zalo OA nổi trên website.
@@ -29,7 +33,15 @@ const SHOW_ZALO_BUTTON = true
 export function ClientWidgets() {
   const pathname = usePathname()
 
-  if (pathname?.startsWith("/admin")) return null
+  // Root layouts survive Next client-side navigation; keep the document language
+  // aligned with the current page after navigation from a Vietnamese Next Link.
+  useEffect(() => {
+    document.documentElement.lang = pathname === "/" || pathname === "/privacy" ? "en" : "vi"
+  }, [pathname])
+
+  // English pages use their own contact flow. The Vietnamese chat/Zalo overlays
+  // would both dilute positioning and load extra JS on the export homepage.
+  if (pathname === "/" || pathname === "/privacy" || pathname?.startsWith("/admin")) return null
 
   return (
     <>

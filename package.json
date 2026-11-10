@@ -21,7 +21,8 @@
     "schema:trade": "node scripts/verify-vexim-trade.mjs --export",
     "test:trade": "node scripts/verify-vexim-trade.mjs",
     "test:trade:browser": "node scripts/verify-vexim-trade-browser.mjs",
-    "test:blog-sidebar": "node scripts/verify-blog-sidebar.mjs"
+    "test:blog-sidebar": "node scripts/verify-blog-sidebar.mjs",
+    "test:homepage": "node scripts/verify-homepage.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -101,6 +102,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.9",
     "@types/node": "^22",
+    "@types/nodemailer": "^7.0.12",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "postcss": "^8.5",

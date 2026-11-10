@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Root layout selects the document language per request. Next 15 otherwise
+  // streams dynamic metadata into <body> for ordinary browsers, so Lighthouse
+  // (and some parsers) miss the description/canonical. Keep metadata in <head>.
+  htmlLimitedBots: /.*/,
   typescript: {
     ignoreBuildErrors: true,
   },
