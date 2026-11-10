@@ -11,9 +11,13 @@ const get = async (url) => {
 }
 
 const home = await get("/")
+const viHome = await get("/vi")
 const privacy = await get("/privacy")
+const viPrivacy = await get("/vi/privacy")
 const fda = await get("/services/fda")
 const heading = "Global B2B Digital Infrastructure & Export Acceleration"
+const viHeading = "Hạ tầng số B2B toàn cầu & Tăng tốc xuất khẩu"
+const siteUrl = "https://www.veximglobal.com"
 assert.equal(home("html").attr("lang"), "en")
 assert.equal(home("main").first().attr("lang"), "en")
 assert.equal(home("h1").text(), heading)
@@ -22,16 +26,53 @@ assert.equal(home('main header, main footer').length, 0, "Global landmarks shoul
 assert.equal(home('head link[rel="canonical"]').attr("href"), "https://www.veximglobal.com")
 assert.ok(home('head meta[name="description"]').attr("content")?.includes("B2B export websites"))
 assert.equal(home('body meta[name="description"]').length, 0)
-assert.equal(home('head link[rel="preload"][as="font"][href="/fonts/inter-home-latin.woff2"]').length, 1)
+assert.equal(home('head link[rel="preload"][as="font"][href="/fonts/inter-home-latin.woff2"]').length, 0, "Optional display font should not delay critical resources")
 assert.equal(home('head link[rel="manifest"]').length, 0, "The public homepage is not the admin PWA")
 assert.equal(home('meta[property="og:url"]').attr("content"), "https://www.veximglobal.com")
 assert.equal(home('meta[property="og:locale"]').attr("content"), "en_US")
 assert.equal(home('meta[property="og:image"]').attr("content"), "https://www.veximglobal.com/og-image.jpg")
 assert.equal(privacy("html").attr("lang"), "en")
 assert.equal(privacy('head link[rel="manifest"]').length, 0)
+assert.equal(viHome("html").attr("lang"), "vi")
+assert.equal(viHome("main").first().attr("lang"), "vi")
+assert.equal(viHome("h1").text(), viHeading)
+assert.equal(viHome("h1").length, 1)
+assert.equal(viHome('head link[rel="canonical"]').attr("href"), `${siteUrl}/vi`)
+assert.equal(viHome('meta[property="og:locale"]').attr("content"), "vi_VN")
+assert.equal(viHome('meta[property="og:image"]').attr("content"), `${siteUrl}/og-image-vi.jpg`)
+assert.equal(viHome('head link[rel="manifest"]').length, 0)
+assert.equal(viPrivacy("html").attr("lang"), "vi")
+assert.equal(viPrivacy("main").attr("lang"), "vi")
+assert.equal(viPrivacy("h1").text(), "Quyền riêng tư & yêu cầu đánh giá")
+assert.equal(viPrivacy('head link[rel="canonical"]').attr("href"), `${siteUrl}/vi/privacy`)
+assert.equal(privacy('head link[rel="canonical"]').attr("href"), `${siteUrl}/privacy`)
+assert.equal(privacy('title').text(), 'Privacy & Data Requests | Vexim Global')
+assert.equal(viPrivacy('title').text(), 'Quyền riêng tư & Yêu cầu dữ liệu | Vexim Global')
+for (const [english, vietnamese, path] of [[home, viHome, ""], [privacy, viPrivacy, "/privacy"]]) {
+  for (const document of [english, vietnamese]) {
+    assert.equal(document('link[rel="alternate"][hreflang="en"]').attr("href"), `${siteUrl}${path}`)
+    assert.equal(document('link[rel="alternate"][hreflang="vi"]').attr("href"), `${siteUrl}/vi${path}`)
+    assert.equal(document('link[rel="alternate"][hreflang="x-default"]').attr("href"), `${siteUrl}${path}`)
+  }
+}
 assert.equal(fda("html").attr("lang"), "vi")
+assert.equal(home("body").hasClass("font-sans"), false)
+assert.equal(viHome("body").hasClass("font-sans"), false)
+assert.equal(fda("body").hasClass("font-sans"), true, "Existing Vietnamese service font stays unchanged")
+assert.equal(fda('link[rel="alternate"][hreflang="en"]').length, 0, "Untranslated legal pages must not advertise an English counterpart")
+assert.equal(fda('[data-language-switcher]').length, 0)
 assert.equal(fda('head meta[name="description"]').length, 1)
-for (const id of ["solutions", "the-gap", "services", "contact"]) assert.equal(home(`#${id}`).length, 1, id)
+for (const id of ["solutions", "the-gap", "services", "contact"]) {
+  assert.equal(home(`#${id}`).length, 1, id)
+  assert.equal(viHome(`#${id}`).length, 1, `VI ${id}`)
+}
+assert.equal(viHome('main section#solutions article').length, 3)
+assert.equal(viHome('main section#the-gap article').length, 2)
+assert.equal(viHome('main section#services article').length, 3)
+assert.equal(viHome('a[href="/vi/privacy"]').length, 1)
+assert.equal(viHome('a[href="https://veximtrade.com"]').length >= 2, true)
+assert.ok(viHome('main').text().includes('Không cam kết thứ hạng'))
+assert.ok(!/90%|Top 1[-–]10|Alibaba|Global Sources/i.test(viHome('main').text()))
 assert.equal(home('main section#solutions article').length, 3, "Three bento solution pillars")
 assert.equal(home('main section#the-gap article').length, 2, "Two-column verification gap")
 assert.equal(home('main section#services article').length, 3, "Product-line engagement scopes")
@@ -54,13 +95,22 @@ for (const asset of ["export-network.svg", "cloud-architecture.svg", "buyer-inte
   assert.ok(Buffer.byteLength(content) < 16_000, `SVG illustration should be lightweight: ${asset}`)
 }
 assert.ok(readFileSync("public/og-image.jpg").length < 300_000)
+assert.ok(readFileSync("public/og-image-vi.jpg").length < 300_000)
+const sitemapResponse = await fetch(`${base}/sitemap.xml`)
+assert.equal(sitemapResponse.status, 200)
+const sitemap = await sitemapResponse.text()
+for (const url of [`${siteUrl}/vi`, `${siteUrl}/vi/privacy`]) assert.ok(sitemap.includes(`<loc>${url}</loc>`), `sitemap ${url}`)
+assert.ok(sitemap.includes('hreflang="vi"'))
+const serviceSitemapEntry = sitemap.slice(sitemap.indexOf(`<loc>${siteUrl}/services/fda</loc>`), sitemap.indexOf('</url>', sitemap.indexOf(`<loc>${siteUrl}/services/fda</loc>`)))
+assert.ok(serviceSitemapEntry.includes(`<loc>${siteUrl}/services/fda</loc>`))
+assert.ok(!serviceSitemapEntry.includes('hreflang="en"'), 'Unreviewed service translations must not be in sitemap')
 const bad = await fetch(`${base}/api/digital-audit`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ website: "javascript:alert(1)", company: "Factory", markets: "US", email: "a@example.com" }) })
 assert.equal(bad.status, 400)
 const injected = await fetch(`${base}/api/digital-audit`, { method: "POST", headers: { "Content-Type": "application/json", Origin: "https://invalid.example" }, body: "{}" })
 assert.equal(injected.status, 403)
 const honeypot = await fetch(`${base}/api/digital-audit`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ fax: "filled-by-bot" }) })
 assert.deepEqual(await honeypot.json(), { success: true })
-console.log("PASS: English bento homepage / privacy, Vietnamese FDA, schema, four local SVGs, honest claims and audit endpoint validation")
+console.log("PASS: bilingual home/privacy SSR, reciprocal hreflang/sitemap, unchanged Vietnamese FDA, schema, four SVGs, honest claims and audit endpoint validation")
 
 const executablePath = process.env.BROWSER_EXECUTABLE_PATH
 if (!executablePath) { console.log("Set BROWSER_EXECUTABLE_PATH to run interactive Chromium checks."); process.exit(0) }
@@ -109,7 +159,7 @@ try {
     })
     assert.equal(art.length, 4)
     assert.ok(art.every(image => image.width > 0 && image.height > 0), `broken isometric art at ${width}px`)
-    if (width < 880) {
+    if (width <= 960) {
       const header = await page.evaluate(() => ({
         brand: document.querySelector('a[class*="brand"]')?.getBoundingClientRect().right,
         menu: document.querySelector('button[aria-controls="home-mobile-nav"]')?.getBoundingClientRect().toJSON(),
@@ -136,6 +186,114 @@ try {
     console.log(`PASS browser: ${width}px, vector art, bento layout, no overflow/hydration errors, initial CLS=${state.cls.toFixed(4)}`)
     await page.close()
   }
+  for (const width of [320, 390, 768, 881, 1024, 1440]) {
+    const page = await browser.newPage()
+    const errors = []
+    page.on("pageerror", error => errors.push(error.message))
+    page.on("console", entry => { if (entry.type() === "error" && !entry.text().includes("favicon")) errors.push(entry.text()) })
+    await page.setViewport({ width, height: width < 500 ? 844 : 900, deviceScaleFactor: 1 })
+    await page.evaluateOnNewDocument(() => {
+      window.__homeCLS = 0
+      new PerformanceObserver(list => {
+        for (const entry of list.getEntries()) if (!entry.hadRecentInput) window.__homeCLS += entry.value
+      }).observe({ type: "layout-shift", buffered: true })
+    })
+    await page.goto(`${base}/vi`, { waitUntil: "networkidle2", timeout: 90000 })
+    await page.evaluate(() => document.fonts.ready)
+    const state = await page.evaluate(() => {
+      const copy = document.querySelector('[class*="heroCopy"]').getBoundingClientRect()
+      const art = document.querySelector('figure[class*="heroStage"]').getBoundingClientRect()
+      const brand = document.querySelector('a[class*="brand"]').getBoundingClientRect()
+      const menu = document.querySelector('button[aria-controls="home-mobile-nav"]').getBoundingClientRect()
+      return { lang: document.documentElement.lang, h1: document.querySelector('h1')?.textContent,
+        width: document.documentElement.scrollWidth, viewport: innerWidth, cls: window.__homeCLS || 0,
+        align: getComputedStyle(document.querySelector('[class*="heroCopy"]')).textAlign,
+        copyRight: copy.right, copyBottom: copy.bottom, artLeft: art.left, artTop: art.top,
+        brandRight: brand.right, menuLeft: menu.left, menuWidth: menu.width,
+        menuVisible: getComputedStyle(document.querySelector('button[aria-controls="home-mobile-nav"]')).display !== 'none',
+      }
+    })
+    assert.equal(state.lang, "vi")
+    assert.equal(await page.$('.zalo-chat-widget'), null, "Translated landing uses its own contact flow, not the service widget")
+    assert.equal(state.h1, viHeading)
+    assert.equal(state.width, state.viewport, `Vietnamese overflow at ${width}px`)
+    assert.equal(state.align, "left")
+    assert.ok(state.cls < .01, `Vietnamese layout shift at ${width}px`)
+    if (width > 960) assert.ok(state.artLeft >= state.copyRight + 16)
+    else assert.ok(state.artTop >= state.copyBottom + 20)
+    if (width <= 960) assert.ok(state.menuVisible && state.menuWidth >= 42 && state.menuLeft >= state.brandRight + 8)
+    const art = await page.$$eval('main img[src^="/home/"]', async images => {
+      await Promise.all(images.map(image => image.decode()))
+      return images.map(image => [image.naturalWidth, image.naturalHeight])
+    })
+    assert.equal(art.length, 4)
+    assert.ok(art.every(([w, h]) => w > 0 && h > 0))
+    assert.deepEqual(errors, [], `Vietnamese browser errors at ${width}px`)
+    if (screenshots && [390, 1440].includes(width)) await page.screenshot({ path: path.join(screenshots, `homepage-vi-${width}.png`), fullPage: true })
+    console.log(`PASS browser VI: ${width}px, no overflow, stable editorial hero, four SVGs, CLS=${state.cls.toFixed(4)}`)
+    await page.close()
+  }
+  const languagePage = await browser.newPage()
+  await languagePage.setViewport({ width: 1440, height: 900 })
+  await languagePage.goto(`${base}/`, { waitUntil: "networkidle2" })
+  await languagePage.locator('[class*="desktopLanguage"] summary').click()
+  assert.equal(await languagePage.$eval('[class*="desktopLanguage"]', el => el.open), true)
+  await languagePage.keyboard.press('Escape')
+  assert.equal(await languagePage.$eval('[class*="desktopLanguage"]', el => el.open), false)
+  await languagePage.locator('[class*="desktopLanguage"] summary').click()
+  await Promise.all([languagePage.waitForNavigation({ waitUntil: 'domcontentloaded' }), languagePage.locator('[class*="desktopLanguage"] a[lang="vi"]').click()])
+  assert.equal(new URL(languagePage.url()).pathname, '/vi')
+  assert.equal(await languagePage.$eval('html', el => el.lang), 'vi')
+  await languagePage.setViewport({ width: 390, height: 844 })
+  await languagePage.goto(`${base}/vi/privacy`, { waitUntil: 'networkidle2' })
+  await languagePage.locator('button[aria-controls="home-mobile-nav"]').click()
+  await languagePage.locator('[class*="mobileLanguage"] summary').click()
+  assert.equal(await languagePage.$eval('[class*="mobileLanguage"]', el => el.open), true)
+  await Promise.all([languagePage.waitForNavigation({ waitUntil: 'domcontentloaded' }), languagePage.locator('[class*="mobileLanguage"] a[lang="en"]').click()])
+  assert.equal(new URL(languagePage.url()).pathname, '/privacy')
+  assert.equal(await languagePage.$eval('html', el => el.lang), 'en')
+  await languagePage.close()
+  console.log('PASS browser: desktop/mobile keyboard-accessible language dropdown, same-page locale links, preserved privacy context')
+
+  const viAudit = await browser.newPage()
+  await viAudit.setViewport({ width: 390, height: 844 })
+  await viAudit.goto(`${base}/vi`, { waitUntil: 'networkidle2' })
+  await viAudit.setRequestInterception(true)
+  let viPosted, viStatus = 200
+  viAudit.on('request', request => {
+    if (request.url().endsWith('/api/digital-audit')) {
+      viPosted = JSON.parse(request.postData())
+      void request.respond({ status: viStatus, contentType: 'application/json', body: viStatus === 200 ? '{"success":true}' : '{"error":"Online submission is unavailable."}' })
+    } else void request.continue()
+  })
+  await viAudit.locator('button[class*="heroPrimary"]').click()
+  assert.ok((await viAudit.$eval('[role="dialog"]', el => el.textContent)).includes('Tên công ty'))
+  await viAudit.locator('#audit-website').fill('https://nhamay.example')
+  await viAudit.locator('#audit-company').fill('Nhà máy thử nghiệm')
+  await viAudit.locator('#audit-markets').fill('Nhật Bản')
+  await viAudit.locator('#audit-email').fill('sales@nhamay.example')
+  await viAudit.locator('button[type="submit"]').click()
+  await viAudit.waitForSelector('p[role="status"]')
+  assert.equal(viPosted.company, 'Nhà máy thử nghiệm')
+  assert.ok((await viAudit.$eval('p[role="status"]', el => el.textContent)).includes('đã được gửi'))
+  await viAudit.keyboard.press('Escape')
+  await viAudit.waitForFunction(() => !document.querySelector('[role="dialog"]'))
+  viStatus = 503
+  await viAudit.locator('button[class*="tierButtonFeatured"]').click()
+  assert.ok((await viAudit.$eval('p[class*="scopeNote"]', el => el.textContent)).includes('Global Growth Engine'))
+  await viAudit.locator('#audit-website').fill('https://nhamay.example')
+  await viAudit.locator('#audit-company').fill('Nhà máy thử nghiệm')
+  await viAudit.locator('#audit-markets').fill('Nhật Bản')
+  await viAudit.locator('#audit-email').fill('sales@nhamay.example')
+  await viAudit.locator('button[type="submit"]').click()
+  await viAudit.waitForSelector('p[role="alert"]')
+  assert.ok((await viAudit.$eval('p[role="alert"]', el => el.textContent)).includes('Chưa thể gửi trực tuyến'))
+  assert.equal(viPosted.scope, 'Global Growth Engine')
+  const draftHref = await viAudit.$eval('a[href^="mailto:contact@veximglobal.com?subject="]', el => el.href)
+  assert.ok(decodeURIComponent(draftHref).includes('Xin chào Vexim Global'))
+  await viAudit.close()
+  console.log('PASS browser VI: localized audit success/error and email draft fallback (mocked; no mail sent)')
+
   const page = await browser.newPage()
   await page.setViewport({ width: 1280, height: 900 })
   await page.goto(`${base}/`, { waitUntil: "networkidle2" })

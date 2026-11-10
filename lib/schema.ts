@@ -29,7 +29,8 @@ import {
 } from "./business-profile"
 
 import { TRADE, TRADE_CATEGORIES, buildTradeOrganization } from "./vexim-trade-content"
-import { EXPORT_TIERS, HOME_POSITIONING } from "./homepage-content"
+import { EXPORT_TIERS, EXPORT_TIERS_VI, HOME_POSITIONING, HOME_POSITIONING_VI } from "./homepage-content"
+import { VI_HOME_META } from "./home-i18n"
 
 const HOME_PAGE_ID = `${SITE_URL}/#webpage`
 const HOME_IMAGE_ID = `${SITE_URL}/#primaryimage`
@@ -201,7 +202,56 @@ export function buildHomePageSchema() {
   }
 }
 
-/** Standalone export of exactly the two graphs emitted on the homepage. */
+/** Separate WebPage and localized Service for the editorially translated /vi route.
+ * The business entity keeps its single, unchanged Organization @id. */
+export function buildVietnameseHomePageSchema() {
+  const url = `${SITE_URL}/vi`
+  const pageId = `${url}#webpage`
+  const serviceId = `${url}#service`
+  const imageId = `${url}#primaryimage`
+  const imageUrl = `${SITE_URL}/og-image-vi.jpg`
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        ...buildWebPageSchema({ path: "/vi", name: VI_HOME_META.title, description: VI_HOME_META.description, inLanguage: "vi-VN" }),
+        "@context": undefined,
+        mainEntity: { "@id": serviceId },
+        primaryImageOfPage: { "@id": imageId },
+      },
+      { "@type": "ImageObject", "@id": imageId, url: imageUrl, contentUrl: imageUrl, width: 1200, height: 630 },
+      buildTradeOrganization(ORGANIZATION_ID),
+      {
+        "@type": "Service",
+        "@id": serviceId,
+        name: HOME_POSITIONING_VI.headline,
+        serviceType: "Hạ tầng số B2B và SEO theo nhu cầu người mua",
+        description: VI_HOME_META.description,
+        url,
+        provider: { "@id": ORGANIZATION_ID },
+        mainEntityOfPage: { "@id": pageId },
+        audience: { "@type": "BusinessAudience", audienceType: "Nhà sản xuất Việt Nam tìm kiếm người mua quốc tế" },
+        hasOfferCatalog: {
+          "@type": "OfferCatalog",
+          "@id": `${url}#offer-catalog`,
+          name: "Phạm vi hợp tác về hạ tầng số xuất khẩu",
+          itemListElement: EXPORT_TIERS_VI.map((tier) => ({
+            "@type": "Offer",
+            url: `${url}#services`,
+            itemOffered: {
+              "@type": "Service", "@id": `${url}#service-${tier.id}`,
+              name: tier.name, description: tier.description,
+              serviceType: "Hạ tầng số xuất khẩu", url: `${url}#services`,
+              provider: { "@id": ORGANIZATION_ID },
+            },
+          })),
+        },
+      },
+    ],
+  }
+}
+
+/** Standalone export of exactly the two graphs emitted on the English homepage. */
 export function buildCompleteHomeSchema() {
   return {
     "@context": "https://schema.org",

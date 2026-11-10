@@ -19,6 +19,9 @@
   -webkit-font-smoothing: antialiased;
   overflow-x: clip;
 }
+.home[lang="vi"] { font-family: var(--font-vexim-home-vi), system-ui, sans-serif; }
+/* The audit dialog is portaled to <body>, outside the /vi font wrapper. */
+.auditDialog[lang="vi"] { font-family: var(--font-be-vietnam-pro), system-ui, sans-serif; }
 .home :is(a, button, input):focus-visible,
 .auditDialog :is(a, button, input):focus-visible { outline: 2px solid #0071e3; outline-offset: 4px; }
 .home :is(a, button) { -webkit-tap-highlight-color: transparent; }
@@ -35,7 +38,7 @@
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
 }
-.headerInner { display: flex; align-items: center; justify-content: space-between; gap: 26px; height: 68px; }
+.headerInner { display: flex; align-items: center; justify-content: space-between; gap: clamp(12px, 1.8vw, 26px); height: 68px; }
 .brand { display: inline-flex; align-items: center; flex: 0 0 auto; gap: 10px; color: var(--ink); text-decoration: none; font-size: 18px; font-weight: 790; letter-spacing: -.055em; line-height: 1; }
 .brand img { width: 35px; height: 35px; object-fit: contain; }
 .brandLight { color: #246bb8; font-weight: 530; }
@@ -47,6 +50,18 @@
 .headerAudit:hover { background: #434347; transform: translateY(-2px); }
 .menuToggle { display: none; align-items: center; justify-content: center; flex: 0 0 44px; width: 44px; height: 44px; border: 1px solid #dee1e7; border-radius: 50%; background: #fff; color: #25272d; cursor: pointer; }
 .mobileNav[hidden], .mobileNav { display: none; }
+/* The language selector only links to published, fully localized pages. */
+.languageMenu { position: relative; z-index: 2; flex: 0 0 auto; }
+.languageMenu summary { display: flex; align-items: center; justify-content: center; gap: 7px; min-height: 39px; padding: 0 11px; border: 1px solid #dce3ed; border-radius: 999px; background: #fff; color: #354c69; font-size: 11px; font-weight: 720; list-style: none; cursor: pointer; }
+.languageMenu summary::-webkit-details-marker { display: none; }
+.languageMenu summary:focus-visible { outline: 2px solid #0071e3; outline-offset: 3px; }
+.languageMenu summary svg:last-child { transition: transform .2s ease; }
+.languageMenu[open] summary svg:last-child { transform: rotate(180deg); }
+.languageOptions { position: absolute; top: calc(100% + 9px); right: 0; display: grid; min-width: 166px; gap: 3px; padding: 6px; border: 1px solid #e0e6ef; border-radius: 14px; background: #fff; box-shadow: 0 18px 36px rgb(31 49 81 / 14%); }
+.languageOptions a { display: flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 40px; padding: 0 11px; border-radius: 9px; color: #334254; text-decoration: none; font-size: 12px; font-weight: 560; white-space: nowrap; }
+.languageOptions a:hover, .languageOptions a[aria-current="page"] { background: #edf4ff; color: #005abb; }
+.languageOptions a span { color: #667c99; font-size: 10px; font-weight: 710; }
+.mobileLanguage { display: none; }
 
 /* A quieter editorial headline sits beside the export illustration on desktop. */
 .hero { position: relative; isolation: isolate; overflow: hidden; padding-bottom: 34px; background: linear-gradient(180deg, #fff 0%, #fafbff 54%, #f3f7ff 100%); }
@@ -173,6 +188,7 @@
 .complianceLead > svg { flex: 0 0 auto; margin-top: 2px; color: #326fae; }
 .complianceLead strong { display: block; color: #303744; font-size: 13px; }
 .complianceLead p { margin: 6px 0 0; color: #5e6876; font-size: 11px; line-height: 1.6; }
+.complianceLead small { display: block; margin-top: 5px; color: #566273; font-size: 10px; line-height: 1.5; }
 .complianceLinks { display: flex; align-items: center; justify-content: end; flex-wrap: wrap; gap: 7px; }
 .complianceLinks a { display: inline-flex; align-items: center; gap: 4px; padding: 9px 12px; border: 1px solid #e0e6ef; border-radius: 999px; background: #fff; color: #325f8f; text-decoration: none; font-size: 10px; font-weight: 680; white-space: nowrap; }
 .complianceLinks a:hover { background: #eaf4ff; color: #005abb; }
@@ -240,12 +256,18 @@
   .bentoTrade { padding-inline: 37px 22px; }
   .tierCard { padding: 27px; }
 }
-@media (max-width: 880px) {
-  .desktopNav, .headerAudit { display: none; }
-  .menuToggle { display: inline-flex; }
+@media (max-width: 960px) {
+  .desktopNav, .headerAudit, .desktopLanguage { display: none; }
+  .menuToggle { display: inline-flex; margin-left: auto; }
   .mobileNav:not([hidden]) { position: absolute; top: 100%; left: 0; right: 0; display: grid; padding: 13px max(28px, calc((100% - 700px) / 2)) 21px; border-bottom: 1px solid #e5e8ee; background: rgb(255 255 255 / 95%); backdrop-filter: blur(18px); box-shadow: 0 16px 28px rgb(25 35 49 / 9%); }
   .mobileNav > a { display: flex; align-items: center; justify-content: space-between; min-height: 49px; border-bottom: 1px solid #ededf0; color: #32353b; text-decoration: none; font-size: 14px; font-weight: 550; }
+  .mobileLanguage { display: block; margin-top: 14px; padding-top: 14px; border-top: 1px solid #ededf0; }
+  .mobileLanguage summary { justify-content: flex-start; width: 100%; min-height: 44px; padding-inline: 13px; border-radius: 11px; }
+  .mobileLanguage summary svg:last-child { margin-left: auto; }
+  .mobileLanguage .languageOptions { position: static; margin-top: 8px; box-shadow: none; }
   .mobileNav > button { min-height: 47px; margin-top: 18px; border: 0; border-radius: 999px; background: #0071e3; color: #fff; font-size: 13px; font-weight: 650; cursor: pointer; }
+}
+@media (max-width: 880px) {
   .heroInner { padding-top: 72px; }
   .hero h1 { font-size: clamp(43px, 6vw, 53px); }
   .stageTagStart { top: 17px; left: 17px; }
@@ -310,6 +332,8 @@
 }
 @media (max-width: 480px) {
   .hero h1 { font-size: clamp(34px, 9.2vw, 42px); }
+  /* Let the shorter Vietnamese headline lead the mobile composition. */
+  .home[lang="vi"] .hero h1 { font-size: clamp(39px, 10.2vw, 44px); }
   .heroActions { flex-direction: column; align-items: stretch; }
   .heroPrimary, .heroSecondary { width: 100%; min-height: 48px; }
   .heroFootnote { font-size: 10px; }

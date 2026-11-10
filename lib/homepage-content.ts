@@ -70,3 +70,76 @@ export const EXPORT_TIERS = [
     ],
   },
 ] as const
+
+/** Vietnamese editorial copy. Keep the approved English landing and service identities unchanged. */
+export const HOME_POSITIONING_VI = {
+  headline: "Hạ tầng số B2B toàn cầu & Tăng tốc xuất khẩu",
+  description: "Vexim Global hỗ trợ nhà sản xuất Việt Nam xây dựng hiện diện số chính thức, tổ chức nội dung theo nhu cầu tìm kiếm của người mua và kết nối với hệ sinh thái Vexim Trade.",
+  tradeUrl: HOME_POSITIONING.tradeUrl,
+} as const
+
+export const EXPORT_PILLARS_VI = [
+  {
+    id: "export-architecture", number: "01", label: "NỀN TẢNG", title: "Kiến trúc website B2B xuất khẩu",
+    description: "Một kênh chính thức, dễ sử dụng để giới thiệu sản phẩm và thông tin mà người mua quốc tế cần để tìm hiểu doanh nghiệp.",
+    features: [
+      "Website B2B tối ưu tốc độ, sử dụng kiến trúc tĩnh hoặc kết xuất phía máy chủ.",
+      "Danh mục sản phẩm có cấu trúc với MOQ, Incoterms 2020 và thông số kỹ thuật.",
+      "Thông tin nhà máy và tài liệu sản phẩm do doanh nghiệp cung cấp, xác minh.",
+    ],
+    output: "Sở hữu nền tảng số của riêng bạn.",
+  },
+  {
+    id: "buyer-intent-seo", number: "02", label: "KHẢ NĂNG ĐƯỢC TÌM THẤY", title: "SEO theo nhu cầu người mua",
+    description: "Xây dựng nội dung danh mục hữu ích cho những truy vấn thương mại mà đội ngũ thu mua có thể sử dụng.",
+    features: [
+      "Lập bản đồ truy vấn về nguồn cung số lượng lớn, gia công OEM và điều kiện FOB.",
+      "Lập kế hoạch nội dung theo thị trường Mỹ, EU và Trung Đông.",
+      "Theo dõi khả năng lập chỉ mục và báo cáo có nguồn dữ liệu, mốc thời gian rõ ràng.",
+    ],
+    output: "Sẵn sàng khi người mua tìm kiếm.",
+  },
+  {
+    id: "trade-sync", number: "03", label: "KẾT NỐI", title: "Kết nối nền tảng Vexim Trade",
+    description: "Liên kết website xuất khẩu độc lập với sự hiện diện phù hợp trên nền tảng và lộ trình tiếp nhận yêu cầu rõ ràng hơn.",
+    features: [
+      "Hỗ trợ danh bạ và liên kết chéo, tùy điều kiện tham gia của nền tảng.",
+      "Thiết kế luồng tiếp nhận yêu cầu phù hợp với quy trình bán hàng của bạn.",
+      "Đối chiếu dữ liệu đầu ra khi phạm vi và quyền truy cập nền tảng cho phép.",
+    ],
+    output: "Từ tìm kiếm đến trao đổi trực tiếp.",
+  },
+] as const
+
+/** The three engagement names remain product names, not translated guarantees. */
+export const EXPORT_TIERS_VI = [
+  {
+    id: "core", number: "01", name: "B2B Launchpad", audience: "Một dòng sản phẩm chủ lực", label: "XÂY NỀN TẢNG",
+    description: "Bước khởi đầu tập trung cho một dòng sản phẩm xuất khẩu.",
+    features: [
+      "Xây dựng website B2B và danh mục sản phẩm",
+      "SEO theo nhu cầu người mua cho nhóm sản phẩm chính",
+      "Hỗ trợ danh bạ Vexim Trade tùy điều kiện tham gia và thời hạn thỏa thuận",
+    ],
+  },
+  {
+    id: "growth", number: "02", name: "Global Growth Engine", audience: "Nhà máy có nhiều danh mục", label: "KẾT NỐI DANH MỤC",
+    description: "Vận hành nội dung, tìm kiếm và tiếp nhận yêu cầu cho danh mục sản phẩm rộng hơn.",
+    features: [
+      "Kiến trúc danh mục nhiều nhóm sản phẩm",
+      "SEO theo nhu cầu người mua ở nhiều thị trường",
+      "Vận hành nội dung B2B hằng tháng",
+      "Cải thiện lộ trình tiếp nhận yêu cầu",
+    ],
+  },
+  {
+    id: "enterprise", number: "03", name: "Enterprise Dominance", audience: "Nhóm doanh nghiệp sản xuất quy mô lớn", label: "VẬN HÀNH Ở QUY MÔ LỚN",
+    description: "Phạm vi hợp tác theo nhu cầu sản phẩm và thị trường của từng doanh nghiệp.",
+    features: [
+      "Hạ tầng website và danh mục tùy chỉnh",
+      "Lập kế hoạch SEO danh mục và truyền thông B2B",
+      "Đối chiếu dữ liệu đầu ra khi có nguồn phù hợp",
+      "Vận hành liên tục theo phạm vi đã thỏa thuận",
+    ],
+  },
+] as const

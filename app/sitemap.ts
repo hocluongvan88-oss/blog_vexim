@@ -3,6 +3,7 @@ import { createStaticClient } from "@/lib/supabase/server"
 import { BLOG_CATEGORIES } from "@/lib/blog-categories"
 import { TRADE } from "@/lib/vexim-trade-content"
 import { STATIC_ROUTES } from "@/lib/site-routes"
+import { languageUrls } from "@/lib/locale-routes"
 
 /**
  * sitemap.xml
@@ -62,17 +63,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
-  const staticPages: MetadataRoute.Sitemap = STATIC_ROUTES.map((route) => ({
-    // Trang chủ dùng `baseUrl` KHÔNG có "/" ở cuối — khớp từng ký tự với canonical
-    // và og:url mà Next xuất cho "/" (Next bỏ "/" khi pathname là "/"). Xem ghi chú
-    // về SITE_URL_WITH_SLASH trong lib/business-profile.ts.
-    url: route.path === "/" ? baseUrl : `${baseUrl}${route.path}`,
-    // Trang tĩnh: ngày sửa thật nằm trong code, không đo được ở runtime → bỏ lastModified
-    // thay vì gửi `new Date()` giả (Google chỉ tin lastmod khi nó chính xác).
-    lastModified: route.path === "/blog" ? blogLastModified : route.path === TRADE.path ? new Date(`${TRADE.updated}T00:00:00+07:00`) : undefined,
-    changeFrequency: route.changeFrequency,
-    priority: route.priority,
-  }))
+  const staticPages: MetadataRoute.Sitemap = STATIC_ROUTES.map((route) => {
+    const localizedPage = ["/", "/vi"].includes(route.path) ? "home" : ["/privacy", "/vi/privacy"].includes(route.path) ? "privacy" : null
+    return {
+      // Canonical homepage uses origin without slash; other pages use their own paths.
+      url: route.path === "/" ? baseUrl : `${baseUrl}${route.path}`,
+      // Only published, complete pairs get reciprocal hreflang in the sitemap.
+      ...(localizedPage ? { alternates: { languages: languageUrls(localizedPage) } } : {}),
+      // Trang tĩnh: chỉ ghi lastmod khi có ngày sửa thực tế.
+      lastModified: route.path === "/blog" ? blogLastModified : route.path === TRADE.path ? new Date(`${TRADE.updated}T00:00:00+07:00`) : undefined,
+      changeFrequency: route.changeFrequency,
+      priority: route.priority,
+    }
+  })
 
   // Trang danh mục — lấy từ nguồn dùng chung để không bị thiếu danh mục
   const categoryPages: MetadataRoute.Sitemap = BLOG_CATEGORIES.map((category) => ({

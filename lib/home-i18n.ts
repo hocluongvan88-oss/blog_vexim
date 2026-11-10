@@ -1,0 +1,119 @@
+/** No browser translation service or request-dependent redirect: both languages
+ * are complete SSR documents with stable URLs, canonicals and hreflang. */
+export const HOME_MESSAGES = {
+  en: {
+    hero: {
+      badge: "The Next-Gen Export Acceleration Engine", titleBefore: "Global B2B Digital ", titleAccent: "Infrastructure", titleAfter: " & Export Acceleration",
+      audit: "Request Digital Audit", trade: "Explore Vexim Trade Platform", footnote: "Built for Vietnamese manufacturers. Designed for international buyers.",
+      from: "Built in Vietnam", fromDetail: "Official supplier presence", to: "Ready for global discovery", toDetail: "North America · Europe",
+      imageAlt: "Isometric illustration connecting a Vietnamese factory and product catalog with buyers in North America and Europe",
+      illustrationNote: "Concept illustration · no live buyer or ranking data", pathwayLabel: "The connected export system",
+      pathway: ["Owned foundation", "Buyer-intent discovery", "Trade connection"], scroll: "Explore the system",
+    },
+    solutions: {
+      eyebrow: "01 / THE SOLUTION", label: "One connected export system", titleBefore: "Everything you need", titleAfter: "to be ", titleAccent: "found and trusted.",
+      description: "From your own website to the moment a buyer reaches out, each part of the export journey should work together.",
+      searches: "Illustrative buyer-intent searches", trade: "Explore Vexim Trade",
+      disclaimer: "Search positions, listing access and buyer inquiries depend on market conditions, platform eligibility and the agreed scope.",
+      artworkAlt: ["Isometric cloud server cluster beside a structured product catalog", "Isometric search lens highlighting buyer destinations on a globe", "Isometric shipping containers connected to an illustrative buyer profile"],
+    },
+    gap: {
+      eyebrow: "02 / THE VERIFICATION GAP", label: "Make the first impression count", titleBefore: "A listing gets noticed.", titleAccent: "A foundation gets checked.",
+      description: "After an introduction, buyers often look for an official website to understand the supplier, its products and how to start a direct conversation.",
+      traditionalLabel: "THE TRADITIONAL GAP", traditionalTitle: "When the search ends at a thin page.",
+      traditionalText: "A marketplace introduction can open a door. But if your own website is difficult to find or lacks product depth, buyers have less information to assess your business independently.",
+      traditionalPoints: ["Product details are scattered or missing.", "Factory information is hard to verify.", "The direct inquiry route is unclear."],
+      traditionalTail: "A missed opportunity to build trust", standardLabel: "THE VEXIM STANDARD", standardTitle: "Make every next step easier to verify.",
+      standardText: "An owned, structured export presence brings product information, supplier credentials and direct inquiry pathways together—so buyers can evaluate you on your terms.",
+      standardPoints: ["Searchable product and category pages.", "Credentials backed by owner-supplied evidence.", "Clear handoff to your sales conversation."],
+      standardTail: "Discovery → verification → conversation",
+      disclaimer: "This is a service framework, not a quantified claim about factories or a promise of search rankings, contracts or lead volume. Publish results only with approved, dated evidence.",
+    },
+    tiers: {
+      eyebrow: "03 / THE ENGAGEMENT", label: "Scope, not a cheap website package", titleBefore: "Built around your", titleAccent: "product lines.",
+      description: "Choose the operational depth that fits your catalog and markets. Final deliverables, timelines and marketplace terms are agreed together.",
+      featured: "FOR MULTI-CATEGORY TEAMS", includes: "WHAT WE CAN BUILD TOGETHER", discuss: "Discuss this scope",
+      note: "Marketplace access and verification require platform eligibility and an agreed term. No rankings, lead volumes or contract outcomes are guaranteed.",
+    },
+    compliance: { label: "Compliance resources", title: "Looking for compliance support?", description: "FDA, GACC, MoCRA and US Agent services remain available as separate pathways.", languageNote: "These service pages are currently available in Vietnamese." },
+    footer: {
+      eyebrow: "LET'S BUILD WHAT COMES NEXT", titleBefore: "Your products deserve", titleAccent: "to be discoverable.",
+      description: "Start with a conversation about your product lines and target markets.", brand: "Digital export foundations for Vietnamese manufacturers. Built for discovery, designed for direct buyer conversations.",
+      explore: "EXPLORE", solutions: "Our solutions", gap: "The verification gap", tiers: "Engagement scopes",
+      resources: "RESOURCES", blog: "Insights & articles (Vietnamese)", privacy: "Privacy & data requests", portal: "Client portal (Vietnamese)",
+      fda: "FDA resources (Vietnamese)", gacc: "GACC resources (Vietnamese)", mocra: "MoCRA resources (Vietnamese)", usAgent: "US Agent services (Vietnamese)",
+      contact: "CONTACT", country: "Vietnam", rights: "All rights reserved.", tagline: "Vietnam → Global",
+    },
+    privacy: {
+      eyebrow: "VEXIM GLOBAL / DATA REQUESTS", title: "Privacy & audit requests",
+      lead: "This page explains the information handled by our digital audit request form. It does not replace a full site-wide privacy policy for our other products and services.",
+      providedTitle: "Information you provide", providedText: "To request an audit conversation, you enter a website URL, your company name, target export markets and a business email. You may also select an engagement scope. Please do not include sensitive or confidential information in these fields.",
+      processTitle: "How the request works", processText: "When email delivery is configured, your information is sent to Vexim Global’s business inbox to respond to your inquiry. Submission does not run an automatic crawl or audit of your website. If online delivery is unavailable, you may choose to send an email draft from your own email application instead. In either case, the form does not save this information to a website database; email services may keep correspondence in their mail systems.",
+      questionsTitle: "Questions, access or correction", questionsBefore: "For questions about a request, or to ask about access, correction or deletion of the information in your email correspondence, contact", questionsAfter: "Other parts of the Vexim Global site, including Vietnamese consultation forms and client tools, may involve different data processing. Contact us for details before providing sensitive information.",
+      mailSubject: "Privacy and data request", back: "← Back to homepage",
+    },
+  },
+  vi: {
+    hero: {
+      badge: "Hạ tầng số cho doanh nghiệp xuất khẩu", titleBefore: "Hạ tầng số ", titleAccent: "B2B toàn cầu", titleAfter: " & Tăng tốc xuất khẩu",
+      audit: "Yêu cầu đánh giá hạ tầng số", trade: "Khám phá nền tảng Vexim Trade", footnote: "Dành cho nhà sản xuất Việt Nam. Thiết kế để người mua quốc tế dễ tìm hiểu.",
+      from: "Xây dựng tại Việt Nam", fromDetail: "Hiện diện nhà cung cấp chính thức", to: "Sẵn sàng được tìm hiểu", toDetail: "Bắc Mỹ · Châu Âu",
+      imageAlt: "Minh họa đẳng trục kết nối nhà máy và danh mục sản phẩm tại Việt Nam với người mua ở Bắc Mỹ và châu Âu",
+      illustrationNote: "Minh họa ý tưởng · không phải dữ liệu người mua hoặc thứ hạng thực tế", pathwayLabel: "Hệ thống xuất khẩu kết nối",
+      pathway: ["Nền tảng sở hữu riêng", "Nội dung theo nhu cầu tìm kiếm", "Kết nối thương mại"], scroll: "Khám phá hệ thống",
+    },
+    solutions: {
+      eyebrow: "01 / GIẢI PHÁP", label: "Một hệ thống xuất khẩu kết nối", titleBefore: "Từ nền tảng số", titleAfter: "đến khi ", titleAccent: "người mua tìm thấy bạn.",
+      description: "Từ website chính thức đến lúc người mua liên hệ, từng phần trong hành trình xuất khẩu nên hỗ trợ lẫn nhau.",
+      searches: "Ví dụ truy vấn tiếng Anh của người mua", trade: "Khám phá Vexim Trade",
+      disclaimer: "Thứ hạng tìm kiếm, khả năng đăng danh bạ và yêu cầu của người mua phụ thuộc vào thị trường, điều kiện nền tảng và phạm vi đã thỏa thuận.",
+      artworkAlt: ["Minh họa cụm máy chủ và danh mục sản phẩm có cấu trúc", "Minh họa kính tìm kiếm và các thị trường người mua trên địa cầu", "Minh họa container vận chuyển kết nối với hồ sơ người mua"],
+    },
+    gap: {
+      eyebrow: "02 / KHOẢNG TRỐNG XÁC MINH", label: "Tạo ấn tượng đầu tiên rõ ràng", titleBefore: "Danh bạ giúp được chú ý.", titleAccent: "Nền tảng giúp được tìm hiểu.",
+      description: "Sau khi được giới thiệu, người mua thường tìm website chính thức để xem nhà cung cấp, sản phẩm và cách bắt đầu trao đổi trực tiếp.",
+      traditionalLabel: "KHOẢNG TRỐNG THƯỜNG GẶP", traditionalTitle: "Khi thông tin chỉ dừng ở một trang mỏng.",
+      traditionalText: "Danh bạ có thể tạo cơ hội kết nối. Nhưng nếu website chính thức khó tìm hoặc thiếu thông tin sản phẩm, người mua sẽ có ít cơ sở hơn để tự tìm hiểu doanh nghiệp.",
+      traditionalPoints: ["Thông tin sản phẩm rời rạc hoặc còn thiếu.", "Thông tin nhà máy khó đối chiếu.", "Chưa rõ cách gửi yêu cầu trực tiếp."],
+      traditionalTail: "Bỏ lỡ cơ hội xây dựng niềm tin", standardLabel: "CÁCH TIẾP CẬN CỦA VEXIM", standardTitle: "Giúp từng bước dễ kiểm tra hơn.",
+      standardText: "Một kênh xuất khẩu riêng, có cấu trúc giúp tập hợp thông tin sản phẩm, hồ sơ nhà cung cấp và lộ trình liên hệ trực tiếp để người mua chủ động đánh giá.",
+      standardPoints: ["Trang sản phẩm và danh mục có thể tìm kiếm.", "Hồ sơ doanh nghiệp có tài liệu do chủ sở hữu cung cấp.", "Lộ trình chuyển tiếp rõ ràng sang bộ phận bán hàng."],
+      standardTail: "Tìm thấy → tìm hiểu → trao đổi",
+      disclaimer: "Đây là khung dịch vụ, không phải số liệu về nhà máy hoặc cam kết thứ hạng, hợp đồng hay lượng khách hàng tiềm năng. Chỉ công bố kết quả khi có bằng chứng được duyệt và ghi rõ thời gian.",
+    },
+    tiers: {
+      eyebrow: "03 / PHẠM VI HỢP TÁC", label: "Thiết kế theo nhu cầu, không đóng gói đại trà", titleBefore: "Bắt đầu từ", titleAccent: "dòng sản phẩm của bạn.",
+      description: "Chọn mức triển khai phù hợp với danh mục và thị trường. Hạng mục bàn giao, thời gian và điều kiện nền tảng được hai bên thống nhất cụ thể.",
+      featured: "DÀNH CHO NHIỀU DANH MỤC", includes: "CÁC HẠNG MỤC CÓ THỂ PHỐI HỢP", discuss: "Trao đổi về phạm vi này",
+      note: "Tiếp cận và xác minh trên nền tảng phụ thuộc điều kiện tham gia và thỏa thuận. Không cam kết thứ hạng, lượng yêu cầu hay kết quả hợp đồng.",
+    },
+    compliance: { label: "Tài liệu tuân thủ", title: "Cần hỗ trợ về quy định?", description: "Dịch vụ FDA, GACC, MoCRA và US Agent được trình bày tại các trang riêng.", languageNote: "Các trang dịch vụ hiện có bản tiếng Việt; bản tiếng Anh sẽ chỉ xuất bản sau khi được rà soát." },
+    footer: {
+      eyebrow: "CÙNG XÂY NỀN TẢNG TIẾP THEO", titleBefore: "Để sản phẩm của bạn", titleAccent: "dễ được tìm thấy.",
+      description: "Bắt đầu bằng cuộc trao đổi về dòng sản phẩm và thị trường mục tiêu.", brand: "Hạ tầng số xuất khẩu dành cho nhà sản xuất Việt Nam, hỗ trợ người mua tìm hiểu và liên hệ trực tiếp.",
+      explore: "KHÁM PHÁ", solutions: "Giải pháp", gap: "Khoảng trống xác minh", tiers: "Phạm vi hợp tác",
+      resources: "TÀI NGUYÊN", blog: "Bài viết & phân tích", privacy: "Quyền riêng tư & yêu cầu dữ liệu", portal: "Cổng khách hàng",
+      fda: "Tài liệu FDA", gacc: "Tài liệu GACC", mocra: "Tài liệu MoCRA", usAgent: "Dịch vụ US Agent",
+      contact: "LIÊN HỆ", country: "Việt Nam", rights: "Bảo lưu mọi quyền.", tagline: "Việt Nam → Toàn cầu",
+    },
+    privacy: {
+      eyebrow: "VEXIM GLOBAL / YÊU CẦU DỮ LIỆU", title: "Quyền riêng tư & yêu cầu đánh giá",
+      lead: "Trang này giải thích cách chúng tôi xử lý thông tin gửi qua biểu mẫu yêu cầu trao đổi về hạ tầng số. Trang không thay thế chính sách quyền riêng tư chung cho các sản phẩm và dịch vụ khác.",
+      providedTitle: "Thông tin bạn cung cấp", providedText: "Để yêu cầu trao đổi, bạn nhập URL website, tên công ty, thị trường xuất khẩu mục tiêu và email công việc. Bạn cũng có thể chọn phạm vi hợp tác. Vui lòng không điền thông tin nhạy cảm hoặc bí mật vào các trường này.",
+      processTitle: "Cách yêu cầu được xử lý", processText: "Khi hệ thống gửi email được cấu hình, thông tin của bạn được gửi đến hộp thư công việc của Vexim Global để phản hồi. Việc gửi biểu mẫu không tự động quét hoặc đánh giá website. Nếu không thể gửi trực tuyến, bạn có thể mở bản nháp và gửi bằng ứng dụng email của mình. Biểu mẫu không lưu thông tin này vào cơ sở dữ liệu của website; nhà cung cấp email có thể lưu thư trao đổi trong hệ thống của họ.",
+      questionsTitle: "Câu hỏi, truy cập hoặc chỉnh sửa", questionsBefore: "Để hỏi về yêu cầu, hoặc đề nghị truy cập, chỉnh sửa hay xóa thông tin trong thư trao đổi, vui lòng liên hệ", questionsAfter: "Các phần khác của website Vexim Global, gồm biểu mẫu tư vấn và công cụ dành cho khách hàng, có thể xử lý dữ liệu theo cách khác. Hãy liên hệ để biết thêm trước khi cung cấp thông tin nhạy cảm.",
+      mailSubject: "Yêu cầu về quyền riêng tư và dữ liệu", back: "← Về trang chủ",
+    },
+  },
+} as const
+
+export const VI_HOME_META = {
+  title: "Hạ tầng số B2B & Tăng tốc xuất khẩu | Vexim Global",
+  description: "Vexim Global hỗ trợ nhà sản xuất Việt Nam xây dựng website B2B, nội dung theo nhu cầu tìm kiếm của người mua và kết nối với hệ sinh thái Vexim Trade.",
+  ogAlt: "Vexim Global: hạ tầng số B2B và hành trình từ nhà sản xuất Việt Nam đến người mua quốc tế",
+} as const
+
+export const VI_PRIVACY_META = {
+  title: "Quyền riêng tư & Yêu cầu dữ liệu | Vexim Global",
+  description: "Cách Vexim Global xử lý thông tin gửi qua biểu mẫu yêu cầu đánh giá hạ tầng số và kênh liên hệ về dữ liệu.",
+} as const
