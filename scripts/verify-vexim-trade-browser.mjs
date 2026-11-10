@@ -224,14 +224,18 @@ try {
       els.every((el) => new URL(el.href).searchParams.get("utm_source") === "email"),
     ),
   )
-  // The homepage card must use a full document navigation, not request this HTML as an RSC payload.
+  // The English homepage now links to the separate Trade ecosystem directly,
+  // rather than linking to the old /services/export-sales homepage card.
   await page.goto(base, { waitUntil: "domcontentloaded" })
-  await page.addStyleTag({ content: "html{scroll-behavior:auto!important}" })
-  await page.$eval('#services h3 a[href="/services/export-sales"]', (el) =>
-    el.scrollIntoView({ block: "center", behavior: "instant" }),
+  const homepageTradeLinks = await page.$$eval('a[href="https://veximtrade.com"]', (links) =>
+    links.map((link) => ({ target: link.target, rel: link.rel })),
   )
-  await page.click('#services h3 a[href="/services/export-sales"]')
-  await page.waitForFunction(() => location.pathname === "/services/export-sales")
+  assert.ok(homepageTradeLinks.length >= 2)
+  assert.ok(homepageTradeLinks.every(({ target, rel }) =>
+    target === "_blank" && rel.includes("noopener") && rel.includes("noreferrer"),
+  ))
+  // Its standalone Vietnamese landing must still render as a normal HTML document.
+  await page.goto(`${base}/services/export-sales`, { waitUntil: "domcontentloaded" })
   assert.equal(await page.$$("script[src*='_next/']").then((els) => els.length), 0)
   // Exercise the existing Vercel SDK contract and its after-paint loader without a real collector.
   const loader = loadSchemaBuilders()
@@ -281,7 +285,7 @@ try {
   }
   assert.deepEqual(errors, [])
   console.log(
-    "PASS: 320–1920px/no overflow; correct breakpoints; self-hosted Inter/actual ASCII+Vietnamese NFC+NFD glyphs/no framework JS; sticky/keyboard/native menu/no-JS; UTMs; 3 CTA events and deduplicated private scroll events; real homepage document navigation",
+    "PASS: 320–1920px/no overflow; correct breakpoints; self-hosted Inter/actual ASCII+Vietnamese NFC+NFD glyphs/no framework JS; sticky/keyboard/native menu/no-JS; UTMs; 3 CTA events and deduplicated private scroll events; current homepage Trade links and standalone document",
   )
 } finally {
   await browser.close()
