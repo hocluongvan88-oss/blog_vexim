@@ -202,6 +202,17 @@ body:has([data-blog-sidebar-rail]) {
   overflow-x: clip;
 }
 
+/* Keep the homepage's translucent sticky header attached to the viewport.
+   A hidden horizontal overflow on body would create a scroll container and
+   prevent sticky positioning; clip does not affect other site sections. */
+body:has([data-vexim-homepage]) {
+  overflow-x: clip;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:has([data-vexim-homepage]) { scroll-behavior: auto; }
+}
+
 /* Thêm styles cho Rich Text Editor để hiển thị định dạng đẹp */
 /* Rich Text Editor Styles */
 .prose {

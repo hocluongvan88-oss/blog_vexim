@@ -26,7 +26,7 @@ export default function Home() {
   return <>
     {/* Organization/Logo/WebSite are emitted once in the root layout. */}
     <JsonLd id="home-page-schema" data={buildHomePageSchema()} />
-    <div className={styles.home} lang="en">
+    <div className={styles.home} lang="en" data-vexim-homepage>
       <AuditProvider>
         <HomeHeader />
         <main lang="en">

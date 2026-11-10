@@ -94,6 +94,18 @@ try {
       await page.locator('nav[aria-label="Mobile navigation"] a[href="#performance"]').click()
       assert.equal(await page.$eval('button[aria-controls="home-mobile-nav"]', el => el.getAttribute("aria-expanded")), "false")
     }
+    if ([390, 1440].includes(width)) {
+      const design = await page.evaluate(() => ({
+        headingSize: parseFloat(getComputedStyle(document.querySelector('#hero-title')).fontSize),
+        solutionBackground: getComputedStyle(document.querySelector('#solutions')).backgroundColor,
+        headerPosition: getComputedStyle(document.querySelector('header')).position,
+      }))
+      assert.ok(design.headingSize >= 40, `hero typography too small at ${width}px`)
+      assert.equal(design.solutionBackground, 'rgb(245, 245, 247)', 'the homepage solution surface should remain light')
+      assert.equal(design.headerPosition, 'sticky')
+      await page.evaluate(() => scrollTo({ top: 900, behavior: 'instant' }))
+      assert.ok(Math.abs(await page.$eval('header', el => el.getBoundingClientRect().top)) < 1, `sticky header does not follow the viewport at ${width}px`)
+    }
     assert.deepEqual(errors, [], `browser errors at ${width}px`)
     console.log(`PASS browser: ${width}px, no overflow/hydration errors, initial CLS=${state.cls.toFixed(4)}`)
     await page.close()
