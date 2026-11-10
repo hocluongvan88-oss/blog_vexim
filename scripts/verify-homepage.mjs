@@ -57,7 +57,7 @@ const browser = await puppeteer.launch({ executablePath, headless: true, args: [
 const screenshots = process.env.HOME_TEST_SCREENSHOT_DIR
 if (screenshots) mkdirSync(screenshots, { recursive: true })
 try {
-  for (const width of [320, 390, 768, 1024, 1440, 1920]) {
+  for (const width of [320, 390, 681, 768, 800, 881, 1024, 1440, 1920]) {
     const page = await browser.newPage()
     const errors = []
     page.on("pageerror", error => errors.push(error.message))
@@ -81,6 +81,10 @@ try {
     assert.equal(state.width, state.viewport, `horizontal overflow at ${width}px`)
     assert.equal(state.h1, "Global B2B Digital Infrastructure & Export Acceleration Engine")
     assert.ok(state.cls < 0.01, `initial layout shift ${state.cls} at ${width}px`)
+    if (width >= 681 && width <= 800) {
+      const columns = await page.$eval('[class*="pillarGrid"]', el => getComputedStyle(el).gridTemplateColumns.split(' ').length)
+      assert.equal(columns, 2, `portrait tablet cards are too narrow at ${width}px`)
+    }
     if (screenshots && [390, 1440].includes(width)) await page.screenshot({ path: path.join(screenshots, `homepage-${width}.png`), fullPage: true })
     if (width < 880) {
       const header = await page.evaluate(() => ({
@@ -150,6 +154,7 @@ try {
   await page.locator('#audit-email').fill('sales@factory.example')
   await page.locator('button[type="submit"]').click()
   await page.waitForSelector('a[href^="mailto:contact@veximglobal.com?subject="]')
+  await page.waitForSelector('p[role="alert"]') // Draft appears before the mocked 503 response has settled.
   assert.ok((await page.$eval('p[role="alert"]', el => el.textContent)).includes('unavailable'))
   assert.equal(posted.scope, 'Global Growth Engine')
   await page.close()
