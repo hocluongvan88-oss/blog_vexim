@@ -33,6 +33,7 @@ import {
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { BlockEditor } from "@/components/block-editor/block-editor"
+import { PostTitleInput } from "@/components/admin/post-title-input"
 import { SEOChecker } from "@/components/seo-checker"
 import { ImageUploader } from "@/components/image-uploader"
 import { AIWritingAssistant } from "@/components/admin/ai-writing-assistant"
@@ -580,15 +581,15 @@ export default function NewPostPage() {
         )}
 
         <div
-          className={`grid gap-6 items-start ${
+          className={`grid grid-cols-1 gap-4 xl:gap-6 items-start ${
             showSidebar
-              ? "lg:grid-cols-[minmax(0,1fr)_420px] xl:grid-cols-[minmax(0,1fr)_470px] 2xl:grid-cols-[minmax(0,1fr)_520px]"
+              ? "xl:grid-cols-[minmax(0,1fr)_300px] 2xl:grid-cols-[minmax(0,1fr)_340px]"
               : "grid-cols-1 max-w-4xl mx-auto"
           }`}
         >
           {/* ==================== CỘT TRÁI: TRANG GIẤY SOẠN THẢO LIỀN MẠCH (Notion / WordPress Canvas) ==================== */}
           <div className="space-y-4 min-w-0">
-            <Card className="p-6 md:p-8 shadow-xs border-border/80 bg-white space-y-5">
+            <Card className="min-w-0 gap-5 p-4 sm:p-6 2xl:p-8 shadow-xs border-border/80 bg-white">
               {/* Thanh thiết lập nhanh đầu trang giấy: Danh mục + Ảnh bìa + Đường dẫn */}
               <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-dashed">
                 <div className="flex flex-wrap items-center gap-2">
@@ -707,24 +708,12 @@ export default function NewPostPage() {
 
               {/* TIÊU ĐỀ BÀI VIẾT KIỂU NOTION / WORDPRESS */}
               <div>
-                <Input
-                  id="title"
-                  placeholder="Nhập tiêu đề bài viết..."
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault()
-                      focusFirstEditorBlock()
-                    }
-                  }}
-                  className="border-0 shadow-none px-0 text-2xl md:text-4xl font-bold text-primary placeholder:text-muted-foreground/40 focus-visible:ring-0 h-auto py-1"
-                />
+                <PostTitleInput value={title} onChange={setTitle} onEnter={focusFirstEditorBlock} />
               </div>
 
               {/* MÔ TẢ NGẮN (EXCERPT) GỌN GÀNG NGAY DƯỚI TIÊU ĐỀ */}
               <div className="rounded-lg border border-dashed bg-muted/15 p-3 space-y-1.5">
-                <div className="flex items-center justify-between gap-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
                   <Label htmlFor="excerpt" className="text-xs font-medium text-muted-foreground">
                     Mô tả ngắn (hiển thị ở trang danh sách bài viết) <span className="text-destructive">*</span>
                   </Label>
@@ -762,7 +751,7 @@ export default function NewPostPage() {
             </Card>
           </div>
 
-          {/* ==================== CỘT PHẢI: BẢNG CÔNG CỤ CHIA TAB (rộng 420–520px, không cắt nội dung) ==================== */}
+          {/* ==================== CỘT PHẢI: BẢNG CÔNG CỤ CHIA TAB (rộng 300–340px; xếp dưới editor trên màn hình hẹp) ==================== */}
           {showSidebar && (
             <aside className="space-y-4 min-w-0">
               <Tabs
@@ -771,7 +760,7 @@ export default function NewPostPage() {
                 className="w-full"
               >
                 {/* Thanh tab luôn bám theo khi cuộn bài viết, nhưng nội dung bên dưới chảy tự nhiên (không bị cắt) */}
-                <div className="lg:sticky lg:top-16 z-20 -my-1 py-1 rounded-lg bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85">
+                <div className="xl:sticky xl:top-16 z-20 -my-1 py-1 rounded-lg bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85">
                 <TabsList className="grid w-full grid-cols-3 h-10">
                   <TabsTrigger value="settings" className="text-xs gap-1.5">
                     <Settings2 className="w-3.5 h-3.5" />

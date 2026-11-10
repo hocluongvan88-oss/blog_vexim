@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { BlockEditor } from "@/components/block-editor/block-editor"
+import { PostTitleInput } from "@/components/admin/post-title-input"
 import { SEOChecker } from "@/components/seo-checker"
 import {
   Eye,
@@ -665,15 +666,15 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
         )}
 
         <div
-          className={`grid gap-6 items-start ${
+          className={`grid grid-cols-1 gap-4 xl:gap-6 items-start ${
             showSidebar
-              ? "lg:grid-cols-[minmax(0,1fr)_420px] xl:grid-cols-[minmax(0,1fr)_470px] 2xl:grid-cols-[minmax(0,1fr)_520px]"
+              ? "xl:grid-cols-[minmax(0,1fr)_300px] 2xl:grid-cols-[minmax(0,1fr)_340px]"
               : "grid-cols-1 max-w-4xl mx-auto"
           }`}
         >
           {/* ==================== CỘT TRÁI: TRANG GIẤY SOẠN THẢO ==================== */}
           <div className="space-y-4 min-w-0">
-            <Card className="p-6 md:p-8 shadow-xs border-border/80 bg-white space-y-5">
+            <Card className="min-w-0 gap-5 p-4 sm:p-6 2xl:p-8 shadow-xs border-border/80 bg-white">
               {/* Thanh thiết lập nhanh đầu trang giấy */}
               <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-dashed">
                 <div className="flex flex-wrap items-center gap-2">
@@ -791,24 +792,12 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
 
               {/* TIÊU ĐỀ BÀI VIẾT */}
               <div>
-                <Input
-                  id="title"
-                  placeholder="Nhập tiêu đề bài viết..."
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault()
-                      focusFirstEditorBlock()
-                    }
-                  }}
-                  className="border-0 shadow-none px-0 text-2xl md:text-4xl font-bold text-primary placeholder:text-muted-foreground/40 focus-visible:ring-0 h-auto py-1"
-                />
+                <PostTitleInput value={title} onChange={setTitle} onEnter={focusFirstEditorBlock} />
               </div>
 
               {/* MÔ TẢ NGẮN */}
               <div className="rounded-lg border border-dashed bg-muted/15 p-3 space-y-1.5">
-                <div className="flex items-center justify-between gap-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
                   <Label htmlFor="excerpt" className="text-xs font-medium text-muted-foreground">
                     Mô tả ngắn <span className="text-destructive">*</span>
                   </Label>
@@ -854,7 +843,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
                 className="w-full"
               >
                 {/* Thanh tab luôn bám theo khi cuộn bài viết, nhưng nội dung bên dưới chảy tự nhiên (không bị cắt) */}
-                <div className="lg:sticky lg:top-16 z-20 -my-1 py-1 rounded-lg bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85">
+                <div className="xl:sticky xl:top-16 z-20 -my-1 py-1 rounded-lg bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85">
                 <TabsList className="grid w-full grid-cols-3 h-10">
                   <TabsTrigger value="settings" className="text-xs gap-1.5">
                     <Settings2 className="w-3.5 h-3.5" />

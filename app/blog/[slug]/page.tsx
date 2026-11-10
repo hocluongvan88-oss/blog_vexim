@@ -19,7 +19,8 @@ import { notFound } from "next/navigation"
 import { BlogShareButtons } from "@/components/blog-share-buttons"
 import { RelatedPosts } from "@/components/related-posts"
 import BlogSidebar from "@/components/blog-sidebar"
-import { PopularPosts } from "@/components/popular-posts"
+import { RecentPosts } from "@/components/recent-posts"
+import { BlogSidebarRail } from "@/components/blog-sidebar-rail"
 import { BlogTableOfContents } from "@/components/blog-table-of-contents"
 import { BlogInternalLinks } from "@/components/blog-internal-links"
 import { ViewTracker } from "@/components/view-tracker"
@@ -311,7 +312,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             {/* Grid layout with TOC, content and sidebar */}
             <div className="grid grid-cols-1 xl:grid-cols-[220px_minmax(0,1fr)_300px] lg:grid-cols-[minmax(0,1fr)_300px] gap-8">
               {/* Table of Contents - Left side on xl screens */}
-              <aside className="hidden xl:block overflow-hidden">
+              <aside className="hidden min-w-0 xl:block">
                 <BlogTableOfContents headings={tocHeadings} />
               </aside>
 
@@ -423,12 +424,12 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
               </div>
 
               {/* Sidebar - Hidden on mobile, shown on large screens */}
-              <div className="hidden lg:block space-y-6">
-                <PopularPosts />
+              <BlogSidebarRail className="hidden lg:block">
+                <RecentPosts excludePostId={post.id} />
                 <BlogSidebar />
                 {/* Internal Links in Sidebar for desktop */}
                 <BlogInternalLinks category={post.category} />
-              </div>
+              </BlogSidebarRail>
             </div>
           </div>
         </article>

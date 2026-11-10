@@ -81,7 +81,7 @@ export function BlockToolbar({
 
   return (
     <div
-      className="absolute -top-9 right-2 bg-popover/95 backdrop-blur border rounded-lg shadow-md px-1.5 py-1 flex items-center gap-0.5 z-20"
+      className="relative ml-auto mb-2 w-fit max-w-full bg-popover/95 backdrop-blur border rounded-lg shadow-md px-1.5 py-1 flex flex-wrap items-center justify-end gap-0.5 z-20"
       onClick={(e) => e.stopPropagation()}
     >
       {/* Block Type Converter */}

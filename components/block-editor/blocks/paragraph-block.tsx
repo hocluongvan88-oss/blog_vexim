@@ -513,7 +513,7 @@ export function ParagraphBlock({
       ref={editorRef}
       contentEditable
       suppressContentEditableWarning
-      className={`${alignClass} text-base leading-relaxed outline-none min-h-[32px] py-1 resize-none overflow-hidden empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground/60 prose prose-sm max-w-none [&_a]:text-blue-600 [&_a]:underline [&_a]:cursor-pointer [&_a:hover]:text-blue-800`}
+      className={`min-w-0 break-words [overflow-wrap:anywhere] ${alignClass} text-base leading-relaxed outline-none min-h-[32px] py-1 resize-none overflow-hidden empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground/60 prose prose-sm max-w-none [&_a]:text-blue-600 [&_a]:underline [&_a]:cursor-pointer [&_a:hover]:text-blue-800`}
       data-placeholder="Gõ '/' để chọn khối (H2, Ảnh, Bảng, Danh sách...) hoặc nhập nội dung..."
       onKeyDown={handleKeyDown}
       onPaste={handlePaste}
