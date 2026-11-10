@@ -1,23 +1,18 @@
-# Schema trang chủ Vexim Global — bản hiện tại
+# Schema trang chủ Vexim Global — định vị B2B Digital Export
 
-Bản này được sinh từ cấu hình đang dùng trong repository, không lấy lại dữ liệu cũ hoặc tự thêm giá, tọa độ, đánh giá khách hàng.
+Được sinh từ code hiện tại. Không chép lại dữ liệu cũ và không tự thêm giá, tọa độ, số liệu thứ hạng hoặc chứng nhận.
 
-- Domain: **https://www.veximglobal.com** (khớp canonical/OG/sitemap).
-- Email: **contact@veximglobal.com**. Điện thoại: **+84373685634**.
-- Địa chỉ: **25/6/51 Ngọa Long, Tây Tựu, Hà Nội**.
-- Slogan: **Tử Tế - Tận Tâm - Trách Nhiệm**.
-- Giờ làm việc: thứ Hai–thứ Sáu 08:00–18:00; thứ Bảy 08:00–12:00. Chủ nhật nghỉ, không khai lịch mở cửa.
-- Facebook/LinkedIn/Zalo: URL doanh nghiệp đã cung cấp; không dùng URL quản trị.
-- Logo 824×543; ảnh trang chủ/OG 1200×630.
-- Danh mục: 6 dịch vụ, mỗi dịch vụ có URL và @id khớp landing page.
+- Canonical / OG / sitemap: **https://www.veximglobal.com**.
+- Trang chủ WebPage: **en**; WebSite: tiếng Anh và tiếng Việt (blog/dịch vụ còn bằng tiếng Việt).
+- Organization / LocalBusiness: một node chung toàn website, số điện thoại **+84373685634**, email **contact@veximglobal.com**, địa chỉ **25/6/51 Ngọa Long, Tây Tựu, Hà Nội**.
+- Slogan doanh nghiệp được giữ như thông tin thương hiệu đã xác nhận; phần chữ nhìn thấy trên trang chủ đều tiếng Anh.
+- Service chính: hạ tầng xuất khẩu B2B và Buyer-Intent SEO; ba phạm vi hợp tác được đề xuất: Core Launchpad, Global Growth Engine, Enterprise Dominance. Không có giá hoặc cam kết thứ hạng.
+- FDA, GACC, MoCRA và US Agent là liên kết phụ; 6 định danh service trang dịch vụ trước đây vẫn giữ nguyên trên từng landing page, không còn là catalog chính của trang chủ.
+- Ảnh trang chủ/OG là tệp thực 1200×630, không chứa số liệu minh họa như hiệu suất thật.
 
 ## Cách sử dụng
 
-Trong ứng dụng Next.js này, layout xuất Organization/LocalBusiness, Logo và WebSite; trang chủ xuất WebPage, ảnh và Service. Không chèn thêm nguyên khối bên dưới vào ứng dụng vì sẽ lặp dữ liệu đã có.
-
-Khối bên dưới là bản gộp tương đương để sao chép sang hệ thống khác hoặc đưa vào công cụ kiểm tra. Nếu dùng thay bản cũ, **thay toàn bộ khối cũ**, không giữ đồng thời các URL non-www.
-
-Hai khối JSON-LD khác nhau vẫn liên kết được qua @id; không bắt buộc tất cả nằm trong một thẻ script.
+Root layout xuất Organization/LocalBusiness, Logo và WebSite. Trang chủ xuất WebPage, ImageObject, Vexim Trade Organization và Service. Dùng chung @id nhưng **không chèn** bản gộp này thêm lần nữa vào Next.js.
 
 ## JSON-LD hoàn chỉnh
 
@@ -42,7 +37,7 @@ Hai khối JSON-LD khác nhau vẫn liên kết được qua @id; không bắt b
       "image": {
         "@id": "https://www.veximglobal.com/#logo"
       },
-      "description": "Vexim Global hỗ trợ doanh nghiệp Việt đăng ký FDA, DUNS, US Agent, FSVP, tuân thủ MoCRA và lập LLC tại Mỹ. Quy trình rõ ràng, tư vấn miễn phí trong 24h.",
+      "description": "Vexim Global builds digital export foundations for Vietnamese manufacturers: B2B web infrastructure, buyer-intent SEO and connections to the Vexim Trade ecosystem. Regulatory resources remain available separately.",
       "telephone": "+84373685634",
       "email": "contact@veximglobal.com",
       "address": {
@@ -121,7 +116,10 @@ Hai khối JSON-LD khác nhau vẫn liên kết được qua @id; không bắt b
       "@id": "https://www.veximglobal.com/#website",
       "name": "Vexim Global",
       "url": "https://www.veximglobal.com",
-      "inLanguage": "vi-VN",
+      "inLanguage": [
+        "en",
+        "vi-VN"
+      ],
       "publisher": {
         "@id": "https://www.veximglobal.com/#organization"
       }
@@ -130,9 +128,9 @@ Hai khối JSON-LD khác nhau vẫn liên kết được qua @id; không bắt b
       "@type": "WebPage",
       "@id": "https://www.veximglobal.com/#webpage",
       "url": "https://www.veximglobal.com",
-      "name": "Đăng Ký FDA, US Agent & Tư Vấn Xuất Khẩu Sang Mỹ | Vexim Global",
-      "description": "Vexim Global hỗ trợ doanh nghiệp Việt đăng ký FDA, DUNS, US Agent, FSVP, tuân thủ MoCRA và lập LLC tại Mỹ. Quy trình rõ ràng, tư vấn miễn phí trong 24h.",
-      "inLanguage": "vi-VN",
+      "name": "B2B Digital Export Infrastructure | Vexim Global",
+      "description": "Vexim Global builds B2B export websites, buyer-intent SEO and Vexim Trade connections for Vietnamese manufacturers entering international markets.",
+      "inLanguage": "en",
       "isPartOf": {
         "@id": "https://www.veximglobal.com/#website"
       },
@@ -188,9 +186,9 @@ Hai khối JSON-LD khác nhau vẫn liên kết được qua @id; không bắt b
     {
       "@type": "Service",
       "@id": "https://www.veximglobal.com/#service",
-      "name": "Dịch vụ đăng ký FDA & tư vấn pháp lý xuất khẩu sang Mỹ",
-      "serviceType": "Regulatory Compliance & Market Access",
-      "description": "Tư vấn và hỗ trợ doanh nghiệp Việt Nam về FDA, DUNS, MoCRA, US Agent, FSVP, thành lập LLC & EIN và hồ sơ nhà cung cấp nông sản trên Vexim Trade.",
+      "name": "Global B2B Digital Infrastructure & Export Acceleration Engine",
+      "serviceType": "B2B Digital Export Infrastructure & Buyer-Intent SEO",
+      "description": "Vexim Global builds B2B export websites, buyer-intent SEO and Vexim Trade connections for Vietnamese manufacturers entering international markets.",
       "url": "https://www.veximglobal.com",
       "provider": {
         "@id": "https://www.veximglobal.com/#organization"
@@ -200,200 +198,55 @@ Hai khối JSON-LD khác nhau vẫn liên kết được qua @id; không bắt b
       },
       "audience": {
         "@type": "BusinessAudience",
-        "audienceType": "Doanh nghiệp Việt Nam xuất khẩu sang Mỹ"
+        "audienceType": "Vietnamese manufacturers exporting to international buyers"
       },
-      "areaServed": [
-        {
-          "@type": "Country",
-          "name": "Việt Nam",
-          "identifier": "VN"
-        },
-        {
-          "@type": "Country",
-          "name": "Hoa Kỳ",
-          "identifier": "US"
-        }
-      ],
       "hasOfferCatalog": {
         "@type": "OfferCatalog",
         "@id": "https://www.veximglobal.com/#offer-catalog",
-        "name": "Dịch vụ của Vexim Global",
+        "name": "Digital export infrastructure engagement scopes",
         "itemListElement": [
           {
             "@type": "Offer",
-            "url": "https://www.veximglobal.com/services/fda",
+            "url": "https://www.veximglobal.com/#services",
             "itemOffered": {
               "@type": "Service",
-              "@id": "https://www.veximglobal.com/#service-fda-registration",
-              "name": "Đăng ký FDA & DUNS",
-              "serviceType": "FDA Food Facility Registration & DUNS",
-              "description": "Hỗ trợ DUNS (UFI), đăng ký cơ sở thực phẩm FDA và US Agent cho doanh nghiệp Việt xuất khẩu sang Mỹ; cơ sở thuộc diện áp dụng gia hạn từ 01/10 đến 31/12 năm chẵn. Đăng ký không đồng nghĩa FDA phê duyệt sản phẩm.",
-              "url": "https://www.veximglobal.com/services/fda",
+              "@id": "https://www.veximglobal.com/#service-core",
+              "name": "B2B Core Launchpad",
+              "description": "A focused starting point for an export-ready category.",
+              "serviceType": "Digital export infrastructure",
+              "url": "https://www.veximglobal.com/#services",
               "provider": {
                 "@id": "https://www.veximglobal.com/#organization"
-              },
-              "areaServed": [
-                {
-                  "@type": "Country",
-                  "name": "Việt Nam",
-                  "identifier": "VN"
-                },
-                {
-                  "@type": "Country",
-                  "name": "Hoa Kỳ",
-                  "identifier": "US"
-                }
-              ]
+              }
             }
           },
           {
             "@type": "Offer",
-            "url": "https://www.veximglobal.com/services/cosmetics/mocra-registration",
+            "url": "https://www.veximglobal.com/#services",
             "itemOffered": {
               "@type": "Service",
-              "@id": "https://www.veximglobal.com/#service-mocra",
-              "name": "Tuân thủ MoCRA",
-              "serviceType": "MoCRA Cosmetic Facility Registration & Product Listing",
-              "description": "Đăng ký cơ sở sản xuất mỹ phẩm và liệt kê sản phẩm lên FDA theo Đạo luật Hiện đại hóa Mỹ phẩm (MoCRA) 2022, kèm tư vấn Adverse Event.",
-              "url": "https://www.veximglobal.com/services/cosmetics/mocra-registration",
+              "@id": "https://www.veximglobal.com/#service-growth",
+              "name": "Global Growth Engine",
+              "description": "A coordinated web, search and content operation for a broader portfolio.",
+              "serviceType": "Digital export infrastructure",
+              "url": "https://www.veximglobal.com/#services",
               "provider": {
                 "@id": "https://www.veximglobal.com/#organization"
-              },
-              "areaServed": [
-                {
-                  "@type": "Country",
-                  "name": "Việt Nam",
-                  "identifier": "VN"
-                },
-                {
-                  "@type": "Country",
-                  "name": "Hoa Kỳ",
-                  "identifier": "US"
-                }
-              ]
+              }
             }
           },
           {
             "@type": "Offer",
-            "url": "https://www.veximglobal.com/services/us-agent",
+            "url": "https://www.veximglobal.com/#services",
             "itemOffered": {
               "@type": "Service",
-              "@id": "https://www.veximglobal.com/#service-us-agent",
-              "name": "US Agent & Responsible Person",
-              "serviceType": "FDA US Agent & MoCRA Responsible Person",
-              "description": "Đại diện pháp lý tại Mỹ cho cơ sở thực phẩm (US Agent) và người chịu trách nhiệm cho mỹ phẩm (Responsible Person) theo quy định liên bang.",
-              "url": "https://www.veximglobal.com/services/us-agent",
+              "@id": "https://www.veximglobal.com/#service-enterprise",
+              "name": "Enterprise Dominance",
+              "description": "An export agency retainer built around your operating complexity.",
+              "serviceType": "Digital export infrastructure",
+              "url": "https://www.veximglobal.com/#services",
               "provider": {
                 "@id": "https://www.veximglobal.com/#organization"
-              },
-              "areaServed": [
-                {
-                  "@type": "Country",
-                  "name": "Việt Nam",
-                  "identifier": "VN"
-                },
-                {
-                  "@type": "Country",
-                  "name": "Hoa Kỳ",
-                  "identifier": "US"
-                }
-              ]
-            }
-          },
-          {
-            "@type": "Offer",
-            "url": "https://www.veximglobal.com/services/fsvp",
-            "itemOffered": {
-              "@type": "Service",
-              "@id": "https://www.veximglobal.com/#service-fsvp",
-              "name": "FSVP Importer & Plan",
-              "serviceType": "Foreign Supplier Verification Program (FSVP) Compliance",
-              "description": "Đảm nhận vai trò FSVP Importer và xây dựng FSVP Plan, đánh giá nhà cung cấp nước ngoài theo FSMA cho lô thực phẩm nhập vào Mỹ.",
-              "url": "https://www.veximglobal.com/services/fsvp",
-              "provider": {
-                "@id": "https://www.veximglobal.com/#organization"
-              },
-              "areaServed": [
-                {
-                  "@type": "Country",
-                  "name": "Việt Nam",
-                  "identifier": "VN"
-                },
-                {
-                  "@type": "Country",
-                  "name": "Hoa Kỳ",
-                  "identifier": "US"
-                }
-              ]
-            }
-          },
-          {
-            "@type": "Offer",
-            "url": "https://www.veximglobal.com/services/llc-ein",
-            "itemOffered": {
-              "@type": "Service",
-              "@id": "https://www.veximglobal.com/#service-llc-ein",
-              "name": "Thành lập LLC & EIN",
-              "serviceType": "US LLC Formation & EIN Registration",
-              "description": "Thành lập công ty LLC tại Mỹ và xin mã số thuế EIN để doanh nghiệp Việt tự đứng tên nhập khẩu, mở tài khoản ngân hàng Mỹ.",
-              "url": "https://www.veximglobal.com/services/llc-ein",
-              "provider": {
-                "@id": "https://www.veximglobal.com/#organization"
-              },
-              "areaServed": [
-                {
-                  "@type": "Country",
-                  "name": "Việt Nam",
-                  "identifier": "VN"
-                },
-                {
-                  "@type": "Country",
-                  "name": "Hoa Kỳ",
-                  "identifier": "US"
-                }
-              ]
-            }
-          },
-          {
-            "@type": "Offer",
-            "url": "https://www.veximglobal.com/services/export-sales",
-            "itemOffered": {
-              "@type": "Service",
-              "@id": "https://www.veximglobal.com/#service-export-sales",
-              "name": "Vexim Trade",
-              "serviceType": "Danh bạ nhà cung cấp nông sản Việt Nam",
-              "description": "Hồ sơ nhà cung cấp nông sản Việt Nam với quy cách chuẩn ngành, xác minh từng bước và yêu cầu báo giá gửi thẳng đến doanh nghiệp.",
-              "url": "https://www.veximglobal.com/services/export-sales",
-              "provider": {
-                "@id": "https://veximtrade.com/#organization"
-              },
-              "areaServed": "VN",
-              "audience": {
-                "@type": "BusinessAudience",
-                "audienceType": "Doanh nghiệp sản xuất, xuất khẩu nông sản Việt Nam"
-              },
-              "hasOfferCatalog": {
-                "@type": "OfferCatalog",
-                "name": "Danh mục đang mở",
-                "itemListElement": [
-                  {
-                    "@type": "OfferCatalog",
-                    "name": "Hạt điều nhân"
-                  },
-                  {
-                    "@type": "OfferCatalog",
-                    "name": "Hồ tiêu"
-                  },
-                  {
-                    "@type": "OfferCatalog",
-                    "name": "Quế, hồi"
-                  }
-                ]
-              },
-              "potentialAction": {
-                "@type": "RegisterAction",
-                "target": "https://veximtrade.com/supplier/register",
-                "name": "Đăng ký nhà cung cấp"
               }
             }
           }
@@ -405,13 +258,6 @@ Hai khối JSON-LD khác nhau vẫn liên kết được qua @id; không bắt b
 </script>
 ```
 
-## Ghi chú kiểm tra
+## Giới hạn
 
-- ProfessionalService được Schema.org đánh dấu deprecated; dùng LocalBusiness cho đơn vị có địa chỉ công khai, Service cho dịch vụ được cung cấp.
-- openingHoursSpecification thuộc Place; LocalBusiness kế thừa cả Place và Organization.
-- provider đặt trên Service; availableLanguage chỉ khai trong ContactPoint, không đặt trực tiếp trên Service.
-- Không dùng priceRange “$$” khi chưa có căn cứ; không tự thêm geo, mã bưu chính, số giấy phép, review hoặc aggregateRating.
-- sameAs chỉ gồm các hồ sơ mạng xã hội đã xác nhận. Link hồ sơ năng lực fda.veximglobal.com vẫn hiển thị ở phần căn cứ website, không dùng như hồ sơ định danh mạng xã hội.
-- Đây là dữ liệu xác minh theo code và HTML local. Chưa kiểm tra production hoặc chạy Rich Results Test/Schema Markup Validator trực tuyến. Schema hợp lệ không đảm bảo Google hiển thị rich results.
-
-Tạo lại sau khi đổi thông tin: `npm run schema:export`. Kiểm tra: `npm run test:schema`.
+Schema phù hợp nội dung hiện tại của code; chưa xác nhận việc Google hiển thị rich results hay kết quả production. Không ngụ ý vị trí SEO hoặc chuyển đổi. Tạo lại bằng `npm run schema:export`, kiểm tra `npm run test:schema`.

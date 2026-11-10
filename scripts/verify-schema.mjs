@@ -41,10 +41,18 @@ try {
   const service = definitions.get(P.HOME_SERVICE_ID)
   assert.equal(service['@type'], 'Service')
   assert.equal(service.provider['@id'], P.ORGANIZATION_ID)
-  assert.equal(service.hasOfferCatalog.itemListElement.length, 6)
+  assert.equal(service.name, 'Global B2B Digital Infrastructure & Export Acceleration Engine')
+  assert.equal(definitions.get(`${P.SITE_URL}/#webpage`).inLanguage, 'en')
+  assert.deepEqual(definitions.get(P.WEBSITE_ID).inLanguage, ['en', 'vi-VN'])
+  assert.equal(service.hasOfferCatalog.itemListElement.length, 3)
+  for (const offer of service.hasOfferCatalog.itemListElement) {
+    assert.equal(offer.itemOffered.provider['@id'], P.ORGANIZATION_ID)
+    assert.ok(offer.itemOffered.url.endsWith('/#services'))
+    assert.ok(!('price' in offer), 'No invented package price')
+  }
   for (const item of P.SERVICE_CATALOG) {
-    const node = definitions.get(P.serviceId(item.key))
-    assert.deepEqual(node, normalize(B.buildServiceNode(item)))
+    assert.ok(!definitions.has(P.serviceId(item.key)), 'Legacy compliance/Trade services are not the homepage primary catalog')
+    const node = normalize(B.buildServiceNode(item))
     assert.equal(node.url, `${P.SITE_URL}${item.path}`)
     assert.ok(!('availableLanguage' in node), 'Service has no availableLanguage property')
     assert.ok(!('inLanguage' in node), 'Service has no inLanguage property')
@@ -52,7 +60,7 @@ try {
   const serialized = JSON.stringify(graph)
   assert.ok(!/https:\/\/veximglobal\.com|ProfessionalService|priceRange|admin\/dashboard|aggregateRating|postalCode/.test(serialized))
   assert.deepEqual(JSON.parse(readFileSync('docs/seo/homepage-schema.json', 'utf8')), graph)
-  console.log(`PASS: ${graph['@graph'].length} top-level entities; all ${references.length} @id references resolve; 6 service identities match; exported JSON is current`)
+  console.log(`PASS: ${graph['@graph'].length} top-level entities; all ${references.length} @id references resolve; 3 digital engagement scopes; 6 legacy landing identities preserved; export current`)
 
   // Optional integration check against actual SSR HTML, not an assumption from source.
   const base = process.env.SCHEMA_TEST_BASE_URL
@@ -73,18 +81,22 @@ try {
     assert.equal(home.$('link[rel="canonical"]').attr('href'), P.SITE_URL)
     assert.equal(home.$('meta[property="og:url"]').attr('content'), P.SITE_URL)
     assert.equal(home.$('title').text(), P.SITE_TITLE)
+    assert.equal(home.$('html').attr('lang'), 'en')
+    assert.equal(home.$('main').first().attr('lang'), 'en')
+    assert.equal(home.$('meta[property="og:locale"]').attr('content'), 'en_US')
     assert.equal(home.$('h1').text().trim(), service.name)
     assert.ok(home.$('footer').text().includes(P.PUBLIC_EMAIL))
     assert.ok(home.$('footer').text().includes(P.ADDRESS.streetAddress))
     for (const item of P.SERVICE_CATALOG) {
-      const { nodes } = await getPage(item.path)
+      const { nodes, $ } = await getPage(item.path)
       const node = nodes.find(node => node['@id'] === P.serviceId(item.key))
       assert.ok(node)
       const { '@context': _context, ...serviceNode } = node
       assert.deepEqual(serviceNode, B.buildServiceNode(item))
       assert.equal(nodes.filter(node => node['@id'] === P.ORGANIZATION_ID).length, 1)
+      assert.equal($('html').attr('lang'), 'vi')
     }
-    console.log('PASS: homepage SSR matches standalone export; canonical/OG/title/H1/footer match; all 6 landing pages emit the same service identities')
+    console.log('PASS: English homepage SSR matches standalone export; canonical/OG/title/H1/footer match; all 6 legacy landing pages retain service identities and Vietnamese document language')
   }
 } finally {
   cleanup()

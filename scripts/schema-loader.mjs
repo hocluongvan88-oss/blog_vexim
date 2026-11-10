@@ -12,7 +12,7 @@ export function loadSchemaBuilders() {
   const dir = mkdtempSync(path.join(tmpdir(), "vexim-schema-"))
   const require = createRequire(import.meta.url)
   try {
-    for (const name of ["contact-info", "vexim-trade-content", "business-profile", "schema", "fda-page-content", "fda-page-schema", "vexim-trade-assets", "vexim-trade-styles", "vexim-trade-page"]) {
+    for (const name of ["contact-info", "vexim-trade-content", "business-profile", "homepage-content", "schema", "fda-page-content", "fda-page-schema", "vexim-trade-assets", "vexim-trade-styles", "vexim-trade-page"]) {
       const result = ts.transpileModule(readFileSync(path.join(root, "lib", `${name}.ts`), "utf8"), {
         compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 },
       })

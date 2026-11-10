@@ -2,6 +2,14 @@ import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
 
 export async function middleware(request: NextRequest) {
+  // The English homepage and its privacy notice are public and cookieless.
+  // Mark their requests so the shared root layout renders <html lang="en">
+  // on the server; existing Vietnamese routes retain lang="vi".
+  if (request.nextUrl.pathname === "/" || request.nextUrl.pathname === "/privacy") {
+    const requestHeaders = new Headers(request.headers)
+    requestHeaders.set("x-vexim-english-page", "1")
+    return NextResponse.next({ request: { headers: requestHeaders } })
+  }
   // This public, cookieless document and its self-hosted assets need no auth refresh.
   const tradePath = "/services/export-sales"
   if (request.nextUrl.pathname.toLowerCase() === tradePath) {

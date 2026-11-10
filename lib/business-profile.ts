@@ -129,12 +129,9 @@ export const AVAILABLE_LANGUAGES = ["Vietnamese", "English"] as const
 /**
  * Một dịch vụ trong danh mục.
  *
- * `id` dùng làm `@id` của node `Service` — trang chủ liệt kê trong `hasOfferCatalog`,
- * còn landing page của chính dịch vụ đó phát ra node cùng `@id`. Nhờ trùng `@id`,
- * Google gộp được hai node thành MỘT thực thể thay vì coi là hai dịch vụ khác nhau.
- *
- * `anchor` là text link có chứa từ khóa, thay cho "Tìm hiểu thêm" chung chung
- * (anchor chung chung không truyền ngữ cảnh cho trang đích).
+ * `key` tạo `@id` ổn định cho node `Service` ở mỗi landing page. Danh mục này
+ * không còn là catalog chính trên homepage; các dịch vụ tuân thủ vẫn giữ nguyên
+ * URL và danh tính schema ở trang riêng. `anchor` dành cho liên kết nội bộ cũ.
  */
 export interface ServiceCatalogItem {
   /** Khóa nội bộ, đồng thời là slug của `@id` */
@@ -147,7 +144,7 @@ export interface ServiceCatalogItem {
   description: string
   /** URL landing page (tương đối) */
   path: string
-  /** Anchor text chứa từ khóa cho link ở trang chủ */
+  /** Anchor text cho liên kết đến dịch vụ ở các trang hiện có */
   anchor: string
 }
 
@@ -208,7 +205,7 @@ export const SERVICE_CATALOG: ServiceCatalogItem[] = [
   },
 ]
 
-/** `@id` ổn định cho một dịch vụ — dùng chung ở trang chủ và landing page. */
+/** `@id` ổn định cho các landing page dịch vụ cũ. */
 export function serviceId(key: string): string {
   return `${SITE_URL}/#service-${key}`
 }
@@ -220,24 +217,13 @@ export function getService(key: string): ServiceCatalogItem | undefined {
 
 /** Chuỗi mô tả doanh nghiệp dùng chung cho meta description và schema `description`. */
 export const ORGANIZATION_DESCRIPTION =
-  "Vexim Global hỗ trợ doanh nghiệp Việt đăng ký FDA, DUNS, US Agent, FSVP, tuân thủ MoCRA và lập LLC tại Mỹ. Quy trình rõ ràng, tư vấn miễn phí trong 24h."
+  "Vexim Global builds digital export foundations for Vietnamese manufacturers: B2B web infrastructure, buyer-intent SEO and connections to the Vexim Trade ecosystem. Regulatory resources remain available separately."
 
 /** Số hiển thị ở footer / schema, ví dụ "0373 685 634". */
 export const PHONE_DISPLAY = VEXIM_PHONE_DISPLAY
 
-/**
- * Title + description của TRANG CHỦ.
- *
- * Đặt ở đây để `app/layout.tsx` (title.default, og:title, twitter:title) và
- * `app/page.tsx` (title, description, og:description) dùng chung MỘT chuỗi —
- * trước đây ba chỗ này lệch nhau (meta description nhắc MFDS/CE còn og:description
- * thì không), và cả hai đều liệt kê dịch vụ mà trang không hề cung cấp.
- */
-export const SITE_TITLE = "Đăng Ký FDA, US Agent & Tư Vấn Xuất Khẩu Sang Mỹ | Vexim Global"
-
-/** Cùng nội dung cho meta description, og:description và twitter:description. */
-export const SITE_DESCRIPTION = ORGANIZATION_DESCRIPTION
-
-/** Alt text cho ảnh OG — mô tả ảnh, không nhét khẩu hiệu. */
-export const OG_IMAGE_ALT =
-  "Vexim Global — dịch vụ đăng ký FDA, US Agent, FSVP, MoCRA và thành lập LLC cho doanh nghiệp Việt xuất khẩu sang Mỹ"
+/** Homepage title and description; service pages keep their own localized metadata. */
+export const SITE_TITLE = "B2B Digital Export Infrastructure | Vexim Global"
+export const SITE_DESCRIPTION =
+  "Vexim Global builds B2B export websites, buyer-intent SEO and Vexim Trade connections for Vietnamese manufacturers entering international markets."
+export const OG_IMAGE_ALT = "Vexim Global — B2B Digital Export Infrastructure and Export Acceleration"

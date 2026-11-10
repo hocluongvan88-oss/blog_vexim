@@ -10,26 +10,21 @@ try {
   mkdirSync(out, { recursive: true })
   const json = JSON.stringify(builders.buildCompleteHomeSchema(), null, 2).replace(/</g, "\\u003c")
   writeFileSync(path.join(out, "homepage-schema.json"), `${json}\n`)
-  writeFileSync(path.join(out, "homepage-schema.md"), `# Schema trang chủ Vexim Global — bản hiện tại
+  writeFileSync(path.join(out, "homepage-schema.md"), `# Schema trang chủ Vexim Global — định vị B2B Digital Export
 
-Bản này được sinh từ cấu hình đang dùng trong repository, không lấy lại dữ liệu cũ hoặc tự thêm giá, tọa độ, đánh giá khách hàng.
+Được sinh từ code hiện tại. Không chép lại dữ liệu cũ và không tự thêm giá, tọa độ, số liệu thứ hạng hoặc chứng nhận.
 
-- Domain: **https://www.veximglobal.com** (khớp canonical/OG/sitemap).
-- Email: **contact@veximglobal.com**. Điện thoại: **+84373685634**.
-- Địa chỉ: **25/6/51 Ngọa Long, Tây Tựu, Hà Nội**.
-- Slogan: **Tử Tế - Tận Tâm - Trách Nhiệm**.
-- Giờ làm việc: thứ Hai–thứ Sáu 08:00–18:00; thứ Bảy 08:00–12:00. Chủ nhật nghỉ, không khai lịch mở cửa.
-- Facebook/LinkedIn/Zalo: URL doanh nghiệp đã cung cấp; không dùng URL quản trị.
-- Logo 824×543; ảnh trang chủ/OG 1200×630.
-- Danh mục: 6 dịch vụ, mỗi dịch vụ có URL và @id khớp landing page.
+- Canonical / OG / sitemap: **https://www.veximglobal.com**.
+- Trang chủ WebPage: **en**; WebSite: tiếng Anh và tiếng Việt (blog/dịch vụ còn bằng tiếng Việt).
+- Organization / LocalBusiness: một node chung toàn website, số điện thoại **+84373685634**, email **contact@veximglobal.com**, địa chỉ **25/6/51 Ngọa Long, Tây Tựu, Hà Nội**.
+- Slogan doanh nghiệp được giữ như thông tin thương hiệu đã xác nhận; phần chữ nhìn thấy trên trang chủ đều tiếng Anh.
+- Service chính: hạ tầng xuất khẩu B2B và Buyer-Intent SEO; ba phạm vi hợp tác được đề xuất: Core Launchpad, Global Growth Engine, Enterprise Dominance. Không có giá hoặc cam kết thứ hạng.
+- FDA, GACC, MoCRA và US Agent là liên kết phụ; 6 định danh service trang dịch vụ trước đây vẫn giữ nguyên trên từng landing page, không còn là catalog chính của trang chủ.
+- Ảnh trang chủ/OG là tệp thực 1200×630, không chứa số liệu minh họa như hiệu suất thật.
 
 ## Cách sử dụng
 
-Trong ứng dụng Next.js này, layout xuất Organization/LocalBusiness, Logo và WebSite; trang chủ xuất WebPage, ảnh và Service. Không chèn thêm nguyên khối bên dưới vào ứng dụng vì sẽ lặp dữ liệu đã có.
-
-Khối bên dưới là bản gộp tương đương để sao chép sang hệ thống khác hoặc đưa vào công cụ kiểm tra. Nếu dùng thay bản cũ, **thay toàn bộ khối cũ**, không giữ đồng thời các URL non-www.
-
-Hai khối JSON-LD khác nhau vẫn liên kết được qua @id; không bắt buộc tất cả nằm trong một thẻ script.
+Root layout xuất Organization/LocalBusiness, Logo và WebSite. Trang chủ xuất WebPage, ImageObject, Vexim Trade Organization và Service. Dùng chung @id nhưng **không chèn** bản gộp này thêm lần nữa vào Next.js.
 
 ## JSON-LD hoàn chỉnh
 
@@ -39,16 +34,9 @@ ${json}
 </script>
 \`\`\`
 
-## Ghi chú kiểm tra
+## Giới hạn
 
-- ProfessionalService được Schema.org đánh dấu deprecated; dùng LocalBusiness cho đơn vị có địa chỉ công khai, Service cho dịch vụ được cung cấp.
-- openingHoursSpecification thuộc Place; LocalBusiness kế thừa cả Place và Organization.
-- provider đặt trên Service; availableLanguage chỉ khai trong ContactPoint, không đặt trực tiếp trên Service.
-- Không dùng priceRange “$$” khi chưa có căn cứ; không tự thêm geo, mã bưu chính, số giấy phép, review hoặc aggregateRating.
-- sameAs chỉ gồm các hồ sơ mạng xã hội đã xác nhận. Link hồ sơ năng lực fda.veximglobal.com vẫn hiển thị ở phần căn cứ website, không dùng như hồ sơ định danh mạng xã hội.
-- Đây là dữ liệu xác minh theo code và HTML local. Chưa kiểm tra production hoặc chạy Rich Results Test/Schema Markup Validator trực tuyến. Schema hợp lệ không đảm bảo Google hiển thị rich results.
-
-Tạo lại sau khi đổi thông tin: \`npm run schema:export\`. Kiểm tra: \`npm run test:schema\`.
+Schema phù hợp nội dung hiện tại của code; chưa xác nhận việc Google hiển thị rich results hay kết quả production. Không ngụ ý vị trí SEO hoặc chuyển đổi. Tạo lại bằng \`npm run schema:export\`, kiểm tra \`npm run test:schema\`.
 `)
   console.log("Generated docs/seo/homepage-schema.json and homepage-schema.md")
 } finally {
