@@ -3,7 +3,7 @@ import { HOME_MESSAGES } from "@/lib/home-i18n"
 import { homePath, type HomeLocale } from "@/lib/locale-routes"
 import { AuditProvider } from "./audit-dialog"
 import { HomeHeader } from "./home-header"
-import { HomeFooter } from "./home-sections"
+import { HomeFooter } from "./privacy-footer"
 import styles from "./home.module.css"
 
 /** Notice limited to the digital-audit form. Other services have separate flows. */

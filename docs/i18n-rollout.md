@@ -9,7 +9,7 @@
 
 Hai cặp URL có nội dung SSR riêng, canonical tự trỏ, `hreflang` hai chiều và `x-default` về bản tiếng Anh của **chính trang tương ứng**. Dropdown ở header trỏ sang bản tương ứng của đúng loại trang. Không dùng `?lang=vi`, tự động chuyển hướng theo IP/ngôn ngữ trình duyệt, hay dịch tự động trên client. Biểu mẫu đánh giá dùng chung endpoint; giao diện và bản nháp email được bản địa hóa. Thông báo dữ liệu chỉ mô tả **biểu mẫu đánh giá này**, không nhận là chính sách quyền riêng tư bao trùm toàn website.
 
-`lib/locale-routes.ts` là danh sách duy nhất của **các cặp đã được xuất bản**. Nội dung dài của trang và metadata ở `lib/home-i18n.ts` (server); phần điều hướng và biểu mẫu ở `lib/home-client-i18n.ts` (client). Ba phạm vi B2B Launchpad, Global Growth Engine và Enterprise Dominance giữ nguyên tên sản phẩm ở cả hai ngôn ngữ. Mỗi homepage có WebPage/Service/ImageObject riêng, nhưng dùng cùng `Organization`/`LocalBusiness` và cùng thông tin liên hệ.
+`lib/locale-routes.ts` là danh sách duy nhất của **các cặp đã được xuất bản**. Nội dung sản phẩm ở `lib/homepage-content.ts`, thông điệp SSR/metadata ở `lib/home-i18n.ts`, nhãn biên tập riêng của giao diện trang chủ mới ở `lib/landing-copy.ts` (server); phần điều hướng và biểu mẫu ở `lib/home-client-i18n.ts` (client). Ba phạm vi B2B Launchpad, Global Growth Engine và Enterprise Dominance giữ nguyên tên sản phẩm ở cả hai ngôn ngữ. Mỗi homepage có WebPage/Service/ImageObject riêng, nhưng dùng cùng `Organization`/`LocalBusiness` và cùng thông tin liên hệ. Header/footer trang privacy giữ giao diện hiện có; không đổi scope dịch vụ.
 
 ## Chưa nằm trong đợt này
 
