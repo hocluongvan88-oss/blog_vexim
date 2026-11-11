@@ -1,6 +1,5 @@
-// Reproduce the homepage social preview from the same local SVG/Inter assets.
-// BROWSER_EXECUTABLE_PATH=/path/to/chromium corepack pnpm og:home
-// Requires only the repo's puppeteer-core dependency and a local Chromium binary.
+// Reproduce the two homepage social previews using only the new, original local art.
+// BROWSER_EXECUTABLE_PATH=/path/to/chromium pnpm og:home [--vi]
 import { createServer } from "node:http"
 import { readFileSync, statSync } from "node:fs"
 import path from "node:path"
@@ -14,7 +13,7 @@ if (!browserPath) throw new Error("Set BROWSER_EXECUTABLE_PATH to a local Chromi
 
 const files = new Map([
   ["/trade/logo.svg", ["public/trade/logo.svg", "image/svg+xml"]],
-  ["/home/export-network.svg", ["public/home/export-network.svg", "image/svg+xml"]],
+  ["/home/export-atelier.svg", ["public/home/export-atelier.svg", "image/svg+xml"]],
   ["/fonts/inter-home-latin.woff2", ["public/fonts/inter-home-latin.woff2", "font/woff2"]],
   ["/fonts/be-vietnam-regular.woff2", ["app/fonts/BeVietnamPro-Regular.woff2", "font/woff2"]],
   ["/fonts/be-vietnam-bold.woff2", ["app/fonts/BeVietnamPro-Bold.woff2", "font/woff2"]],
@@ -24,21 +23,23 @@ const pageHtml = `<!doctype html><html lang="${vietnamese ? "vi" : "en"}"><head>
 @font-face{font-family:Inter;src:url('/fonts/inter-home-latin.woff2') format('woff2');font-weight:100 900;font-display:block}
 @font-face{font-family:BeVietnam;src:url('/fonts/be-vietnam-regular.woff2') format('woff2');font-weight:400;font-display:block}
 @font-face{font-family:BeVietnam;src:url('/fonts/be-vietnam-bold.woff2') format('woff2');font-weight:700;font-display:block}
-*{box-sizing:border-box}html,body{margin:0;width:1200px;height:630px;overflow:hidden}body{font-family:${vietnamese ? "BeVietnam" : "Inter"},Arial,sans-serif;color:#1d1d1f;background:radial-gradient(circle at 86% 58%,#dbeaff 0,transparent 38%),linear-gradient(150deg,#fff 2%,#f8faff 75%,#f1f6ff)}
-.canvas{position:relative;width:1200px;height:630px;padding:0 75px;overflow:hidden}
-.brand{display:flex;align-items:center;gap:12px;position:absolute;top:49px;left:75px;font-size:25px;font-weight:740;letter-spacing:-.055em}.brand img{width:43px;height:43px}.brand em{color:#2471bf;font-style:normal;font-weight:550}
-.eyebrow{position:absolute;top:145px;left:77px;color:#2668ac;font-size:12px;font-weight:730;letter-spacing:.095em}
-h1{position:absolute;top:194px;left:72px;z-index:1;margin:0;font-size:${vietnamese ? 53 : 59}px;font-weight:710;letter-spacing:-.066em;line-height:1.115}h1 span{color:#1969c4;background:linear-gradient(95deg,#0071e3,#5e5ce6);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.sub{position:absolute;top:468px;left:77px;color:#4d617c;font-size:16px;font-weight:510}
-.scene{position:absolute;top:205px;left:645px;width:595px;height:299px;border:1px solid #dbe7fb;border-radius:30px;background:radial-gradient(circle at 45% 40%,#fff,#eaf3ff);overflow:hidden;box-shadow:0 22px 55px #4468a82b}.scene img{display:block;width:110%;height:auto;margin-left:-5%;margin-top:-3px}
-.bottom{position:absolute;left:77px;right:76px;bottom:32px;display:flex;align-items:center;justify-content:space-between;padding-top:18px;border-top:1px solid #d5e1ef;color:#52657e;font-size:12px;font-weight:650;letter-spacing:.055em}
+*{box-sizing:border-box}html,body{margin:0;width:1200px;height:630px;overflow:hidden}
+body{font-family:${vietnamese ? "BeVietnam" : "Inter"},Arial,sans-serif;color:#0b2748;background:linear-gradient(120deg,#fbfdff 0%,#f4f9fe 50%,#dbeeff 100%)}
+.canvas{position:relative;width:1200px;height:630px;overflow:hidden;border-top:10px solid #0b315a}
+.brand{position:absolute;top:52px;left:72px;display:flex;align-items:center;gap:11px;font-size:24px;font-weight:780;letter-spacing:-.065em}.brand img{width:43px;height:43px}.brand em{margin-left:.12em;color:#1767b3;font-style:normal;font-weight:575}
+.eyebrow{position:absolute;top:158px;left:77px;color:#1b669f;font-size:11px;font-weight:740;letter-spacing:.12em}
+h1{position:absolute;top:208px;left:72px;z-index:1;margin:0;max-width:665px;font-size:${vietnamese ? 49 : 54}px;font-weight:710;letter-spacing:-.055em;line-height:1.17}h1 span{color:#1767b3}
+.sub{position:absolute;top:504px;left:76px;color:#49667f;font-size:15px;font-weight:540}
+.scene{position:absolute;left:755px;top:167px;width:382px;height:362px;overflow:hidden;border:1px solid #bfd8ed;background:radial-gradient(circle at 47% 38%,#fafdff,#dceefb 76%)}
+.scene:before{content:'';position:absolute;z-index:2;inset:12px;border:1px solid #bddaf0}.scene img{position:absolute;top:19px;left:-44px;display:block;width:470px;height:auto}
+.bottom{position:absolute;left:76px;right:76px;bottom:31px;display:flex;align-items:center;justify-content:space-between;padding-top:15px;border-top:1px solid #bad1e5;color:#416580;font-size:10px;font-weight:690;letter-spacing:.07em}
 </style></head><body><div class="canvas">
-<div class="brand"><img src="/trade/logo.svg" alt=""><span>VEXIM <em>GLOBAL</em></span></div>
-<div class="eyebrow">${vietnamese ? "HẠ TẦNG SỐ CHO DOANH NGHIỆP XUẤT KHẨU" : "THE NEXT-GEN EXPORT ACCELERATION ENGINE"}</div>
-<h1>${vietnamese ? "Hạ tầng số<br><span>B2B toàn cầu</span><br>&amp; Tăng tốc xuất khẩu" : "Global B2B Digital<br><span>Infrastructure &amp;</span><br>Export Acceleration"}</h1>
-<p class="sub">${vietnamese ? "Từ nhà sản xuất Việt Nam đến người mua quốc tế." : "Built in Vietnam. Designed for international buyers."}</p>
-<div class="scene"><img src="/home/export-network.svg" alt=""></div>
-<div class="bottom"><span>VEXIMGLOBAL.COM</span><span>${vietnamese ? "NỀN TẢNG SỐ&nbsp;&nbsp; · &nbsp;&nbsp;NỘI DUNG THEO TÌM KIẾM&nbsp;&nbsp; · &nbsp;&nbsp;KẾT NỐI THƯƠNG MẠI" : "OWNED PRESENCE&nbsp;&nbsp; · &nbsp;&nbsp;BUYER-INTENT SEARCH&nbsp;&nbsp; · &nbsp;&nbsp;TRADE CONNECTION"}</span></div>
+<div class="brand"><img src="/trade/logo.svg" alt=""><span>VEXIM<em>GLOBAL</em></span></div>
+<div class="eyebrow">${vietnamese ? "HẠ TẦNG SỐ XUẤT KHẨU CÓ ĐỊNH HƯỚNG" : "DIGITAL EXPORT, BUILT WITH INTENTION"}</div>
+<h1>${vietnamese ? "Hạ tầng số<br><span>B2B toàn cầu</span><br>&amp; Tăng tốc xuất khẩu" : "Global B2B Digital<br><span>Infrastructure</span><br>&amp; Export Acceleration"}</h1>
+<p class="sub">${vietnamese ? "Xây dựng tại Việt Nam. Kết nối với thế giới." : "Built in Vietnam. Connected to the world."}</p>
+<div class="scene"><img src="/home/export-atelier.svg" alt=""></div>
+<div class="bottom"><span>VEXIMGLOBAL.COM</span><span>${vietnamese ? "NỀN TẢNG SỐ · TÌM KIẾM · KẾT NỐI THƯƠNG MẠI" : "OWNED PRESENCE · BUYER-INTENT SEARCH · TRADE CONNECTION"}</span></div>
 </div></body></html>`
 
 const server = createServer((req, res) => {

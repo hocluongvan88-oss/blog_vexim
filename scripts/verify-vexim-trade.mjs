@@ -311,10 +311,11 @@ try {
     assert.equal(legacyLabel.status, 308)
     assert.equal(legacyLabel.headers.get("location"), "/services/food/label-compliance")
     const home = load(await (await fetch(base)).text())
-    // The new English homepage links to the separate Trade platform from its hero and bento.
+    // Only the English homepage changes: it still links to Trade from its hero and solution section.
     assert.ok(home('a[href="https://veximtrade.com"]').length >= 2)
     assert.ok(home('#solutions a[href="https://veximtrade.com"]').text().includes("Vexim Trade"))
-    assert.equal(home('#solutions img[src="/home/trade-connect.svg"]').length, 1)
+    assert.equal(home('main img[src="/home/export-atelier.svg"]').length, 1)
+    assert.equal(home('#solutions img[src="/home/trade-connect.svg"]').length, 0, "Old bento artwork must not render")
     const sitemap = await (await fetch(`${base}/sitemap.xml`)).text()
     assert.ok(sitemap.includes(`${P.SITE_URL}${T.TRADE.path}`))
     assert.ok(sitemap.includes("2026-10-24T17:00:00.000Z"))
@@ -330,7 +331,7 @@ try {
       assert.equal((await fetch(base + path)).status, 200, path)
     assert.ok(!(await (await fetch(`${base}/robots.txt`)).text()).includes("Disallow: /trade"))
     console.log(
-      "PASS: actual route, UTM SSR, 301 uppercase, homepage card/artwork, assets, sitemap content timestamp and robots",
+      "PASS: actual route, UTM SSR, 301 uppercase, redesigned homepage Trade links/artwork, assets, sitemap content timestamp and robots",
     )
   }
 } finally {

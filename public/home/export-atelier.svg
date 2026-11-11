@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 770" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">An export connection from Vietnam to the world</title>
+  <desc id="desc">Original conceptual illustration of a factory, a connected globe and product shipments. No real buyer, ranking or transaction data.</desc>
+  <defs>
+    <linearGradient id="globe" x1="260" y1="105" x2="745" y2="620" gradientUnits="userSpaceOnUse"><stop stop-color="#F8FCFF"/><stop offset=".47" stop-color="#D3E8FC"/><stop offset="1" stop-color="#7EAAD9"/></linearGradient>
+    <linearGradient id="blue" x1="385" y1="403" x2="808" y2="699" gradientUnits="userSpaceOnUse"><stop stop-color="#5DA4DF"/><stop offset=".49" stop-color="#1267B6"/><stop offset="1" stop-color="#0C315D"/></linearGradient>
+    <linearGradient id="wall" x1="68" y1="495" x2="310" y2="695" gradientUnits="userSpaceOnUse"><stop stop-color="#fff"/><stop offset="1" stop-color="#B8D4EC"/></linearGradient>
+    <linearGradient id="deck" x1="113" y1="563" x2="776" y2="723" gradientUnits="userSpaceOnUse"><stop stop-color="#E6F3FE"/><stop offset="1" stop-color="#9AC0E6"/></linearGradient>
+    <radialGradient id="halo"><stop stop-color="#C9E6FE" stop-opacity=".94"/><stop offset="1" stop-color="#E4F3FF" stop-opacity="0"/></radialGradient>
+    <filter id="depth" x="-30%" y="-30%" width="170%" height="180%"><feDropShadow dx="0" dy="25" stdDeviation="27" flood-color="#103A67" flood-opacity=".17"/></filter>
+    <clipPath id="earth"><circle cx="540" cy="352" r="222"/></clipPath>
+  </defs>
+  <ellipse cx="510" cy="401" rx="401" ry="344" fill="url(#halo)"/>
+  <circle cx="540" cy="352" r="275" stroke="#C7E2F7" stroke-width="1.3" stroke-dasharray="4 8"/>
+  <circle cx="540" cy="352" r="247" stroke="#F5FAFF" stroke-width="1"/>
+  <g filter="url(#depth)"><circle cx="540" cy="352" r="222" fill="url(#globe)" stroke="#A8CBEA" stroke-width="2"/></g>
+  <g clip-path="url(#earth)">
+    <path d="M362 244c35-25 73-43 121-49l28 15 37-8 22 29-20 28-34 2-21 29-27 7-18 32-35-6-15-27-34-3-13-27-30-6 39-15Zm-43 123 35 6 21 29 41 6 16 30-28 21-11 41-27 17-17 38-52-16-31-46-4-61 25-33 32-32Zm285-132 35-13 48 15 45-15 43 19 6 50-42 18-25 31-44 6-22 35-41-11-24-38 10-31-22-23 33-43Zm89 190 36-12 34 20 4 49-42 39-45-8-12-42 25-46Z" fill="#71A7D9" opacity=".53"/>
+    <path d="M337 343c102 59 289 68 421-8M350 397c112 62 297 49 407-15M399 474c96 31 212 19 302-22M540 130c-76 76-112 168-110 277 0 74 28 128 74 169M540 130c79 82 116 169 112 272-2 70-25 132-66 174M318 352h444M347 265h383M357 437h369" stroke="#fff" stroke-opacity=".53" stroke-width="1.4"/>
+  </g>
+  <path d="M220 490c52-78 112-91 184-67 70 24 115 28 180-41 53-57 120-68 206-32" stroke="#fff" stroke-width="10" stroke-linecap="round" opacity=".66"/>
+  <path d="M220 490c52-78 112-91 184-67 70 24 115 28 180-41 53-57 120-68 206-32" stroke="#176DB7" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="3 11"/>
+  <circle cx="290" cy="438" r="10" fill="#fff" stroke="#176DB7" stroke-width="3"/><circle cx="600" cy="365" r="9" fill="#fff" stroke="#176DB7" stroke-width="3"/><circle cx="758" cy="349" r="10" fill="#fff" stroke="#176DB7" stroke-width="3"/>
+  <g filter="url(#depth)">
+    <path d="m103 606 282-85 404 103-281 91-405-109Z" fill="url(#deck)" stroke="#9EC7E8" stroke-width="2"/>
+    <path d="m103 606 405 109v24L103 631v-25Z" fill="#8BB8DF"/>
+    <path d="m508 715 281-91v25l-281 90v-24Z" fill="#5B94C9"/>
+  </g>
+  <g filter="url(#depth)">
+    <path d="m126 530 112-47 111 26-113 48-110-27Z" fill="#F9FCFF" stroke="#B6D4EC" stroke-width="2"/>
+    <path d="m126 530 110 27v117l-110-29V530Z" fill="url(#wall)" stroke="#9FC3E2" stroke-width="2"/>
+    <path d="m236 557 113-48v122l-113 43V557Z" fill="#9FC4E3" stroke="#77A8D1" stroke-width="2"/>
+    <path d="m126 530 110 27 113-48-18-36-94 36-90-19-21 40Z" fill="#E4F2FF" stroke="#95BEE0" stroke-width="2"/>
+    <path d="m153 582 25 7v24l-25-7v-24Zm44 13 24 6v24l-24-6v-24Zm69-22 28-11v27l-28 10v-26Zm52-20 17-7v27l-17 7v-27Z" fill="#5B93C9"/>
+    <path d="m269 620 30-12v50l-30 11v-49Z" fill="#1767B4"/>
+    <path d="m141 499 90 20 93-35" stroke="#86B3D7" stroke-width="3"/>
+  </g>
+  <g filter="url(#depth)">
+    <path d="m453 556 144-48 176 42-144 52-176-46Z" fill="#B7D9F5"/>
+    <path d="m453 556 176 46v82l-176-47v-81Z" fill="url(#blue)"/>
+    <path d="m629 602 144-52v84l-144 50v-82Z" fill="#0C4B8B"/>
+    <path d="m454 571 175 46M454 589l175 46M454 607l175 46M648 611l113-41M648 630l113-41M648 649l113-41" stroke="#92C7F4" stroke-width="2" stroke-opacity=".53"/>
+    <path d="m477 626 25 7v14l-25-7v-14Zm33 8 25 7v14l-25-7v-14Z" fill="#DEEEFD"/>
+  </g>
+  <g stroke="#1767B4" stroke-width="2"><circle cx="757" cy="349" r="25" fill="#fff" fill-opacity=".93"/><path d="m747 349 8 8 14-16" stroke-linecap="round" stroke-linejoin="round"/></g>
+  <circle cx="157" cy="274" r="6" fill="#2A78BE"/><circle cx="728" cy="124" r="5" fill="#2A78BE"/><circle cx="831" cy="529" r="4" fill="#2A78BE"/>
+  <path d="M170 274h83m475-150h49m54 405h46" stroke="#9CC9E9" stroke-width="2"/>
+</svg>
