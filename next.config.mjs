@@ -35,6 +35,21 @@ const nextConfig = {
         permanent: true,
       },
       /*
+       * Tiếng Việt trở thành ngôn ngữ mặc định ở URL gốc; bản tiếng Anh dời
+       * sang /en. Hai URL /vi cũ đã được Google index, nên chuyển 301 (308
+       * trong Next) về bản tiếng Việt mới thay vì để 404.
+       */
+      {
+        source: "/vi",
+        destination: "/",
+        permanent: true,
+      },
+      {
+        source: "/vi/privacy",
+        destination: "/privacy",
+        permanent: true,
+      },
+      /*
        * Ép toàn bộ traffic từ bản KHÔNG www -> bản CÓ www (chuẩn SEO, đồng nhất sitemap).
        *
        * `permanent: true` trả về 308, KHÔNG phải 301. Google coi 308 tương đương 301

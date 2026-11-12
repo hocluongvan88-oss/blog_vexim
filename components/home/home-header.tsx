@@ -12,6 +12,10 @@ function LanguageDropdown({ locale, page, mobile = false }: { locale: HomeLocale
   const label = HOME_CLIENT_MESSAGES[locale].language
   const paths = LOCALIZED_PATHS[page]
 
+  // Gắn ?lang= để middleware ghi cookie lựa chọn của khách — nhờ vậy lần sau
+  // không bị chuyển hướng theo ngôn ngữ trình duyệt nữa.
+  const choose = (target: string, value: HomeLocale) => `${target}?lang=${value}`
+
   useEffect(() => {
     const dismiss = (event: PointerEvent) => {
       if (event.target instanceof Node && !details.current?.contains(event.target)) details.current?.removeAttribute("open")
@@ -30,8 +34,8 @@ function LanguageDropdown({ locale, page, mobile = false }: { locale: HomeLocale
   return <details ref={details} className={`${styles.languageMenu} ${mobile ? styles.mobileLanguage : styles.desktopLanguage}`} data-language-switcher>
     <summary aria-label={label.choose}><Globe2 size={16} aria-hidden="true" /><span>{locale.toUpperCase()}</span><ChevronDown size={14} aria-hidden="true" /></summary>
     <div className={styles.languageOptions} aria-label={label.choose}>
-      <a href={paths.en} lang="en" aria-current={locale === "en" ? "page" : undefined}>{label.english}<span>EN</span></a>
-      <a href={paths.vi} lang="vi" aria-current={locale === "vi" ? "page" : undefined}>{label.vietnamese}<span>VI</span></a>
+      <a href={choose(paths.en, "en")} lang="en" aria-current={locale === "en" ? "page" : undefined}>{label.english}<span>EN</span></a>
+      <a href={choose(paths.vi, "vi")} lang="vi" aria-current={locale === "vi" ? "page" : undefined}>{label.vietnamese}<span>VI</span></a>
     </div>
   </details>
 }

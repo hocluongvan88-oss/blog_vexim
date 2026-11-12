@@ -2,16 +2,24 @@ import type { Metadata } from "next"
 import { LocalizedPrivacy } from "@/components/home/localized-privacy"
 import { SITE_URL } from "@/lib/business-profile"
 import { languageUrls } from "@/lib/locale-routes"
+import { VI_PRIVACY_META } from "@/lib/home-i18n"
+import VietnameseLayout from "@/components/home/vietnamese-font"
+
+/** Trang quyền riêng tư — tiếng Việt, ở URL gốc. Bản tiếng Anh ở `/en/privacy`. */
+const url = `${SITE_URL}/privacy`
 
 export const metadata: Metadata = {
-  title: { absolute: "Privacy & Data Requests | Vexim Global" },
-  description: "How Vexim Global handles information submitted through the digital export audit request form, and how to contact us about your data.",
+  title: { absolute: VI_PRIVACY_META.title },
+  description: VI_PRIVACY_META.description,
   manifest: null,
-  alternates: { canonical: `${SITE_URL}/privacy`, languages: languageUrls("privacy") },
-  openGraph: { locale: "en_US", url: `${SITE_URL}/privacy`, title: "Privacy & Data Requests | Vexim Global", description: "Information about digital audit requests and data contact at Vexim Global." },
+  alternates: { canonical: url, languages: languageUrls("privacy") },
+  openGraph: { locale: "vi_VN", url, title: VI_PRIVACY_META.title, description: VI_PRIVACY_META.description },
 }
 
-/** Factual notice for this form, not a fabricated site-wide legal policy. */
 export default function PrivacyPage() {
-  return <LocalizedPrivacy locale="en" />
+  return (
+    <VietnameseLayout>
+      <LocalizedPrivacy locale="vi" />
+    </VietnameseLayout>
+  )
 }

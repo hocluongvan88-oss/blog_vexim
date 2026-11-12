@@ -64,7 +64,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   const staticPages: MetadataRoute.Sitemap = STATIC_ROUTES.map((route) => {
-    const localizedPage = ["/", "/vi"].includes(route.path) ? "home" : ["/privacy", "/vi/privacy"].includes(route.path) ? "privacy" : null
+    const localizedPage = ["/", "/en"].includes(route.path) ? "home" : ["/privacy", "/en/privacy"].includes(route.path) ? "privacy" : null
     return {
       // Canonical homepage uses origin without slash; other pages use their own paths.
       url: route.path === "/" ? baseUrl : `${baseUrl}${route.path}`,

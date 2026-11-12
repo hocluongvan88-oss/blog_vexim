@@ -2,12 +2,16 @@
 
 ## Phạm vi đã xuất bản
 
-| Nội dung | Tiếng Anh | Tiếng Việt |
+| Nội dung | Tiếng Việt (mặc định) | Tiếng Anh |
 | --- | --- | --- |
-| Trang chủ hạ tầng số | `/` | `/vi` |
-| Thông báo dữ liệu của biểu mẫu đánh giá | `/privacy` | `/vi/privacy` |
+| Trang chủ hạ tầng số | `/` | `/en` |
+| Thông báo dữ liệu của biểu mẫu đánh giá | `/privacy` | `/en/privacy` |
 
-Hai cặp URL có nội dung SSR riêng, canonical tự trỏ, `hreflang` hai chiều và `x-default` về bản tiếng Anh của **chính trang tương ứng**. Dropdown ở header trỏ sang bản tương ứng của đúng loại trang. Không dùng `?lang=vi`, tự động chuyển hướng theo IP/ngôn ngữ trình duyệt, hay dịch tự động trên client. Biểu mẫu đánh giá dùng chung endpoint; giao diện và bản nháp email được bản địa hóa. Thông báo dữ liệu chỉ mô tả **biểu mẫu đánh giá này**, không nhận là chính sách quyền riêng tư bao trùm toàn website.
+**Tiếng Việt là ngôn ngữ mặc định của site**: nội dung tiếng Việt nằm ở URL gốc, bản tiếng Anh dưới tiền tố `/en`. Hai URL tiếng Việt cũ (`/vi`, `/vi/privacy`) được chuyển 308 về URL mới để không mất tín hiệu SEO.
+
+Hai cặp URL có nội dung SSR riêng, canonical tự trỏ, `hreflang` hai chiều và `x-default` về **bản tiếng Việt** của chính trang tương ứng. Dropdown ở header trỏ sang bản tương ứng của đúng loại trang; mỗi lựa chọn mang `?lang=vi|en` để middleware ghi cookie `vexim_locale` một năm, nhờ vậy khách đã tự chọn ngôn ngữ không bị chuyển hướng lại.
+
+**Tự động chuyển ngôn ngữ:** middleware so sánh trọng số `q` của `Accept-Language`. Nếu trình duyệt ưu tiên tiếng Anh hơn tiếng Việt và chưa có cookie lựa chọn, khách được chuyển 307 từ `/` sang `/en` (và `/privacy` sang `/en/privacy`). Chuyển hướng chỉ một chiều — `/en` không bao giờ bị đẩy ngược về `/` — nên không có vòng lặp. Không dò IP/geo, không dịch tự động trên client. Biểu mẫu đánh giá dùng chung endpoint; giao diện và bản nháp email được bản địa hóa. Thông báo dữ liệu chỉ mô tả **biểu mẫu đánh giá này**, không nhận là chính sách quyền riêng tư bao trùm toàn website.
 
 `lib/locale-routes.ts` là danh sách duy nhất của **các cặp đã được xuất bản**. Nội dung dài của trang và metadata ở `lib/home-i18n.ts` (server); phần điều hướng và biểu mẫu ở `lib/home-client-i18n.ts` (client). Ba phạm vi B2B Launchpad, Global Growth Engine và Enterprise Dominance giữ nguyên tên sản phẩm ở cả hai ngôn ngữ. Mỗi homepage có WebPage/Service/ImageObject riêng, nhưng dùng cùng `Organization`/`LocalBusiness` và cùng thông tin liên hệ.
 

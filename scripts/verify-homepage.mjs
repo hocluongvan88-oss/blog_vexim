@@ -4,16 +4,16 @@ import path from "node:path"
 import { load } from "cheerio"
 
 const base = (process.env.HOME_TEST_BASE_URL || "http://127.0.0.1:3000").replace(/\/$/, "")
-const get = async (url) => {
-  const response = await fetch(`${base}${url}`)
+const get = async (url, language = "vi-VN,vi;q=0.9") => {
+  const response = await fetch(`${base}${url}`, { headers: { "accept-language": language } })
   assert.equal(response.status, 200, url)
   return load(await response.text())
 }
 
-const home = await get("/")
-const viHome = await get("/vi")
-const privacy = await get("/privacy")
-const viPrivacy = await get("/vi/privacy")
+const viHome = await get("/")
+const home = await get("/en", "en-US,en;q=0.9")
+const viPrivacy = await get("/privacy")
+const privacy = await get("/en/privacy", "en-US,en;q=0.9")
 const fda = await get("/services/fda")
 const heading = "Global B2B Digital Infrastructure & Export Acceleration"
 const viHeading = "Hạ tầng số B2B toàn cầu & Tăng tốc xuất khẩu"
@@ -23,12 +23,12 @@ assert.equal(home("main").first().attr("lang"), "en")
 assert.equal(home("h1").text(), heading)
 assert.equal(home("h1").length, 1)
 assert.equal(home('main header, main footer').length, 0, "Global landmarks should sit outside <main>")
-assert.equal(home('head link[rel="canonical"]').attr("href"), "https://www.veximglobal.com")
+assert.equal(home('head link[rel="canonical"]').attr("href"), "https://www.veximglobal.com/en")
 assert.ok(home('head meta[name="description"]').attr("content")?.includes("B2B export websites"))
 assert.equal(home('body meta[name="description"]').length, 0)
 assert.equal(home('head link[rel="preload"][as="font"][href="/fonts/inter-home-latin.woff2"]').length, 0, "Optional display font should not delay critical resources")
 assert.equal(home('head link[rel="manifest"]').length, 0, "The public homepage is not the admin PWA")
-assert.equal(home('meta[property="og:url"]').attr("content"), "https://www.veximglobal.com")
+assert.equal(home('meta[property="og:url"]').attr("content"), "https://www.veximglobal.com/en")
 assert.equal(home('meta[property="og:locale"]').attr("content"), "en_US")
 assert.equal(home('meta[property="og:image"]').attr("content"), "https://www.veximglobal.com/og-image.jpg")
 assert.equal(privacy("html").attr("lang"), "en")
@@ -37,21 +37,23 @@ assert.equal(viHome("html").attr("lang"), "vi")
 assert.equal(viHome("main").first().attr("lang"), "vi")
 assert.equal(viHome("h1").text(), viHeading)
 assert.equal(viHome("h1").length, 1)
-assert.equal(viHome('head link[rel="canonical"]').attr("href"), `${siteUrl}/vi`)
+assert.equal(viHome('head link[rel="canonical"]').attr("href"), siteUrl)
 assert.equal(viHome('meta[property="og:locale"]').attr("content"), "vi_VN")
 assert.equal(viHome('meta[property="og:image"]').attr("content"), `${siteUrl}/og-image-vi.jpg`)
 assert.equal(viHome('head link[rel="manifest"]').length, 0)
 assert.equal(viPrivacy("html").attr("lang"), "vi")
 assert.equal(viPrivacy("main").attr("lang"), "vi")
 assert.equal(viPrivacy("h1").text(), "Quyền riêng tư & yêu cầu đánh giá")
-assert.equal(viPrivacy('head link[rel="canonical"]').attr("href"), `${siteUrl}/vi/privacy`)
-assert.equal(privacy('head link[rel="canonical"]').attr("href"), `${siteUrl}/privacy`)
+assert.equal(viPrivacy('head link[rel="canonical"]').attr("href"), `${siteUrl}/privacy`)
+assert.equal(privacy('head link[rel="canonical"]').attr("href"), `${siteUrl}/en/privacy`)
 assert.equal(privacy('title').text(), 'Privacy & Data Requests | Vexim Global')
 assert.equal(viPrivacy('title').text(), 'Quyền riêng tư & Yêu cầu dữ liệu | Vexim Global')
+// Tiếng Việt là mặc định ở URL gốc; /en là bản tiếng Anh. x-default trỏ về
+// bản tiếng Việt vì đó là ngôn ngữ mặc định của site.
 for (const [english, vietnamese, path] of [[home, viHome, ""], [privacy, viPrivacy, "/privacy"]]) {
   for (const document of [english, vietnamese]) {
-    assert.equal(document('link[rel="alternate"][hreflang="en"]').attr("href"), `${siteUrl}${path}`)
-    assert.equal(document('link[rel="alternate"][hreflang="vi"]').attr("href"), `${siteUrl}/vi${path}`)
+    assert.equal(document('link[rel="alternate"][hreflang="en"]').attr("href"), `${siteUrl}/en${path}`)
+    assert.equal(document('link[rel="alternate"][hreflang="vi"]').attr("href"), `${siteUrl}${path}`)
     assert.equal(document('link[rel="alternate"][hreflang="x-default"]').attr("href"), `${siteUrl}${path}`)
   }
 }
@@ -69,7 +71,7 @@ for (const id of ["solutions", "the-gap", "services", "contact"]) {
 assert.equal(viHome('main section#solutions article').length, 3)
 assert.equal(viHome('main section#the-gap article').length, 2)
 assert.equal(viHome('main section#services article').length, 3)
-assert.equal(viHome('a[href="/vi/privacy"]').length, 1)
+assert.equal(viHome('a[href="/privacy"]').length, 1)
 assert.equal(viHome('a[href="https://veximtrade.com"]').length >= 2, true)
 assert.ok(viHome('main').text().includes('Không cam kết thứ hạng'))
 assert.ok(!/90%|Top 1[-–]10|Alibaba|Global Sources/i.test(viHome('main').text()))
@@ -78,7 +80,7 @@ assert.equal(home('main section#the-gap article').length, 2, "Two-column verific
 assert.equal(home('main section#services article').length, 3, "Product-line engagement scopes")
 assert.equal(home('main [class*="dashboardShell"], main [class*="proofConsole"]').length, 0, "No legacy technical dashboard")
 assert.equal(home('a[href="https://veximtrade.com"]').length >= 2, true)
-assert.equal(home('a[href="/privacy"]').length, 1)
+assert.equal(home('a[href="/en/privacy"]').length, 1)
 for (const href of ["/services/fda", "/services/gacc", "/services/cosmetics/mocra-registration", "/services/us-agent"]) assert.ok(home(`a[href="${href}"]`).length, href)
 assert.equal(home('script#home-page-schema[type="application/ld+json"]').length, 1)
 const schema = JSON.parse(home("script#home-page-schema").html())
@@ -86,8 +88,11 @@ const service = schema["@graph"].find(node => node["@type"] === "Service")
 assert.equal(service.name, heading)
 assert.equal(service.hasOfferCatalog.itemListElement.length, 3)
 assert.equal(schema["@graph"].find(node => node["@type"] === "WebPage").inLanguage, "en")
-assert.ok(!/\?lang=vi|90% of factory|Page 1 of Google|instant listing verification|high-volume OEM contracts|Top 1[-–]10|Alibaba|Global Sources/i.test(home("main").text()))
-assert.equal(home('a[href*="?lang=vi"]').length, 0)
+assert.ok(!/90% of factory|Page 1 of Google|instant listing verification|high-volume OEM contracts|Top 1[-–]10|Alibaba|Global Sources/i.test(home("main").text()))
+// Mỗi liên kết chuyển ngữ mang ?lang= để middleware ghi nhớ lựa chọn của
+// khách (desktop + mobile = 2 liên kết mỗi ngôn ngữ).
+assert.equal(home('a[href="/?lang=vi"]').length, 2)
+assert.equal(home('a[href="/en?lang=en"]').length, 2)
 const homePhotos = home('main img[src^="/home/"][src$=".webp"]')
 assert.equal(homePhotos.length, 12, "Twelve editorial photographs inside <main>: four hero, three solution, four journey, one verification scene")
 assert.equal(home('footer img[src^="/home/"][src$=".webp"]').length, 1, "The footer invitation carries one photograph")
@@ -110,7 +115,43 @@ assert.ok(readFileSync("public/og-image-vi.jpg").length < 300_000)
 const sitemapResponse = await fetch(`${base}/sitemap.xml`)
 assert.equal(sitemapResponse.status, 200)
 const sitemap = await sitemapResponse.text()
-for (const url of [`${siteUrl}/vi`, `${siteUrl}/vi/privacy`]) assert.ok(sitemap.includes(`<loc>${url}</loc>`), `sitemap ${url}`)
+for (const url of [`${siteUrl}/en`, `${siteUrl}/en/privacy`]) assert.ok(sitemap.includes(`<loc>${url}</loc>`), `sitemap ${url}`)
+assert.ok(sitemap.includes(`<loc>${siteUrl}</loc>`), "sitemap default-language home")
+assert.ok(sitemap.includes(`<loc>${siteUrl}/privacy</loc>`), "sitemap default-language privacy")
+// Định tuyến ngôn ngữ: tiếng Việt là mặc định, khách quốc tế được chuyển sang
+// /en, và lựa chọn thủ công (?lang=) được ghi cookie để không bị chuyển lại.
+{
+  const status = async (path, headers) => {
+    const response = await fetch(`${base}${path}`, { headers, redirect: "manual" })
+    return { code: response.status, location: response.headers.get("location"), cookies: response.headers.getSetCookie?.() ?? [] }
+  }
+  const english = { "accept-language": "en-US,en;q=0.9" }
+  const vietnamese = { "accept-language": "vi-VN,vi;q=0.9" }
+
+  assert.equal((await status("/", {})).code, 200, "no Accept-Language falls back to Vietnamese")
+  const enBrowser = await status("/", english)
+  assert.equal(enBrowser.code, 307, "English browser is redirected to the English page")
+  assert.ok(enBrowser.location?.endsWith("/en"), "redirects to /en")
+  assert.equal((await status("/privacy", english)).location?.endsWith("/en/privacy"), true)
+  assert.equal((await status("/en", english)).code, 200, "English page never bounces back")
+  assert.equal((await status("/", vietnamese)).code, 200)
+  assert.equal((await status("/", { "accept-language": "en;q=0.2, vi;q=0.9" })).code, 200, "quality values decide")
+  assert.equal((await status("/", { "accept-language": "fr-FR,fr;q=0.9" })).code, 200, "unrelated languages stay on Vietnamese")
+
+  // Bấm "VI" trên bản tiếng Anh ghi cookie để lần sau trình duyệt tiếng Anh
+  // không bị chuyển hướng nữa.
+  const chooseVi = await status("/?lang=vi", english)
+  assert.equal(chooseVi.code, 307)
+  assert.ok(chooseVi.cookies.some(cookie => cookie.startsWith("vexim_locale=vi")), "manual choice is persisted")
+  assert.equal((await status("/", { ...english, cookie: "vexim_locale=vi" })).code, 200, "remembered choice wins over the browser language")
+  assert.equal((await status("/", { ...vietnamese, cookie: "vexim_locale=en" })).location?.endsWith("/en"), true, "remembered English choice redirects")
+
+  // URL tiếng Việt cũ giữ 308 về URL mới để không mất tín hiệu SEO.
+  const oldHome = await status("/vi", {})
+  assert.equal(oldHome.code, 308)
+  assert.ok(oldHome.location?.endsWith("/"), "/vi -> /")
+  assert.equal((await status("/vi/privacy", {})).location?.endsWith("/privacy"), true, "/vi/privacy -> /privacy")
+}
 assert.ok(sitemap.includes('hreflang="vi"'))
 const serviceSitemapEntry = sitemap.slice(sitemap.indexOf(`<loc>${siteUrl}/services/fda</loc>`), sitemap.indexOf('</url>', sitemap.indexOf(`<loc>${siteUrl}/services/fda</loc>`)))
 assert.ok(serviceSitemapEntry.includes(`<loc>${siteUrl}/services/fda</loc>`))
@@ -142,7 +183,7 @@ try {
         for (const entry of list.getEntries()) if (!entry.hadRecentInput) window.__homeCLS += entry.value
       }).observe({ type: "layout-shift", buffered: true })
     })
-    await page.goto(`${base}/`, { waitUntil: "networkidle2", timeout: 90000 })
+    await page.goto(`${base}/en`, { waitUntil: "networkidle2", timeout: 90000 })
     await page.evaluate(() => document.fonts.ready)
     const state = await page.evaluate(() => ({
       lang: document.documentElement.lang,
@@ -181,7 +222,7 @@ try {
       const toggle = page.locator('button[aria-controls="home-mobile-nav"]')
       await toggle.click()
       assert.equal(await page.$eval('button[aria-controls="home-mobile-nav"]', el => el.getAttribute("aria-expanded")), "true")
-      await page.locator('nav[aria-label="Mobile navigation"] a[href="/#the-gap"]').click()
+      await page.locator('nav[aria-label="Mobile navigation"] a[href="/en#the-gap"]').click()
       assert.equal(await page.$eval('button[aria-controls="home-mobile-nav"]', el => el.getAttribute("aria-expanded")), "false")
     }
     const cards = await page.$$eval('#solutions article', items => items.map(item => ({ top: item.getBoundingClientRect().top, width: item.getBoundingClientRect().width })))
@@ -211,7 +252,7 @@ try {
         for (const entry of list.getEntries()) if (!entry.hadRecentInput) window.__homeCLS += entry.value
       }).observe({ type: "layout-shift", buffered: true })
     })
-    await page.goto(`${base}/vi`, { waitUntil: "networkidle2", timeout: 90000 })
+    await page.goto(`${base}/`, { waitUntil: "networkidle2", timeout: 90000 })
     await page.evaluate(() => document.fonts.ready)
     const state = await page.evaluate(() => {
       const copy = document.querySelector('[class*="heroCopy"]').getBoundingClientRect()
@@ -246,31 +287,35 @@ try {
     console.log(`PASS browser VI: ${width}px, no overflow, stable editorial hero, four SVGs, CLS=${state.cls.toFixed(4)}`)
     await page.close()
   }
+  // Vietnamese is the default: the browser starts on the Vietnamese page and
+  // the dropdown switches to /en and back, remembering each manual choice.
   const languagePage = await browser.newPage()
   await languagePage.setViewport({ width: 1440, height: 900 })
   await languagePage.goto(`${base}/`, { waitUntil: "networkidle2" })
+  assert.equal(await languagePage.$eval('html', el => el.lang), 'vi')
   await languagePage.locator('[class*="desktopLanguage"] summary').click()
   assert.equal(await languagePage.$eval('[class*="desktopLanguage"]', el => el.open), true)
   await languagePage.keyboard.press('Escape')
   assert.equal(await languagePage.$eval('[class*="desktopLanguage"]', el => el.open), false)
   await languagePage.locator('[class*="desktopLanguage"] summary').click()
-  await Promise.all([languagePage.waitForNavigation({ waitUntil: 'domcontentloaded' }), languagePage.locator('[class*="desktopLanguage"] a[lang="vi"]').click()])
-  assert.equal(new URL(languagePage.url()).pathname, '/vi')
-  assert.equal(await languagePage.$eval('html', el => el.lang), 'vi')
+  await Promise.all([languagePage.waitForNavigation({ waitUntil: 'domcontentloaded' }), languagePage.locator('[class*="desktopLanguage"] a[lang="en"]').click()])
+  assert.equal(new URL(languagePage.url()).pathname, '/en')
+  assert.equal(await languagePage.$eval('html', el => el.lang), 'en')
+  assert.equal(await languagePage.evaluate(() => document.cookie.includes('vexim_locale=en')), true, 'manual choice is remembered')
   await languagePage.setViewport({ width: 390, height: 844 })
-  await languagePage.goto(`${base}/vi/privacy`, { waitUntil: 'networkidle2' })
+  await languagePage.goto(`${base}/en/privacy`, { waitUntil: 'networkidle2' })
   await languagePage.locator('button[aria-controls="home-mobile-nav"]').click()
   await languagePage.locator('[class*="mobileLanguage"] summary').click()
   assert.equal(await languagePage.$eval('[class*="mobileLanguage"]', el => el.open), true)
-  await Promise.all([languagePage.waitForNavigation({ waitUntil: 'domcontentloaded' }), languagePage.locator('[class*="mobileLanguage"] a[lang="en"]').click()])
+  await Promise.all([languagePage.waitForNavigation({ waitUntil: 'domcontentloaded' }), languagePage.locator('[class*="mobileLanguage"] a[lang="vi"]').click()])
   assert.equal(new URL(languagePage.url()).pathname, '/privacy')
-  assert.equal(await languagePage.$eval('html', el => el.lang), 'en')
+  assert.equal(await languagePage.$eval('html', el => el.lang), 'vi')
   await languagePage.close()
   console.log('PASS browser: desktop/mobile keyboard-accessible language dropdown, same-page locale links, preserved privacy context')
 
   const viAudit = await browser.newPage()
   await viAudit.setViewport({ width: 390, height: 844 })
-  await viAudit.goto(`${base}/vi`, { waitUntil: 'networkidle2' })
+  await viAudit.goto(`${base}/`, { waitUntil: 'networkidle2' })
   await viAudit.setRequestInterception(true)
   let viPosted, viStatus = 200
   viAudit.on('request', request => {
@@ -309,7 +354,7 @@ try {
 
   const page = await browser.newPage()
   await page.setViewport({ width: 1280, height: 900 })
-  await page.goto(`${base}/`, { waitUntil: "networkidle2" })
+  await page.goto(`${base}/en`, { waitUntil: "networkidle2" })
   await page.setRequestInterception(true)
   let posted
   let mockStatus = 200
