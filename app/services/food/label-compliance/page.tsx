@@ -68,8 +68,8 @@ export default function LabelCompliancePage() {
             </div>
             <div className="relative h-[400px] lg:h-[500px]">
               <Image
-                src="/fda-label-compliance-food-nutrition.jpg"
-                alt="FDA Label Compliance"
+                src="/ai-fda-label-compliance-check-scanner.jpg"
+                alt="Máy quét kiểm tra nhãn thực phẩm theo quy định FDA"
                 fill
                 className="object-cover rounded-2xl shadow-2xl"
               />
