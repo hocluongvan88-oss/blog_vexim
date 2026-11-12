@@ -18,9 +18,9 @@ export interface StaticRoute {
 
 export const STATIC_ROUTES: StaticRoute[] = [
   { path: "/", priority: 1.0, changeFrequency: "weekly" },
-  { path: "/vi", priority: 1.0, changeFrequency: "weekly" },
+  { path: "/en", priority: 0.9, changeFrequency: "weekly" },
   { path: "/privacy", priority: 0.2, changeFrequency: "yearly" },
-  { path: "/vi/privacy", priority: 0.2, changeFrequency: "yearly" },
+  { path: "/en/privacy", priority: 0.2, changeFrequency: "yearly" },
   { path: "/blog", priority: 0.9, changeFrequency: "weekly" },
 
   // Dịch vụ theo thị trường

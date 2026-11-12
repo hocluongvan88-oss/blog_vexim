@@ -22,7 +22,7 @@ const ZaloChatButton = dynamic(() => import("@/components/zalo-chat-button").the
  * và chuông thông báo cho admin vẫn hoạt động nguyên vẹn.
  */
 const SHOW_ZALO_BUTTON = true
-const LANDING_PATHS = new Set(["/", "/privacy", "/vi", "/vi/privacy"])
+const LANDING_PATHS = new Set(["/", "/privacy", "/en", "/en/privacy"])
 
 /**
  * Các kênh liên hệ hiển thị trên website (ẩn trong trang quản trị /admin).
@@ -37,7 +37,7 @@ export function ClientWidgets() {
   // Root layouts survive Next client-side navigation; keep the document language
   // aligned with the current page after navigation from a Vietnamese Next Link.
   useEffect(() => {
-    document.documentElement.lang = pathname === "/" || pathname === "/privacy" ? "en" : "vi"
+    document.documentElement.lang = pathname === "/en" || pathname === "/en/privacy" ? "en" : "vi"
     // Root layouts persist on client navigation; match the server's public
     // landing font rule when moving between home and service/blog pages.
     document.body.classList.toggle("font-sans", !LANDING_PATHS.has(pathname))

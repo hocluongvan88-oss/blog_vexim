@@ -1,23 +1,34 @@
 import type { Metadata } from "next"
 import { LocalizedHome } from "@/components/home/localized-home"
-import { OG_IMAGE, OG_IMAGE_ALT, SITE_DESCRIPTION, SITE_TITLE, SITE_URL_WITH_SLASH } from "@/lib/business-profile"
+import { SITE_URL } from "@/lib/business-profile"
 import { languageUrls } from "@/lib/locale-routes"
+import { VI_HOME_META } from "@/lib/home-i18n"
+import VietnameseLayout from "@/components/home/vietnamese-font"
 
-/** English homepage, independently positioned from the Vietnamese service/blog pages. */
+/**
+ * Trang chủ — tiếng Việt, ở URL gốc. Đây là ngôn ngữ mặc định của site, nên
+ * `/` cũng là `x-default` trong hreflang. Bản tiếng Anh nằm ở `/en`.
+ */
+const image = `${SITE_URL}/og-image-vi.jpg`
+
 export const metadata: Metadata = {
-  title: SITE_TITLE,
-  description: SITE_DESCRIPTION,
-  keywords: ["B2B export website", "digital export infrastructure", "buyer intent SEO", "Vietnam manufacturer", "Vexim Trade"],
+  title: { absolute: VI_HOME_META.title },
+  description: VI_HOME_META.description,
+  keywords: ["website B2B xuất khẩu", "hạ tầng số xuất khẩu", "SEO theo nhu cầu người mua", "nhà sản xuất Việt Nam", "Vexim Trade"],
   manifest: null, // The root manifest is for the separate admin dashboard.
-  alternates: { canonical: SITE_URL_WITH_SLASH, languages: languageUrls("home") },
+  alternates: { canonical: SITE_URL, languages: languageUrls("home") },
   openGraph: {
-    type: "website", locale: "en_US", url: SITE_URL_WITH_SLASH, siteName: "Vexim Global",
-    title: SITE_TITLE, description: SITE_DESCRIPTION,
-    images: [{ url: OG_IMAGE.url, width: OG_IMAGE.width, height: OG_IMAGE.height, alt: OG_IMAGE_ALT }],
+    type: "website", locale: "vi_VN", url: SITE_URL, siteName: "Vexim Global",
+    title: VI_HOME_META.title, description: VI_HOME_META.description,
+    images: [{ url: image, width: 1200, height: 630, alt: VI_HOME_META.ogAlt }],
   },
-  twitter: { card: "summary_large_image", title: SITE_TITLE, description: SITE_DESCRIPTION, images: [OG_IMAGE.url] },
+  twitter: { card: "summary_large_image", title: VI_HOME_META.title, description: VI_HOME_META.description, images: [image] },
 }
 
 export default function Home() {
-  return <LocalizedHome locale="en" />
+  return (
+    <VietnameseLayout>
+      <LocalizedHome locale="vi" />
+    </VietnameseLayout>
+  )
 }

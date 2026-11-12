@@ -182,7 +182,7 @@ export function buildHomePageSchema() {
     "@context": "https://schema.org",
     "@graph": [
       {
-        ...buildWebPageSchema({ path: "/", name: SITE_TITLE, description: SITE_DESCRIPTION, inLanguage: "en" }),
+        ...buildWebPageSchema({ path: "/en", name: SITE_TITLE, description: SITE_DESCRIPTION, inLanguage: "en" }),
         "@context": undefined,
         "@id": HOME_PAGE_ID,
         mainEntity: { "@id": HOME_SERVICE_ID },
@@ -202,28 +202,29 @@ export function buildHomePageSchema() {
   }
 }
 
-/** Separate WebPage and localized Service for the editorially translated /vi route.
- * The business entity keeps its single, unchanged Organization @id. */
+/** WebPage và Service cho trang chủ tiếng Việt ở URL gốc (`/`), ngôn ngữ mặc
+ * định của site. Bản tiếng Anh ở `/en` do `buildHomePageSchema()` đảm nhận.
+ * Thực thể doanh nghiệp giữ nguyên một Organization @id duy nhất. */
 export function buildVietnameseHomePageSchema() {
-  const url = `${SITE_URL}/vi`
-  const pageId = `${url}#webpage`
-  const serviceId = `${url}#service`
-  const imageId = `${url}#primaryimage`
+  const url = SITE_URL
+  const pageId = HOME_PAGE_ID
+  const serviceNodeId = HOME_SERVICE_ID
+  const imageId = HOME_IMAGE_ID
   const imageUrl = `${SITE_URL}/og-image-vi.jpg`
   return {
     "@context": "https://schema.org",
     "@graph": [
       {
-        ...buildWebPageSchema({ path: "/vi", name: VI_HOME_META.title, description: VI_HOME_META.description, inLanguage: "vi-VN" }),
+        ...buildWebPageSchema({ path: "/", name: VI_HOME_META.title, description: VI_HOME_META.description, inLanguage: "vi-VN" }),
         "@context": undefined,
-        mainEntity: { "@id": serviceId },
+        mainEntity: { "@id": serviceNodeId },
         primaryImageOfPage: { "@id": imageId },
       },
       { "@type": "ImageObject", "@id": imageId, url: imageUrl, contentUrl: imageUrl, width: 1200, height: 630 },
       buildTradeOrganization(ORGANIZATION_ID),
       {
         "@type": "Service",
-        "@id": serviceId,
+        "@id": serviceNodeId,
         name: HOME_POSITIONING_VI.headline,
         serviceType: "Hạ tầng số B2B và SEO theo nhu cầu người mua",
         description: VI_HOME_META.description,
@@ -233,7 +234,7 @@ export function buildVietnameseHomePageSchema() {
         audience: { "@type": "BusinessAudience", audienceType: "Nhà sản xuất Việt Nam tìm kiếm người mua quốc tế" },
         hasOfferCatalog: {
           "@type": "OfferCatalog",
-          "@id": `${url}#offer-catalog`,
+          "@id": `${url}/#offer-catalog`,
           name: "Phạm vi hợp tác về hạ tầng số xuất khẩu",
           itemListElement: EXPORT_TIERS_VI.map((tier) => ({
             "@type": "Offer",
