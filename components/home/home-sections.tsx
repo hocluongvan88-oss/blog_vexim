@@ -39,8 +39,6 @@ export function HomeHero({ locale }: { locale: HomeLocale }) {
   const text = HOME_MESSAGES[locale].hero
   const positioning = locale === "vi" ? HOME_POSITIONING_VI : HOME_POSITIONING
   return <section className={styles.hero} aria-labelledby="hero-title">
-    <div className={styles.heroGlow} aria-hidden="true" />
-    <div className={styles.heroBlob} aria-hidden="true" />
     <div className={`${styles.container} ${styles.heroInner}`}>
       <div className={styles.heroLead}>
         <div className={styles.heroCopy}>
