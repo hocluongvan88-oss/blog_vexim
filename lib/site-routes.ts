@@ -3,7 +3,7 @@
  *
  * Lý do tồn tại: trước đây `app/sitemap.ts` chỉ liệt kê 7 trang dịch vụ, bỏ sót
  * gần 20 trang dịch vụ thật (/services/food/*, /services/cosmetics/*, /services/gacc/assessment,
- * /services/fsvp, /services/fda-label-check, /services/llc-ein) và /fda-tracker.
+ * /services/fsvp, /services/fda-label-check, /services/llc-ein).
  * Các trang này vẫn được Google tìm thấy qua liên kết nội bộ, nhưng thiếu trong sitemap
  * khiến tốc độ phát hiện/đánh giá lại chậm hơn và Search Console khó đối soát.
  *
@@ -22,7 +22,6 @@ export const STATIC_ROUTES: StaticRoute[] = [
   { path: "/privacy", priority: 0.2, changeFrequency: "yearly" },
   { path: "/vi/privacy", priority: 0.2, changeFrequency: "yearly" },
   { path: "/blog", priority: 0.9, changeFrequency: "weekly" },
-  { path: "/fda-tracker", priority: 0.8, changeFrequency: "daily" },
 
   // Dịch vụ theo thị trường
   { path: "/services/fda", priority: 0.9, changeFrequency: "weekly" },

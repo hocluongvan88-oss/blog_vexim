@@ -15,63 +15,6 @@ const { templates: T, cleanup } = loadEmailTemplates()
 const EMAIL = "nguoidung@example.com"
 const BASE = "https://www.veximglobal.com"
 
-const sampleAlerts = [
-  {
-    title: "Thu hồi lô cá ngừ đóng hộp có vi khuẩn Listeria",
-    criticalInfo: "Lô sản xuất 12/08/2026, sử dụng trước 30/09/2026 — nguy cơ nhiễm Listeria monocytogenes",
-    aiSummary: "FDA yêu cầu thu hồi 42 tấn cá ngừ đóng hộp sản xuất tại Texas do phát hiện vi khuẩn Listeria. Người tiêu dùng không nên sử dụng lô sản xuất trong tháng 8/2026.",
-    date: "2026-09-18",
-    manufacturer: "Gulf Coast Canned Seafood LLC",
-    classification: "Class I - nguy cơ gây tổn hại sức khỏe",
-    category: "food",
-  },
-  {
-    title: "Thu hồi viên sủi vitamin C liều cao hàm lượng không đạt",
-    criticalInfo: "Hàm lượng vitamin C thực tế chỉ đạt 47% so với công bố",
-    aiSummary: "Sản phẩm viên sủi vitamin C 1000mg do Sunrise Nutrition (California) sản xuất có hàm lượng hoạt chất thấp hơn nhiều so với nhãn. Không gây nguy hiểm trực tiếp nhưng vi phạm tiêu chuẩn chất lượng FDA.",
-    date: "2026-09-17",
-    manufacturer: "Sunrise Nutrition Inc.",
-    classification: "Class II",
-    category: "food",
-  },
-  {
-    title: "Thu hồi kem dưỡng ẩm chứa chất gây ung thư nhóm 1",
-    criticalInfo: "Chứa 1,4-dioxane vượt ngưỡng cho phép — sản phẩm tại thị trường Mỹ",
-    aiSummary: "Một thương hiệu mỹ phẩm online thông báo thu hồi tự nguyện dòng kem dưỡng ẩm do phát hiện 1,4-dioxane (chất gây ung thư nhóm 1) vượt ngưỡng. Vexim lưu ý các lô hàng xuất sang thị trường Canada, EU.",
-    date: "2026-09-16",
-    manufacturer: "Beauty Glow Cosmetics",
-    classification: "Class I - nguy cơ gây tổn hại sức khỏe",
-    category: "cosmetics",
-  },
-  {
-    title: "Cảnh báo: bột sắn dây đóng gói nhầm vào thực phẩm cho trẻ em",
-    criticalInfo: "Lô 1.200 hộp, phân phối tại 3 tiểu bang",
-    aiSummary: "Lỗi phân loại nguyên liệu dẫn đến bột sắn dây không đạt chuẩn xuất hiện trong hỗn hợp thực phẩm cho trẻ em dưới 3 tuổi. Phụ huynh cần kiểm tra hạn sử dụng in trên đáy hộp.",
-    date: "2026-09-15",
-    manufacturer: "Little Sprout Foods Co.",
-    classification: "Class II",
-    category: "food",
-  },
-  {
-    title: "Thu hồi thực phẩm chức năng tăng cơ có chứa chất cấm",
-    criticalInfo: "Phát hiện methylhexanamine — chất không được phép trong thực phẩm",
-    aiSummary: "Thực phẩm bổ sung cho người tập gym chứa methylhexanamine (chất kích thích thần kinh cấm dùng trong thực phẩm) có thể gây tim đập nhanh, tăng huyết áp. FDA khuyến cáo ngừng sử dụng ngay.",
-    date: "2026-09-14",
-    manufacturer: "MaxPro Supplement",
-    classification: "Class I - nguy cơ gây tổn hại sức khỏe",
-    category: "food",
-  },
-  {
-    title: "Cảnh báo hạt điều rang muối nhiễm ôi dầu",
-    criticalInfo: "Lô hàng 800kg, sản xuất 25/07/2026",
-    aiSummary: "Mẫu thử cho thấy chỉ số acid tự do vượt ngưỡng, sản phẩm có mùi ôi. Doanh nghiệp xuất khẩu cần đối chiếu mã lô của nhà cung cấp.",
-    date: "2026-09-13",
-    manufacturer: "NutriCoast Traders",
-    classification: "Class II",
-    category: "food",
-  },
-]
-
 const gaccParams = {
   companyName: "Công ty TNHH Thực phẩm An Việt",
   productName: "Cá basa phi lê đông lạnh",
@@ -94,52 +37,18 @@ const consultationParams = {
 
 const pages = [
   {
-    file: "01-xac-nhan-dang-ky-fda",
-    title: "1. Xác nhận đăng ký cảnh báo FDA",
-    html: T.getVerificationEmailHTML({
-      email: EMAIL,
-      verificationLink: `${BASE}/api/fda/verify?email=${encodeURIComponent(EMAIL)}&token=DEMO_TOKEN_123`,
-      unsubscribeLink: `${BASE}/fda-tracker/unsubscribe?email=${encodeURIComponent(EMAIL)}&token=DEMO_TOKEN_123`,
-    }),
-  },
-  {
-    file: "02-ban-tin-canh-bao",
-    title: "2. Bản tin cảnh báo FDA (hàng ngày / hàng tuần)",
-    html: T.getAlertEmailHTML({
-      email: EMAIL,
-      alerts: sampleAlerts,
-      alertCount: 12,
-      frequency: "daily",
-      unsubscribeLink: `${BASE}/fda-tracker/unsubscribe?email=${encodeURIComponent(EMAIL)}&token=DEMO_TOKEN_123`,
-    }),
-  },
-  {
-    file: "03-canh-bao-khan-cap",
-    title: "3. Cảnh báo FDA khẩn cấp",
-    html: T.getImmediateAlertEmailHTML({
-      email: EMAIL,
-      alert: sampleAlerts[0],
-      unsubscribeLink: `${BASE}/fda-tracker/unsubscribe?email=${encodeURIComponent(EMAIL)}&token=DEMO_TOKEN_123`,
-    }),
-  },
-  {
-    file: "04-huy-dang-ky",
-    title: "4. Xác nhận hủy đăng ký",
-    html: T.getUnsubscribeEmailHTML({ email: EMAIL }),
-  },
-  {
-    file: "05-xac-nhan-ho-so-gacc",
-    title: "5. Xác nhận hồ sơ GACC (khách hàng)",
+    file: "01-xac-nhan-ho-so-gacc",
+    title: "1. Xác nhận hồ sơ GACC (khách hàng)",
     html: T.getGACCUserConfirmationHTML(gaccParams),
   },
   {
-    file: "06-thong-bao-gacc-admin",
-    title: "6. Thông báo hồ sơ GACC mới (admin)",
+    file: "02-thong-bao-gacc-admin",
+    title: "2. Thông báo hồ sơ GACC mới (admin)",
     html: T.getGACCAdminNotificationHTML(gaccParams),
   },
   {
-    file: "07-nhac-no-gia-han-fda",
-    title: "7. Nhắc nhở gia hạn đăng ký FDA",
+    file: "03-nhac-no-gia-han-fda",
+    title: "3. Nhắc nhở gia hạn đăng ký FDA",
     html: T.getFdaRenewalReminderHTML({
       companyName: gaccParams.companyName,
       contactName: "Trần Quốc Bảo",
@@ -150,8 +59,8 @@ const pages = [
     }),
   },
   {
-    file: "08-nhac-no-gia-han-us-agent",
-    title: "8. Nhắc nhở gia hạn US Agent",
+    file: "04-nhac-no-gia-han-us-agent",
+    title: "4. Nhắc nhở gia hạn US Agent",
     html: T.getAgentRenewalReminderHTML({
       companyName: gaccParams.companyName,
       contactName: "Trần Quốc Bảo",
@@ -162,13 +71,13 @@ const pages = [
     }),
   },
   {
-    file: "09-xac-nhan-tu-van-khach-hang",
-    title: "9. Xác nhận đăng ký tư vấn (khách hàng)",
+    file: "05-xac-nhan-tu-van-khach-hang",
+    title: "5. Xác nhận đăng ký tư vấn (khách hàng)",
     html: T.getConsultationCustomerHTML(consultationParams),
   },
   {
-    file: "10-thong-cao-lead-moi-admin",
-    title: "10. Lead mới từ website (admin)",
+    file: "06-thong-cao-lead-moi-admin",
+    title: "6. Lead mới từ website (admin)",
     html: T.getConsultationAdminHTML(consultationParams),
   },
 ]

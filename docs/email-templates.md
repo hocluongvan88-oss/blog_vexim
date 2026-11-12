@@ -18,7 +18,7 @@ Mở `/email-preview/index.html` trên dev server để xem 10 mẫu. Chọn đ�
 
 Bộ test không gọi DB/SMTP thật: kiểm tra template, dữ liệu độc hại, link xác nhận, trả kết quả gửi thư, trạng thái API xác nhận và hủy đăng ký bằng mocks.
 
-Đã kiểm tra thêm bằng Chromium: 10 mẫu × 5 độ rộng (320, 375, 390, 430, 768) × sáng/tối = 100 lượt render, không tràn ngang; CTA cao tối thiểu 44px. Đã kiểm tra UI hủy đăng ký chỉ gửi DELETE sau thao tác xác nhận (mock API).
+Đã kiểm tra thêm bằng Chromium: 6 mẫu × 5 độ rộng (320, 375, 390, 430, 768) × sáng/tối = 60 lượt render, không tràn ngang; CTA cao tối thiểu 44px.
 
 **Chưa kiểm thử trên Apple Mail/Gmail iPhone thật hoặc gửi thư qua SMTP production.** Chromium không mô phỏng thuật toán đổi màu của mọi email client.
 
@@ -26,7 +26,5 @@ Bộ test không gọi DB/SMTP thật: kiểm tra template, dữ liệu độc h
 
 1. Kiểm tra `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME`; địa chỉ gửi phải được nhà cung cấp email cho phép. Không tự đổi biến môi trường hay DNS qua sửa template.
 2. Đặt `NEXT_PUBLIC_BASE_URL=https://www.veximglobal.com`. Resend dự phòng dùng `FROM_EMAIL` nếu đã cấu hình.
-3. Gửi một đăng ký tư vấn và một đăng ký FDA bằng địa chỉ thử nghiệm được chủ hộp thư đồng ý. Kiểm tra Apple Mail và Gmail trên iPhone ở cả hai chế độ, bật cỡ chữ lớn, thử link/nút và reply.
-4. Kiểm tra xác nhận FDA có hạn 24h, trạng thái hết hạn và gửi lại. API đăng ký trả 503 nếu email xác nhận không được gửi, không báo thành công giả.
-5. Link hủy mở `/fda-tracker/unsubscribe`; chỉ khi người dùng xác nhận mới gọi DELETE. Link không hợp lệ không được báo hủy thành công hay gửi email xác nhận hủy tới địa chỉ tùy ý.
-6. Template `.com`/Reply-To không tự đảm bảo SPF, DKIM, DMARC hoặc inbox placement. Cần kiểm tra trên tên miền/nhà cung cấp gửi thực tế.
+3. Gửi một đăng ký tư vấn, một hồ sơ GACC và một nhắc gia hạn FDA bằng địa chỉ thử nghiệm được chủ hộp thư đồng ý. Kiểm tra Apple Mail và Gmail trên iPhone ở cả hai chế độ, bật cỡ chữ lớn, thử link/nút và reply.
+4. Template `.com`/Reply-To không tự đảm bảo SPF, DKIM, DMARC hoặc inbox placement. Cần kiểm tra trên tên miền/nhà cung cấp gửi thực tế.
