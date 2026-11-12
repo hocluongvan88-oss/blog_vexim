@@ -1,6 +1,6 @@
 import { AuditProvider } from "./audit-dialog"
 import { HomeHeader } from "./home-header"
-import { ComplianceUtilities, CoreSolutions, ExportTiers, HomeFooter, HomeHero, VerificationGap } from "./home-sections"
+import { ComplianceUtilities, CoreSolutions, ExportTiers, HomeFooter, HomeHero, PhotoJourney, VerificationGap } from "./home-sections"
 import { JsonLd } from "@/components/json-ld"
 import { buildHomePageSchema, buildVietnameseHomePageSchema } from "@/lib/schema"
 import type { HomeLocale } from "@/lib/locale-routes"
@@ -16,6 +16,7 @@ export function LocalizedHome({ locale }: { locale: HomeLocale }) {
         <main lang={locale}>
           <HomeHero locale={locale} />
           <CoreSolutions locale={locale} />
+          <PhotoJourney locale={locale} />
           <VerificationGap locale={locale} />
           <ExportTiers locale={locale} />
           <ComplianceUtilities locale={locale} />

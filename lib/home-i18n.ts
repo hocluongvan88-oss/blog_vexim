@@ -8,7 +8,17 @@ export const HOME_MESSAGES = {
       from: "Built in Vietnam", fromDetail: "Official supplier presence", to: "Ready for global discovery", toDetail: "North America · Europe",
       imageAlt: "Isometric illustration connecting a Vietnamese factory and product catalog with buyers in North America and Europe",
       illustrationNote: "Concept illustration · no live buyer or ranking data", pathwayLabel: "The connected export system",
+      footerImageAlt: "Photograph of a scientist in a food quality-control laboratory holding a spice sample jar",
+      handoffImageAlt: "Photograph of an export documentation desk with customs forms, a stamp and a laptop showing a world map",
+      truckImageAlt: "Photograph of an orange container truck driving a highway through green Vietnamese countryside",
       pathway: ["Owned foundation", "Buyer-intent discovery", "Trade connection"], scroll: "Explore the system",
+      proofNote: "Illustrative imagery of Vietnamese production and export logistics.",
+      proof: [
+        { title: "Vietnamese origin", detail: "Local cashew, spice and specialty food.", alt: "Top-down photograph of Vietnamese cashew nuts, star anise, cinnamon and peppercorns on a teal background" },
+        { title: "Production standards", detail: "Processes documented by the factory.", alt: "Photograph of workers in protective clothing inspecting packaged food on a stainless steel production line" },
+        { title: "Buyer conversations", detail: "Samples to a direct conversation.", alt: "Photograph of a Vietnamese supplier and an international buyer shaking hands during a trade meeting" },
+        { title: "Port to partner", detail: "Documents and container freight.", alt: "Aerial photograph of a container port with brightly coloured containers and a cargo ship at sunset" },
+      ],
     },
     solutions: {
       eyebrow: "01 / THE SOLUTION", label: "One connected export system", titleBefore: "Everything you need", titleAfter: "to be ", titleAccent: "found and trusted.",
@@ -16,6 +26,12 @@ export const HOME_MESSAGES = {
       searches: "Illustrative buyer-intent searches", trade: "Explore Vexim Trade",
       disclaimer: "Search positions, listing access and buyer inquiries depend on market conditions, platform eligibility and the agreed scope.",
       artworkAlt: ["Isometric cloud server cluster beside a structured product catalog", "Isometric search lens highlighting buyer destinations on a globe", "Isometric shipping containers connected to an illustrative buyer profile"],
+      photosTitle: "What the export journey looks like",
+      photos: [
+        { label: "Digital foundation", title: "A product page buyers can check", caption: "Specifications, MOQ and Incoterms in one structured place.", alt: "Photograph of a laptop and smartphone showing an abstract product catalogue interface on a blue gradient" },
+        { label: "Discovery", title: "Searches mapped to your catalogue", caption: "Buyer-intent topics planned market by market.", alt: "Photograph of a sunlit desk with a laptop showing a glowing global trade map, a notebook and Vietnamese coffee" },
+        { label: "Trade connection", title: "Documented and packed to ship", caption: "Cartons, pallets and paperwork ready for a container booking.", alt: "Photograph of warehouse workers loading cartons and woven sacks onto a pallet beside a forklift" },
+      ],
     },
     gap: {
       eyebrow: "02 / THE VERIFICATION GAP", label: "Make the first impression count", titleBefore: "A listing gets noticed.", titleAccent: "A foundation gets checked.",
@@ -27,6 +43,7 @@ export const HOME_MESSAGES = {
       standardText: "An owned, structured export presence brings product information, supplier credentials and direct inquiry pathways together—so buyers can evaluate you on your terms.",
       standardPoints: ["Searchable product and category pages.", "Credentials backed by owner-supplied evidence.", "Clear handoff to your sales conversation."],
       standardTail: "Discovery → verification → conversation",
+      figureCaption: "From the factory gate to the container port",
       disclaimer: "This is a service framework, not a quantified claim about factories or a promise of search rankings, contracts or lead volume. Publish results only with approved, dated evidence.",
     },
     tiers: {
@@ -60,7 +77,17 @@ export const HOME_MESSAGES = {
       from: "Xây dựng tại Việt Nam", fromDetail: "Hiện diện nhà cung cấp chính thức", to: "Sẵn sàng được tìm hiểu", toDetail: "Bắc Mỹ · Châu Âu",
       imageAlt: "Minh họa đẳng trục kết nối nhà máy và danh mục sản phẩm tại Việt Nam với người mua ở Bắc Mỹ và châu Âu",
       illustrationNote: "Minh họa ý tưởng · không phải dữ liệu người mua hoặc thứ hạng thực tế", pathwayLabel: "Hệ thống xuất khẩu kết nối",
+      footerImageAlt: "Ảnh chuyên viên trong phòng thí nghiệm kiểm soát chất lượng thực phẩm đang cầm mẫu gia vị",
+      handoffImageAlt: "Ảnh bàn chứng từ xuất khẩu với tờ khai hải quan, con dấu và laptop hiển thị bản đồ thế giới",
+      truckImageAlt: "Ảnh xe container màu cam chạy trên cao tốc giữa vùng quê xanh của Việt Nam",
       pathway: ["Nền tảng sở hữu riêng", "Nội dung theo nhu cầu tìm kiếm", "Kết nối thương mại"], scroll: "Khám phá hệ thống",
+      proofNote: "Hình ảnh minh họa cho sản xuất và logistics xuất khẩu tại Việt Nam.",
+      proof: [
+        { title: "Xuất xứ Việt Nam", detail: "Hạt điều, gia vị và đặc sản địa phương.", alt: "Ảnh chụp từ trên xuống hạt điều, hoa hồi, quế và tiêu Việt Nam trên nền xanh mòng két" },
+        { title: "Tiêu chuẩn sản xuất", detail: "Quy trình do nhà máy ghi nhận.", alt: "Ảnh công nhân mặc đồ bảo hộ kiểm tra thực phẩm đóng gói trên dây chuyền inox" },
+        { title: "Trao đổi cùng người mua", detail: "Từ mẫu thử đến trao đổi trực tiếp.", alt: "Ảnh nhà cung cấp Việt Nam và người mua quốc tế bắt tay trong buổi gặp thương mại" },
+        { title: "Từ cảng đến đối tác", detail: "Chứng từ và vận tải container.", alt: "Ảnh toàn cảnh cảng container với các container nhiều màu và tàu hàng lúc hoàng hôn" },
+      ],
     },
     solutions: {
       eyebrow: "01 / GIẢI PHÁP", label: "Một hệ thống xuất khẩu kết nối", titleBefore: "Từ nền tảng số", titleAfter: "đến khi ", titleAccent: "người mua tìm thấy bạn.",
@@ -68,6 +95,12 @@ export const HOME_MESSAGES = {
       searches: "Ví dụ truy vấn tiếng Anh của người mua", trade: "Khám phá Vexim Trade",
       disclaimer: "Thứ hạng tìm kiếm, khả năng đăng danh bạ và yêu cầu của người mua phụ thuộc vào thị trường, điều kiện nền tảng và phạm vi đã thỏa thuận.",
       artworkAlt: ["Minh họa cụm máy chủ và danh mục sản phẩm có cấu trúc", "Minh họa kính tìm kiếm và các thị trường người mua trên địa cầu", "Minh họa container vận chuyển kết nối với hồ sơ người mua"],
+      photosTitle: "Hành trình xuất khẩu trông như thế nào",
+      photos: [
+        { label: "Nền tảng số", title: "Trang sản phẩm để người mua đối chiếu", caption: "Thông số, MOQ và Incoterms trong một nơi có cấu trúc.", alt: "Ảnh laptop và điện thoại hiển thị giao diện danh mục sản phẩm trừu tượng trên nền xanh dương" },
+        { label: "Khám phá", title: "Truy vấn gắn với danh mục của bạn", caption: "Chủ đề theo nhu cầu tìm kiếm, lên kế hoạch theo từng thị trường.", alt: "Ảnh bàn làm việc đầy nắng với laptop hiển thị bản đồ thương mại toàn cầu, sổ tay và cà phê Việt" },
+        { label: "Kết nối thương mại", title: "Chứng từ đầy đủ, đóng gói sẵn sàng", caption: "Thùng hàng, pallet và chứng từ sẵn sàng cho container.", alt: "Ảnh công nhân kho bốc thùng carton và bao tải lên pallet cạnh xe nâng" },
+      ],
     },
     gap: {
       eyebrow: "02 / KHOẢNG TRỐNG XÁC MINH", label: "Tạo ấn tượng đầu tiên rõ ràng", titleBefore: "Danh bạ giúp được chú ý.", titleAccent: "Nền tảng giúp được tìm hiểu.",
@@ -79,6 +112,7 @@ export const HOME_MESSAGES = {
       standardText: "Một kênh xuất khẩu riêng, có cấu trúc giúp tập hợp thông tin sản phẩm, hồ sơ nhà cung cấp và lộ trình liên hệ trực tiếp để người mua chủ động đánh giá.",
       standardPoints: ["Trang sản phẩm và danh mục có thể tìm kiếm.", "Hồ sơ doanh nghiệp có tài liệu do chủ sở hữu cung cấp.", "Lộ trình chuyển tiếp rõ ràng sang bộ phận bán hàng."],
       standardTail: "Tìm thấy → tìm hiểu → trao đổi",
+      figureCaption: "Từ cổng nhà máy đến cảng container",
       disclaimer: "Đây là khung dịch vụ, không phải số liệu về nhà máy hoặc cam kết thứ hạng, hợp đồng hay lượng khách hàng tiềm năng. Chỉ công bố kết quả khi có bằng chứng được duyệt và ghi rõ thời gian.",
     },
     tiers: {

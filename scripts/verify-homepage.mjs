@@ -88,7 +88,18 @@ assert.equal(service.hasOfferCatalog.itemListElement.length, 3)
 assert.equal(schema["@graph"].find(node => node["@type"] === "WebPage").inLanguage, "en")
 assert.ok(!/\?lang=vi|90% of factory|Page 1 of Google|instant listing verification|high-volume OEM contracts|Top 1[-–]10|Alibaba|Global Sources/i.test(home("main").text()))
 assert.equal(home('a[href*="?lang=vi"]').length, 0)
-assert.equal(home('main img[src^="/home/"]').length, 4)
+const homePhotos = home('main img[src^="/home/"][src$=".webp"]')
+assert.equal(homePhotos.length, 12, "Twelve editorial photographs inside <main>: four hero, three solution, four journey, one verification scene")
+assert.equal(home('footer img[src^="/home/"][src$=".webp"]').length, 1, "The footer invitation carries one photograph")
+assert.equal(homePhotos.filter((_, image) => !home(image).attr("alt")).length, 0, "Every photograph carries alt text")
+assert.equal(homePhotos.filter((_, image) => !home(image).attr("srcset")).length, 0, "Every photograph offers a responsive srcset")
+assert.equal(home('main img[src="/home/export-network.svg"]').length, 1, "The illustrated route map remains in the hero")
+for (const asset of ["origin-ingredients", "factory-floor", "buyer-meeting", "port-logistics", "catalog-device", "quality-lab", "warehouse-loading", "vietnam-factory-exterior", "global-buyer", "hanoi-harbor", "export-documentation", "trucking"]) {
+  for (const suffix of ["", "-800"]) {
+    const photo = readFileSync(`public/home/${asset}${suffix}.webp`)
+    assert.ok(photo.length > 8_000 && photo.length < 200_000, `Photograph should stay lightweight: ${asset}${suffix}.webp`)
+  }
+}
 for (const asset of ["export-network.svg", "cloud-architecture.svg", "buyer-intent.svg", "trade-connect.svg"]) {
   const content = readFileSync(`public/home/${asset}`, "utf8")
   assert.ok(content.includes("<svg") && !/<script|<foreignObject|https?:\/\//i.test(content.replace('xmlns="http://www.w3.org/2000/svg"', "")), asset)
@@ -110,12 +121,12 @@ const injected = await fetch(`${base}/api/digital-audit`, { method: "POST", head
 assert.equal(injected.status, 403)
 const honeypot = await fetch(`${base}/api/digital-audit`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ fax: "filled-by-bot" }) })
 assert.deepEqual(await honeypot.json(), { success: true })
-console.log("PASS: bilingual home/privacy SSR, reciprocal hreflang/sitemap, unchanged Vietnamese FDA, schema, four SVGs, honest claims and audit endpoint validation")
+console.log("PASS: bilingual home/privacy SSR, reciprocal hreflang/sitemap, unchanged Vietnamese FDA, schema, four SVGs plus twelve photographs, honest claims and audit endpoint validation")
 
 const executablePath = process.env.BROWSER_EXECUTABLE_PATH
 if (!executablePath) { console.log("Set BROWSER_EXECUTABLE_PATH to run interactive Chromium checks."); process.exit(0) }
 const { default: puppeteer } = await import("puppeteer-core")
-const browser = await puppeteer.launch({ executablePath, headless: true, args: ["--no-sandbox", "--disable-dev-shm-usage"] })
+const browser = await puppeteer.launch({ executablePath, headless: true, protocolTimeout: 240000, args: ["--no-sandbox", "--disable-dev-shm-usage"] })
 const screenshots = process.env.HOME_TEST_SCREENSHOT_DIR
 if (screenshots) mkdirSync(screenshots, { recursive: true })
 try {
@@ -141,7 +152,8 @@ try {
       heroTextAlign: getComputedStyle(document.querySelector('[class*="heroCopy"]')).textAlign,
       heroCopy: document.querySelector('[class*="heroCopy"]').getBoundingClientRect().toJSON(),
       heroStage: document.querySelector('figure[class*="heroStage"]').getBoundingClientRect().toJSON(),
-      solution: getComputedStyle(document.querySelector('#solutions')).backgroundColor,
+      solution: getComputedStyle(document.querySelector('#solutions')).backgroundImage,
+      heroPhotos: document.querySelectorAll('figure[class*="heroStage"] img').length,
       header: getComputedStyle(document.querySelector('header')).position,
     }))
     assert.equal(state.lang, "en")
@@ -151,13 +163,14 @@ try {
     if (width > 960) assert.ok(state.heroStage.left >= state.heroCopy.right + 16, `illustration belongs beside the headline at ${width}px`)
     else assert.ok(state.heroStage.top >= state.heroCopy.bottom + 20, `illustration belongs below the copy at ${width}px`)
     assert.ok(state.cls < 0.01, `initial layout shift ${state.cls} at ${width}px`)
-    assert.equal(state.solution, "rgb(255, 255, 255)")
+    assert.ok(state.solution.includes("gradient"), `solutions band keeps a warm, tinted background at ${width}px`)
+    assert.equal(state.heroPhotos, 5, `hero keeps four photographs plus the route map at ${width}px`)
     assert.equal(state.header, "sticky")
     const art = await page.$$eval('main img[src^="/home/"]', async images => {
       await Promise.all(images.map(async image => { image.loading = "eager"; await image.decode() }))
       return images.map(image => ({ width: image.naturalWidth, height: image.naturalHeight }))
     })
-    assert.equal(art.length, 4)
+    assert.equal(art.length, 13)
     assert.ok(art.every(image => image.width > 0 && image.height > 0), `broken isometric art at ${width}px`)
     if (width <= 960) {
       const header = await page.evaluate(() => ({
@@ -223,10 +236,10 @@ try {
     else assert.ok(state.artTop >= state.copyBottom + 20)
     if (width <= 960) assert.ok(state.menuVisible && state.menuWidth >= 42 && state.menuLeft >= state.brandRight + 8)
     const art = await page.$$eval('main img[src^="/home/"]', async images => {
-      await Promise.all(images.map(image => image.decode()))
+      await Promise.all(images.map(async image => { image.loading = "eager"; await image.decode() }))
       return images.map(image => [image.naturalWidth, image.naturalHeight])
     })
-    assert.equal(art.length, 4)
+    assert.equal(art.length, 13)
     assert.ok(art.every(([w, h]) => w > 0 && h > 0))
     assert.deepEqual(errors, [], `Vietnamese browser errors at ${width}px`)
     if (screenshots && [390, 1440].includes(width)) await page.screenshot({ path: path.join(screenshots, `homepage-vi-${width}.png`), fullPage: true })
