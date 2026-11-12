@@ -20,6 +20,21 @@ const nextConfig = {
   async redirects() {
     return [
       /*
+       * FDA Tracker đã ngừng hoạt động (không còn ai sử dụng). Giữ 301 cho
+       * các URL cũ còn nằm trong header cũ, email đã gửi và kết quả tìm kiếm,
+       * để người dùng không gặp 404 và Google chuyển tín hiệu về trang FDA.
+       */
+      {
+        source: "/fda-tracker",
+        destination: "/services/fda",
+        permanent: true,
+      },
+      {
+        source: "/fda-tracker/:path*",
+        destination: "/services/fda",
+        permanent: true,
+      },
+      /*
        * Ép toàn bộ traffic từ bản KHÔNG www -> bản CÓ www (chuẩn SEO, đồng nhất sitemap).
        *
        * `permanent: true` trả về 308, KHÔNG phải 301. Google coi 308 tương đương 301

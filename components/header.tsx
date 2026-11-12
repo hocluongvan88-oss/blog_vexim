@@ -75,9 +75,6 @@ export function Header() {
               <Link href="/#services" className="text-slate-700 hover:text-accent transition-colors font-medium">
                 Dịch vụ
               </Link>
-              <Link href="/fda-tracker" className="text-slate-700 hover:text-accent transition-colors font-medium">
-                FDA Tracker
-              </Link>
               <Link href="/#about" className="text-slate-700 hover:text-accent transition-colors font-medium">
                 Giới thiệu
               </Link>
@@ -150,13 +147,6 @@ export function Header() {
                   className="text-left text-slate-700 hover:text-accent transition-colors font-medium"
                 >
                   Dịch vụ
-                </Link>
-                <Link
-                  href="/fda-tracker"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-left text-slate-700 hover:text-accent transition-colors font-medium"
-                >
-                  FDA Tracker
                 </Link>
                 <Link
                   href="/#about"

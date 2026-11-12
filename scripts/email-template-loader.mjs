@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url"
 import path from "node:path"
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
-const files = ["contact-info.ts", "business-profile.ts", "email-layout.ts", "email-templates.tsx", "email-gacc.tsx", "email-fda-registration.tsx", "email-consultation.tsx"]
+const files = ["contact-info.ts", "business-profile.ts", "email-layout.ts", "email-gacc.tsx", "email-fda-registration.tsx", "email-consultation.tsx"]
 
 export function loadEmailTemplates() {
   const dir = mkdtempSync(path.join(tmpdir(), "vexim-email-"))
