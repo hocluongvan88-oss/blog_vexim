@@ -15,8 +15,8 @@ const home = await get("/en", "en-US,en;q=0.9")
 const viPrivacy = await get("/privacy")
 const privacy = await get("/en/privacy", "en-US,en;q=0.9")
 const fda = await get("/services/fda")
-const heading = "Global B2B Digital Infrastructure & Export Acceleration"
-const viHeading = "Hạ tầng số B2B toàn cầu & Tăng tốc xuất khẩu"
+const heading = "Your own route to international buyers"
+const viHeading = "Con đường riêng để người mua tìm thấy bạn"
 const siteUrl = "https://www.veximglobal.com"
 assert.equal(home("html").attr("lang"), "en")
 assert.equal(home("main").first().attr("lang"), "en")
@@ -24,7 +24,7 @@ assert.equal(home("h1").text(), heading)
 assert.equal(home("h1").length, 1)
 assert.equal(home('main header, main footer').length, 0, "Global landmarks should sit outside <main>")
 assert.equal(home('head link[rel="canonical"]').attr("href"), "https://www.veximglobal.com/en")
-assert.ok(home('head meta[name="description"]').attr("content")?.includes("B2B export websites"))
+assert.ok(home('head meta[name="description"]').attr("content")?.includes("B2B platform"))
 assert.equal(home('body meta[name="description"]').length, 0)
 assert.equal(home('head link[rel="preload"][as="font"][href="/fonts/inter-home-latin.woff2"]').length, 0, "Optional display font should not delay critical resources")
 assert.equal(home('head link[rel="manifest"]').length, 0, "The public homepage is not the admin PWA")
@@ -68,14 +68,14 @@ for (const id of ["solutions", "the-gap", "services", "contact"]) {
   assert.equal(home(`#${id}`).length, 1, id)
   assert.equal(viHome(`#${id}`).length, 1, `VI ${id}`)
 }
-assert.equal(viHome('main section#solutions article').length, 3)
+assert.equal(viHome('main section#solutions article').length, 4)
 assert.equal(viHome('main section#the-gap article').length, 2)
 assert.equal(viHome('main section#services article').length, 3)
 assert.equal(viHome('a[href="/privacy"]').length, 1)
 assert.equal(viHome('a[href="https://veximtrade.com"]').length >= 2, true)
 assert.ok(viHome('main').text().includes('Không cam kết thứ hạng'))
 assert.ok(!/90%|Top 1[-–]10|Alibaba|Global Sources/i.test(viHome('main').text()))
-assert.equal(home('main section#solutions article').length, 3, "Three bento solution pillars")
+assert.equal(home('main section#solutions article').length, 4, "Four pillars: platform, reach, website, operations")
 assert.equal(home('main section#the-gap article').length, 2, "Two-column verification gap")
 assert.equal(home('main section#services article').length, 3, "Product-line engagement scopes")
 assert.equal(home('main [class*="dashboardShell"], main [class*="proofConsole"]').length, 0, "No legacy technical dashboard")
@@ -94,12 +94,12 @@ assert.ok(!/90% of factory|Page 1 of Google|instant listing verification|high-vo
 assert.equal(home('a[href="/?lang=vi"]').length, 2)
 assert.equal(home('a[href="/en?lang=en"]').length, 2)
 const homePhotos = home('main img[src^="/home/"][src$=".webp"]')
-assert.equal(homePhotos.length, 12, "Twelve editorial photographs inside <main>: four hero, three solution, four journey, one verification scene")
+assert.equal(homePhotos.length, 13, "Thirteen editorial photographs inside <main>: four hero, four pillar, four journey, one verification scene")
 assert.equal(home('footer img[src^="/home/"][src$=".webp"]').length, 1, "The footer invitation carries one photograph")
 assert.equal(homePhotos.filter((_, image) => !home(image).attr("alt")).length, 0, "Every photograph carries alt text")
 assert.equal(homePhotos.filter((_, image) => !home(image).attr("srcset")).length, 0, "Every photograph offers a responsive srcset")
 assert.equal(home('main img[src="/home/export-network.svg"]').length, 1, "The illustrated route map remains in the hero")
-for (const asset of ["origin-ingredients", "factory-floor", "buyer-meeting", "port-logistics", "catalog-device", "quality-lab", "warehouse-loading", "vietnam-factory-exterior", "global-buyer", "hanoi-harbor", "export-documentation", "trucking"]) {
+for (const asset of ["origin-ingredients", "factory-floor", "buyer-meeting", "port-logistics", "catalog-device", "quality-lab", "warehouse-loading", "vietnam-factory-exterior", "global-buyer", "hanoi-harbor", "export-documentation", "trucking", "content-operations"]) {
   for (const suffix of ["", "-800"]) {
     const photo = readFileSync(`public/home/${asset}${suffix}.webp`)
     assert.ok(photo.length > 8_000 && photo.length < 200_000, `Photograph should stay lightweight: ${asset}${suffix}.webp`)
@@ -211,7 +211,7 @@ try {
       await Promise.all(images.map(async image => { image.loading = "eager"; await image.decode() }))
       return images.map(image => ({ width: image.naturalWidth, height: image.naturalHeight }))
     })
-    assert.equal(art.length, 13)
+    assert.equal(art.length, 14)
     assert.ok(art.every(image => image.width > 0 && image.height > 0), `broken isometric art at ${width}px`)
     if (width <= 960) {
       const header = await page.evaluate(() => ({
@@ -280,7 +280,7 @@ try {
       await Promise.all(images.map(async image => { image.loading = "eager"; await image.decode() }))
       return images.map(image => [image.naturalWidth, image.naturalHeight])
     })
-    assert.equal(art.length, 13)
+    assert.equal(art.length, 14)
     assert.ok(art.every(([w, h]) => w > 0 && h > 0))
     assert.deepEqual(errors, [], `Vietnamese browser errors at ${width}px`)
     if (screenshots && [390, 1440].includes(width)) await page.screenshot({ path: path.join(screenshots, `homepage-vi-${width}.png`), fullPage: true })

@@ -23,10 +23,15 @@ const PHOTO = {
   harbor: { src: "/home/hanoi-harbor.webp", srcSet: "/home/hanoi-harbor-800.webp 800w, /home/hanoi-harbor.webp 1200w", width: 1200, height: 654 },
   documents: { src: "/home/export-documentation.webp", srcSet: "/home/export-documentation-800.webp 800w, /home/export-documentation.webp 1200w", width: 1200, height: 823 },
   trucking: { src: "/home/trucking.webp", srcSet: "/home/trucking-800.webp 800w, /home/trucking.webp 1200w", width: 1200, height: 509 },
+  operations: { src: "/home/content-operations.webp", srcSet: "/home/content-operations-800.webp 800w, /home/content-operations.webp 1200w", width: 1200, height: 655 },
 } as const
 
+/** Bốn trụ cột xếp thành lưới bento: hai thẻ đôi ở hàng đầu, hai thẻ rộng phía dưới.
+ * Thẻ cuối dùng bố cục ngang (ảnh bên phải) như trước. */
+const BENTO_TONE = [styles.bentoLead, styles.bentoPair, styles.bentoWide, styles.bentoWideAlt] as const
+
 const heroPhotos = [PHOTO.origin, PHOTO.factory, PHOTO.buyer, PHOTO.port] as const
-const solutionPhotos = [PHOTO.catalog, PHOTO.workspace, PHOTO.warehouse] as const
+const solutionPhotos = [PHOTO.catalog, PHOTO.workspace, PHOTO.warehouse, PHOTO.operations] as const
 const footerPhoto = PHOTO.documents
 const gapFigurePhoto = PHOTO.trucking
 
@@ -96,16 +101,16 @@ export function CoreSolutions({ locale }: { locale: HomeLocale }) {
       <h2 id="solutions-title">{text.titleBefore}<br />{text.titleAfter}<span>{text.titleAccent}</span></h2>
       <p>{text.description}</p>
     </div>
-    <div className={styles.bentoGrid}>{pillars.map((pillar, index) => <article key={pillar.id} className={`${styles.bentoCard} ${index === 0 ? styles.bentoInfrastructure : index === 1 ? styles.bentoSearch : styles.bentoTrade}`}>
+    <div className={styles.bentoGrid}>{pillars.map((pillar, index) => <article key={pillar.id} className={`${styles.bentoCard} ${BENTO_TONE[index]}`}>
       <div className={styles.bentoCopy}>
-        <div className={styles.cardTop}><span>{pillar.number} / 03</span><span>{pillar.label}</span></div>
+        <div className={styles.cardTop}><span>{pillar.number} / 04</span><span>{pillar.label}</span></div>
         <h3>{pillar.title}</h3>
         <p className={styles.bentoDescription}>{pillar.description}</p>
         <ul className={styles.bentoFeatures}>{pillar.features.map(feature => <li key={feature}><Check size={15} aria-hidden="true" />{feature}</li>)}</ul>
         {index === 1 && <div className={styles.queryChips} aria-label={text.searches}><span>bulk supplier</span><span>OEM factory Vietnam</span><span>FOB Ho Chi Minh City</span></div>}
-        {index === 2 && <a className={styles.bentoLink} {...tradeLink}>{text.trade} <ArrowUpRight size={17} aria-hidden="true" /></a>}
+        {index === 3 && <a className={styles.bentoLink} {...tradeLink}>{text.trade} <ArrowUpRight size={17} aria-hidden="true" /></a>}
       </div>
-      <figure className={`${styles.bentoMedia} ${index === 2 ? styles.bentoMediaWide : ""}`}>
+      <figure className={`${styles.bentoMedia} ${index === 3 ? styles.bentoMediaWide : ""}`}>
         <img className={styles.bentoPhoto} src={solutionPhotos[index].src} srcSet={solutionPhotos[index].srcSet} sizes="(max-width: 720px) 92vw, 560px" width={solutionPhotos[index].width} height={solutionPhotos[index].height} alt={text.photos[index].alt} loading="lazy" decoding="async" />
         <figcaption><strong>{text.photos[index].title}</strong><span>{text.photos[index].caption}</span></figcaption>
       </figure>
@@ -120,13 +125,13 @@ export function PhotoJourney({ locale }: { locale: HomeLocale }) {
   return <section className={styles.photoBand} aria-labelledby="photo-band-title"><div className={styles.container}>
     <div className={styles.photoBandHead}>
       <h2 id="photo-band-title">{text.photosTitle}</h2>
-      <p>{text.photos.map(item => item.label).join(" · ")}</p>
+      <p>{text.journey.map(item => item.label).join(" · ")}</p>
     </div>
     <div className={styles.photoBandGrid}>
-      <figure className={`${styles.photoBandFigure} ${styles.photoBandTall}`}><img src={PHOTO.harbor.src} srcSet={PHOTO.harbor.srcSet} sizes="(max-width: 960px) 92vw, 700px" width={PHOTO.harbor.width} height={PHOTO.harbor.height} alt={text.photos[0].alt} loading="lazy" decoding="async" /><figcaption><span>{text.photos[0].label}</span>{text.photos[0].title}</figcaption></figure>
-      <figure className={styles.photoBandFigure}><img src={PHOTO.lab.src} srcSet={PHOTO.lab.srcSet} sizes="(max-width: 960px) 46vw, 420px" width={PHOTO.lab.width} height={PHOTO.lab.height} alt={text.photos[2].alt} loading="lazy" decoding="async" /><figcaption><span>{text.photos[2].label}</span>{text.photos[2].title}</figcaption></figure>
-      <figure className={styles.photoBandFigure}><img src={PHOTO.workspace.src} srcSet={PHOTO.workspace.srcSet} sizes="(max-width: 960px) 46vw, 420px" width={PHOTO.workspace.width} height={PHOTO.workspace.height} alt={text.photos[1].alt} loading="lazy" decoding="async" /><figcaption><span>{text.photos[1].label}</span>{text.photos[1].title}</figcaption></figure>
-      <figure className={styles.photoBandFigure}><img src={PHOTO.exterior.src} srcSet={PHOTO.exterior.srcSet} sizes="(max-width: 960px) 46vw, 420px" width={PHOTO.exterior.width} height={PHOTO.exterior.height} alt={HOME_MESSAGES[locale].hero.proof[1].alt} loading="lazy" decoding="async" /><figcaption><span>{HOME_MESSAGES[locale].hero.proof[1].title}</span>{HOME_MESSAGES[locale].hero.proof[1].detail}</figcaption></figure>
+      <figure className={`${styles.photoBandFigure} ${styles.photoBandTall}`}><img src={PHOTO.harbor.src} srcSet={PHOTO.harbor.srcSet} sizes="(max-width: 960px) 92vw, 700px" width={PHOTO.harbor.width} height={PHOTO.harbor.height} alt={text.journey[0].alt} loading="lazy" decoding="async" /><figcaption><span>{text.journey[0].label}</span>{text.journey[0].title}</figcaption></figure>
+      <figure className={styles.photoBandFigure}><img src={PHOTO.lab.src} srcSet={PHOTO.lab.srcSet} sizes="(max-width: 960px) 46vw, 420px" width={PHOTO.lab.width} height={PHOTO.lab.height} alt={text.journey[1].alt} loading="lazy" decoding="async" /><figcaption><span>{text.journey[1].label}</span>{text.journey[1].title}</figcaption></figure>
+      <figure className={styles.photoBandFigure}><img src={PHOTO.workspace.src} srcSet={PHOTO.workspace.srcSet} sizes="(max-width: 960px) 46vw, 420px" width={PHOTO.workspace.width} height={PHOTO.workspace.height} alt={text.journey[2].alt} loading="lazy" decoding="async" /><figcaption><span>{text.journey[2].label}</span>{text.journey[2].title}</figcaption></figure>
+      <figure className={styles.photoBandFigure}><img src={PHOTO.exterior.src} srcSet={PHOTO.exterior.srcSet} sizes="(max-width: 960px) 46vw, 420px" width={PHOTO.exterior.width} height={PHOTO.exterior.height} alt={text.journey[3].alt} loading="lazy" decoding="async" /><figcaption><span>{text.journey[3].label}</span>{text.journey[3].title}</figcaption></figure>
     </div>
   </div></section>
 }
