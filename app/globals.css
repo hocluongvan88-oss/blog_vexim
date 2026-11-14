@@ -114,8 +114,12 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-@theme {
-  /* Update font to Be Vietnam Pro for Vietnamese content */
+@theme inline {
+  /* Be Vietnam Pro cho nội dung tiếng Việt. `inline` là bắt buộc: giá trị này
+     tham chiếu biến do next/font sinh ra ở class trên <body>, nên phải được
+     chèn nguyên văn vào CSS. Trong `@theme` thường, Tailwind biên dịch
+     `--font-sans` thành `var(--font-sans)` khi dùng trong utility, khiến
+     `font-sans` tham chiếu chính nó và trình duyệt rơi về font hệ thống. */
   --font-sans: var(--font-be-vietnam-pro), "Be Vietnam Pro", system-ui, -apple-system, sans-serif;
   --font-mono: "Geist Mono", "Geist Mono Fallback";
 

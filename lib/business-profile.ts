@@ -223,7 +223,7 @@ export const ORGANIZATION_DESCRIPTION =
 export const PHONE_DISPLAY = VEXIM_PHONE_DISPLAY
 
 /** Homepage title and description; service pages keep their own localized metadata. */
-export const SITE_TITLE = "B2B Digital Export Infrastructure | Vexim Global"
+export const SITE_TITLE = "B2B Platform & Export Marketing for Vietnamese Manufacturers | Vexim Global"
 export const SITE_DESCRIPTION =
-  "Vexim Global builds B2B export websites, buyer-intent SEO and Vexim Trade connections for Vietnamese manufacturers entering international markets."
-export const OG_IMAGE_ALT = "Vexim Global — B2B Digital Export Infrastructure and Export Acceleration"
+  "Vexim Global gives Vietnamese manufacturers their own route to international buyers: a B2B platform, commercial B2B websites, market-level search coverage and the monthly content work behind it."
+export const OG_IMAGE_ALT = "Vexim Global — a B2B platform and export marketing channel for Vietnamese manufacturers"
