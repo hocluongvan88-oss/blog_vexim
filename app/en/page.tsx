@@ -12,7 +12,7 @@ const url = `${SITE_URL}/en`
 export const metadata: Metadata = {
   title: SITE_TITLE,
   description: SITE_DESCRIPTION,
-  keywords: ["B2B export website", "digital export infrastructure", "buyer intent SEO", "Vietnam manufacturer", "Vexim Trade"],
+  keywords: ["B2B marketplace Vietnam", "export product website", "export sales channel", "Vietnam manufacturer", "Vexim Trade"],
   manifest: null, // The root manifest is for the separate admin dashboard.
   alternates: { canonical: url, languages: languageUrls("home") },
   openGraph: {

@@ -11,7 +11,7 @@ const emailPattern = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/
 const clean = (value: unknown) => typeof value === "string" ? value.trim() : ""
 
 export function validateDigitalAudit(input: unknown): { ok: true; data: DigitalAuditRequest } | { ok: false; error: string } {
-  if (!input || typeof input !== "object" || Array.isArray(input)) return { ok: false, error: "Please provide a valid audit request." }
+  if (!input || typeof input !== "object" || Array.isArray(input)) return { ok: false, error: "Please provide a valid request." }
   const values = input as Record<string, unknown>
   const website = clean(values.website)
   const company = clean(values.company)
@@ -31,5 +31,5 @@ export function validateDigitalAudit(input: unknown): { ok: true; data: DigitalA
 }
 
 export function auditEmailText(data: DigitalAuditRequest) {
-  return ["New digital audit request — Vexim Global", "", `Company: ${data.company}`, `Website: ${data.website}`, `Target export markets: ${data.markets}`, `Reply to: ${data.email}`, `Engagement scope: ${data.scope || "Not specified"}`, "", "No automated audit or ranking guarantee was offered."].join("\n")
+  return ["New export channel request — Vexim Global", "", `Company: ${data.company}`, `Website: ${data.website}`, `Target export markets: ${data.markets}`, `Reply to: ${data.email}`, `Engagement scope: ${data.scope || "Not specified"}`, "", "No automated checking or result was promised."].join("\n")
 }

@@ -107,7 +107,7 @@ export function CoreSolutions({ locale }: { locale: HomeLocale }) {
         <h3>{pillar.title}</h3>
         <p className={styles.bentoDescription}>{pillar.description}</p>
         <ul className={styles.bentoFeatures}>{pillar.features.map(feature => <li key={feature}><Check size={15} aria-hidden="true" />{feature}</li>)}</ul>
-        {index === 1 && <div className={styles.queryChips} aria-label={text.searches}><span>bulk supplier</span><span>OEM factory Vietnam</span><span>FOB Ho Chi Minh City</span></div>}
+        {index === 1 && <div className={styles.queryChips} aria-label={text.searches}><span>cashew supplier Vietnam</span><span>OEM coffee factory</span><span>FOB Ho Chi Minh City</span></div>}
         {index === 3 && <a className={styles.bentoLink} {...tradeLink}>{text.trade} <ArrowUpRight size={17} aria-hidden="true" /></a>}
       </div>
       <figure className={`${styles.bentoMedia} ${index === 3 ? styles.bentoMediaWide : ""}`}>

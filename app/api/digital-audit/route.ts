@@ -45,7 +45,7 @@ export async function POST(request: Request) {
       from: process.env.MAIL_FROM_ADDRESS || process.env.MAIL_USERNAME,
       to: process.env.ADMIN_EMAIL || process.env.MAIL_USERNAME,
       replyTo: checked.data.email,
-      subject: "Digital audit request — Vexim Global",
+      subject: "Export channel request — Vexim Global",
       text: auditEmailText(checked.data),
     })
     return response({ success: true })
