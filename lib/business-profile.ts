@@ -217,7 +217,7 @@ export function getService(key: string): ServiceCatalogItem | undefined {
 
 /** Chuỗi mô tả doanh nghiệp dùng chung cho meta description và schema `description`. */
 export const ORGANIZATION_DESCRIPTION =
-  "Vexim Global builds digital export foundations for Vietnamese manufacturers: B2B web infrastructure, buyer-intent SEO and connections to the Vexim Trade ecosystem. Regulatory resources remain available separately."
+  "Vexim Global builds the export sales channel for Vietnamese manufacturers: the Vexim Trade B2B marketplace, product websites buyers can check, buyer work in each target market, and monthly content that keeps it current. Regulatory resources remain available separately."
 
 /** Số hiển thị ở footer / schema, ví dụ "0373 685 634". */
 export const PHONE_DISPLAY = VEXIM_PHONE_DISPLAY
@@ -225,5 +225,5 @@ export const PHONE_DISPLAY = VEXIM_PHONE_DISPLAY
 /** Homepage title and description; service pages keep their own localized metadata. */
 export const SITE_TITLE = "B2B Platform & Export Marketing for Vietnamese Manufacturers | Vexim Global"
 export const SITE_DESCRIPTION =
-  "Vexim Global gives Vietnamese manufacturers their own route to international buyers: a B2B platform, commercial B2B websites, market-level search coverage and the monthly content work behind it."
-export const OG_IMAGE_ALT = "Vexim Global — a B2B platform and export marketing channel for Vietnamese manufacturers"
+  "Vexim Global gives Vietnamese manufacturers their own route to international buyers: the Vexim Trade B2B marketplace, product websites buyers can check, buyer work in each target market and the monthly content behind it."
+export const OG_IMAGE_ALT = "Vexim Global — a B2B marketplace and export sales channel for Vietnamese manufacturers"

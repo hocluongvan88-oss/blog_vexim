@@ -121,7 +121,7 @@ export function buildHomeServiceSchema() {
     "@type": "Service",
     "@id": HOME_SERVICE_ID,
     name: HOME_POSITIONING.headline,
-    serviceType: "B2B Digital Export Infrastructure & Buyer-Intent SEO",
+    serviceType: "B2B Export Sales Channel: Marketplace, Product Website and Buyer Work by Market",
     description: SITE_DESCRIPTION,
     url: SITE_URL,
     provider: { "@id": ORGANIZATION_ID },
@@ -226,7 +226,7 @@ export function buildVietnameseHomePageSchema() {
         "@type": "Service",
         "@id": serviceNodeId,
         name: HOME_POSITIONING_VI.headline,
-        serviceType: "Hạ tầng số B2B và SEO theo nhu cầu người mua",
+        serviceType: "Kênh bán xuất khẩu B2B: sàn giao dịch, website sản phẩm và làm việc với người mua theo thị trường",
         description: VI_HOME_META.description,
         url,
         provider: { "@id": ORGANIZATION_ID },
@@ -235,7 +235,7 @@ export function buildVietnameseHomePageSchema() {
         hasOfferCatalog: {
           "@type": "OfferCatalog",
           "@id": `${url}/#offer-catalog`,
-          name: "Phạm vi hợp tác về hạ tầng số xuất khẩu",
+          name: "Phạm vi hợp tác về kênh bán xuất khẩu",
           itemListElement: EXPORT_TIERS_VI.map((tier) => ({
             "@type": "Offer",
             url: `${url}#services`,
