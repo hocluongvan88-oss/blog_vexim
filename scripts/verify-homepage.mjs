@@ -337,7 +337,7 @@ try {
   await viAudit.locator('button[type="submit"]').click()
   await viAudit.waitForSelector('p[role="status"]')
   assert.equal(viPosted.company, 'Nhà máy thử nghiệm')
-  assert.ok((await viAudit.$eval('p[role="status"]', el => el.textContent)).includes('đã được gửi'))
+  assert.ok((await viAudit.$eval('p[role="status"]', el => el.textContent)).includes('Đã gửi'))
   await viAudit.keyboard.press('Escape')
   await viAudit.waitForFunction(() => !document.querySelector('[role="dialog"]'))
   viStatus = 503
