@@ -16,7 +16,7 @@ const viPrivacy = await get("/privacy")
 const privacy = await get("/en/privacy", "en-US,en;q=0.9")
 const fda = await get("/services/fda")
 const heading = "Your own route to international buyers"
-const viHeading = "Con đường riêng để người mua tìm thấy bạn"
+const viHeading = "Hàng tốt chưa đủ. Người mua phải tìm thấy bạn."
 const siteUrl = "https://www.veximglobal.com"
 assert.equal(home("html").attr("lang"), "en")
 assert.equal(home("main").first().attr("lang"), "en")

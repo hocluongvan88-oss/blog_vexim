@@ -106,60 +106,69 @@ export const EXPORT_TIERS = [
 /**
  * Bản tiếng Việt — ngôn ngữ mặc định của site.
  *
- * Văn phong: câu ngắn, mỗi mục mở bằng một câu khẳng định làm tiêu đề, sau đó
- * là hai ba câu có chi tiết cụ thể (đơn vị, điều kiện, con số). Nói thẳng giới
- * hạn của mình. Không tính từ hoa mỹ, không hứa hẹn.
+ * Văn phong học từ Agentcy: câu ngắn có nhịp, nhưng KHÔNG khô. Bốn thiết bị
+ * dùng đều tay:
+ *   1. Con số cụ thể làm điểm tựa: "ba nghìn", "sáu thứ", "một bước", "hai cột".
+ *   2. Vật cụ thể có tên: pallet, Incoterms 2020, tờ khai, tên người để viết thư.
+ *   3. Cặp đối lập: "Hàng không thiếu. Đường đến người mua mới thiếu."
+ *   4. Ba nhịp liên tiếp: "Cùng kiểu ảnh. Cùng mức đặt tối thiểu. Giá thấp hơn một chút."
+ *
+ * Và một thứ nữa Agentcy làm rất giỏi: tự nói ra giới hạn của mình.
+ * "Trước đó thì không." / "Không có lựa chọn thứ ba."
+ *
+ * Từ vựng vẫn là của nhà cung cấp: hàng, đơn, mẫu, giá, chứng từ, nhà máy.
+ * Không dùng từ khoá, SEO, lập chỉ mục, lưu lượng, thứ hạng.
  */
 export const HOME_POSITIONING_VI = {
-  headline: "Con đường riêng để người mua tìm thấy bạn",
-  description: "Doanh nghiệp Việt ít khi thua ở chất lượng hàng. Thua ở chỗ người mua không tìm thấy mình. Trên sàn, ba nghìn nhà cung cấp nằm cạnh nhau với cùng một tấm ảnh, và người mua chỉ còn một thứ để so: giá. Vexim giữ bốn phần việc: sàn B2B Vexim Trade, website sản phẩm của riêng doanh nghiệp, việc tiếp cận người mua ở từng thị trường, và đội ngũ viết nội dung đều mỗi tháng.",
+  headline: "Hàng tốt chưa đủ. Người mua phải tìm thấy bạn.",
+  description: "Doanh nghiệp Việt hiếm khi thua ở chất lượng. Thua ở chỗ người mua không tìm ra mình. Trên sàn, ba nghìn nhà cung cấp chen nhau bằng một tấm ảnh, và người mua chỉ còn một thứ để so. Vexim giữ bốn việc: sàn B2B Vexim Trade, website sản phẩm của riêng bạn, tiếp cận người mua ở từng thị trường, và nội dung ra đều mỗi tháng.",
   tradeUrl: HOME_POSITIONING.tradeUrl,
 } as const
 
 export const EXPORT_PILLARS_VI = [
   {
     id: "trade-platform", number: "01", label: "SÀN B2B",
-    title: "Sàn B2B xây quanh những mặt hàng Việt Nam làm tốt",
-    description: "Người mua đến với một mặt hàng trong đầu, không phải với danh sách ba nghìn nhà cung cấp để lọc. Vexim Trade xếp nhà cung cấp theo nhóm hàng Việt Nam làm tốt, nên người mua có đơn thật tới được hồ sơ của bạn và đã biết bạn làm gì.",
+    title: "Sàn B2B xây quanh hàng Việt Nam làm tốt",
+    description: "Người mua đến với một mặt hàng trong đầu. Không phải danh sách ba nghìn nhà cung cấp để lọc. Vexim Trade xếp nhà cung cấp theo nhóm hàng Việt Nam làm tốt, nên người mua có đơn thật tới thẳng hồ sơ của bạn.",
     features: [
-      "Nhóm hàng xây theo những mặt hàng Việt Nam có thế mạnh xuất khẩu.",
-      "Hồ sơ xếp theo mặt hàng, không xếp theo giá thấp nhất.",
-      "Từ trang sản phẩm tới chỗ trao đổi với nhà cung cấp: một bước.",
+      "Ngành hàng chia theo thứ Việt Nam làm tốt nhất, không dàn đều.",
+      "Hồ sơ xếp theo mặt hàng. Không xếp theo giá thấp nhất.",
+      "Từ trang sản phẩm tới chỗ trao đổi: một bước.",
     ],
     output: "Người mua chủ động tìm đến bạn.",
   },
   {
     id: "market-visibility", number: "02", label: "TIẾP CẬN THỊ TRƯỜNG",
-    title: "Làm việc ở đúng những thị trường bạn bán",
-    description: "Người mua ở Ohio và người mua ở Osaka không gọi tên hàng của bạn giống nhau, cũng không so bạn với cùng một nhóm nhà cung cấp. Một chiến dịch chung cho mọi thị trường thì không tới được thị trường nào.",
+    title: "Làm việc ở đúng thị trường bạn bán",
+    description: "Người mua ở Ohio và người mua ở Osaka không gọi tên hàng của bạn giống nhau. Họ cũng không so bạn với cùng một nhóm nhà cung cấp. Một chiến dịch cho tất cả các thị trường thì không tới được thị trường nào.",
     features: [
-      "Đọc cách người mua ở từng thị trường gọi tên và hỏi mua trước khi viết.",
-      "Nội dung nhắm đúng người đặt đơn, không nhắm người đọc cho vui.",
-      "Báo cáo tách rõ việc đã làm và những gì quay lại.",
+      "Đọc cách người mua ở từng nơi gọi tên hàng trước khi viết một chữ.",
+      "Nội dung nhắm người đặt đơn, không nhắm người đọc cho vui.",
+      "Báo cáo hai cột: việc đã làm, và những gì quay lại.",
     ],
-    output: "Đi ít thị trường nhưng đi đến nơi.",
+    output: "Đi ít thị trường, đi đến nơi.",
   },
   {
     id: "export-website", number: "03", label: "WEBSITE SẢN PHẨM",
     title: "Website sản phẩm để người mua đặt được hàng",
-    description: "Người mua cần thông số, số lượng đặt tối thiểu, quy cách đóng gói, chứng nhận, thời gian giao và tên người để viết thư. Phần lớn website nhà máy chỉ đăng brochure. Vexim làm bản dùng được cho mua bán.",
+    description: "Người mua cần sáu thứ: thông số, số lượng tối thiểu, quy cách đóng gói, chứng nhận, thời gian giao, và tên một người để viết thư. Phần lớn website nhà máy chỉ đăng brochure.",
     features: [
-      "Trang mở nhanh trên điện thoại của người mua ở nước ngoài.",
+      "Mở nhanh trên điện thoại người mua, kể cả khi mạng yếu.",
       "Bảng hàng kèm số lượng tối thiểu, Incoterms 2020, quy cách đóng gói.",
-      "Hồ sơ nhà máy và chứng nhận do doanh nghiệp cung cấp, có xác nhận nội bộ.",
+      "Hồ sơ nhà máy và chứng nhận do bạn cung cấp. Chúng tôi xác nhận nội bộ.",
     ],
     output: "Người mua tự xem được, không phải hỏi trước.",
   },
   {
     id: "content-operations", number: "04", label: "VẬN HÀNH",
-    title: "Nội dung và trang bán hàng, cập nhật đều mỗi tháng",
-    description: "Website không tự chạy vì đã dựng xong. Phải có người theo dõi người mua ở từng thị trường đang tìm gì, viết bằng ngôn ngữ của họ, đăng đúng nhịp, rồi kiểm tra xem người mua có tới được trang hay không. Phần lớn doanh nghiệp xuất khẩu không có người làm việc này.",
+    title: "Nội dung và trang bán hàng, ra đều mỗi tháng",
+    description: "Website không tự chạy vì đã dựng xong. Mỗi tháng phải có người xem người mua đang tìm gì, viết, đăng, rồi kiểm tra xem có ai tới thật không. Hầu hết doanh nghiệp xuất khẩu không có ai làm việc này.",
     features: [
-      "Kế hoạch chủ đề theo từng nhóm hàng và từng thị trường.",
-      "Bài viết và trang sản phẩm viết theo chu kỳ hằng tháng.",
-      "Kiểm tra hằng tháng xem trang có được tìm thấy không, kèm báo cáo ngắn.",
+      "Chủ đề chốt trước tháng, theo nhóm hàng và thị trường.",
+      "Bài viết và trang sản phẩm ra đều, không dồn một cục.",
+      "Kiểm tra hằng tháng xem trang có được tìm thấy không. Báo cáo gọn một trang.",
     ],
-    output: "Hiện diện tích lại dần, không hết hạn sau mỗi chiến dịch.",
+    output: "Hiện diện tích lại dần. Không hết hạn sau mỗi chiến dịch.",
   },
 ] as const
 
