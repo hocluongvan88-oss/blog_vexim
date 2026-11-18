@@ -6,15 +6,20 @@ import { readFileSync, statSync } from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 import puppeteer from "puppeteer-core"
+import { loadSchemaBuilders } from "./schema-loader.mjs"
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
 const browserPath = process.env.BROWSER_EXECUTABLE_PATH
 const vietnamese = process.argv.includes("--vi")
 if (!browserPath) throw new Error("Set BROWSER_EXECUTABLE_PATH to a local Chromium executable")
 
+const { homeContent, cleanup } = loadSchemaBuilders()
+const hero = homeContent.HOME_HERO[vietnamese ? "vi" : "en"]
+cleanup()
+
 const files = new Map([
   ["/trade/logo.svg", ["public/trade/logo.svg", "image/svg+xml"]],
-  ["/home/export-network.svg", ["public/home/export-network.svg", "image/svg+xml"]],
+  ["/home/export/routes.svg", ["public/home/export/routes.svg", "image/svg+xml"]],
   ["/fonts/inter-home-latin.woff2", ["public/fonts/inter-home-latin.woff2", "font/woff2"]],
   ["/fonts/be-vietnam-regular.woff2", ["app/fonts/BeVietnamPro-Regular.woff2", "font/woff2"]],
   ["/fonts/be-vietnam-bold.woff2", ["app/fonts/BeVietnamPro-Bold.woff2", "font/woff2"]],
@@ -24,21 +29,14 @@ const pageHtml = `<!doctype html><html lang="${vietnamese ? "vi" : "en"}"><head>
 @font-face{font-family:Inter;src:url('/fonts/inter-home-latin.woff2') format('woff2');font-weight:100 900;font-display:block}
 @font-face{font-family:BeVietnam;src:url('/fonts/be-vietnam-regular.woff2') format('woff2');font-weight:400;font-display:block}
 @font-face{font-family:BeVietnam;src:url('/fonts/be-vietnam-bold.woff2') format('woff2');font-weight:700;font-display:block}
-*{box-sizing:border-box}html,body{margin:0;width:1200px;height:630px;overflow:hidden}body{font-family:${vietnamese ? "BeVietnam" : "Inter"},Arial,sans-serif;color:#1d1d1f;background:radial-gradient(circle at 86% 58%,#dbeaff 0,transparent 38%),linear-gradient(150deg,#fff 2%,#f8faff 75%,#f1f6ff)}
-.canvas{position:relative;width:1200px;height:630px;padding:0 75px;overflow:hidden}
-.brand{display:flex;align-items:center;gap:12px;position:absolute;top:49px;left:75px;font-size:25px;font-weight:740;letter-spacing:-.055em}.brand img{width:43px;height:43px}.brand em{color:#2471bf;font-style:normal;font-weight:550}
-.eyebrow{position:absolute;top:145px;left:77px;color:#2668ac;font-size:12px;font-weight:730;letter-spacing:.095em}
-h1{position:absolute;top:194px;left:72px;z-index:1;margin:0;font-size:${vietnamese ? 53 : 59}px;font-weight:710;letter-spacing:-.066em;line-height:1.115}h1 span{color:#1969c4;background:linear-gradient(95deg,#0071e3,#5e5ce6);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.sub{position:absolute;top:468px;left:77px;color:#4d617c;font-size:16px;font-weight:510}
-.scene{position:absolute;top:205px;left:645px;width:595px;height:299px;border:1px solid #dbe7fb;border-radius:30px;background:radial-gradient(circle at 45% 40%,#fff,#eaf3ff);overflow:hidden;box-shadow:0 22px 55px #4468a82b}.scene img{display:block;width:110%;height:auto;margin-left:-5%;margin-top:-3px}
-.bottom{position:absolute;left:77px;right:76px;bottom:32px;display:flex;align-items:center;justify-content:space-between;padding-top:18px;border-top:1px solid #d5e1ef;color:#52657e;font-size:12px;font-weight:650;letter-spacing:.055em}
-</style></head><body><div class="canvas">
-<div class="brand"><img src="/trade/logo.svg" alt=""><span>VEXIM <em>GLOBAL</em></span></div>
-<div class="eyebrow">${vietnamese ? "HẠ TẦNG SỐ CHO DOANH NGHIỆP XUẤT KHẨU" : "THE NEXT-GEN EXPORT ACCELERATION ENGINE"}</div>
-<h1>${vietnamese ? "Hạ tầng số<br><span>B2B toàn cầu</span><br>&amp; Tăng tốc xuất khẩu" : "Global B2B Digital<br><span>Infrastructure &amp;</span><br>Export Acceleration"}</h1>
-<p class="sub">${vietnamese ? "Từ nhà sản xuất Việt Nam đến người mua quốc tế." : "Built in Vietnam. Designed for international buyers."}</p>
-<div class="scene"><img src="/home/export-network.svg" alt=""></div>
-<div class="bottom"><span>VEXIMGLOBAL.COM</span><span>${vietnamese ? "NỀN TẢNG SỐ&nbsp;&nbsp; · &nbsp;&nbsp;NỘI DUNG THEO TÌM KIẾM&nbsp;&nbsp; · &nbsp;&nbsp;KẾT NỐI THƯƠNG MẠI" : "OWNED PRESENCE&nbsp;&nbsp; · &nbsp;&nbsp;BUYER-INTENT SEARCH&nbsp;&nbsp; · &nbsp;&nbsp;TRADE CONNECTION"}</span></div>
+*{box-sizing:border-box}html,body{margin:0;width:1200px;height:630px;overflow:hidden}body{font-family:${vietnamese ? "BeVietnam" : "Inter"},Arial,sans-serif;color:#fff;background:#0b4937 radial-gradient(#2a624e 1px,transparent 1px) 0 0/20px 20px}
+.canvas{position:relative;padding:48px 58px;height:100%}.brand{display:flex;align-items:center;gap:13px;font-size:24px;font-weight:700;letter-spacing:-.04em}.brand img{width:35px;height:35px;filter:brightness(0) saturate(100%) invert(78%) sepia(82%) saturate(802%) hue-rotate(337deg)}
+.eyebrow{margin:67px 0 19px;color:#edeedc;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.08em}.eyebrow b{padding:4px 10px;margin-right:8px;background:#f5b63e;color:#13271c;border-radius:30px}.copy{position:relative;z-index:1;width:590px}
+h1{margin:0;font-size:54px;line-height:1.12;letter-spacing:-.055em;text-wrap:balance}h1 span{display:block;color:#f5b63e}.scene{position:absolute;right:43px;top:162px;width:468px;padding:20px 13px 16px;background:#163c2f;border:1px solid #527460;border-radius:24px}.scene img{display:block;width:100%;height:auto}.scene b{display:block;padding:0 9px 8px;font-size:12px;letter-spacing:.13em;color:#e6eade}.scene small{display:block;padding:8px 9px 0;border-top:1px solid #385b47;color:#cadacb;font-size:13px}.bottom{position:absolute;bottom:36px;left:58px;right:58px;display:flex;justify-content:space-between;padding-top:18px;border-top:1px solid #53816a;font-size:13px;letter-spacing:.08em}
+</style></head><body><div class="canvas"><div class="brand"><img src="/trade/logo.svg" alt="">VEXIM GLOBAL</div>
+<div class="eyebrow"><b>B2B</b> ${hero.badge}</div><div class="copy"><h1>${hero.lead} <span>${hero.accent}</span></h1></div>
+<div class="scene"><b>VIET NAM → GLOBAL</b><img src="/home/export/routes.svg" alt=""><small>${vietnamese ? "Kết nối trực tiếp với nhà nhập khẩu" : "Connecting food exporters with importers"}</small></div>
+<div class="bottom"><span>VEXIMGLOBAL.COM</span><span>VEXIM TRADE　/　SEO &amp; GEO　/　WEB</span></div>
 </div></body></html>`
 
 const server = createServer((req, res) => {

@@ -2,12 +2,12 @@
 
 Được sinh từ code hiện tại. Không chép lại dữ liệu cũ và không tự thêm giá, tọa độ, số liệu thứ hạng hoặc chứng nhận.
 
-- Trang chủ tiếng Anh: canonical/OG **https://www.veximglobal.com**, WebPage **en**.
-- Trang chủ tiếng Việt: canonical/OG **https://www.veximglobal.com/vi**, WebPage **vi-VN**; hai trang có hreflang hai chiều và trong sitemap. JSON-LD tiếng Việt nằm tại `homepage-schema-vi.json`.
+- Trang chủ tiếng Anh: canonical/OG **https://www.veximglobal.com/en**, WebPage **en**.
+- Trang chủ tiếng Việt: canonical/OG **https://www.veximglobal.com**, WebPage **vi-VN**; hai trang có hreflang hai chiều và trong sitemap. JSON-LD tiếng Việt nằm tại `homepage-schema-vi.json`.
 - WebSite: tiếng Anh và tiếng Việt; blog và trang dịch vụ vẫn chỉ có tiếng Việt cho đến khi có bản dịch được biên tập và duyệt.
 - Organization / LocalBusiness: một node chung toàn website, số điện thoại **+84373685634**, email **contact@veximglobal.com**, địa chỉ **25/6/51 Ngọa Long, Tây Tựu, Hà Nội**.
 - Slogan doanh nghiệp được giữ như thông tin thương hiệu đã xác nhận; nội dung mỗi trang chủ theo ngôn ngữ của URL.
-- Service chính: hạ tầng xuất khẩu B2B và Buyer-Intent SEO; ba phạm vi hợp tác được đề xuất: B2B Launchpad, Global Growth Engine, Enterprise Dominance. Không có giá hoặc cam kết thứ hạng.
+- Service chính: tìm khách hàng nhập khẩu cho doanh nghiệp thực phẩm; ba dịch vụ hiển thị: sàn B2B Vexim Trade, SEO quốc tế và website xuất khẩu. Không có giá hoặc cam kết thứ hạng.
 - FDA, GACC, MoCRA và US Agent là liên kết phụ; 6 định danh service trang dịch vụ trước đây vẫn giữ nguyên trên từng landing page, không còn là catalog chính của trang chủ.
 - Ảnh OG cho mỗi ngôn ngữ là tệp thực 1200×630, không chứa số liệu minh họa như hiệu suất thật.
 
@@ -38,7 +38,7 @@ Root layout xuất Organization/LocalBusiness, Logo và WebSite. Mỗi trang ch�
       "image": {
         "@id": "https://www.veximglobal.com/#logo"
       },
-      "description": "Vexim Global builds digital export foundations for Vietnamese manufacturers: B2B web infrastructure, buyer-intent SEO and connections to the Vexim Trade ecosystem. Regulatory resources remain available separately.",
+      "description": "Vexim Global builds the export sales channel for Vietnamese manufacturers: the Vexim Trade B2B marketplace, product websites buyers can check, buyer work in each target market, and monthly content that keeps it current. Regulatory resources remain available separately.",
       "telephone": "+84373685634",
       "email": "contact@veximglobal.com",
       "address": {
@@ -127,10 +127,10 @@ Root layout xuất Organization/LocalBusiness, Logo và WebSite. Mỗi trang ch�
     },
     {
       "@type": "WebPage",
-      "@id": "https://www.veximglobal.com/#webpage",
-      "url": "https://www.veximglobal.com",
-      "name": "B2B Digital Export Infrastructure | Vexim Global",
-      "description": "Vexim Global builds B2B export websites, buyer-intent SEO and Vexim Trade connections for Vietnamese manufacturers entering international markets.",
+      "@id": "https://www.veximglobal.com/en#webpage",
+      "url": "https://www.veximglobal.com/en",
+      "name": "Reach International Buyers for Vietnamese Food Exports | Vexim Global",
+      "description": "Connect with food importers through the Vexim Trade B2B marketplace, international SEO and an export website. Explore practical support for Vietnamese suppliers.",
       "inLanguage": "en",
       "isPartOf": {
         "@id": "https://www.veximglobal.com/#website"
@@ -142,15 +142,15 @@ Root layout xuất Organization/LocalBusiness, Logo và WebSite. Mỗi trang ch�
         "@id": "https://www.veximglobal.com/#organization"
       },
       "mainEntity": {
-        "@id": "https://www.veximglobal.com/#service"
+        "@id": "https://www.veximglobal.com/en#service"
       },
       "primaryImageOfPage": {
-        "@id": "https://www.veximglobal.com/#primaryimage"
+        "@id": "https://www.veximglobal.com/en#primaryimage"
       }
     },
     {
       "@type": "ImageObject",
-      "@id": "https://www.veximglobal.com/#primaryimage",
+      "@id": "https://www.veximglobal.com/en#primaryimage",
       "url": "https://www.veximglobal.com/og-image.jpg",
       "contentUrl": "https://www.veximglobal.com/og-image.jpg",
       "width": 1200,
@@ -186,36 +186,30 @@ Root layout xuất Organization/LocalBusiness, Logo và WebSite. Mỗi trang ch�
     },
     {
       "@type": "Service",
-      "@id": "https://www.veximglobal.com/#service",
-      "name": "Global B2B Digital Infrastructure & Export Acceleration",
-      "serviceType": "B2B Digital Export Infrastructure & Buyer-Intent SEO",
-      "description": "Vexim Global builds B2B export websites, buyer-intent SEO and Vexim Trade connections for Vietnamese manufacturers entering international markets.",
-      "url": "https://www.veximglobal.com",
+      "@id": "https://www.veximglobal.com/en#service",
+      "name": "Connect with food importers looking for suppliers in Vietnam",
+      "description": "Vexim Global brings together the Vexim Trade B2B marketplace, international SEO and export websites. Help buyers find your business, review your capabilities and request a quote directly.",
+      "url": "https://www.veximglobal.com/en",
       "provider": {
         "@id": "https://www.veximglobal.com/#organization"
       },
       "mainEntityOfPage": {
-        "@id": "https://www.veximglobal.com/#webpage"
-      },
-      "audience": {
-        "@type": "BusinessAudience",
-        "audienceType": "Vietnamese manufacturers exporting to international buyers"
+        "@id": "https://www.veximglobal.com/en#webpage"
       },
       "hasOfferCatalog": {
         "@type": "OfferCatalog",
-        "@id": "https://www.veximglobal.com/#offer-catalog",
-        "name": "Digital export infrastructure engagement scopes",
+        "@id": "https://www.veximglobal.com/en#offer-catalog",
+        "name": "Services for food exporters",
         "itemListElement": [
           {
             "@type": "Offer",
-            "url": "https://www.veximglobal.com/#services",
+            "url": "https://www.veximglobal.com/en#trade",
             "itemOffered": {
               "@type": "Service",
-              "@id": "https://www.veximglobal.com/#service-core",
-              "name": "B2B Launchpad",
-              "description": "A focused digital export starting point for one product line.",
-              "serviceType": "Digital export infrastructure",
-              "url": "https://www.veximglobal.com/#services",
+              "@id": "https://www.veximglobal.com/en#offer-trade",
+              "name": "Vexim Trade",
+              "description": "A storefront for Vietnam’s food exporters. Importers can review your profile, compare supply capabilities and send quote requests straight to your team.",
+              "url": "https://www.veximglobal.com/en#trade",
               "provider": {
                 "@id": "https://www.veximglobal.com/#organization"
               }
@@ -223,14 +217,13 @@ Root layout xuất Organization/LocalBusiness, Logo và WebSite. Mỗi trang ch�
           },
           {
             "@type": "Offer",
-            "url": "https://www.veximglobal.com/#services",
+            "url": "https://www.veximglobal.com/en#seo",
             "itemOffered": {
               "@type": "Service",
-              "@id": "https://www.veximglobal.com/#service-growth",
-              "name": "Global Growth Engine",
-              "description": "An ongoing search, content and inquiry operation across a broader catalog.",
-              "serviceType": "Digital export infrastructure",
-              "url": "https://www.veximglobal.com/#services",
+              "@id": "https://www.veximglobal.com/en#offer-seo",
+              "name": "International SEO",
+              "description": "Help buyers in your target markets discover accurate supplier information on Google and AI search tools.",
+              "url": "https://www.veximglobal.com/en#seo",
               "provider": {
                 "@id": "https://www.veximglobal.com/#organization"
               }
@@ -238,14 +231,13 @@ Root layout xuất Organization/LocalBusiness, Logo và WebSite. Mỗi trang ch�
           },
           {
             "@type": "Offer",
-            "url": "https://www.veximglobal.com/#services",
+            "url": "https://www.veximglobal.com/en#website",
             "itemOffered": {
               "@type": "Service",
-              "@id": "https://www.veximglobal.com/#service-enterprise",
-              "name": "Enterprise Dominance",
-              "description": "A tailored export agency retainer aligned with your product and market complexity.",
-              "serviceType": "Digital export infrastructure",
-              "url": "https://www.veximglobal.com/#services",
+              "@id": "https://www.veximglobal.com/en#offer-website",
+              "name": "Export websites",
+              "description": "A multilingual company profile with factory credentials, current documentation and a clear route to a quote.",
+              "url": "https://www.veximglobal.com/en#website",
               "provider": {
                 "@id": "https://www.veximglobal.com/#organization"
               }

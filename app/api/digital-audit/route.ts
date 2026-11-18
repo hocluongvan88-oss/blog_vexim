@@ -13,8 +13,10 @@ export async function POST(request: Request) {
   if (!request.headers.get("content-type")?.toLowerCase().startsWith("application/json")) return response({ error: "Expected a JSON request." }, 415)
   if (Number(request.headers.get("content-length") || 0) > 4096) return response({ error: "Request too large." }, 413)
   const origin = request.headers.get("origin")
+  // Behind a reverse proxy Next may construct request.url from its internal
+  // listen address. Compare against the incoming Host, not that address.
   if (origin) {
-    try { if (new URL(origin).host !== new URL(request.url).host) return response({ error: "Invalid request origin." }, 403) }
+    try { if (new URL(origin).host !== (request.headers.get("host") || new URL(request.url).host)) return response({ error: "Invalid request origin." }, 403) }
     catch { return response({ error: "Invalid request origin." }, 403) }
   }
   let body: Record<string, unknown>

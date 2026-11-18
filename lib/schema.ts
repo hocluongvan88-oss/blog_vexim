@@ -29,7 +29,7 @@ import {
 } from "./business-profile"
 
 import { TRADE, TRADE_CATEGORIES, buildTradeOrganization } from "./vexim-trade-content"
-import { EXPORT_TIERS, EXPORT_TIERS_VI, HOME_POSITIONING, HOME_POSITIONING_VI } from "./homepage-content"
+import { HOME_HERO, HOME_SOLUTIONS } from "./homepage-content"
 import { VI_HOME_META } from "./home-i18n"
 
 const HOME_PAGE_ID = `${SITE_URL}/#webpage`
@@ -114,38 +114,23 @@ export function buildSiteSchema() {
   }
 }
 
-/** Umbrella service of the homepage, not the business that provides it. */
-export function buildHomeServiceSchema() {
+/** Visible service areas, with language-specific page/fragment URLs. */
+export function buildHomeServiceSchema(locale: "en" | "vi" = "en") {
+  const url = locale === "vi" ? SITE_URL : `${SITE_URL}/en`
+  const prefix = locale === "vi" ? `${SITE_URL}/` : url
+  const hero = HOME_HERO[locale]
   return {
-    "@context": "https://schema.org",
-    "@type": "Service",
-    "@id": HOME_SERVICE_ID,
-    name: HOME_POSITIONING.headline,
-    serviceType: "B2B Export Sales Channel: Marketplace, Product Website and Buyer Work by Market",
-    description: SITE_DESCRIPTION,
-    url: SITE_URL,
-    provider: { "@id": ORGANIZATION_ID },
-    mainEntityOfPage: { "@id": HOME_PAGE_ID },
-    audience: {
-      "@type": "BusinessAudience",
-      audienceType: "Vietnamese manufacturers exporting to international buyers",
-    },
+    "@context": "https://schema.org", "@type": "Service",
+    "@id": locale === "vi" ? HOME_SERVICE_ID : `${url}#service`,
+    name: `${hero.lead} ${hero.accent}`,
+    description: hero.description, url,
+    provider: { "@id": ORGANIZATION_ID }, mainEntityOfPage: { "@id": `${prefix}#webpage` },
     hasOfferCatalog: {
-      "@type": "OfferCatalog",
-      "@id": `${SITE_URL}/#offer-catalog`,
-      name: "Digital export infrastructure engagement scopes",
-      itemListElement: EXPORT_TIERS.map((tier) => ({
-        "@type": "Offer",
-        url: `${SITE_URL}/#services`,
-        itemOffered: {
-          "@type": "Service",
-          "@id": `${SITE_URL}/#service-${tier.id}`,
-          name: tier.name,
-          description: tier.description,
-          serviceType: "Digital export infrastructure",
-          url: `${SITE_URL}/#services`,
-          provider: { "@id": ORGANIZATION_ID },
-        },
+      "@type": "OfferCatalog", "@id": `${prefix}#offer-catalog`,
+      name: locale === "vi" ? "Giải pháp cho doanh nghiệp xuất khẩu thực phẩm" : "Services for food exporters",
+      itemListElement: HOME_SOLUTIONS[locale].map(item => ({
+        "@type": "Offer", url: `${prefix}#${item.id}`,
+        itemOffered: { "@type": "Service", "@id": `${prefix}#offer-${item.id}`, name: item.name, description: item.description, url: `${prefix}#${item.id}`, provider: { "@id": ORGANIZATION_ID } },
       })),
     },
   }
@@ -175,82 +160,28 @@ export function buildServiceSchema(service: ServiceCatalogItem) {
   return { "@context": "https://schema.org", ...buildServiceNode(service) }
 }
 
-/** Page-only graph; Organization/Logo/WebSite are emitted once by the root layout. */
-export function buildHomePageSchema() {
-  const { "@context": _context, ...service } = buildHomeServiceSchema()
+/** Organization/Logo/WebSite are emitted once by the root layout. */
+function localizedHomeGraph(locale: "en" | "vi") {
+  const vi = locale === "vi"
+  const { "@context": _context, ...service } = buildHomeServiceSchema(locale)
+  const { "@context": _pageContext, ...page } = buildWebPageSchema({
+    path: vi ? "/" : "/en", name: vi ? VI_HOME_META.title : SITE_TITLE,
+    description: vi ? VI_HOME_META.description : SITE_DESCRIPTION, inLanguage: vi ? "vi-VN" : "en",
+  })
+  const imageId = vi ? HOME_IMAGE_ID : `${SITE_URL}/en#primaryimage`
+  const imageUrl = vi ? `${SITE_URL}/og-image-vi.jpg` : OG_IMAGE.url
   return {
     "@context": "https://schema.org",
     "@graph": [
-      {
-        ...buildWebPageSchema({ path: "/en", name: SITE_TITLE, description: SITE_DESCRIPTION, inLanguage: "en" }),
-        "@context": undefined,
-        "@id": HOME_PAGE_ID,
-        mainEntity: { "@id": HOME_SERVICE_ID },
-        primaryImageOfPage: { "@id": HOME_IMAGE_ID },
-      },
-      {
-        "@type": "ImageObject",
-        "@id": HOME_IMAGE_ID,
-        url: OG_IMAGE.url,
-        contentUrl: OG_IMAGE.url,
-        width: OG_IMAGE.width,
-        height: OG_IMAGE.height,
-      },
-      buildTradeOrganization(ORGANIZATION_ID),
-      service,
+      { ...page, mainEntity: { "@id": service["@id"] }, primaryImageOfPage: { "@id": imageId } },
+      { "@type": "ImageObject", "@id": imageId, url: imageUrl, contentUrl: imageUrl, width: OG_IMAGE.width, height: OG_IMAGE.height },
+      buildTradeOrganization(ORGANIZATION_ID), service,
     ],
   }
 }
 
-/** WebPage và Service cho trang chủ tiếng Việt ở URL gốc (`/`), ngôn ngữ mặc
- * định của site. Bản tiếng Anh ở `/en` do `buildHomePageSchema()` đảm nhận.
- * Thực thể doanh nghiệp giữ nguyên một Organization @id duy nhất. */
-export function buildVietnameseHomePageSchema() {
-  const url = SITE_URL
-  const pageId = HOME_PAGE_ID
-  const serviceNodeId = HOME_SERVICE_ID
-  const imageId = HOME_IMAGE_ID
-  const imageUrl = `${SITE_URL}/og-image-vi.jpg`
-  return {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        ...buildWebPageSchema({ path: "/", name: VI_HOME_META.title, description: VI_HOME_META.description, inLanguage: "vi-VN" }),
-        "@context": undefined,
-        mainEntity: { "@id": serviceNodeId },
-        primaryImageOfPage: { "@id": imageId },
-      },
-      { "@type": "ImageObject", "@id": imageId, url: imageUrl, contentUrl: imageUrl, width: 1200, height: 630 },
-      buildTradeOrganization(ORGANIZATION_ID),
-      {
-        "@type": "Service",
-        "@id": serviceNodeId,
-        name: HOME_POSITIONING_VI.headline,
-        serviceType: "Kênh bán xuất khẩu B2B: sàn giao dịch, website sản phẩm và làm việc với người mua theo thị trường",
-        description: VI_HOME_META.description,
-        url,
-        provider: { "@id": ORGANIZATION_ID },
-        mainEntityOfPage: { "@id": pageId },
-        audience: { "@type": "BusinessAudience", audienceType: "Nhà sản xuất Việt Nam tìm kiếm người mua quốc tế" },
-        hasOfferCatalog: {
-          "@type": "OfferCatalog",
-          "@id": `${url}/#offer-catalog`,
-          name: "Phạm vi hợp tác về kênh bán xuất khẩu",
-          itemListElement: EXPORT_TIERS_VI.map((tier) => ({
-            "@type": "Offer",
-            url: `${url}#services`,
-            itemOffered: {
-              "@type": "Service", "@id": `${url}#service-${tier.id}`,
-              name: tier.name, description: tier.description,
-              serviceType: "Hạ tầng số xuất khẩu", url: `${url}#services`,
-              provider: { "@id": ORGANIZATION_ID },
-            },
-          })),
-        },
-      },
-    ],
-  }
-}
+export function buildHomePageSchema() { return localizedHomeGraph("en") }
+export function buildVietnameseHomePageSchema() { return localizedHomeGraph("vi") }
 
 /** Standalone export of exactly the two graphs emitted on the English homepage. */
 export function buildCompleteHomeSchema() {

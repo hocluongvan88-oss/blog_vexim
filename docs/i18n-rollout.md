@@ -4,20 +4,20 @@
 
 | Nội dung | Tiếng Việt (mặc định) | Tiếng Anh |
 | --- | --- | --- |
-| Trang chủ hạ tầng số | `/` | `/en` |
+| Trang chủ xúc tiến xuất khẩu | `/` | `/en` |
 | Thông báo dữ liệu của biểu mẫu đánh giá | `/privacy` | `/en/privacy` |
 
 **Tiếng Việt là ngôn ngữ mặc định của site**: nội dung tiếng Việt nằm ở URL gốc, bản tiếng Anh dưới tiền tố `/en`. Hai URL tiếng Việt cũ (`/vi`, `/vi/privacy`) được chuyển 308 về URL mới để không mất tín hiệu SEO.
 
-Hai cặp URL có nội dung SSR riêng, canonical tự trỏ, `hreflang` hai chiều và `x-default` về **bản tiếng Việt** của chính trang tương ứng. Dropdown ở header trỏ sang bản tương ứng của đúng loại trang; mỗi lựa chọn mang `?lang=vi|en` để middleware ghi cookie `vexim_locale` một năm, nhờ vậy khách đã tự chọn ngôn ngữ không bị chuyển hướng lại.
+Hai cặp URL có nội dung SSR riêng, canonical tự trỏ, `hreflang` hai chiều và `x-default` về **bản tiếng Việt** của chính trang tương ứng. Cặp liên kết VI/EN ở đầu trang trỏ sang bản tương ứng của đúng loại trang; mỗi lựa chọn mang `?lang=vi|en` để middleware ghi cookie `vexim_locale` một năm, nhờ vậy khách đã tự chọn ngôn ngữ không bị chuyển hướng lại.
 
 **Tự động chuyển ngôn ngữ:** middleware so sánh trọng số `q` của `Accept-Language`. Nếu trình duyệt ưu tiên tiếng Anh hơn tiếng Việt và chưa có cookie lựa chọn, khách được chuyển 307 từ `/` sang `/en` (và `/privacy` sang `/en/privacy`). Chuyển hướng chỉ một chiều — `/en` không bao giờ bị đẩy ngược về `/` — nên không có vòng lặp. Không dò IP/geo, không dịch tự động trên client. Biểu mẫu đánh giá dùng chung endpoint; giao diện và bản nháp email được bản địa hóa. Thông báo dữ liệu chỉ mô tả **biểu mẫu đánh giá này**, không nhận là chính sách quyền riêng tư bao trùm toàn website.
 
-`lib/locale-routes.ts` là danh sách duy nhất của **các cặp đã được xuất bản**. Nội dung dài của trang và metadata ở `lib/home-i18n.ts` (server); phần điều hướng và biểu mẫu ở `lib/home-client-i18n.ts` (client). Ba phạm vi B2B Launchpad, Global Growth Engine và Enterprise Dominance giữ nguyên tên sản phẩm ở cả hai ngôn ngữ. Mỗi homepage có WebPage/Service/ImageObject riêng, nhưng dùng cùng `Organization`/`LocalBusiness` và cùng thông tin liên hệ.
+`lib/locale-routes.ts` là danh sách duy nhất của **các cặp đã được xuất bản**. Nội dung dài của trang và metadata ở `lib/home-i18n.ts` (server); phần điều hướng và biểu mẫu ở `lib/home-client-i18n.ts` (client). Ba kênh dịch vụ ở `lib/homepage-content.ts` được dùng chung cho phần giới thiệu và schema. Không hiển thị danh mục mặt hàng hoặc tên gói dịch vụ cũ. Mỗi homepage có WebPage/Service/ImageObject riêng, nhưng dùng cùng `Organization`/`LocalBusiness` và cùng thông tin liên hệ.
 
 ## Chưa nằm trong đợt này
 
-Các URL dịch vụ pháp lý/quy định hiện có vẫn là tiếng Việt, **không** gắn dropdown hay `hreflang="en"`/English canonical giả. Blog, FDA tracker và trang độc lập Vexim Trade cũng không được mở thêm ngôn ngữ trong đợt này. Các liên kết tài nguyên ở footer tiếng Anh có nhãn “(Vietnamese)”; khu vực dịch vụ tuân thủ có ghi chú riêng rằng các trang đích hiện chỉ có tiếng Việt.
+Các URL dịch vụ pháp lý/quy định hiện có vẫn là tiếng Việt, **không** gắn dropdown hay `hreflang="en"`/English canonical giả. Blog, FDA tracker và trang độc lập Vexim Trade cũng không được mở thêm ngôn ngữ trong đợt này. Các liên kết tài nguyên ở footer tiếng Anh có nhãn “(VI)” cho mục bài viết và cổng khách hàng; khu vực dịch vụ tuân thủ có ghi chú riêng rằng các trang đích hiện chỉ có tiếng Việt.
 
 **Trước khi mở từng cặp dịch vụ:** biên tập viên và người phụ trách pháp lý duyệt toàn bộ nội dung, thuật ngữ và thông tin quy định hiện hành; xác nhận URL tiếng Anh thực sự hoạt động, canonical/OG/schema và điều khoản dịch vụ tương ứng; sau đó mới thêm cặp URL vào `LOCALIZED_PATHS`, sitemap/điều hướng của *riêng* trang đó, và kiểm tra SSR/SEO/đổi ngôn ngữ. Không sao chép dịch máy hoặc bật hàng loạt cho 24 URL trước khi duyệt.
 
