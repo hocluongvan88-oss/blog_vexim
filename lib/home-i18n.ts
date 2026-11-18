@@ -79,9 +79,9 @@ export const HOME_MESSAGES = {
   },
   vi: {
     hero: {
-      badge: "Sàn B2B, website sản phẩm, làm việc với người mua theo thị trường", titleBefore: "Con đường riêng ", titleAccent: "để người mua tìm thấy bạn", titleAfter: "",
-      audit: "Yêu cầu trao đổi", trade: "Khám phá Vexim Trade", footnote: "Hai mươi năm làm chứng từ xuất khẩu, nay dồn vào phần quyết định xem người mua có tìm được bạn hay không.",
-      from: "Xây dựng tại Việt Nam", fromDetail: "Hiện diện nhà cung cấp chính thức", to: "Sẵn sàng cho người mua đối chiếu", toDetail: "Bắc Mỹ · Châu Âu",
+      badge: "Sàn B2B · Website sản phẩm · Tiếp cận theo thị trường", titleBefore: "Con đường riêng ", titleAccent: "để người mua tìm thấy bạn", titleAfter: "",
+      audit: "Yêu cầu trao đổi", trade: "Khám phá Vexim Trade", footnote: "Hai mươi năm làm chứng từ xuất khẩu. Nay làm phần quyết định xem người mua có tìm được bạn hay không.",
+      from: "Xây dựng tại Việt Nam", fromDetail: "Nhà cung cấp chính thức", to: "Sẵn sàng cho người mua đối chiếu", toDetail: "Bắc Mỹ · Châu Âu",
       imageAlt: "Minh họa đẳng trục kết nối nhà máy và danh mục sản phẩm tại Việt Nam với người mua ở Bắc Mỹ và châu Âu",
       illustrationNote: "Minh họa ý tưởng · không phải dữ liệu người mua thực tế", pathwayLabel: "Hệ thống xuất khẩu kết nối",
       footerImageAlt: "Ảnh chuyên viên trong phòng thí nghiệm kiểm soát chất lượng thực phẩm đang cầm mẫu gia vị",
@@ -97,10 +97,10 @@ export const HOME_MESSAGES = {
       ],
     },
     solutions: {
-      eyebrow: "01 / VEXIM LÀM GÌ", label: "Bốn mảnh ghép của một con đường tới người mua", titleBefore: "Cái thiếu không phải ", titleAfter: "", titleAccent: "hàng của bạn, mà là đường đến người mua.",
-      description: "Doanh nghiệp Việt thường không thua ở chất lượng hàng. Thua ở chỗ những trang người mua đọc thuộc về sàn và nhà cung cấp nước ngoài, giá bị kéo xuống giữa hàng nghìn trang giống nhau, còn người mua thì không có chỗ nào để kiểm tra bạn thực sự là ai. Bốn phần dưới đây xử lý đúng theo thứ tự đó.",
+      eyebrow: "01 / VEXIM LÀM GÌ", label: "Bốn việc, một con đường tới người mua", titleBefore: "Hàng không thiếu.", titleAfter: "", titleAccent: "Đường đến người mua mới thiếu.",
+      description: "Doanh nghiệp Việt ít khi thua ở chất lượng hàng. Thua ở chỗ trang người mua đọc thuộc về sàn và nhà cung cấp nước ngoài. Giá bị kéo xuống giữa hàng nghìn trang giống nhau. Người mua không có chỗ nào để kiểm tra bạn là ai. Bốn việc dưới đây xử lý theo đúng thứ tự đó.",
       searches: "Cách người mua tìm nhà cung cấp", trade: "Khám phá Vexim Trade",
-      disclaimer: "Trang của bạn hiện ở đâu, sàn có duyệt hồ sơ hay không và có bao nhiêu người mua viết tới đều phụ thuộc vào thị trường, quy định của sàn và phạm vi hai bên đã thống nhất. Chúng tôi báo cáo việc đã làm và những gì quay lại, không báo cáo những gì có thể xảy ra.",
+      disclaimer: "Ba thứ phụ thuộc vào thị trường, quy định của sàn và phạm vi hai bên đã thống nhất: trang của bạn hiện ở đâu, sàn có duyệt hồ sơ không, và bao nhiêu người mua viết tới. Chúng tôi báo cáo việc đã làm và những gì quay lại.",
       artworkAlt: ["Minh họa cụm máy chủ và danh mục sản phẩm có cấu trúc", "Minh họa địa cầu với các thị trường người mua được đánh dấu", "Minh họa container vận chuyển kết nối với hồ sơ người mua"],
       photosTitle: "Từ xưởng sản xuất đến bộ hồ sơ người mua nhận được",
       journey: [
@@ -110,35 +110,35 @@ export const HOME_MESSAGES = {
         { label: "Nhà máy", title: "Năng lực sản xuất người mua đến xem được", alt: "Ảnh toàn cảnh nhà máy tại Việt Nam với xe tải đang lấy hàng" },
       ],
       photos: [
-        { label: "Nền tảng", title: "Trang sản phẩm để người mua đối chiếu", caption: "Thông số, MOQ và Incoterms trong một nơi có cấu trúc.", alt: "Ảnh laptop và điện thoại hiển thị giao diện danh mục sản phẩm trừu tượng trên nền xanh dương" },
-        { label: "Tiếp cận", title: "Người mua, đọc theo từng thị trường", caption: "Người mua ở mỗi nơi hỏi gì, lên kế hoạch trước khi viết.", alt: "Ảnh bàn làm việc đầy nắng với laptop hiển thị bản đồ thương mại toàn cầu, sổ tay và cà phê Việt" },
+        { label: "Nền tảng", title: "Trang sản phẩm để người mua đối chiếu", caption: "Thông số, số lượng tối thiểu và Incoterms trong một chỗ.", alt: "Ảnh laptop và điện thoại hiển thị giao diện danh mục sản phẩm trừu tượng trên nền xanh dương" },
+        { label: "Tiếp cận", title: "Người mua, đọc theo từng thị trường", caption: "Mỗi nơi hỏi một kiểu. Kế hoạch chốt trước khi viết.", alt: "Ảnh bàn làm việc đầy nắng với laptop hiển thị bản đồ thương mại toàn cầu, sổ tay và cà phê Việt" },
         { label: "Vận hành", title: "Chứng từ đầy đủ, đóng gói sẵn sàng", caption: "Thùng hàng, pallet và chứng từ sẵn sàng cho container.", alt: "Ảnh công nhân kho bốc thùng carton và bao tải lên pallet cạnh xe nâng" },
-        { label: "Nhịp đều", title: "Nội dung lên đều mỗi tháng", caption: "Chủ đề chốt trước, viết và đăng theo tháng.", alt: "Ảnh bàn làm việc có laptop hiển thị lịch nội dung, sổ tay và cà phê Việt" },
+        { label: "Nhịp đều", title: "Nội dung lên đều mỗi tháng", caption: "Chủ đề chốt trước. Viết và đăng theo tháng.", alt: "Ảnh bàn làm việc có laptop hiển thị lịch nội dung, sổ tay và cà phê Việt" },
       ],
     },
     gap: {
       eyebrow: "02 / VẤN ĐỀ PHỤ THUỘC", label: "Vì sao hàng tốt vẫn mất đơn", titleBefore: "Đi thuê sự chú ý", titleAccent: "thì giá cũng đi thuê.",
-      description: "Kênh nào bạn không sở hữu thì quan hệ với người mua thuộc về người khác. Đó là lý do của chuyện bị ép giá, và nó lặp lại ở gần như toàn ngành.",
+      description: "Kênh nào bạn không sở hữu thì quan hệ với người mua thuộc về người khác. Đó là lý do của chuyện bị ép giá. Nó lặp lại ở gần như toàn ngành.",
       traditionalLabel: "CHỈ LÀM QUA TRUNG GIAN", traditionalTitle: "Bạn đang cạnh tranh trong danh sách của người khác.",
-      traditionalText: "Trên một sàn, trang của bạn nằm cạnh hàng nghìn trang khác: cùng kiểu ảnh, cùng mức đặt tối thiểu, giá thấp hơn một chút. Sàn giữ trang đó, giữ yêu cầu hỏi hàng và giữ luôn quan hệ với người mua. Khi nhà cung cấp khác hạ giá, bạn chỉ có hai lựa chọn: hạ theo, hoặc rơi khỏi trang.",
+      traditionalText: "Trên một sàn, trang của bạn nằm cạnh hàng nghìn trang khác: cùng kiểu ảnh, cùng mức đặt tối thiểu, giá thấp hơn một chút. Sàn giữ trang đó, giữ yêu cầu hỏi hàng, giữ luôn quan hệ với người mua. Khi nhà cung cấp khác hạ giá, còn hai lựa chọn: hạ theo, hoặc rơi khỏi trang.",
       traditionalPoints: ["Người mua và yêu cầu hỏi hàng đều thuộc về sàn.", "Giá trở thành thứ duy nhất người mua so được.", "Người mua không có cách nào kiểm tra nhà máy đứng sau trang đó."],
-      traditionalTail: "Sản lượng tăng, biên lợi nhuận thì không", standardLabel: "KÊNH VEXIM DỰNG", standardTitle: "Trang nhà cung cấp của bạn, trên website người mua kiểm tra được.",
-      standardText: "Website sản phẩm, hồ sơ trên sàn và công việc với người mua ở từng thị trường chạy cùng nhau. Người mua tới được trang do bạn kiểm soát, đọc đúng thông số của thị trường họ, và kiểm tra được nhà máy trước khi gửi email đầu tiên. Chỉ khi đó mới có chuyện thương lượng giá.",
+      traditionalTail: "Sản lượng tăng, biên lợi nhuận thì không", standardLabel: "KÊNH VEXIM DỰNG", standardTitle: "Trang của bạn, trên website người mua kiểm tra được.",
+      standardText: "Website sản phẩm, hồ sơ trên sàn và việc tiếp cận người mua ở từng thị trường chạy cùng nhau. Người mua tới được trang do bạn kiểm soát, đọc đúng thông số của thị trường họ, kiểm tra được nhà máy trước khi gửi email đầu tiên. Chỉ khi đó mới có chuyện thương lượng giá.",
       standardPoints: ["Trang của bạn hiện ở đúng chỗ người mua ở thị trường đó đang xem.", "Thông số người mua tự đối chiếu được, không cần hỏi trước.", "Yêu cầu hỏi hàng đến kèm thị trường và nội dung đơn đã rõ."],
       standardTail: "Tìm thấy → kiểm tra → thương lượng",
       figureCaption: "Từ cổng nhà máy đến cảng container",
-      disclaimer: "Đây là mô tả công việc, không phải cam kết về chỗ trang của bạn hiện, số người mua viết tới hay hợp đồng ký được. Kết quả chỉ công bố khi có bằng chứng ghi rõ thời gian.",
+      disclaimer: "Đây là mô tả công việc, không phải cam kết. Không hứa trang của bạn hiện ở đâu, bao nhiêu người mua viết tới, hay hợp đồng nào ký được. Kết quả chỉ công bố khi có bằng chứng ghi rõ thời gian.",
     },
     tiers: {
-      eyebrow: "03 / CÁCH LÀM VIỆC", label: "Phạm vi đi theo thị trường bạn chọn", titleBefore: "Bắt đầu từ thị trường", titleAccent: "bạn thực sự muốn vào.",
-      description: "Mỗi nhà máy cần một lộ trình khác nhau. Hai bên chốt thị trường trước, rồi mới xác định khối lượng công việc để tới được đó. Hạng mục bàn giao, thời gian và điều kiện nền tảng được ghi rõ trước khi bắt đầu.",
+      eyebrow: "03 / CÁCH LÀM VIỆC", label: "Phạm vi đi theo thị trường bạn chọn", titleBefore: "Chốt thị trường trước.", titleAccent: "Rồi mới chốt khối lượng việc.",
+      description: "Hai nhà máy không cần cùng một lộ trình. Hai bên chốt thị trường trước, rồi xác định khối lượng việc để tới được đó. Hạng mục bàn giao, thời gian và điều kiện nền tảng ghi rõ trước khi bắt đầu.",
       featured: "DÀNH CHO NHIỀU NHÓM HÀNG", includes: "CÁC HẠNG MỤC CÓ THỂ PHỐI HỢP", discuss: "Trao đổi về phạm vi này",
-      note: "Vào được sàn và được duyệt hồ sơ phụ thuộc điều kiện tham gia và thỏa thuận. Không cam kết trang của bạn hiện ở đâu, bao nhiêu người mua viết tới hay hợp đồng nào ký được. Ai cam kết mấy thứ đó là đang bán cho bạn thứ khác.",
+      note: "Vào sàn và được duyệt hồ sơ phụ thuộc điều kiện tham gia và thỏa thuận. Không cam kết trang của bạn hiện ở đâu, bao nhiêu người mua viết tới, hay hợp đồng nào ký được. Ai cam kết mấy thứ đó là đang bán cho bạn thứ khác.",
     },
-    compliance: { label: "Hỗ trợ tuân thủ", title: "Nơi Vexim bắt đầu", description: "Tuân thủ là nghề gốc của công ty. Đăng ký FDA, GACC, MoCRA và dịch vụ US Agent vẫn do đúng đội ngũ đó phụ trách, tách riêng khỏi phần tăng trưởng ở trên.", languageNote: "Các trang dịch vụ hiện có bản tiếng Việt; bản tiếng Anh sẽ chỉ xuất bản sau khi được rà soát." },
+    compliance: { label: "Hỗ trợ tuân thủ", title: "Nơi Vexim bắt đầu", description: "Tuân thủ là nghề gốc của công ty. Đăng ký FDA, GACC, MoCRA và dịch vụ US Agent vẫn do đúng đội ngũ đó làm, tách riêng khỏi phần tăng trưởng ở trên.", languageNote: "Các trang dịch vụ hiện chỉ có bản tiếng Việt. Bản tiếng Anh xuất bản sau khi rà soát." },
     footer: {
-      eyebrow: "BẮT ĐẦU TỪ THỊ TRƯỜNG CỦA BẠN", titleBefore: "Hàng của bạn không có lỗi.", titleAccent: "Con đường tới người mua mới là chỗ có lỗi.",
-      description: "Cho chúng tôi biết bạn đang muốn vào thị trường nào và đang bán mặt hàng gì. Chúng tôi sẽ nói thẳng người mua ở đó đang tìm nhà cung cấp như thế nào.", brand: "Sàn B2B, website sản phẩm và công việc với người mua theo từng thị trường cho nhà sản xuất Việt Nam, để người mua tìm thấy nhà máy chứ không chỉ thấy thêm một trang hàng.",
+      eyebrow: "BẮT ĐẦU TỪ THỊ TRƯỜNG CỦA BẠN", titleBefore: "Hàng của bạn không có lỗi.", titleAccent: "Con đường tới người mua mới có lỗi.",
+      description: "Cho chúng tôi biết bạn bán mặt hàng gì và muốn vào thị trường nào. Chúng tôi sẽ nói thẳng người mua ở đó đang tìm nhà cung cấp ra sao.", brand: "Sàn B2B, website sản phẩm và việc tiếp cận người mua theo từng thị trường cho nhà sản xuất Việt Nam. Để người mua tìm thấy nhà máy, không phải thêm một trang hàng.",
       explore: "KHÁM PHÁ", solutions: "Giải pháp", gap: "Vì sao hàng tốt vẫn mất đơn", tiers: "Phạm vi hợp tác",
       resources: "TÀI NGUYÊN", blog: "Bài viết & phân tích", privacy: "Quyền riêng tư & yêu cầu dữ liệu", portal: "Cổng khách hàng",
       fda: "Tài liệu FDA", gacc: "Tài liệu GACC", mocra: "Tài liệu MoCRA", usAgent: "Dịch vụ US Agent",
@@ -156,8 +156,8 @@ export const HOME_MESSAGES = {
 } as const
 
 export const VI_HOME_META = {
-  title: "Sàn B2B & Marketing xuất khẩu cho nhà sản xuất Việt Nam | Vexim Global",
-  description: "Vexim Global tạo con đường riêng để nhà sản xuất Việt Nam tới người mua quốc tế: sàn B2B Vexim Trade, website thương mại, phủ tìm kiếm theo từng thị trường và đội ngũ vận hành nội dung hằng tháng.",
+  title: "Sàn B2B cho nhà sản xuất Việt Nam | Vexim Global",
+  description: "Vexim Global giữ bốn phần việc để nhà sản xuất Việt Nam tới được người mua quốc tế: sàn B2B Vexim Trade, website sản phẩm, tiếp cận người mua theo từng thị trường, và đội ngũ viết nội dung hằng tháng.",
   ogAlt: "Vexim Global: sàn B2B và kênh bán hàng xuất khẩu cho nhà sản xuất Việt Nam",
 } as const
 

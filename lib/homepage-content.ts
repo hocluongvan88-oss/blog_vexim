@@ -106,13 +106,13 @@ export const EXPORT_TIERS = [
 /**
  * Bản tiếng Việt — ngôn ngữ mặc định của site.
  *
- * Ngôn từ lấy từ cách nhà cung cấp nói với nhau: hàng, mẫu, đơn, giá, chứng từ,
- * người mua, nhà máy. Không dùng từ nghề marketing như "từ khoá", "SEO",
- * "lập chỉ mục", "lưu lượng" — người đọc không biết, và cũng không cần biết.
+ * Văn phong: câu ngắn, mỗi mục mở bằng một câu khẳng định làm tiêu đề, sau đó
+ * là hai ba câu có chi tiết cụ thể (đơn vị, điều kiện, con số). Nói thẳng giới
+ * hạn của mình. Không tính từ hoa mỹ, không hứa hẹn.
  */
 export const HOME_POSITIONING_VI = {
-  headline: "Con đường riêng để người mua quốc tế tìm thấy bạn",
-  description: "Doanh nghiệp Việt thường không thua ở chất lượng hàng. Cái thiếu là chỗ để người mua tìm thấy: những trang người mua đọc đều thuộc về sàn và nhà cung cấp nước ngoài, giá thì bị kéo xuống, còn người mua thì không biết nhà máy nào đứng sau tấm ảnh. Vexim làm phần doanh nghiệp còn thiếu: một sàn B2B cho hàng Việt, một website sản phẩm của riêng doanh nghiệp, công việc với người mua ở từng thị trường bạn bán, và đội ngũ viết nội dung hằng tháng để mọi thứ không cũ đi.",
+  headline: "Con đường riêng để người mua tìm thấy bạn",
+  description: "Doanh nghiệp Việt ít khi thua ở chất lượng hàng. Thua ở chỗ người mua không tìm thấy mình. Trên sàn, ba nghìn nhà cung cấp nằm cạnh nhau với cùng một tấm ảnh, và người mua chỉ còn một thứ để so: giá. Vexim giữ bốn phần việc: sàn B2B Vexim Trade, website sản phẩm của riêng doanh nghiệp, việc tiếp cận người mua ở từng thị trường, và đội ngũ viết nội dung đều mỗi tháng.",
   tradeUrl: HOME_POSITIONING.tradeUrl,
 } as const
 
@@ -120,21 +120,21 @@ export const EXPORT_PILLARS_VI = [
   {
     id: "trade-platform", number: "01", label: "SÀN B2B",
     title: "Sàn B2B xây quanh những mặt hàng Việt Nam làm tốt",
-    description: "Người mua đến với một mặt hàng và một thị trường trong đầu, không phải với danh sách ba nghìn nhà cung cấp để lọc. Vexim Trade xếp nhà cung cấp theo đúng những nhóm hàng Việt Nam làm tốt, để người mua có đơn thật đến được hồ sơ của bạn và đã biết bạn làm gì.",
+    description: "Người mua đến với một mặt hàng trong đầu, không phải với danh sách ba nghìn nhà cung cấp để lọc. Vexim Trade xếp nhà cung cấp theo nhóm hàng Việt Nam làm tốt, nên người mua có đơn thật tới được hồ sơ của bạn và đã biết bạn làm gì.",
     features: [
       "Nhóm hàng xây theo những mặt hàng Việt Nam có thế mạnh xuất khẩu.",
-      "Hồ sơ nhà cung cấp xếp theo mặt hàng, không xếp theo giá thấp nhất.",
-      "Đường ngắn từ trang sản phẩm đến cuộc trao đổi với nhà cung cấp.",
+      "Hồ sơ xếp theo mặt hàng, không xếp theo giá thấp nhất.",
+      "Từ trang sản phẩm tới chỗ trao đổi với nhà cung cấp: một bước.",
     ],
-    output: "Một nơi người mua chủ động tìm đến bạn.",
+    output: "Người mua chủ động tìm đến bạn.",
   },
   {
     id: "market-visibility", number: "02", label: "TIẾP CẬN THỊ TRƯỜNG",
     title: "Làm việc ở đúng những thị trường bạn bán",
-    description: "Người mua ở Mỹ và người mua ở Nhật không gọi tên hàng của bạn giống nhau, và cũng không so bạn với cùng một nhóm nhà cung cấp. Làm một chiến dịch chung cho tất cả các thị trường thì không tới được thị trường nào đúng nghĩa.",
+    description: "Người mua ở Ohio và người mua ở Osaka không gọi tên hàng của bạn giống nhau, cũng không so bạn với cùng một nhóm nhà cung cấp. Một chiến dịch chung cho mọi thị trường thì không tới được thị trường nào.",
     features: [
-      "Đọc cách người mua ở từng thị trường gọi tên và hỏi mua hàng trước khi viết.",
-      "Nội dung sản phẩm và hồ sơ công ty nhắm đúng người đặt đơn.",
+      "Đọc cách người mua ở từng thị trường gọi tên và hỏi mua trước khi viết.",
+      "Nội dung nhắm đúng người đặt đơn, không nhắm người đọc cho vui.",
       "Báo cáo tách rõ việc đã làm và những gì quay lại.",
     ],
     output: "Đi ít thị trường nhưng đi đến nơi.",
@@ -142,22 +142,22 @@ export const EXPORT_PILLARS_VI = [
   {
     id: "export-website", number: "03", label: "WEBSITE SẢN PHẨM",
     title: "Website sản phẩm để người mua đặt được hàng",
-    description: "Người mua cần thông số, số lượng đặt tối thiểu, quy cách đóng gói, chứng nhận, thời gian giao và tên người để viết thư. Phần lớn website nhà máy chỉ đăng brochure. Vexim làm bản dùng được cho mua bán: mở nhanh, có thứ tự, dễ đối chiếu.",
+    description: "Người mua cần thông số, số lượng đặt tối thiểu, quy cách đóng gói, chứng nhận, thời gian giao và tên người để viết thư. Phần lớn website nhà máy chỉ đăng brochure. Vexim làm bản dùng được cho mua bán.",
     features: [
       "Trang mở nhanh trên điện thoại của người mua ở nước ngoài.",
-      "Bảng hàng kèm số lượng tối thiểu, Incoterms 2020, quy cách đóng gói và thông số.",
+      "Bảng hàng kèm số lượng tối thiểu, Incoterms 2020, quy cách đóng gói.",
       "Hồ sơ nhà máy và chứng nhận do doanh nghiệp cung cấp, có xác nhận nội bộ.",
     ],
-    output: "Một trang người mua tự xem được, không phải hỏi trước.",
+    output: "Người mua tự xem được, không phải hỏi trước.",
   },
   {
     id: "content-operations", number: "04", label: "VẬN HÀNH",
     title: "Nội dung và trang bán hàng, cập nhật đều mỗi tháng",
-    description: "Website không tự chạy được chỉ vì đã dựng xong. Phải có người theo dõi người mua ở từng thị trường đang tìm gì, viết bằng ngôn ngữ của họ, đăng đúng nhịp và kiểm tra xem người mua có thực sự tới được trang hay không. Phần lớn doanh nghiệp xuất khẩu không có người làm việc này.",
+    description: "Website không tự chạy vì đã dựng xong. Phải có người theo dõi người mua ở từng thị trường đang tìm gì, viết bằng ngôn ngữ của họ, đăng đúng nhịp, rồi kiểm tra xem người mua có tới được trang hay không. Phần lớn doanh nghiệp xuất khẩu không có người làm việc này.",
     features: [
-      "Kế hoạch chủ đề theo từng nhóm hàng và từng thị trường mục tiêu.",
+      "Kế hoạch chủ đề theo từng nhóm hàng và từng thị trường.",
       "Bài viết và trang sản phẩm viết theo chu kỳ hằng tháng.",
-      "Kiểm tra hằng tháng xem trang có được tìm thấy không, kèm báo cáo ngắn để làm tiếp.",
+      "Kiểm tra hằng tháng xem trang có được tìm thấy không, kèm báo cáo ngắn.",
     ],
     output: "Hiện diện tích lại dần, không hết hạn sau mỗi chiến dịch.",
   },
@@ -168,17 +168,17 @@ export const EXPORT_TIERS_VI = [
   {
     id: "core", number: "01", name: "B2B Launchpad", audience: "Một mặt hàng chủ lực",
     label: "DỰNG NỀN TẢNG",
-    description: "Dành cho nhà máy cần có chỗ đứng đàng hoàng ngoài sàn trước khi chi tiền cho việc mở thị trường.",
+    description: "Cho nhà máy cần đứng được ngoài sàn trước khi chi tiền mở thị trường.",
     features: [
       "Website sản phẩm và cấu trúc danh mục hàng",
       "Tìm hiểu người mua cho nhóm hàng chính",
-      "Dựng hồ sơ nhà cung cấp trên Vexim Trade, tùy duyệt và thời hạn thỏa thuận",
+      "Hồ sơ nhà cung cấp trên Vexim Trade, tùy duyệt và thời hạn thỏa thuận",
     ],
   },
   {
     id: "growth", number: "02", name: "Global Growth Engine", audience: "Nhà máy nhiều nhóm hàng",
     label: "MỞ THÊM THỊ TRƯỜNG",
-    description: "Dành cho nhà máy đã có vài nhóm hàng và một thị trường không còn đủ chỗ tăng.",
+    description: "Cho nhà máy đã có vài nhóm hàng và một thị trường không còn đủ chỗ tăng.",
     features: [
       "Danh mục và cấu trúc trang cho nhiều nhóm hàng",
       "Làm việc với người mua ở các thị trường trọng điểm",
@@ -189,11 +189,11 @@ export const EXPORT_TIERS_VI = [
   {
     id: "enterprise", number: "03", name: "Enterprise Dominance", audience: "Tập đoàn sản xuất quy mô lớn",
     label: "VẬN HÀNH Ở QUY MÔ",
-    description: "Dành cho doanh nghiệp cần một kênh vận hành thường trực, không phải dự án có ngày kết thúc.",
+    description: "Cho doanh nghiệp cần một kênh chạy thường trực, không phải dự án có ngày kết thúc.",
     features: [
       "Website và danh mục riêng cho từng đơn vị",
       "Định vị mặt hàng và kế hoạch truyền thông B2B",
-      "Khai thác dữ liệu người mua khi nguồn dữ liệu và quyền truy cập cho phép",
+      "Khai thác dữ liệu người mua khi nguồn và quyền truy cập cho phép",
       "Vận hành liên tục theo phạm vi đã thỏa thuận",
     ],
   },
