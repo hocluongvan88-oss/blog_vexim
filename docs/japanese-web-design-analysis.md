@@ -358,3 +358,62 @@ Bài "Cùng em sáng tạo STEM mùa 4" dài, có:
 **Kết luận cập nhật:** Vexim nên lấy **cấu trúc phân tầng của Panasonic** + **giọng nói thẳng
 của Agentcy** + **kỷ luật dẫn nguồn của Panasonic**. Hai thứ này không xung đột: phân tầng
 giải quyết "ai đọc gì", dẫn nguồn giải quyết "tin được không".
+
+---
+
+# Bổ sung: LG Việt Nam (lg.com/vn)
+
+Ghi chép ngày 2026-11-18. Đọc 5 phần của trang chủ (carousel, danh mục nhu cầu, ưu đãi,
+hỗ trợ, footer).
+
+LG là **cực đối lập** với 12 trang trước. Không kể chuyện thương hiệu ở trang chủ.
+Trang chủ là cỗ máy bán hàng.
+
+## Điểm đáng học
+
+### 1. Ma trận giá 4 tầng
+Đây là chi tiết UX giá hay nhất trong 13 trang đã đọc:
+
+```
+Giảm 4.300.000 ₫
+15.690.000 ₫  ~~19.990.000 ₫~~            ← giá hiện tại, giá gốc gạch
+Ưu đãi thành viên 15.376.200 ₫             ← giá riêng cho member
+Chỉ 1.307.500₫/tháng (12 tháng) 0% lãi suất ← quy ra tiền/tháng
+```
+
+Bốn mức cam kết, người mua tự chọn tầng. Không chỉ nói "giá tốt".
+
+### 2. Tab lọc theo trạng thái tâm lý, không theo thuộc tính
+`Dành riêng cho bạn / Phổ biến nhất / Được đánh giá cao / Ưu đãi hot`
+Không có tab "Thông số" hay "Danh mục".
+
+### 3. Số đánh giá ngay trên thẻ
+`(339)`, `(460)`, `(392)`, `(21)`. Social proof đặt cạnh giá, không đợi vào trang chi tiết.
+
+### 4. Banner có thời hạn
+Mỗi banner đều ghi `01.10 - 30.11.2026`. Không có ưu đãi "vô thời hạn".
+
+### 5. Tám lối vào hỗ trợ
+Chat, Zalo, email, gọi, đăng ký sản phẩm, hỗ trợ đặt hàng, yêu cầu sửa chữa, chat trực tiếp.
+Mỗi người một thói quen liên hệ, LG mở đủ tám cửa.
+
+### 6. "Thông báo có hàng"
+Hết hàng vẫn thu được email, kèm checkbox điều khoản. Không để mất khách.
+
+### 7. Footnote `(*)` cho mọi điều kiện
+`(*) Gói dịch vụ tặng kèm áp dụng với một số tỉnh thành...` — luôn có, ngay dưới claim.
+
+## Điểm LG đánh đổi
+
+- Trang chủ dài vô tận, không có một câu chuyện nào.
+- Bảy banner carousel cạnh tranh nhau, không banner nào được chú ý trọn.
+- Không có CTA định vị — chỉ có "Mua ngay" lặp lại.
+- Không phù hợp với công ty đang xây định vị như Vexim.
+
+## Áp cho Vexim
+
+**Lấy:** ma trận giá 4 tầng (cho bảng gói), số xác nhận đặt cạnh claim, banner có thời hạn,
+footnote điều kiện, nhiều lối liên hệ.
+
+**Không lấy:** carousel khuyến mại, trang chủ dài vô tận, tab lọc theo tâm lý mua sắm
+(không hợp B2B công nghiệp).
