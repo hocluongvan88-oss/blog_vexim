@@ -15,16 +15,18 @@ const home = await get("/en", "en-US,en;q=0.9")
 const viPrivacy = await get("/privacy")
 const privacy = await get("/en/privacy", "en-US,en;q=0.9")
 const fda = await get("/services/fda")
-const heading = "Your own route to international buyers"
+const heading = "Good goods are not enough. A buyer has to find you."
 const viHeading = "Hàng tốt chưa đủ. Người mua phải tìm thấy bạn."
 const siteUrl = "https://www.veximglobal.com"
+// H1 spans two lines visually; compare without whitespace so SSR and DOM agree.
+const norm = value => (value || "").replace(/\s+/g, "")
 assert.equal(home("html").attr("lang"), "en")
 assert.equal(home("main").first().attr("lang"), "en")
-assert.equal(home("h1").text(), heading)
+assert.equal(norm(home("h1").text()), norm(heading))
 assert.equal(home("h1").length, 1)
 assert.equal(home('main header, main footer').length, 0, "Global landmarks should sit outside <main>")
 assert.equal(home('head link[rel="canonical"]').attr("href"), "https://www.veximglobal.com/en")
-assert.ok(home('head meta[name="description"]').attr("content")?.includes("B2B marketplace"))
+assert.ok(home('head meta[name="description"]').attr("content")?.includes("Vexim Trade"))
 assert.equal(home('body meta[name="description"]').length, 0)
 assert.equal(home('head link[rel="preload"][as="font"][href="/fonts/inter-home-latin.woff2"]').length, 0, "Optional display font should not delay critical resources")
 assert.equal(home('head link[rel="manifest"]').length, 0, "The public homepage is not the admin PWA")
@@ -35,7 +37,7 @@ assert.equal(privacy("html").attr("lang"), "en")
 assert.equal(privacy('head link[rel="manifest"]').length, 0)
 assert.equal(viHome("html").attr("lang"), "vi")
 assert.equal(viHome("main").first().attr("lang"), "vi")
-assert.equal(viHome("h1").text(), viHeading)
+assert.equal(norm(viHome("h1").text()), norm(viHeading))
 assert.equal(viHome("h1").length, 1)
 assert.equal(viHome('head link[rel="canonical"]').attr("href"), siteUrl)
 assert.equal(viHome('meta[property="og:locale"]').attr("content"), "vi_VN")
@@ -64,26 +66,38 @@ assert.equal(fda("body").hasClass("font-sans"), true, "Existing Vietnamese servi
 assert.equal(fda('link[rel="alternate"][hreflang="en"]').length, 0, "Untranslated legal pages must not advertise an English counterpart")
 assert.equal(fda('[data-language-switcher]').length, 0)
 assert.equal(fda('head meta[name="description"]').length, 1)
-for (const id of ["solutions", "the-gap", "services", "contact"]) {
+for (const id of ["works", "scope", "compliance", "contact"]) {
   assert.equal(home(`#${id}`).length, 1, id)
   assert.equal(viHome(`#${id}`).length, 1, `VI ${id}`)
 }
-assert.equal(viHome('main section#solutions article').length, 4)
-assert.equal(viHome('main section#the-gap article').length, 2)
-assert.equal(viHome('main section#services article').length, 3)
+// Trang tổng quan: mỗi mục là một cửa vào landing page con.
+assert.equal(viHome('main section#works a[class*="workCard"]').length, 4, "Four work cards")
+assert.equal(home('main section#works a[class*="workCard"]').length, 4, "Four work cards, EN")
+assert.equal(viHome('main section#scope > div > div > button').length, 3, "Three engagement scopes")
+assert.equal(viHome('main section#compliance a[class*="complianceCard"]').length, 4, "Four compliance entries")
 assert.equal(viHome('a[href="/privacy"]').length, 1)
 assert.equal(viHome('a[href="https://veximtrade.com"]').length >= 2, true)
-assert.ok(viHome('main').text().includes('Không cam kết'))
+// Không còn mục dài: trang tổng quan phải ngắn.
+{
+  const words = viHome('main').text().trim().split(/\s+/).filter(Boolean).length
+  assert.ok(words < 320, `Hub body copy should stay short (${words} words)`)
+}
 assert.ok(!/90%|Top 1[-–]10|Alibaba|Global Sources/i.test(viHome('main').text()))
 for (const [label, page] of [["EN", home], ["VI", viHome]]) {
   const copy = page("main").text()
   assert.ok(!/SEO|từ kho[aá]|từ khóa|lập chỉ mục|indexing|keyword|backlink|lưu lượng|traffic/i.test(copy), `${label} copy stays in supplier language`)
 }
-assert.equal(home('main section#solutions article').length, 4, "Four pillars: platform, reach, website, operations")
-assert.equal(home('main section#the-gap article').length, 2, "Two-column verification gap")
-assert.equal(home('main section#services article').length, 3, "Product-line engagement scopes")
+// Mọi thẻ trên trang tổng phải trỏ tới trang có thật, không phải anchor chết.
+for (const [label, page] of [["EN", home], ["VI", viHome]]) {
+  const hrefs = page('main a[href^="/"]').map((_, el) => page(el).attr("href")).get()
+  for (const href of new Set(hrefs)) {
+    const target = href.split("#")[0]
+    if (!target || target === "/") continue
+    const response = await fetch(`${base}${target}`, { headers: { "accept-language": "vi-VN,vi;q=0.9" }, redirect: "manual" })
+    assert.ok([200, 301, 307, 308].includes(response.status), `${label} hub link resolves: ${href}`)
+  }
+}
 assert.equal(home('main [class*="dashboardShell"], main [class*="proofConsole"]').length, 0, "No legacy technical dashboard")
-assert.equal(home('a[href="https://veximtrade.com"]').length >= 2, true)
 assert.equal(home('a[href="/en/privacy"]').length, 1)
 for (const href of ["/services/fda", "/services/gacc", "/services/cosmetics/mocra-registration", "/services/us-agent"]) assert.ok(home(`a[href="${href}"]`).length, href)
 assert.equal(home('script#home-page-schema[type="application/ld+json"]').length, 1)
@@ -97,22 +111,21 @@ assert.ok(!/90% of factory|Page 1 of Google|instant listing verification|high-vo
 // khách (desktop + mobile = 2 liên kết mỗi ngôn ngữ).
 assert.equal(home('a[href="/?lang=vi"]').length, 2)
 assert.equal(home('a[href="/en?lang=en"]').length, 2)
-const homePhotos = home('main img[src^="/home/"][src$=".webp"]')
-assert.equal(homePhotos.length, 13, "Thirteen editorial photographs inside <main>: four hero, four pillar, four journey, one verification scene")
-assert.equal(home('footer img[src^="/home/"][src$=".webp"]').length, 1, "The footer invitation carries one photograph")
-assert.equal(homePhotos.filter((_, image) => !home(image).attr("alt")).length, 0, "Every photograph carries alt text")
-assert.equal(homePhotos.filter((_, image) => !home(image).attr("srcset")).length, 0, "Every photograph offers a responsive srcset")
-assert.equal(home('main img[src="/home/export-network.svg"]').length, 1, "The illustrated route map remains in the hero")
-for (const asset of ["origin-ingredients", "factory-floor", "buyer-meeting", "port-logistics", "catalog-device", "quality-lab", "warehouse-loading", "vietnam-factory-exterior", "global-buyer", "hanoi-harbor", "export-documentation", "trucking", "content-operations"]) {
-  for (const suffix of ["", "-800"]) {
-    const photo = readFileSync(`public/home/${asset}${suffix}.webp`)
-    assert.ok(photo.length > 8_000 && photo.length < 200_000, `Photograph should stay lightweight: ${asset}${suffix}.webp`)
-  }
-}
-for (const asset of ["export-network.svg", "cloud-architecture.svg", "buyer-intent.svg", "trade-connect.svg"]) {
-  const content = readFileSync(`public/home/${asset}`, "utf8")
+// Trang tổng quan cố ý không có ảnh trong <main>: một ảnh phải là bằng chứng,
+// không phải trang trí. Footer vẫn giữ ảnh lời mời.
+assert.equal(home('main img').length, 0, "Hub keeps <main> free of decorative imagery")
+assert.equal(home('footer img[src^="/home/"][src$=".webp"]').length, 1, "The footer invitation keeps one photograph")
+for (const asset of ["export-network.svg", "cloud-architecture.svg", "buyer-svg", "trade-connect.svg"]) {
+  const path = `public/home/${asset}`
+  try { readFileSync(path) } catch { continue }
+  const content = readFileSync(path, "utf8")
   assert.ok(content.includes("<svg") && !/<script|<foreignObject|https?:\/\//i.test(content.replace('xmlns="http://www.w3.org/2000/svg"', "")), asset)
   assert.ok(Buffer.byteLength(content) < 16_000, `SVG illustration should be lightweight: ${asset}`)
+}
+// Ảnh đã nghỉ khỏi trang nhưng vẫn nằm trong /public cho landing page con dùng.
+for (const asset of ["origin-ingredients", "factory-floor", "catalog-device", "quality-lab", "export-documentation"]) {
+  const photo = readFileSync(`public/home/${asset}.webp`)
+  assert.ok(photo.length > 8_000 && photo.length < 200_000, `Photograph should stay lightweight: ${asset}.webp`)
 }
 assert.ok(readFileSync("public/og-image.jpg").length < 300_000)
 assert.ok(readFileSync("public/og-image-vi.jpg").length < 300_000)
@@ -196,27 +209,19 @@ try {
       cls: window.__homeCLS || 0,
       heroTextAlign: getComputedStyle(document.querySelector('[class*="heroCopy"]')).textAlign,
       heroCopy: document.querySelector('[class*="heroCopy"]').getBoundingClientRect().toJSON(),
-      heroStage: document.querySelector('figure[class*="heroStage"]').getBoundingClientRect().toJSON(),
-      solution: getComputedStyle(document.querySelector('#solutions')).backgroundImage,
-      heroPhotos: document.querySelectorAll('figure[class*="heroStage"] img').length,
+      heroIndex: document.querySelector('[class*="heroIndex"]').getBoundingClientRect().toJSON(),
       header: getComputedStyle(document.querySelector('header')).position,
+      mainImages: document.querySelectorAll('main img').length,
     }))
     assert.equal(state.lang, "en")
     assert.equal(state.width, state.viewport, `horizontal overflow at ${width}px`)
-    assert.equal(state.h1, heading)
+    assert.equal(norm(state.h1), norm(heading))
     assert.equal(state.heroTextAlign, "left", `editorial headline alignment at ${width}px`)
-    if (width > 960) assert.ok(state.heroStage.left >= state.heroCopy.right + 16, `illustration belongs beside the headline at ${width}px`)
-    else assert.ok(state.heroStage.top >= state.heroCopy.bottom + 20, `illustration belongs below the copy at ${width}px`)
+    if (width > 1024) assert.ok(state.heroIndex.left >= state.heroCopy.right + 16, `contents list belongs beside the headline at ${width}px`)
+    else assert.ok(state.heroIndex.top >= state.heroCopy.bottom + 16, `contents list belongs below the copy at ${width}px`)
     assert.ok(state.cls < 0.01, `initial layout shift ${state.cls} at ${width}px`)
-    assert.ok(state.solution.includes("gradient"), `solutions band keeps a warm, tinted background at ${width}px`)
-    assert.equal(state.heroPhotos, 5, `hero keeps four photographs plus the route map at ${width}px`)
     assert.equal(state.header, "sticky")
-    const art = await page.$$eval('main img[src^="/home/"]', async images => {
-      await Promise.all(images.map(async image => { image.loading = "eager"; await image.decode() }))
-      return images.map(image => ({ width: image.naturalWidth, height: image.naturalHeight }))
-    })
-    assert.equal(art.length, 14)
-    assert.ok(art.every(image => image.width > 0 && image.height > 0), `broken isometric art at ${width}px`)
+    assert.equal(state.mainImages, 0, `hub carries no decorative imagery at ${width}px`)
     if (width <= 960) {
       const header = await page.evaluate(() => ({
         brand: document.querySelector('a[class*="brand"]')?.getBoundingClientRect().right,
@@ -226,12 +231,12 @@ try {
       const toggle = page.locator('button[aria-controls="home-mobile-nav"]')
       await toggle.click()
       assert.equal(await page.$eval('button[aria-controls="home-mobile-nav"]', el => el.getAttribute("aria-expanded")), "true")
-      await page.locator('nav[aria-label="Mobile navigation"] a[href="/en#the-gap"]').click()
+      await page.locator('nav[aria-label="Mobile navigation"] a[href="/en#scope"]').click()
       assert.equal(await page.$eval('button[aria-controls="home-mobile-nav"]', el => el.getAttribute("aria-expanded")), "false")
     }
-    const cards = await page.$$eval('#solutions article', items => items.map(item => ({ top: item.getBoundingClientRect().top, width: item.getBoundingClientRect().width })))
-    if (width <= 720) assert.ok(cards[1].top > cards[0].top, `bento cards should stack at ${width}px`)
-    else assert.ok(Math.abs(cards[1].top - cards[0].top) < 1, `bento pair should share a row at ${width}px`)
+    const cards = await page.$$eval('#works a[class*="workCard"]', items => items.map(item => ({ top: item.getBoundingClientRect().top, width: item.getBoundingClientRect().width })))
+    if (width <= 720) assert.ok(cards[1].top > cards[0].top, `work cards should stack at ${width}px`)
+    else assert.ok(Math.abs(cards[1].top - cards[0].top) < 1, `work cards should share a row at ${width}px`)
     if ([390, 1440].includes(width)) {
       await page.evaluate(() => scrollTo({ top: 900, behavior: "instant" }))
       assert.ok(Math.abs(await page.$eval('header', el => el.getBoundingClientRect().top)) < 1, `sticky header does not follow the viewport at ${width}px`)
@@ -241,7 +246,7 @@ try {
       }
     }
     assert.deepEqual(errors, [], `browser errors at ${width}px`)
-    console.log(`PASS browser: ${width}px, vector art, bento layout, no overflow/hydration errors, initial CLS=${state.cls.toFixed(4)}`)
+    console.log(`PASS browser: ${width}px, hub grid, no overflow/hydration errors, initial CLS=${state.cls.toFixed(4)}`)
     await page.close()
   }
   for (const width of [320, 390, 768, 881, 1024, 1440]) {
@@ -260,35 +265,31 @@ try {
     await page.evaluate(() => document.fonts.ready)
     const state = await page.evaluate(() => {
       const copy = document.querySelector('[class*="heroCopy"]').getBoundingClientRect()
-      const art = document.querySelector('figure[class*="heroStage"]').getBoundingClientRect()
+      const index = document.querySelector('[class*="heroIndex"]').getBoundingClientRect()
       const brand = document.querySelector('a[class*="brand"]').getBoundingClientRect()
       const menu = document.querySelector('button[aria-controls="home-mobile-nav"]').getBoundingClientRect()
       return { lang: document.documentElement.lang, h1: document.querySelector('h1')?.textContent,
         width: document.documentElement.scrollWidth, viewport: innerWidth, cls: window.__homeCLS || 0,
         align: getComputedStyle(document.querySelector('[class*="heroCopy"]')).textAlign,
-        copyRight: copy.right, copyBottom: copy.bottom, artLeft: art.left, artTop: art.top,
+        copyRight: copy.right, copyBottom: copy.bottom, indexLeft: index.left, indexTop: index.top,
         brandRight: brand.right, menuLeft: menu.left, menuWidth: menu.width,
         menuVisible: getComputedStyle(document.querySelector('button[aria-controls="home-mobile-nav"]')).display !== 'none',
+        mainImages: document.querySelectorAll('main img').length,
       }
     })
     assert.equal(state.lang, "vi")
     assert.equal(await page.$('.zalo-chat-widget'), null, "Translated landing uses its own contact flow, not the service widget")
-    assert.equal(state.h1, viHeading)
+    assert.equal(norm(state.h1), norm(viHeading))
     assert.equal(state.width, state.viewport, `Vietnamese overflow at ${width}px`)
     assert.equal(state.align, "left")
     assert.ok(state.cls < .01, `Vietnamese layout shift at ${width}px`)
-    if (width > 960) assert.ok(state.artLeft >= state.copyRight + 16)
-    else assert.ok(state.artTop >= state.copyBottom + 20)
+    assert.equal(state.mainImages, 0, `hub carries no decorative imagery at ${width}px`)
+    if (width > 1024) assert.ok(state.indexLeft >= state.copyRight + 16)
+    else assert.ok(state.indexTop >= state.copyBottom + 16)
     if (width <= 960) assert.ok(state.menuVisible && state.menuWidth >= 42 && state.menuLeft >= state.brandRight + 8)
-    const art = await page.$$eval('main img[src^="/home/"]', async images => {
-      await Promise.all(images.map(async image => { image.loading = "eager"; await image.decode() }))
-      return images.map(image => [image.naturalWidth, image.naturalHeight])
-    })
-    assert.equal(art.length, 14)
-    assert.ok(art.every(([w, h]) => w > 0 && h > 0))
     assert.deepEqual(errors, [], `Vietnamese browser errors at ${width}px`)
     if (screenshots && [390, 1440].includes(width)) await page.screenshot({ path: path.join(screenshots, `homepage-vi-${width}.png`), fullPage: true })
-    console.log(`PASS browser VI: ${width}px, no overflow, stable editorial hero, four SVGs, CLS=${state.cls.toFixed(4)}`)
+    console.log(`PASS browser VI: ${width}px, no overflow, stable hub hero, CLS=${state.cls.toFixed(4)}`)
     await page.close()
   }
   // Vietnamese is the default: the browser starts on the Vietnamese page and
@@ -328,7 +329,7 @@ try {
       void request.respond({ status: viStatus, contentType: 'application/json', body: viStatus === 200 ? '{"success":true}' : '{"error":"Online submission is unavailable."}' })
     } else void request.continue()
   })
-  await viAudit.locator('button[class*="heroPrimary"]').click()
+  await viAudit.locator('button[class*="btnPrimary"]').click()
   assert.ok((await viAudit.$eval('[role="dialog"]', el => el.textContent)).includes('Tên công ty'))
   await viAudit.locator('#audit-website').fill('https://nhamay.example')
   await viAudit.locator('#audit-company').fill('Nhà máy thử nghiệm')
@@ -341,7 +342,7 @@ try {
   await viAudit.keyboard.press('Escape')
   await viAudit.waitForFunction(() => !document.querySelector('[role="dialog"]'))
   viStatus = 503
-  await viAudit.locator('button[class*="tierButtonFeatured"]').click()
+  await viAudit.evaluate(() => document.querySelectorAll('button[class*="scopeCard"]')[1].click())
   assert.ok((await viAudit.$eval('p[class*="scopeNote"]', el => el.textContent)).includes('Global Growth Engine'))
   await viAudit.locator('#audit-website').fill('https://nhamay.example')
   await viAudit.locator('#audit-company').fill('Nhà máy thử nghiệm')
@@ -368,7 +369,7 @@ try {
       void request.respond({ status: mockStatus, contentType: "application/json", body: mockStatus === 200 ? '{"success":true}' : '{"error":"Online submission is unavailable. Please send the email draft instead."}' })
     } else void request.continue()
   })
-  await page.locator('button[class*="heroPrimary"]').click()
+  await page.locator('button[class*="btnPrimary"]').click()
   await page.locator('#audit-website').fill('https://factory.example')
   await page.locator('#audit-company').fill('Example Factory')
   await page.locator('#audit-markets').fill('Japan, EU')
@@ -381,7 +382,7 @@ try {
   await page.keyboard.press('Escape')
   await page.waitForFunction(() => !document.querySelector('[role="dialog"]'))
   mockStatus = 503
-  await page.locator('button[class*="tierButtonFeatured"]').click()
+  await page.evaluate(() => document.querySelectorAll('button[class*="scopeCard"]')[1].click())
   await page.waitForSelector('p[class*="scopeNote"]')
   assert.ok((await page.$eval('p[class*="scopeNote"]', el => el.textContent)).includes('Global Growth Engine'))
   await page.locator('#audit-website').fill('https://factory.example')

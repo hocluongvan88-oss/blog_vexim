@@ -45,9 +45,9 @@ export function HomeHeader({ locale, page }: { locale: HomeLocale; page: HomePag
   const text = HOME_CLIENT_MESSAGES[locale]
   const base = homePath(locale)
   const navigation = [
-    { href: `${base}#solutions`, label: text.nav.solutions },
-    { href: `${base}#the-gap`, label: text.nav.why },
-    { href: `${base}#services`, label: text.nav.engagements },
+    { href: `${base}#works`, label: text.nav.solutions },
+    { href: `${base}#scope`, label: text.nav.why },
+    { href: `${base}#compliance`, label: text.nav.engagements },
   ]
 
   return <header className={styles.header}>

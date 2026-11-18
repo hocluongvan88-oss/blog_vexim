@@ -1,0 +1,153 @@
+/* Trang tổng quan. Kỷ luật thị giác: 4 giá trị bo góc, 3 mức chữ, không gradient.
+   Sang trọng đến từ khoảng trắng và đường kẻ 1px, không từ hiệu ứng. */
+
+.hub {
+  --ink: #0b1a2b;
+  --muted: #4d5b6e;
+  --blue: #1466f0;
+  --navy: #06182f;
+  --line: #e3e9f2;
+  --paper-alt: #f7f9fc;
+  color: var(--ink);
+  background: #fff;
+}
+
+.container { width: min(100% - 80px, 1220px); margin-inline: auto; }
+
+/* ---------- HERO ---------- */
+.hero { padding: clamp(64px, 7vw, 104px) 0 0; }
+.heroInner { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); align-items: end; gap: 56px; }
+.heroCopy { min-width: 0; max-width: 720px; text-align: left; }
+
+.eyebrow {
+  display: flex; align-items: center; gap: 12px; margin: 0;
+  color: #46586f; font-size: 11px; font-weight: 730; letter-spacing: .14em; text-transform: uppercase;
+}
+.eyebrow::before { content: ""; width: 26px; height: 1px; background: var(--blue); }
+
+.heroTitle {
+  margin: 26px 0 0; font-size: clamp(38px, 5.2vw, 66px); font-weight: 700;
+  letter-spacing: -.05em; line-height: 1.04; text-wrap: balance;
+}
+.heroTitle span { display: block; color: var(--blue); }
+
+.heroLine { max-width: 460px; margin: 26px 0 0; color: #3f4d5f; font-size: 17px; line-height: 1.7; }
+
+.heroActions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
+
+.btnPrimary, .btnGhost {
+  display: inline-flex; align-items: center; gap: 14px; min-height: 52px; padding: 14px 24px;
+  border-radius: 999px; font-size: 14px; font-weight: 690; text-decoration: none; cursor: pointer;
+  transition: transform .25s ease-out, box-shadow .25s ease-out, border-color .25s ease-out;
+}
+.btnPrimary { border: 1px solid transparent; background: var(--blue); color: #fff; box-shadow: 0 10px 24px rgb(20 102 240 / 22%); }
+.btnPrimary:hover { background: #0a4bd1; transform: translateY(-2px); box-shadow: 0 16px 32px rgb(20 102 240 / 26%); }
+.btnGhost { border: 1px solid rgb(13 27 42 / 16%); background: #fff; color: var(--ink); }
+.btnGhost:hover { border-color: rgb(20 102 240 / 40%); transform: translateY(-2px); }
+
+/* Cột phải hero: bốn dòng đánh số, không ảnh. Bảng mục lục của trang. */
+.heroIndex { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
+.heroIndex li { border-bottom: 1px solid var(--line); }
+.heroIndex a {
+  display: grid; grid-template-columns: 34px minmax(0, 1fr) 18px; align-items: center; gap: 16px;
+  padding: 17px 0; color: inherit; text-decoration: none; transition: padding-left .25s ease-out;
+}
+.heroIndex a:hover { padding-left: 8px; }
+.heroIndex b { color: var(--blue); font-size: 11px; font-weight: 750; letter-spacing: .08em; }
+.heroIndex span { font-size: 15px; font-weight: 620; letter-spacing: -.01em; }
+.heroIndex svg { color: #94a3b8; transition: color .25s, transform .25s; }
+.heroIndex a:hover svg { color: var(--blue); transform: translateX(3px); }
+.heroIndexNote { margin: 18px 0 0; color: #6b7686; font-size: 12.5px; line-height: 1.6; }
+
+/* ---------- MARQUEE ---------- */
+.marquee { margin-top: clamp(48px, 5vw, 72px); overflow: hidden; border-block: 1px solid var(--line); background: var(--paper-alt); }
+.marqueeTrack { display: flex; width: max-content; animation: hubRibbon 46s linear infinite; }
+.marquee:hover .marqueeTrack { animation-play-state: paused; }
+.marqueeTrack > span { display: inline-flex; align-items: center; gap: 24px; padding: 15px 0; padding-right: 24px; }
+.marqueeTrack em { color: #5a6a7e; font-size: 11.5px; font-weight: 720; font-style: normal; letter-spacing: .15em; text-transform: uppercase; white-space: nowrap; }
+.marqueeTrack i { width: 4px; height: 4px; border-radius: 50%; background: #b8c4d4; }
+@keyframes hubRibbon { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+/* ---------- SECTION CHUNG ---------- */
+.section { padding: clamp(64px, 6.4vw, 100px) 0; }
+.sectionAlt { background: var(--paper-alt); }
+.sectionHead { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .8fr); align-items: end; gap: 48px; margin-bottom: clamp(34px, 3.4vw, 52px); }
+.sectionTitle { margin: 20px 0 0; font-size: clamp(27px, 2.9vw, 40px); font-weight: 710; letter-spacing: -.045em; line-height: 1.1; text-wrap: balance; }
+.sectionNote { max-width: 330px; justify-self: end; margin: 0; color: #55637a; font-size: 15px; line-height: 1.7; }
+
+/* ---------- BỐN VIỆC ---------- */
+.workGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.workCard {
+  position: relative; display: flex; flex-direction: column; min-height: 0; padding: 28px 30px;
+  border: 1px solid var(--line); border-radius: 22px; background: #fff; color: inherit; text-decoration: none;
+  transition: border-color .28s ease-out, box-shadow .28s ease-out, transform .28s ease-out;
+}
+.workCard:hover { border-color: rgb(20 102 240 / 34%); box-shadow: 0 16px 40px rgb(11 26 43 / 9%); transform: translateY(-4px); }
+.workTop { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.workNum { color: var(--blue); font-size: 11px; font-weight: 760; letter-spacing: .1em; }
+.workLabel { color: #5f6d80; font-size: 10.5px; font-weight: 730; letter-spacing: .12em; text-transform: uppercase; }
+.workTitle { margin: 22px 0 0; font-size: clamp(19px, 1.62vw, 22px); font-weight: 700; letter-spacing: -.028em; line-height: 1.28; }
+.workLine { margin: 10px 0 0; color: #4b5b70; font-size: 14.5px; line-height: 1.65; }
+.workFoot { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 22px; }
+.workCta { color: var(--blue); font-size: 13px; font-weight: 700; letter-spacing: -.005em; }
+.workCard svg { color: #97a6b8; transition: color .25s, transform .25s; }
+.workCard:hover svg { color: var(--blue); transform: translate(2px, -2px); }
+
+/* ---------- PHẠM VI ---------- */
+.scopeGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.scopeCard {
+  display: flex; flex-direction: column; gap: 8px; padding: 28px 26px;
+  border: 1px solid var(--line); border-radius: 22px; background: #fff; text-align: left;
+  transition: border-color .28s ease-out, box-shadow .28s ease-out, transform .28s ease-out;
+}
+.scopeCard:hover { border-color: rgb(20 102 240 / 30%); box-shadow: 0 14px 34px rgb(11 26 43 / 8%); transform: translateY(-3px); }
+.scopeName { font-size: 17px; font-weight: 720; letter-spacing: -.022em; }
+.scopeFor { color: #5b697d; font-size: 13.5px; line-height: 1.55; }
+
+/* ---------- TUÂN THỦ ---------- */
+.complianceGrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 22px; overflow: hidden; }
+.complianceCard { display: grid; gap: 7px; padding: 26px 24px; background: #fff; color: inherit; text-decoration: none; transition: background .25s ease-out; }
+.complianceCard:hover { background: #f4f8ff; }
+.complianceName { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 15.5px; font-weight: 730; letter-spacing: -.018em; }
+.complianceName svg { color: #a2b0c1; }
+.complianceCard:hover .complianceName svg { color: var(--blue); }
+.complianceNote { color: #5b697d; font-size: 12.5px; line-height: 1.55; }
+
+/* ---------- DẢI KẾT ---------- */
+.band { background: var(--navy); color: #fff; }
+.bandInner { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 48px; padding: clamp(56px, 6vw, 84px) 0; }
+.bandTitle { margin: 0; font-size: clamp(26px, 3vw, 40px); font-weight: 710; letter-spacing: -.045em; line-height: 1.12; text-wrap: balance; }
+.bandTitle em { display: block; color: #7ea8ff; font-style: normal; }
+.bandLine { margin: 16px 0 0; color: #b9c9dd; font-size: 15px; line-height: 1.65; }
+.bandButton {
+  display: inline-flex; align-items: center; gap: 14px; min-height: 54px; padding: 15px 26px;
+  border: 1px solid transparent; border-radius: 999px; background: #fff; color: var(--navy);
+  font-size: 14px; font-weight: 720; cursor: pointer; white-space: nowrap;
+  transition: transform .25s ease-out, box-shadow .25s ease-out;
+}
+.bandButton:hover { transform: translateY(-2px); box-shadow: 0 16px 34px rgb(0 0 0 / 26%); }
+
+/* ---------- RESPONSIVE: 2 mốc ---------- */
+@media (max-width: 1024px) {
+  .container { width: min(100% - 56px, 1220px); }
+  .heroInner { grid-template-columns: 1fr; align-items: start; gap: 40px; }
+  .heroIndex { max-width: 560px; }
+  .sectionHead { grid-template-columns: 1fr; align-items: start; gap: 18px; }
+  .sectionNote { justify-self: start; max-width: 520px; }
+  .complianceGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .bandInner { grid-template-columns: 1fr; gap: 28px; justify-items: start; }
+}
+
+@media (max-width: 720px) {
+  .container { width: min(100% - 36px, 620px); }
+  .workGrid, .scopeGrid { grid-template-columns: 1fr; gap: 14px; }
+  .workCard { min-height: 0; padding: 24px 22px; }
+  .complianceGrid { grid-template-columns: 1fr; }
+  .bandInner { padding: 48px 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marqueeTrack { animation: none; }
+  .workCard, .scopeCard, .btnPrimary, .btnGhost, .bandButton { transition: none; }
+  .workCard:hover, .scopeCard:hover, .btnPrimary:hover, .btnGhost:hover, .bandButton:hover { transform: none; }
+}

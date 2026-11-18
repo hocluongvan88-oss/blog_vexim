@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { LocalizedHome } from "@/components/home/localized-home"
 import { OG_IMAGE, OG_IMAGE_ALT, SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from "@/lib/business-profile"
 import { languageUrls } from "@/lib/locale-routes"
+import { EN_HUB_META } from "@/lib/hub-content-en"
 
 /**
  * English homepage at `/en`. Vietnamese is the site default and lives at `/`;
@@ -10,8 +11,8 @@ import { languageUrls } from "@/lib/locale-routes"
 const url = `${SITE_URL}/en`
 
 export const metadata: Metadata = {
-  title: SITE_TITLE,
-  description: SITE_DESCRIPTION,
+  title: { absolute: EN_HUB_META.title },
+  description: EN_HUB_META.description,
   keywords: ["B2B marketplace Vietnam", "export product website", "export sales channel", "Vietnam manufacturer", "Vexim Trade"],
   manifest: null, // The root manifest is for the separate admin dashboard.
   alternates: { canonical: url, languages: languageUrls("home") },

@@ -29,7 +29,7 @@ import {
 } from "./business-profile"
 
 import { TRADE, TRADE_CATEGORIES, buildTradeOrganization } from "./vexim-trade-content"
-import { EXPORT_TIERS, EXPORT_TIERS_VI, HOME_POSITIONING, HOME_POSITIONING_VI } from "./homepage-content"
+import { EXPORT_TIERS, EXPORT_TIERS_VI } from "./homepage-content"
 import { VI_HOME_META } from "./home-i18n"
 
 const HOME_PAGE_ID = `${SITE_URL}/#webpage`
@@ -120,7 +120,7 @@ export function buildHomeServiceSchema() {
     "@context": "https://schema.org",
     "@type": "Service",
     "@id": HOME_SERVICE_ID,
-    name: HOME_POSITIONING.headline,
+    name: "Good goods are not enough. A buyer has to find you.",
     serviceType: "B2B Export Sales Channel: Marketplace, Product Website and Buyer Work by Market",
     description: SITE_DESCRIPTION,
     url: SITE_URL,
@@ -133,7 +133,7 @@ export function buildHomeServiceSchema() {
     hasOfferCatalog: {
       "@type": "OfferCatalog",
       "@id": `${SITE_URL}/#offer-catalog`,
-      name: "Digital export infrastructure engagement scopes",
+      name: "Export channel engagement scopes",
       itemListElement: EXPORT_TIERS.map((tier) => ({
         "@type": "Offer",
         url: `${SITE_URL}/#services`,
@@ -225,7 +225,7 @@ export function buildVietnameseHomePageSchema() {
       {
         "@type": "Service",
         "@id": serviceNodeId,
-        name: HOME_POSITIONING_VI.headline,
+        name: "Hàng tốt chưa đủ. Người mua phải tìm thấy bạn.",
         serviceType: "Kênh bán xuất khẩu B2B: sàn giao dịch, website sản phẩm và làm việc với người mua theo thị trường",
         description: VI_HOME_META.description,
         url,

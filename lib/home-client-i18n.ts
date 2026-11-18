@@ -3,7 +3,7 @@
 export const HOME_CLIENT_MESSAGES = {
   en: {
     brandTagline: "EXPORT SALES CHANNEL",
-    nav: { main: "Main navigation", mobile: "Mobile navigation", open: "Open navigation", close: "Close navigation", solutions: "Solutions", why: "Why Vexim", engagements: "Engagements", contact: "Contact", trade: "Vexim Trade", tradeEcosystem: "Vexim Trade ecosystem", audit: "Talk to us" },
+    nav: { main: "Main navigation", mobile: "Mobile navigation", open: "Open navigation", close: "Close navigation", solutions: "What we do", why: "Scope", engagements: "Compliance", contact: "Contact", trade: "Vexim Trade", tradeEcosystem: "Vexim Trade ecosystem", audit: "Talk to us" },
     language: { choose: "Choose language", english: "English", vietnamese: "Tiếng Việt" },
     audit: {
       defaultButton: "Talk to us", eyebrow: "YOUR NEXT EXPORT MARKET", title: "Tell us what you sell and where.",
@@ -21,7 +21,7 @@ export const HOME_CLIENT_MESSAGES = {
   },
   vi: {
     brandTagline: "KÊNH BÁN HÀNG XUẤT KHẨU",
-    nav: { main: "Điều hướng chính", mobile: "Điều hướng di động", open: "Mở điều hướng", close: "Đóng điều hướng", solutions: "Giải pháp", why: "Vì sao chọn Vexim", engagements: "Phạm vi hợp tác", contact: "Liên hệ", trade: "Vexim Trade", tradeEcosystem: "Hệ sinh thái Vexim Trade", audit: "Yêu cầu đánh giá" },
+    nav: { main: "Điều hướng chính", mobile: "Điều hướng di động", open: "Mở điều hướng", close: "Đóng điều hướng", solutions: "Bốn việc", why: "Phạm vi", engagements: "Tuân thủ", contact: "Liên hệ", trade: "Vexim Trade", tradeEcosystem: "Hệ sinh thái Vexim Trade", audit: "Yêu cầu trao đổi" },
     language: { choose: "Chọn ngôn ngữ", english: "English", vietnamese: "Tiếng Việt" },
     audit: {
       defaultButton: "Yêu cầu trao đổi", eyebrow: "THỊ TRƯỜNG TIẾP THEO CỦA BẠN", title: "Bạn bán gì, muốn vào đâu.",

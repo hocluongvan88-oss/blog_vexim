@@ -339,3 +339,38 @@ Sau mỗi bước: `verify-homepage.mjs` phải vẫn 19/19 PASS, CLS vẫn 0.00
    nhưng phải thống nhất một hướng: hoặc loang màu toàn trang, hoặc phẳng toàn trang.
 2. **Giảm padding dọc 112 → 96px?** Trang hiện dài 6.700px, giảm được ~600px.
 3. **Bảng so sánh 3 gói thay 3 thẻ rời?** Hiện 3 thẻ chiếm gần 1 màn hình mà không so sánh được.
+
+---
+
+## 8. Đã dựng: bố cục trang tổng quan (`components/home/hub-sections.tsx`)
+
+Bản đầu tiên của đặc tả này giữ nguyên bố cục cũ và chỉ thêm mục. Sau đó yêu cầu
+đổi: trang chủ là **trang tổng**, không phải bài viết. Đã cắt hẳn.
+
+**Cấu trúc mới — 4 khối, không hơn:**
+
+| Khối | Nội dung | Vai trò |
+|---|---|---|
+| Hero | H1 hai vế + 1 dòng + 2 nút + **mục lục 4 dòng bên phải** | Trả lời "đây là đâu" trong 3 giây |
+| Marquee | 10 ngành hàng chạy, dừng khi hover | Chỉ để định vị ngành |
+| 01 / Bốn việc | Lưới 2×2, mỗi thẻ là **một cửa vào landing page con** | Chia nhánh, không giải thích |
+| 02 / Phạm vi | 3 thẻ mở form với phạm vi chọn sẵn | Chốt hợp tác |
+| 03 / Tuân thủ | Lưới 4 ô liền kề, mỗi ô một dịch vụ | Lối vào 4 trang con |
+
+**Những gì đã bỏ khỏi trang chủ:** 13 ảnh, bento 4 thẻ, photo band, so sánh hai cột,
+3 thẻ gói dài 6 dòng, dải CTA trùng footer.
+
+**Kết quả đo được:**
+
+| Chỉ số | Trước | Sau |
+|---|---|---|
+| Chiều cao trang (1440px) | 6.700px | **3.329px** |
+| Từ trong `<main>` | ~430 | **dưới 320** |
+| Ảnh trong `<main>` | 14 | **0** |
+| Số chữ mỗi thẻ | 3 khối | 1 tiêu đề + 1 dòng + 1 mũi tên |
+
+**Quy tắc mới, đáng giữ:** trang tổng **không có ảnh**. Ảnh là trang trí cho tới khi
+nó là bằng chứng. Ảnh đã nghỉ ở `/public/home/` chờ landing page con dùng lại.
+
+**Đã kiểm:** `verify-homepage.mjs` thêm kiểm mọi link nội bộ trên trang tổng phải trả
+về 200/301/307/308 — không còn thẻ trỏ vào anchor chết. CLS 0.0000 ở cả 10 mốc rộng.
