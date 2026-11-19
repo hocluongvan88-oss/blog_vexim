@@ -170,13 +170,11 @@ export const HOME_MESSAGES = {
         ],
       ],
       demo: "Website công khai của nhà sản xuất thực phẩm Nature Foods",
-      exampleLabel: "Ví dụ công khai · không phải khách hàng Vexim",
       exampleName: "Nature Foods",
       exampleText:
         "Nhà sản xuất thực phẩm sấy Việt Nam; website giới thiệu sản phẩm, năng lực chế biến và dịch vụ OEM.",
       exampleUrl: "https://naturefoods.com.vn/",
       exampleLink: "Xem website Nature Foods",
-      exampleSource: "Nguồn: website chính thức · Kiểm tra 18/11/2026",
       cta: "Tư vấn thiết kế website",
     },
     process: {
@@ -209,8 +207,6 @@ export const HOME_MESSAGES = {
       label: "Đối tượng phù hợp",
       title: "Đối tượng phù hợp với dịch vụ của Vexim",
       alt: "Công nhân đội mũ và đeo khẩu trang đang phân loại nông sản trên bàn chế biến",
-      photoCaption:
-        "Ảnh minh họa từ nguồn công khai của Vexim Trade · không nêu tên doanh nghiệp hay địa điểm",
       items: [
         [
           "Nhà máy sản xuất, chế biến thực phẩm",
@@ -526,13 +522,11 @@ export const HOME_MESSAGES = {
         ["Quote requests", "Route enquiries to the right commercial contact."],
       ],
       demo: "Public website of Vietnamese food producer Nature Foods",
-      exampleLabel: "Public example · not a Vexim client claim",
       exampleName: "Nature Foods",
       exampleText:
         "A Vietnamese dried-food producer; its website presents products, processing capabilities and OEM services.",
       exampleUrl: "https://naturefoods.com.vn/",
       exampleLink: "Visit the Nature Foods website",
-      exampleSource: "Source: official website · Checked 18 Nov 2026",
       cta: "Discuss website design",
     },
     process: {
@@ -559,8 +553,6 @@ export const HOME_MESSAGES = {
       label: "Who it’s for",
       title: "Who can benefit from these services?",
       alt: "Workers in caps and masks sorting produce at a processing table",
-      photoCaption:
-        "Illustrative photo from a public Vexim Trade source · no business or location is identified",
       items: [
         [
           "Food manufacturers and processors",

@@ -581,13 +581,6 @@
 .solution:first-child > p:not(.eyebrow) {
   margin-bottom: 32px;
 }
-.captureSource {
-  display: block;
-  margin-top: 10px;
-  color: #c3d5c8;
-  font-size: 11px;
-  line-height: 1.5;
-}
 .tradeScreen img {
   width: 100%;
   height: auto;
@@ -1039,49 +1032,91 @@
   margin-block: 24px;
 }
 .websiteExample {
+  position: relative;
+  min-width: 0;
+  padding: clamp(22px, 3.3vw, 34px);
+  border: 1px solid var(--line);
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at 88% 6%, #e6efdf 0, transparent 46%),
+    linear-gradient(158deg, #f7f8f2, #fff 70%);
+  box-shadow: 0 26px 60px -46px #163e29;
+}
+.websiteExample::before {
+  content: "";
+  position: absolute;
+  inset: 10px 10px auto auto;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--green);
+  opacity: 0.08;
+}
+.exampleCard {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 14px;
-  padding: clamp(24px, 4vw, 48px);
-  border: 1px solid var(--line);
-  border-radius: 24px;
-  background: linear-gradient(145deg, #f6f7f1, #fff 68%);
-  box-shadow: 0 22px 50px -40px #163e29;
+  gap: 13px;
+  padding: clamp(20px, 3vw, 30px);
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 18px 40px -34px #163e29;
 }
-.websiteExample .eyebrow {
-  color: var(--green);
-  font-size: 10px;
-  line-height: 1.7;
-  letter-spacing: 0.08em;
+.exampleUrl {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 13px 6px 11px;
+  border-radius: 999px;
+  background: #f0f4ea;
+  color: #2c5c3d;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.exampleUrl::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 0 3px rgb(23 90 59 / 12%);
 }
 .websiteExample h3 {
-  font-size: clamp(28px, 4vw, 43px);
+  font-size: clamp(30px, 4vw, 44px);
   letter-spacing: -0.05em;
+  line-height: 1.02;
 }
-.websiteExample > p:not(.eyebrow) {
-  max-width: 38ch;
+.exampleCard > p {
+  max-width: 40ch;
   color: var(--muted);
   font-size: 14px;
   line-height: 1.75;
 }
-.websiteExample > a {
+.exampleCard > a {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  color: var(--green);
-  font-size: 14px;
+  gap: 8px;
+  margin-top: 2px;
+  padding: 12px 20px;
+  border-radius: 999px;
+  background: var(--green);
+  color: #fff;
+  font-size: 13px;
   font-weight: 750;
-  text-decoration: underline;
-  text-underline-offset: 4px;
+  text-decoration: none;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
 }
-.websiteExample > small {
-  padding-top: 12px;
-  border-top: 1px solid var(--line);
-  align-self: stretch;
-  margin-top: 8px;
-  color: var(--muted);
-  font-size: 11px;
+.exampleCard > a:hover {
+  transform: translateY(-1px);
+  background: #0f4a2f;
+}
+.exampleCard > a svg {
+  width: 13px;
+  height: 13px;
 }
 
 .centerHead {
@@ -1140,12 +1175,6 @@
   width: 100%;
   height: auto;
   border-radius: 25px;
-}
-.audiencePhoto figcaption {
-  margin-top: 9px;
-  color: var(--muted);
-  font-size: 10px;
-  line-height: 1.5;
 }
 .audience .points {
   grid-template-columns: 1fr;
@@ -1682,8 +1711,13 @@
     margin-inline: auto;
   }
   .websiteExample {
+    padding: 14px;
+    border-radius: 22px;
+  }
+  .exampleCard {
     gap: 11px;
-    padding: 24px;
+    padding: 20px;
+    border-radius: 16px;
   }
   .searchEvidence {
     padding: 22px;

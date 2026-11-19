@@ -197,7 +197,7 @@ for (const [label, page, title, prefix] of [
   assert.equal(tradeImage.length, 1);
   assert.ok(tradeImage.attr("alt"));
   assert.equal(tradeImage.attr("width"), "760");
-  assert.equal(tradeImage.attr("height"), "241");
+  assert.equal(tradeImage.attr("height"), "312");
   assert.ok(
     page('#solutions a[href="https://www.veximtrade.com/"]').length,
     "The genuine marketplace capture links to its source",
@@ -243,17 +243,31 @@ for (const [label, page, title, prefix] of [
     readFileSync("public/home/export/food-processing-team.webp").length <
       120000,
   );
-  const caption = page("#audience figcaption").text();
-  assert.ok(
-    caption.includes("public Vexim Trade source") ||
-      caption.includes("nguồn công khai của Vexim Trade"),
-    "Disclose the illustrative image source in both languages",
+  assert.equal(
+    page("#audience figcaption").length,
+    0,
+    "Drop the redundant illustrative-photo caption",
   );
-  if (prefix === "/en")
-    assert.ok(
-      !/Nature Foods/.test(page("#website .websiteExample small").text()),
-      "Keep the example's own source note factual",
-    );
+  assert.equal(
+    page("#solutions small").length,
+    0,
+    "Drop the redundant screenshot caption",
+  );
+  const example = page("#website aside");
+  assert.equal(
+    page("#website aside small, #website aside .eyebrow").length,
+    0,
+    "Drop the public-example label and source note from the website block",
+  );
+  assert.equal(
+    example.find('a[href="https://naturefoods.com.vn/"]').length,
+    1,
+    "Keep one clear link to the referenced website",
+  );
+  assert.ok(
+    /naturefoods\.com\.vn/.test(example.text()),
+    "Show the referenced domain in the example card",
+  );
   assert.equal(
     page('script#home-page-schema[type="application/ld+json"]').length,
     1,

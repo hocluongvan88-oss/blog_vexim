@@ -217,7 +217,7 @@ export function CoreSolutions({ locale }: Props) {
                     src={`${art}veximtrade-marketplace.webp`}
                     alt={t.screen}
                     width={760}
-                    height={241}
+                    height={312}
                     loading="lazy"
                     decoding="async"
                   />
@@ -238,13 +238,6 @@ export function CoreSolutions({ locale }: Props) {
                     <em />
                   </div>
                 </div>
-              )}
-              {i === 0 && (
-                <small className={s.captureSource}>
-                  {locale === "vi"
-                    ? "Ảnh chụp veximtrade.com · mở ảnh để xem sàn"
-                    : "Screenshot of veximtrade.com · open the image to visit"}
-                </small>
               )}
             </article>
           ))}
@@ -379,6 +372,9 @@ export function InternationalSEO({ locale }: Props) {
 
 export function ExportWebsite({ locale }: Props) {
   const t = HOME_MESSAGES[locale].website;
+  const exampleHost = t.exampleUrl
+    .replace(/^https?:\/\//, "")
+    .replace(/\/$/, "");
   return (
     <section id="website" className={`${s.section} ${s.white}`}>
       <div className={`${s.container} ${s.website}`}>
@@ -392,14 +388,20 @@ export function ExportWebsite({ locale }: Props) {
             {arrow}
           </ConsultationLink>
         </div>
-        <aside className={s.websiteExample} aria-label={t.demo}>
-          <p className={s.eyebrow}>{t.exampleLabel}</p>
-          <h3>{t.exampleName}</h3>
-          <p>{t.exampleText}</p>
-          <a href={t.exampleUrl} target="_blank" rel="noopener noreferrer">
-            {t.exampleLink} {external}
-          </a>
-          <small>{t.exampleSource}</small>
+        <aside className={s.websiteExample} aria-label={t.exampleName}>
+          <div className={s.exampleCard}>
+            <span className={s.exampleUrl}>{exampleHost}</span>
+            <h3>{t.exampleName}</h3>
+            <p>{t.exampleText}</p>
+            <a
+              className={s.exampleLink}
+              href={t.exampleUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {t.exampleLink} {external}
+            </a>
+          </div>
         </aside>
       </div>
     </section>
@@ -438,7 +440,6 @@ export function Delivery({ locale }: Props) {
               loading="lazy"
               decoding="async"
             />
-            <figcaption>{audience.photoCaption}</figcaption>
           </figure>
           <div>
             <p className={s.eyebrow}>{audience.label}</p>
