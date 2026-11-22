@@ -173,6 +173,69 @@
 .desktopNav a:hover {
   color: #197451;
 }
+.account {
+  position: relative;
+  flex: none;
+}
+.account summary {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 13px;
+  border: 1px solid var(--line);
+  border-radius: 50px;
+  color: var(--ink);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+  white-space: nowrap;
+}
+.account summary::-webkit-details-marker {
+  display: none;
+}
+.account summary:hover,
+.account[open] summary {
+  border-color: #b9cbbc;
+  background: #f3f6f0;
+}
+.account[open] summary svg {
+  transform: rotate(180deg);
+}
+.accountMenu {
+  position: absolute;
+  z-index: 50;
+  top: calc(100% + 8px);
+  right: 0;
+  display: grid;
+  width: 268px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 22px 44px -26px rgb(14 40 26 / 45%);
+}
+.accountMenu a {
+  display: grid;
+  gap: 3px;
+  padding: 11px 12px;
+  border-radius: 11px;
+  color: var(--ink);
+  text-decoration: none;
+}
+.accountMenu a:hover {
+  background: #f2f6ee;
+}
+.accountMenu b {
+  font-size: 13px;
+  font-weight: 700;
+}
+.accountMenu small {
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 1.45;
+}
 .headerCta {
   min-height: 40px;
   padding: 9px 17px;
@@ -242,6 +305,9 @@
   .mobileNav a span {
     color: var(--green);
   }
+  .mobileAccount {
+    color: var(--green) !important;
+  }
   .utility {
     font-size: 10.5px;
     gap: 12px;
@@ -256,6 +322,10 @@
   }
 }
 @media (max-width: 620px) {
+  /* The drawer carries both sign-in destinations at this width. */
+  .account {
+    display: none;
+  }
   .headerInner {
     height: 62px;
   }

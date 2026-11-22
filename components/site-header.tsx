@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Menu, X } from "lucide-react";
+import { ChevronDown, Menu, X } from "lucide-react";
 import { ConsultationDialog } from "@/components/consultation-dialog";
 import { HOME_CLIENT_MESSAGES } from "@/lib/home-client-i18n";
 import {
@@ -38,6 +38,7 @@ export function SiteHeader({
   const [expanded, setExpanded] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const header = useRef<HTMLElement>(null);
+  const account = useRef<HTMLDetailsElement>(null);
   const toggle = useRef<HTMLButtonElement>(null);
   const text = HOME_CLIENT_MESSAGES[locale ?? "vi"];
   const base = homePath(locale ?? "vi");
@@ -68,6 +69,17 @@ export function SiteHeader({
       document.removeEventListener("keydown", escape);
     };
   }, [expanded]);
+
+  // `<details>` không tự đóng khi bấm ra ngoài: đóng giúp menu không bị treo mở.
+  useEffect(() => {
+    const close = (e: PointerEvent) => {
+      if (!account.current?.open) return;
+      if (!account.current.contains(e.target as Node))
+        account.current.open = false;
+    };
+    document.addEventListener("pointerdown", close);
+    return () => document.removeEventListener("pointerdown", close);
+  }, []);
 
   // Đóng menu khi chuyển trang bằng điều hướng phía client.
   useEffect(() => {
@@ -133,6 +145,22 @@ export function SiteHeader({
               </a>
             ))}
           </nav>
+          <details ref={account} className={styles.account}>
+            <summary aria-label={text.nav.login}>
+              <span>{text.nav.login}</span>
+              <ChevronDown size={14} aria-hidden="true" />
+            </summary>
+            <div className={styles.accountMenu}>
+              <a href="/client-portal">
+                <b>{text.nav.loginClient}</b>
+                <small>{text.nav.loginClientHint}</small>
+              </a>
+              <a href="/admin/login">
+                <b>{text.nav.loginAdmin}</b>
+                <small>{text.nav.loginAdminHint}</small>
+              </a>
+            </div>
+          </details>
           <button
             type="button"
             className={`${styles.button} ${styles.headerCta}`}
@@ -169,6 +197,22 @@ export function SiteHeader({
               <span aria-hidden="true">→</span>
             </a>
           ))}
+          <a
+            href="/client-portal"
+            onClick={() => setExpanded(false)}
+            className={styles.mobileAccount}
+          >
+            {text.nav.loginClient}
+            <span aria-hidden="true">→</span>
+          </a>
+          <a
+            href="/admin/login"
+            onClick={() => setExpanded(false)}
+            className={styles.mobileAccount}
+          >
+            {text.nav.loginAdmin}
+            <span aria-hidden="true">→</span>
+          </a>
         </nav>
       </header>
       <ConsultationDialog

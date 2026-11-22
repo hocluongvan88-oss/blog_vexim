@@ -21,7 +21,8 @@ Toàn site render đúng một header: `components/site-header.tsx` (+ `componen
 
 - Trang chủ và `/privacy` truyền `locale`/`page` nên có bộ chuyển ngữ VI/EN; trang dịch vụ và blog không truyền, nên **không** hiển thị bộ chuyển ngữ — đúng với hiện trạng “chưa có bản dịch” ở trên.
 - Các mục điều hướng trỏ về đúng mục của landing page (`/services/export-sales`, `/#seo`, `/#website`, `/#services`, `/blog`, `/#contact`), không còn trỏ tới `#about` đã bị bỏ.
-- Nút CTA mở hộp thoại tư vấn dùng chung thay cho avatar “AD” trang trí trước đây; lối vào `/client-portal` và `/admin/login` vẫn nằm ở footer.
+- Nút CTA mở hộp thoại tư vấn dùng chung thay cho avatar “AD” trang trí trước đây.
+- Lối vào tài khoản nằm ở mục **Đăng nhập** trên header: một menu `<details>` mở ra hai đích — `/client-portal` (Cổng khách hàng) và `/admin/login` (Quản trị viên). Dưới 620px, hai liên kết này được đưa vào menu di động. Footer cũng có cặp liên kết tương ứng làm lối vào dự phòng, nên không còn cảnh “không biết đăng nhập ở đâu” như khi header cũ bị thay.
 - Mọi trang dùng header đều có neo `#main-content` (nút “Bỏ qua đến nội dung chính”) và `data-site-header` để `body` dùng `overflow-x: clip` — nếu dùng `hidden`, `position: sticky` của header sẽ ngừng dính.
 - Vì thanh header dính được, phần đệm đầu trang của các trang dịch vụ/blog đã giảm từ `pt-24/32` xuống `pt-8/10` để không còn khoảng trống lớn dưới header.
 
