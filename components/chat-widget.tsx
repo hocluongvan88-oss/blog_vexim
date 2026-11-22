@@ -42,6 +42,10 @@ import {
 } from "@/lib/lead-profile"
 
 /**
+ * Khung chat AI. HIỆN KHÔNG ĐƯỢC RENDER: `SHOW_AI_CHAT = false` trong
+ * `components/client-widgets.tsx`. Website chỉ còn một kênh liên hệ nổi là
+ * nút Zalo OA. Giữ mã nguồn (và các API `/api/chat*`) để có thể bật lại.
+ *
  * Nội dung thẻ "cần tư vấn sâu hơn" — nói đúng ngữ cảnh từng trường hợp
  * thay vì lặp lại một câu máy móc.
  */

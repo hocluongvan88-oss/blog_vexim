@@ -370,35 +370,17 @@ body:has([data-vexim-homepage]) {
 }
 
 /* ------------------------------------------------------------------
-   Nút Zalo OA — ĐANG BẬT, nằm DƯỚI khung chat AI ở góc phải.
-   Khung chat AI được đẩy lên `bottom-24` (96px) trong chat-widget.tsx;
-   nút Zalo giữ ở đáy màn hình (xem bộ CSS bên dưới).
+   Nút Zalo OA — kênh liên hệ nổi DUY NHẤT trên website.
+   Khung chat AI đã được ẩn (SHOW_AI_CHAT = false trong
+   components/client-widgets.tsx), nên nút Zalo nằm ở đáy góc phải,
+   không còn phải nhường chỗ cho nút chat AI phía trên.
 
-   Ghi chú cũ (khi nút Zalo nằm bên trái) — giữ để tham khảo:
-
-   Nếu bật lại nút Zalo, mở lại đoạn CSS dưới đây để đẩy nó sang góc TRÁI,
-   tránh nằm đè lên khung chat AI ở góc phải:
-
-   .zalo-chat-widget,
-   #zalo-chat-widget,
-   [class*="zalo-chat-widget"] {
-     left: 24px !important;
-     right: auto !important;
-     bottom: 24px !important;
-     z-index: 40 !important;
-   }
-
-   @media (max-width: 640px) {
-     .zalo-chat-widget,
-     #zalo-chat-widget,
-     [class*="zalo-chat-widget"] {
-       left: 16px !important;
-       bottom: 16px !important;
-     }
-   }
+   Nếu sau này bật lại khung chat AI ở `bottom-24 right-6`, đổi `bottom`
+   của nút Zalo xuống thấp hơn hoặc đẩy nút Zalo sang góc trái để tránh
+   chồng lên nhau.
    ------------------------------------------------------------------ */
 
-/* Nút Zalo OA: góc phải dưới, phía dưới khung chat AI (đang bật) */
+/* Nút Zalo OA: góc phải dưới */
 .zalo-chat-widget,
 #zalo-chat-widget,
 [class*="zalo-chat-widget"] {

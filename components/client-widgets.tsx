@@ -4,33 +4,25 @@ import { useEffect } from "react"
 import { usePathname } from "next/navigation"
 import dynamic from "next/dynamic"
 
-// Keep the Vietnamese floating widgets out of the new homepage's JS bundle.
+// Keep the floating widgets out of the new homepage's JS bundle.
 const ChatWidget = dynamic(() => import("@/components/chat-widget").then(mod => mod.ChatWidget), { ssr: false })
 const ZaloChatButton = dynamic(() => import("@/components/zalo-chat-button").then(mod => mod.ZaloChatButton), { ssr: false })
 
 /**
- * Bật/tắt nút Zalo OA nổi trên website.
+ * Kênh liên hệ nổi trên website (ẩn trong trang quản trị /admin).
  *
- * ĐANG BẬT: nút Zalo nằm ở góc phải dưới, phía DƯỚI khung chat AI (khung chat AI
- * được đẩy lên `bottom-24` trong chat-widget.tsx). CSS vị trí nằm trong
- * `app/globals.css` — tìm chú thích "Nút Zalo OA".
+ * Hiện chỉ còn MỘT kênh: nút Zalo OA ở góc phải dưới, mở cửa sổ chat Zalo
+ * ngay trên trang. Khung chat AI (`components/chat-widget.tsx`) được GIỮ LẠI
+ * trong mã nguồn nhưng không còn render — xem `SHOW_AI_CHAT` bên dưới.
  *
- * Muốn tắt: đổi thành `false`.
- *
- * Lưu ý: tắt nút này KHÔNG ảnh hưởng đến kênh Zalo của Vexim. Khách vẫn nhắn
- * trực tiếp cho OA qua ứng dụng Zalo như bình thường, webhook `/api/webhooks/zalo`
- * và chuông thông báo cho admin vẫn hoạt động nguyên vẹn.
+ * Lưu ý: ẩn khung chat AI KHÔNG ảnh hưởng đến webhook `/api/webhooks/zalo`,
+ * hộp thư `/admin/conversations` hay kênh Zalo OA của Vexim. Khách vẫn nhắn
+ * trực tiếp cho OA qua ứng dụng Zalo như bình thường.
  */
 const SHOW_ZALO_BUTTON = true
+const SHOW_AI_CHAT = false
 const LANDING_PATHS = new Set(["/", "/privacy", "/en", "/en/privacy"])
 
-/**
- * Các kênh liên hệ hiển thị trên website (ẩn trong trang quản trị /admin).
- *
- *  1. Trợ lý AI của Vexim (khung chat góc phải) — trả lời ngay 24/7 bằng kho
- *     tri thức nội bộ; khi cần thì xin liên hệ và chuyển cho chuyên viên.
- *  2. (Đang tắt) Nút Zalo OA — xem `SHOW_ZALO_BUTTON` ở trên.
- */
 export function ClientWidgets() {
   const pathname = usePathname()
 
@@ -43,14 +35,13 @@ export function ClientWidgets() {
     document.body.classList.toggle("font-sans", !LANDING_PATHS.has(pathname))
   }, [pathname])
 
-  // Both localized landing/privacy pairs share the audit/contact flow. Keep
-  // Vietnamese chat/Zalo overlays (and their third-party SDK) on the existing
-  // service/blog routes, not over either editorial homepage.
-  if (LANDING_PATHS.has(pathname) || pathname?.startsWith("/admin")) return null
+  // Zalo là kênh liên hệ duy nhất nên hiện trên MỌI trang công khai, kể cả
+  // landing page và /privacy. Chỉ ẩn trong trang quản trị /admin.
+  if (pathname?.startsWith("/admin")) return null
 
   return (
     <>
-      <ChatWidget />
+      {SHOW_AI_CHAT && <ChatWidget />}
       {SHOW_ZALO_BUTTON && <ZaloChatButton />}
     </>
   )

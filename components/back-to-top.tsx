@@ -34,7 +34,9 @@ export function BackToTop() {
   return (
     <Button
       onClick={scrollToTop}
-      className="fixed bottom-5 right-5 sm:bottom-8 sm:right-8 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-accent text-accent-foreground hover:bg-accent/90 shadow-lg z-40"
+      /** Nút Zalo OA chiếm góc phải dưới (~60px + lề) nên nút này nằm CAO HƠN,
+       *  không đè lên nút Zalo. Trên mobile lề dưới của Zalo là 16px. */
+      className="fixed bottom-24 right-5 sm:bottom-28 sm:right-6 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-accent text-accent-foreground hover:bg-accent/90 shadow-lg z-40"
       size="icon"
       aria-label="Quay lại đầu trang"
     >
