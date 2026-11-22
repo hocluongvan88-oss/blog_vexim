@@ -17,6 +17,11 @@ export const HOME_CLIENT_MESSAGES = {
       news: "Tin tức",
       contact: "Liên hệ",
       consult: "Tư vấn miễn phí",
+      login: "Đăng nhập",
+      loginClient: "Cổng khách hàng",
+      loginClientHint: "Theo dõi hồ sơ, chứng nhận và tài liệu",
+      loginAdmin: "Quản trị viên",
+      loginAdminHint: "Bảng điều khiển nội bộ",
     },
     form: {
       company: "Tên doanh nghiệp",
@@ -59,6 +64,11 @@ export const HOME_CLIENT_MESSAGES = {
       news: "Insights",
       contact: "Contact",
       consult: "Free consultation",
+      login: "Sign in",
+      loginClient: "Client portal",
+      loginClientHint: "Track registrations, certificates and documents",
+      loginAdmin: "Administrator",
+      loginAdminHint: "Internal dashboard",
     },
     form: {
       company: "Company name",

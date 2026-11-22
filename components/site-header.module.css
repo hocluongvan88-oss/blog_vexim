@@ -1,0 +1,372 @@
+/* Header dùng chung cho toàn site — cùng thiết kế với landing page.
+   Tên lớp giữ trùng `home.module.css` để giao diện không đổi. */
+
+.shell {
+  /* `display: contents` để phần bao này không tạo hộp: nếu không, `header`
+     (position: sticky) sẽ bị giới hạn trong chiều cao của chính wrapper và
+     ngừng dính sau ~34px cuộn. Biến CSS vẫn kế thừa qua phần tử contents. */
+  display: contents;
+  --green: #0b4937;
+  --ink: #11251e;
+  --gold: #f5b63e;
+  --muted: #465c51;
+  --line: #dfdfd3;
+  color: var(--ink);
+  font:
+    400 15px/1.65 system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
+}
+.shell :where(a, button, input, textarea, select, summary):focus-visible {
+  outline: 3px solid #c48113;
+  outline-offset: 4px;
+}
+.container {
+  width: min(86.2%, 1220px);
+  margin-inline: auto;
+}
+.button {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 11px 22px;
+  border: 1px solid transparent;
+  border-radius: 50px;
+  background: var(--green);
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.45;
+  text-decoration: none;
+  cursor: pointer;
+  border: 0;
+  font-family: inherit;
+  transition:
+    background 0.18s,
+    transform 0.18s;
+}
+.button:hover {
+  background: #116146;
+  transform: translateY(-1px);
+}
+.skip {
+  position: fixed;
+  z-index: 60;
+  top: 8px;
+  left: 16px;
+  padding: 8px 14px;
+  color: var(--ink);
+  background: white;
+  transform: translateY(-160%);
+}
+.skip:focus {
+  transform: none;
+}
+
+/* Dải tiện ích ngắn, rồi tới thanh điều hướng dính trên cùng. */
+.topbar {
+  background: #072c21;
+  color: #f2f6f2;
+}
+.utility {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-height: 34px;
+  font-size: 11.5px;
+  line-height: 1.3;
+}
+.utility > span {
+  margin-right: auto;
+}
+.utility a {
+  color: inherit;
+  text-decoration: none;
+}
+.utility a:hover {
+  text-decoration: underline;
+}
+.languages {
+  display: flex;
+  gap: 4px;
+}
+.languages a {
+  display: inline-grid;
+  min-height: 30px;
+  min-width: 26px;
+  place-items: center;
+  color: #c2d4c9;
+}
+.languages [aria-current="page"] {
+  color: #fff;
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: var(--gold);
+  text-underline-offset: 4px;
+}
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: #fff;
+  border-bottom: 1px solid #dfe6df;
+}
+.headerInner {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  height: 68px;
+}
+.brand {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 9px;
+  color: var(--ink);
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1.1;
+  letter-spacing: -0.055em;
+  text-decoration: none;
+}
+.brand small {
+  display: block;
+  margin-top: 3px;
+  color: #50645a;
+  font-size: 9px;
+  letter-spacing: 0.125em;
+  font-weight: 600;
+}
+.brandMark {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  background: var(--green);
+}
+.brandMark img {
+  width: 22px;
+  height: auto;
+  filter: brightness(0) saturate(100%) invert(78%) sepia(82%) saturate(802%)
+    hue-rotate(337deg);
+}
+.desktopNav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(13px, 1.5vw, 24px);
+  margin-inline: auto;
+}
+.desktopNav a {
+  padding-block: 12px;
+  white-space: nowrap;
+  color: var(--ink);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.desktopNav a:hover {
+  color: #197451;
+}
+.account {
+  position: relative;
+  flex: none;
+}
+.account summary {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 13px;
+  border: 1px solid var(--line);
+  border-radius: 50px;
+  color: var(--ink);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+  white-space: nowrap;
+}
+.account summary::-webkit-details-marker {
+  display: none;
+}
+.account summary:hover,
+.account[open] summary {
+  border-color: #b9cbbc;
+  background: #f3f6f0;
+}
+.account[open] summary svg {
+  transform: rotate(180deg);
+}
+.accountMenu {
+  position: absolute;
+  z-index: 50;
+  top: calc(100% + 8px);
+  right: 0;
+  display: grid;
+  width: 268px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 22px 44px -26px rgb(14 40 26 / 45%);
+}
+.accountMenu a {
+  display: grid;
+  gap: 3px;
+  padding: 11px 12px;
+  border-radius: 11px;
+  color: var(--ink);
+  text-decoration: none;
+}
+.accountMenu a:hover {
+  background: #f2f6ee;
+}
+.accountMenu b {
+  font-size: 13px;
+  font-weight: 700;
+}
+.accountMenu small {
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 1.45;
+}
+.headerCta {
+  min-height: 40px;
+  padding: 9px 17px;
+  white-space: nowrap;
+}
+.shortCta {
+  display: none;
+}
+.menuToggle {
+  display: none;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  width: 44px;
+  height: 44px;
+  color: var(--green);
+  background: transparent;
+  cursor: pointer;
+}
+.mobileNav,
+.mobileNav[hidden] {
+  display: none;
+}
+.mobileNav a {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+@media (max-width: 1140px) {
+  .container {
+    width: calc(100% - 56px);
+  }
+  .desktopNav {
+    display: none;
+  }
+  .headerInner {
+    gap: 10px;
+  }
+  .headerCta {
+    margin-left: auto;
+  }
+  .menuToggle {
+    display: inline-flex;
+  }
+  .mobileNav:not([hidden]) {
+    display: grid;
+    position: absolute;
+    inset: 100% 0 auto;
+    padding: 8px 28px 16px;
+    background: white;
+    border-bottom: 1px solid var(--line);
+    box-shadow: 0 16px 30px rgb(15 40 24 / 12%);
+    max-height: 70vh;
+    overflow: auto;
+  }
+  .mobileNav a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 44px;
+    font-size: 14px;
+    font-weight: 600;
+    border-top: 1px solid #ecede6;
+  }
+  .mobileNav a span {
+    color: var(--green);
+  }
+  .mobileAccount {
+    color: var(--green) !important;
+  }
+  .utility {
+    font-size: 10.5px;
+    gap: 12px;
+  }
+}
+@media (max-width: 820px) {
+  .utility > span {
+    display: none;
+  }
+  .utility > a:first-of-type {
+    margin-right: auto;
+  }
+}
+@media (max-width: 620px) {
+  /* The drawer carries both sign-in destinations at this width. */
+  .account {
+    display: none;
+  }
+  .headerInner {
+    height: 62px;
+  }
+  .brand {
+    font-size: 16px;
+  }
+  .brandMark {
+    height: 34px;
+    width: 34px;
+  }
+  .brand small {
+    font-size: 8px;
+  }
+  .headerCta {
+    min-height: 38px;
+    padding: 8px 12px;
+    font-size: 11.5px;
+  }
+}
+@media (max-width: 420px) {
+  .headerCta span:first-child {
+    display: none;
+  }
+  .headerCta .shortCta {
+    display: inline;
+  }
+  .headerCta {
+    padding-inline: 10px;
+  }
+  .platformLink {
+    display: none;
+  }
+  .brand {
+    gap: 6px;
+    font-size: 14px;
+  }
+  .headerInner {
+    gap: 7px;
+  }
+  .menuToggle {
+    width: 42px;
+    height: 42px;
+  }
+}

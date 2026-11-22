@@ -22,7 +22,7 @@ import {
   ShieldCheck,
   Wallet,
 } from "lucide-react"
-import { Header } from "@/components/header"
+import { SiteHeader } from "@/components/site-header"
 import { Footer } from "@/components/footer"
 import { Button } from "@/components/ui/button"
 import { FdaLeadForm } from "@/components/fda/lead-form"
@@ -128,10 +128,10 @@ export default function FDAPage() {
   return (
     <>
       <JsonLd id="fda-page-schema" data={buildFdaPageSchema()} />
-      <Header />
+      <SiteHeader />
       <main id="main-content">
         {/* Rebuilt to match the reference: photographic hero + directly usable lead form. */}
-        <section id="fda-hero" className="relative isolate overflow-hidden pb-14 pt-28 md:pb-20 md:pt-36">
+        <section id="fda-hero" className="relative isolate overflow-hidden pb-14 pt-8 md:pb-20 md:pt-12">
           <Image
             src={FDA_HERO_IMAGE}
             alt="Minh họa cảng container và hoạt động xuất khẩu hàng hóa"

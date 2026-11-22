@@ -220,23 +220,20 @@ try {
   console.log("PASS: native FAQ keyboard interaction; no page JavaScript errors")
 
   // Preserve regression coverage for the shared dialog used elsewhere on the site.
-  async function clickText(text) {
-    for (const button of await page.$$("button")) {
-      if ((await button.evaluate((el) => el.textContent)).includes(text)) {
-        await button.click()
-        return
-      }
-    }
-    throw new Error(`Button not found: ${text}`)
-  }
   await page.setViewport({ width: 1440, height: 1000 })
   await page.goto(`${base}/services/us-agent`, { waitUntil: "networkidle0", timeout: 120000 })
-  await page.click('button[aria-haspopup="dialog"]')
+  // In-page CTA keeps the children-trigger flow of the shared ConsultationDialog.
+  await page.click('main button[aria-haspopup="dialog"]')
   await page.waitForSelector('[role="dialog"]', { visible: true })
   await page.keyboard.press("Escape")
   await page.waitForFunction(() => !document.querySelector('[role="dialog"]'))
-  await clickText("Yêu cầu tư vấn")
+  // The site-wide header CTA opens the same dialog from its controlled state.
+  const headerCta = 'header button[class*="headerCta"][aria-haspopup="dialog"]'
+  assert.ok(await page.$(headerCta), "Header exposes the consultation dialog")
+  await page.click(headerCta)
   await page.waitForSelector('[role="dialog"]', { visible: true })
+  await page.keyboard.press("Escape")
+  await page.waitForFunction(() => !document.querySelector('[role="dialog"]'))
   console.log("PASS: existing children-trigger and controlled header-dialog flows")
 } finally {
   await browser.close()

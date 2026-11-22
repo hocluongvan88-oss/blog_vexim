@@ -1,6 +1,6 @@
 import { createClient, createStaticClient } from "@/lib/supabase/server"
 import { LOGO } from "@/lib/business-profile"
-import Header from "@/components/header"
+import { SiteHeader } from "@/components/site-header"
 import Footer from "@/components/footer"
 import { BackToTop } from "@/components/back-to-top"
 import { Button } from "@/components/ui/button"
@@ -297,9 +297,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       )}
       <ViewTracker postId={post.id} />
-      <Header />
+      <SiteHeader />
       <BlogShareButtons />
-      <main className="min-h-screen pt-20 md:pt-24">
+      <main id="main-content" className="min-h-screen pt-8 md:pt-12">
         <article className="py-8 md:py-12">
           <div className="container mx-auto px-4">
             <Link href="/blog" className="hidden md:inline-block mb-8">

@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { Mail, Phone, MapPin } from "lucide-react"
+import { Mail, Phone, MapPin, User } from "lucide-react"
 import {
   ADDRESS,
   ORGANIZATION_NAME,
@@ -88,6 +88,20 @@ export function Footer() {
                 <a href={VEXIM_PHONE_TEL_URL} className="text-white/80 hover:text-accent transition-colors">
                   {PHONE_DISPLAY}
                 </a>
+              </li>
+              <li className="flex items-start gap-3">
+                <User className="w-5 h-5 mt-1 flex-shrink-0" />
+                {/* Lối vào tài khoản ổn định: mọi trang đều có footer, kể cả khi
+                    header đang ở chế độ thu gọn trên điện thoại. */}
+                <span className="text-white/80">
+                  <a href="/client-portal" className="hover:text-accent transition-colors underline underline-offset-4">
+                    Cổng khách hàng
+                  </a>
+                  <span className="px-2 text-white/40" aria-hidden="true">·</span>
+                  <a href="/admin/login" className="hover:text-accent transition-colors">
+                    Quản trị viên
+                  </a>
+                </span>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="w-5 h-5 flex-shrink-0" />

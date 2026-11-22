@@ -1,4 +1,4 @@
-import Header from "@/components/header"
+import { SiteHeader } from "@/components/site-header"
 import Footer from "@/components/footer"
 import { BackToTop } from "@/components/back-to-top"
 import { Button } from "@/components/ui/button"
@@ -49,10 +49,10 @@ export default function USAgentPage() {
         thay vì coi là hai dịch vụ khác nhau. Nội dung lấy từ SERVICE_CATALOG.
       */}
       <JsonLd id="service-us-agent-schema" data={serviceNode} />
-      <Header />
-      <main className="min-h-screen">
+      <SiteHeader />
+      <main id="main-content" className="min-h-screen">
         {/* Hero Section */}
-        <section className="relative bg-gradient-to-br from-primary via-primary/95 to-primary/90 text-white pt-32 md:pt-40 pb-16 md:pb-20">
+        <section className="relative bg-gradient-to-br from-primary via-primary/95 to-primary/90 text-white pt-10 md:pt-14 pb-16 md:pb-20">
           <div className="container mx-auto px-4">
             <div className="grid lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
               <div>

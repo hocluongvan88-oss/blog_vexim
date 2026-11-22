@@ -126,7 +126,10 @@ assert.equal(
   0,
   "Untranslated legal pages must not advertise an English counterpart",
 );
-assert.equal(fda("[data-language-switcher]").length, 0);
+const fdaSwitcher = fda(
+  "footer [data-language-switcher], main [data-language-switcher]",
+).length;
+assert.equal(fdaSwitcher, 0);
 assert.equal(fda('head meta[name="description"]').length, 1);
 for (const id of ["solutions", "the-gap", "services", "contact"]) {
   assert.equal(home(`#${id}`).length, 1, id);
@@ -486,7 +489,7 @@ try {
           report: rect('figure[class*="heroStage"]'),
           brand: rect('header a[class*="brand"]'),
           menu: rect('button[aria-controls="home-mobile-nav"]'),
-          cta: rect('header a[href$="#contact"][class]'),
+          cta: rect('header button[class*="headerCta"]'),
           cards: [...document.querySelectorAll("#solutions article")].map(
             (el) => el.getBoundingClientRect().top,
           ),

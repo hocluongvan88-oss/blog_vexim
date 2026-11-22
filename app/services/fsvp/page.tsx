@@ -1,4 +1,4 @@
-import { Header } from "@/components/header"
+import { SiteHeader } from "@/components/site-header"
 import { Footer } from "@/components/footer"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -49,11 +49,11 @@ export default function FSVPMainPage() {
         thay vì coi là hai dịch vụ khác nhau. Nội dung lấy từ SERVICE_CATALOG.
       */}
       <JsonLd id="service-fsvp-schema" data={serviceNode} />
-    <div className="min-h-screen flex flex-col">
-      <Header />
+    <div id="main-content" className="min-h-screen flex flex-col">
+      <SiteHeader />
 
       {/* Hero Section */}
-      <section className="pt-24 md:pt-32 pb-16 md:pb-24 bg-gradient-to-br from-primary/5 via-background to-accent/5">
+      <section className="pt-8 md:pt-12 pb-16 md:pb-24 bg-gradient-to-br from-primary/5 via-background to-accent/5">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>

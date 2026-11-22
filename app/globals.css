@@ -206,9 +206,12 @@ body:has([data-blog-sidebar-rail]) {
   overflow-x: clip;
 }
 
-/* Keep the homepage's translucent sticky header attached to the viewport.
-   A hidden horizontal overflow on body would create a scroll container and
-   prevent sticky positioning; clip does not affect other site sections. */
+/* Keep the shared sticky header attached to the viewport.
+   `overflow-x: hidden` on body computes overflow-y to auto, creating a
+   non-scrolling ancestor that breaks `position: sticky`; `clip` still prevents
+   horizontal overflow without that scroll box. Every page that renders
+   `SiteHeader` carries `data-site-header`, so the fix stays scoped. */
+body:has([data-site-header]),
 body:has([data-vexim-homepage]) {
   overflow-x: clip;
 }
