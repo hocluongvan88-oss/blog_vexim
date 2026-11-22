@@ -37,3 +37,12 @@ Các URL dịch vụ pháp lý/quy định hiện có vẫn là tiếng Việt, 
 - `pnpm schema:export && pnpm test:schema` kiểm tra đồ thị EN/VI và JSON xuất ở `docs/seo/homepage-schema.json`, `docs/seo/homepage-schema-vi.json`. Có thể đặt `SCHEMA_TEST_BASE_URL` trỏ tới bản build chạy thật để so sánh HTML.
 - Sau `pnpm build` và `pnpm start`, chạy `pnpm test:homepage` (đặt `BROWSER_EXECUTABLE_PATH` nếu có Chromium để chạy cả tương tác). Test bao gồm bốn URL, `hreflang`/sitemap, menu EN/VI, biểu mẫu EN/VI, 320–1920px, không tràn ngang và không CLS.
 - Kiểm tra riêng `pnpm test:fda`, `pnpm test:trade` và các bài kiểm tra hiện có trước khi phát hành. Build/test cục bộ **không chứng minh** production đã triển khai; kiểm tra URL công khai và trạng thái deploy sau khi PR được merge.
+
+## Kênh liên hệ nổi (chatbot)
+
+Website chỉ còn **một** kênh liên hệ nổi: nút **Zalo OA** (`components/zalo-chat-button.tsx`, CSS vị trí ở `app/globals.css`). Khung chat AI (`components/chat-widget.tsx`) vẫn giữ trong mã nguồn nhưng bị tắt bằng `SHOW_AI_CHAT = false` trong `components/client-widgets.tsx` — muốn bật lại chỉ cần đổi cờ đó thành `true` (và đẩy nút Zalo xuống/ sang trái để hai nút không chồng nhau).
+
+- Zalo hiện trên mọi trang công khai, kể cả landing page và `/privacy`; chỉ ẩn trong `/admin`.
+- `/services/export-sales` là tài liệu HTML tự dựng (`app/services/export-sales/route.ts`) nên không nạp widget nào — giữ nguyên chủ ý cũ.
+- Nút "Quay lại đầu trang" (`components/back-to-top.tsx`) được nâng lên `bottom-24/28` để không đè lên nút Zalo ở góc phải dưới.
+- Ẩn chat AI **không** ảnh hưởng webhook `/api/webhooks/zalo`, hộp thư `/admin/conversations` hay các API `/api/chat*`.
