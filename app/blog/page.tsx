@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
-import Header from "@/components/header"
+import { SiteHeader } from "@/components/site-header"
 import Footer from "@/components/footer"
 import { BackToTop } from "@/components/back-to-top"
 import { Card } from "@/components/ui/card"
@@ -66,13 +66,13 @@ export default async function BlogPage({ searchParams }: { searchParams: Promise
 
   return (
     <>
-      <Header />
-      <main className="min-h-screen">
+      <SiteHeader />
+      <main id="main-content" className="min-h-screen">
         {/* ============================================================
             Hero — navy đậm nhiều lớp (ảnh logistics + glow xanh nhạt),
             không còn là một mảng màu phẳng như trước.
             ============================================================ */}
-        <section className="relative bg-navy-950 text-white pt-32 md:pt-40 pb-16 md:pb-20 overflow-hidden">
+        <section className="relative bg-navy-950 text-white pt-10 md:pt-14 pb-16 md:pb-20 overflow-hidden">
           {/* Ảnh nền logistics / vận chuyển */}
           <div
             className="absolute inset-0"

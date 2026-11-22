@@ -1,5 +1,5 @@
 import { Metadata } from "next"
-import Header from "@/components/header"
+import { SiteHeader } from "@/components/site-header"
 import Footer from "@/components/footer"
 import { GACCAssessmentForm } from "@/components/gacc-assessment-form"
 import { BackToTop } from "@/components/back-to-top"
@@ -17,8 +17,8 @@ export const metadata: Metadata = {
 export default function GACCAssessmentPage() {
   return (
     <>
-      <Header />
-      <main className="min-h-screen bg-gradient-to-b from-background to-muted/20 pt-20">
+      <SiteHeader />
+      <main id="main-content" className="min-h-screen bg-gradient-to-b from-background to-muted/20 pt-8">
         {/* Hero Section */}
         <section className="py-16 px-4 bg-primary text-primary-foreground">
           <div className="container max-w-4xl mx-auto text-center">

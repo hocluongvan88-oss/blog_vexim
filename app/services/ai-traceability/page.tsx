@@ -1,4 +1,4 @@
-import Header from "@/components/header"
+import { SiteHeader } from "@/components/site-header"
 import Footer from "@/components/footer"
 import { BackToTop } from "@/components/back-to-top"
 import { Button } from "@/components/ui/button"
@@ -21,10 +21,10 @@ export const metadata: Metadata = {
 export default function AITraceabilityPage() {
   return (
     <>
-      <Header />
-      <main className="min-h-screen bg-gradient-to-b from-background via-background to-secondary/20">
+      <SiteHeader />
+      <main id="main-content" className="min-h-screen bg-gradient-to-b from-background via-background to-secondary/20">
         {/* Hero Section with Tech Aesthetic */}
-        <section className="relative pt-32 md:pt-40 pb-20 md:pb-32 overflow-hidden">
+        <section className="relative pt-10 md:pt-14 pb-20 md:pb-32 overflow-hidden">
           {/* Animated background grid */}
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
 

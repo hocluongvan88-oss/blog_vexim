@@ -1,5 +1,5 @@
 import { createClient, createStaticClient } from "@/lib/supabase/server"
-import Header from "@/components/header"
+import { SiteHeader } from "@/components/site-header"
 import Footer from "@/components/footer"
 import { BackToTop } from "@/components/back-to-top"
 import { Card } from "@/components/ui/card"
@@ -149,10 +149,10 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(categoryListSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
-      <Header />
-      <main className="min-h-screen">
+      <SiteHeader />
+      <main id="main-content" className="min-h-screen">
         {/* Hero Section — navy đậm nhiều lớp, không phẳng một màu */}
-        <section className="relative bg-navy-950 text-white pt-32 md:pt-36 pb-14 md:pb-20 overflow-hidden">
+        <section className="relative bg-navy-950 text-white pt-10 md:pt-14 pb-14 md:pb-20 overflow-hidden">
           {/* Ảnh nền logistics */}
           <div
             className="absolute inset-0"

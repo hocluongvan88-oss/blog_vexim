@@ -2,10 +2,10 @@
 
 ## Phạm vi đã xuất bản
 
-| Nội dung | Tiếng Việt (mặc định) | Tiếng Anh |
-| --- | --- | --- |
-| Trang chủ xúc tiến xuất khẩu | `/` | `/en` |
-| Thông báo dữ liệu của biểu mẫu đánh giá | `/privacy` | `/en/privacy` |
+| Nội dung                                | Tiếng Việt (mặc định) | Tiếng Anh     |
+| --------------------------------------- | --------------------- | ------------- |
+| Trang chủ xúc tiến xuất khẩu            | `/`                   | `/en`         |
+| Thông báo dữ liệu của biểu mẫu đánh giá | `/privacy`            | `/en/privacy` |
 
 **Tiếng Việt là ngôn ngữ mặc định của site**: nội dung tiếng Việt nằm ở URL gốc, bản tiếng Anh dưới tiền tố `/en`. Hai URL tiếng Việt cũ (`/vi`, `/vi/privacy`) được chuyển 308 về URL mới để không mất tín hiệu SEO.
 
@@ -15,11 +15,21 @@ Hai cặp URL có nội dung SSR riêng, canonical tự trỏ, `hreflang` hai ch
 
 `lib/locale-routes.ts` là danh sách duy nhất của **các cặp đã được xuất bản**. Nội dung dài của trang và metadata ở `lib/home-i18n.ts` (server); phần điều hướng và biểu mẫu ở `lib/home-client-i18n.ts` (client). Ba kênh dịch vụ ở `lib/homepage-content.ts` được dùng chung cho phần giới thiệu và schema. Không hiển thị danh mục mặt hàng hoặc tên gói dịch vụ cũ. Mỗi homepage có WebPage/Service/ImageObject riêng, nhưng dùng cùng `Organization`/`LocalBusiness` và cùng thông tin liên hệ.
 
+## Một header dùng chung
+
+Toàn site render đúng một header: `components/site-header.tsx` (+ `components/site-header.module.css`), lấy nguyên thiết kế của landing page (dải tiện ích xanh đậm có hotline/Zalo, link Vexim Trade và bộ chuyển ngữ; thanh điều hướng trắng dính trên cùng với logo, 6 mục, nút CTA mở `ConsultationDialog`). `components/home/home-header.tsx` chỉ còn là lớp mỏng truyền `locale`/`page`, và `components/header.tsx` (header navy/cam cũ với avatar trang trí) đã bị xoá.
+
+- Trang chủ và `/privacy` truyền `locale`/`page` nên có bộ chuyển ngữ VI/EN; trang dịch vụ và blog không truyền, nên **không** hiển thị bộ chuyển ngữ — đúng với hiện trạng “chưa có bản dịch” ở trên.
+- Các mục điều hướng trỏ về đúng mục của landing page (`/services/export-sales`, `/#seo`, `/#website`, `/#services`, `/blog`, `/#contact`), không còn trỏ tới `#about` đã bị bỏ.
+- Nút CTA mở hộp thoại tư vấn dùng chung thay cho avatar “AD” trang trí trước đây; lối vào `/client-portal` và `/admin/login` vẫn nằm ở footer.
+- Mọi trang dùng header đều có neo `#main-content` (nút “Bỏ qua đến nội dung chính”) và `data-site-header` để `body` dùng `overflow-x: clip` — nếu dùng `hidden`, `position: sticky` của header sẽ ngừng dính.
+- Vì thanh header dính được, phần đệm đầu trang của các trang dịch vụ/blog đã giảm từ `pt-24/32` xuống `pt-8/10` để không còn khoảng trống lớn dưới header.
+
 ## Chưa nằm trong đợt này
 
 Các URL dịch vụ pháp lý/quy định hiện có vẫn là tiếng Việt, **không** gắn dropdown hay `hreflang="en"`/English canonical giả. Blog, FDA tracker và trang độc lập Vexim Trade cũng không được mở thêm ngôn ngữ trong đợt này. Các liên kết tài nguyên ở footer tiếng Anh có nhãn “(VI)” cho mục bài viết và cổng khách hàng; khu vực dịch vụ tuân thủ có ghi chú riêng rằng các trang đích hiện chỉ có tiếng Việt.
 
-**Trước khi mở từng cặp dịch vụ:** biên tập viên và người phụ trách pháp lý duyệt toàn bộ nội dung, thuật ngữ và thông tin quy định hiện hành; xác nhận URL tiếng Anh thực sự hoạt động, canonical/OG/schema và điều khoản dịch vụ tương ứng; sau đó mới thêm cặp URL vào `LOCALIZED_PATHS`, sitemap/điều hướng của *riêng* trang đó, và kiểm tra SSR/SEO/đổi ngôn ngữ. Không sao chép dịch máy hoặc bật hàng loạt cho 24 URL trước khi duyệt.
+**Trước khi mở từng cặp dịch vụ:** biên tập viên và người phụ trách pháp lý duyệt toàn bộ nội dung, thuật ngữ và thông tin quy định hiện hành; xác nhận URL tiếng Anh thực sự hoạt động, canonical/OG/schema và điều khoản dịch vụ tương ứng; sau đó mới thêm cặp URL vào `LOCALIZED_PATHS`, sitemap/điều hướng của _riêng_ trang đó, và kiểm tra SSR/SEO/đổi ngôn ngữ. Không sao chép dịch máy hoặc bật hàng loạt cho 24 URL trước khi duyệt.
 
 ## Kiểm tra trước khi triển khai
 
