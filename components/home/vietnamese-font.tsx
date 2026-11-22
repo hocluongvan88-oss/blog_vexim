@@ -1,17 +1,16 @@
 import type { ReactNode } from "react"
 import localFont from "next/font/local"
 
-// Route-scoped font for the Vietnamese landing pages. Optional display avoids
-// a late font swap/CLS on slow connections; without eager font preloads, the
-// hero image and critical CSS retain network priority. Service/blog fonts are
-// still configured by the root layout.
+// The new hero is a lightweight inline SVG. Load the local headline and body
+// faces early so Vietnamese line breaks match the design on a cold visit.
 const homeVietnamese = localFont({
   src: [
     { path: "../../app/fonts/BeVietnamPro-Regular.woff2", weight: "400" },
     { path: "../../app/fonts/BeVietnamPro-SemiBold.woff2", weight: "600" },
+    { path: "../../app/fonts/BeVietnamPro-Bold.woff2", weight: "700" },
   ],
-  display: "optional",
-  preload: false,
+  display: "swap",
+  preload: true,
   variable: "--font-vexim-home-vi",
 })
 

@@ -17,12 +17,12 @@ try {
 
 Được sinh từ code hiện tại. Không chép lại dữ liệu cũ và không tự thêm giá, tọa độ, số liệu thứ hạng hoặc chứng nhận.
 
-- Trang chủ tiếng Anh: canonical/OG **https://www.veximglobal.com**, WebPage **en**.
-- Trang chủ tiếng Việt: canonical/OG **https://www.veximglobal.com/vi**, WebPage **vi-VN**; hai trang có hreflang hai chiều và trong sitemap. JSON-LD tiếng Việt nằm tại \`homepage-schema-vi.json\`.
+- Trang chủ tiếng Anh: canonical/OG **https://www.veximglobal.com/en**, WebPage **en**.
+- Trang chủ tiếng Việt: canonical/OG **https://www.veximglobal.com**, WebPage **vi-VN**; hai trang có hreflang hai chiều và trong sitemap. JSON-LD tiếng Việt nằm tại \`homepage-schema-vi.json\`.
 - WebSite: tiếng Anh và tiếng Việt; blog và trang dịch vụ vẫn chỉ có tiếng Việt cho đến khi có bản dịch được biên tập và duyệt.
 - Organization / LocalBusiness: một node chung toàn website, số điện thoại **+84373685634**, email **contact@veximglobal.com**, địa chỉ **25/6/51 Ngọa Long, Tây Tựu, Hà Nội**.
 - Slogan doanh nghiệp được giữ như thông tin thương hiệu đã xác nhận; nội dung mỗi trang chủ theo ngôn ngữ của URL.
-- Service chính: hạ tầng xuất khẩu B2B và Buyer-Intent SEO; ba phạm vi hợp tác được đề xuất: B2B Launchpad, Global Growth Engine, Enterprise Dominance. Không có giá hoặc cam kết thứ hạng.
+- Service chính: tìm khách hàng nhập khẩu cho doanh nghiệp thực phẩm; ba dịch vụ hiển thị: sàn B2B Vexim Trade, SEO quốc tế và website xuất khẩu. Không có giá hoặc cam kết thứ hạng.
 - FDA, GACC, MoCRA và US Agent là liên kết phụ; 6 định danh service trang dịch vụ trước đây vẫn giữ nguyên trên từng landing page, không còn là catalog chính của trang chủ.
 - Ảnh OG cho mỗi ngôn ngữ là tệp thực 1200×630, không chứa số liệu minh họa như hiệu suất thật.
 

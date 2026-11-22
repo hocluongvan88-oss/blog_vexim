@@ -37,17 +37,17 @@ try {
   assert.equal(organization.openingHoursSpecification[1].closes, '12:00')
   assert.ok(organization.openingHoursSpecification.every(slot => slot.dayOfWeek.every(day => day.startsWith('https://schema.org/'))))
   assert.deepEqual([definitions.get(P.LOGO_ID).width, definitions.get(P.LOGO_ID).height], [824, 543])
-  assert.equal(definitions.get(`${P.SITE_URL}/#webpage`).mainEntity['@id'], P.HOME_SERVICE_ID)
-  const service = definitions.get(P.HOME_SERVICE_ID)
+  assert.equal(definitions.get(`${P.SITE_URL}/en#webpage`).mainEntity['@id'], `${P.SITE_URL}/en#service`)
+  const service = definitions.get(`${P.SITE_URL}/en#service`)
   assert.equal(service['@type'], 'Service')
   assert.equal(service.provider['@id'], P.ORGANIZATION_ID)
-  assert.equal(service.name, 'Global B2B Digital Infrastructure & Export Acceleration')
-  assert.equal(definitions.get(`${P.SITE_URL}/#webpage`).inLanguage, 'en')
+  assert.equal(service.name, 'Connect with food importers looking for suppliers in Vietnam')
+  assert.equal(definitions.get(`${P.SITE_URL}/en#webpage`).inLanguage, 'en')
   assert.deepEqual(definitions.get(P.WEBSITE_ID).inLanguage, ['en', 'vi-VN'])
   assert.equal(service.hasOfferCatalog.itemListElement.length, 3)
   for (const offer of service.hasOfferCatalog.itemListElement) {
     assert.equal(offer.itemOffered.provider['@id'], P.ORGANIZATION_ID)
-    assert.ok(offer.itemOffered.url.endsWith('/#services'))
+    assert.ok(["trade", "seo", "website"].some(id => offer.itemOffered.url === `${P.SITE_URL}/en#${id}`))
     assert.ok(!('price' in offer), 'No invented package price')
   }
   for (const item of P.SERVICE_CATALOG) {
@@ -64,14 +64,14 @@ try {
   const viNodes = new Map(), viReferences = []
   visit(viGraph, viNodes, viReferences)
   for (const ref of viReferences) assert.ok(viNodes.has(ref), `Unresolved VI @id: ${ref}`)
-  assert.equal(viNodes.get(`${P.SITE_URL}/vi#webpage`).inLanguage, 'vi-VN')
-  assert.equal(viNodes.get(`${P.SITE_URL}/vi#webpage`).mainEntity['@id'], `${P.SITE_URL}/vi#service`)
-  assert.equal(viNodes.get(`${P.SITE_URL}/vi#service`).name, 'Hạ tầng số B2B toàn cầu & Tăng tốc xuất khẩu')
-  assert.equal(viNodes.get(`${P.SITE_URL}/vi#service`).hasOfferCatalog.itemListElement.length, 3)
+  assert.equal(viNodes.get(`${P.SITE_URL}/#webpage`).inLanguage, 'vi-VN')
+  assert.equal(viNodes.get(`${P.SITE_URL}/#webpage`).mainEntity['@id'], `${P.SITE_URL}/#service`)
+  assert.equal(viNodes.get(`${P.SITE_URL}/#service`).name, 'Tìm khách hàng nhập khẩu cho doanh nghiệp thực phẩm Việt Nam')
+  assert.equal(viNodes.get(`${P.SITE_URL}/#service`).hasOfferCatalog.itemListElement.length, 3)
   assert.deepEqual(viNodes.get(P.ORGANIZATION_ID), organization, 'Business identity must be shared across languages')
   assert.deepEqual(JSON.parse(readFileSync('docs/seo/homepage-schema-vi.json', 'utf8')), viGraph)
   assert.ok(readFileSync('public/og-image-vi.jpg').length < 300_000)
-  console.log(`PASS: EN/VI page graphs, ${references.length} + ${viReferences.length} resolved @id references, unchanged business entity, 3 engagement scopes each, schema exports current`)
+  console.log(`PASS: EN/VI page graphs, ${references.length} + ${viReferences.length} resolved @id references, unchanged business entity, 3 linked services each, schema exports current`)
 
   // Optional integration check against actual SSR HTML, not an assumption from source.
   const base = process.env.SCHEMA_TEST_BASE_URL
@@ -87,10 +87,10 @@ try {
       })
       return { $, nodes }
     }
-    const home = await getPage('/')
+    const home = await getPage('/en')
     assert.deepEqual(home.nodes, graph['@graph'])
-    assert.equal(home.$('link[rel="canonical"]').attr('href'), P.SITE_URL)
-    assert.equal(home.$('meta[property="og:url"]').attr('content'), P.SITE_URL)
+    assert.equal(home.$('link[rel="canonical"]').attr('href'), `${P.SITE_URL}/en`)
+    assert.equal(home.$('meta[property="og:url"]').attr('content'), `${P.SITE_URL}/en`)
     assert.equal(home.$('title').text(), P.SITE_TITLE)
     assert.equal(home.$('html').attr('lang'), 'en')
     assert.equal(home.$('main').first().attr('lang'), 'en')
@@ -98,17 +98,17 @@ try {
     assert.equal(home.$('h1').text().trim(), service.name)
     assert.ok(home.$('footer').text().includes(P.PUBLIC_EMAIL))
     assert.ok(home.$('footer').text().includes(P.ADDRESS.streetAddress))
-    const viHome = await getPage('/vi')
+    const viHome = await getPage('/')
     assert.deepEqual(viHome.nodes, viGraph['@graph'])
-    assert.equal(viHome.$('link[rel="canonical"]').attr('href'), `${P.SITE_URL}/vi`)
-    assert.equal(viHome.$('meta[property="og:url"]').attr('content'), `${P.SITE_URL}/vi`)
+    assert.equal(viHome.$('link[rel="canonical"]').attr('href'), P.SITE_URL)
+    assert.equal(viHome.$('meta[property="og:url"]').attr('content'), P.SITE_URL)
     assert.equal(viHome.$('meta[property="og:locale"]').attr('content'), 'vi_VN')
     assert.equal(viHome.$('html').attr('lang'), 'vi')
     assert.equal(viHome.$('main').first().attr('lang'), 'vi')
-    assert.equal(viHome.$('h1').text().trim(), viNodes.get(`${P.SITE_URL}/vi#service`).name)
+    assert.equal(viHome.$('h1').text().trim(), viNodes.get(`${P.SITE_URL}/#service`).name)
     for (const page of [home.$, viHome.$]) {
-      assert.equal(page('link[rel="alternate"][hreflang="en"]').attr('href'), P.SITE_URL)
-      assert.equal(page('link[rel="alternate"][hreflang="vi"]').attr('href'), `${P.SITE_URL}/vi`)
+      assert.equal(page('link[rel="alternate"][hreflang="en"]').attr('href'), `${P.SITE_URL}/en`)
+      assert.equal(page('link[rel="alternate"][hreflang="vi"]').attr('href'), P.SITE_URL)
     }
     for (const item of P.SERVICE_CATALOG) {
       const { nodes, $ } = await getPage(item.path)

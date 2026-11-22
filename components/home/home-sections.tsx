@@ -1,220 +1,664 @@
-import { ArrowDown, ArrowRight, ArrowUpRight, Check, CircleHelp, Globe2, Search, ShieldCheck, Truck } from "lucide-react"
-import { ADDRESS, ORGANIZATION_NAME, PHONE_DISPLAY, PUBLIC_EMAIL, SAME_AS } from "@/lib/business-profile"
-import { VEXIM_PHONE_TEL_URL } from "@/lib/contact-info"
-import { HOME_MESSAGES } from "@/lib/home-i18n"
-import { homePath, privacyPath, type HomeLocale } from "@/lib/locale-routes"
-import { EXPORT_PILLARS, EXPORT_PILLARS_VI, EXPORT_TIERS, EXPORT_TIERS_VI, HOME_POSITIONING, HOME_POSITIONING_VI } from "@/lib/homepage-content"
-import { AuditButton } from "./audit-dialog"
-import styles from "./home.module.css"
+import type { ReactNode } from "react";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
+import {
+  ADDRESS,
+  ORGANIZATION_NAME,
+  PHONE_DISPLAY,
+  PUBLIC_EMAIL,
+  SOCIAL_PROFILES,
+} from "@/lib/business-profile";
+import { VEXIM_PHONE_TEL_URL, VEXIM_ZALO_URL } from "@/lib/contact-info";
+import { HOME_MESSAGES } from "@/lib/home-i18n";
+import { HOME_HERO, HOME_SOLUTIONS } from "@/lib/homepage-content";
+import { homePath, privacyPath, type HomeLocale } from "@/lib/locale-routes";
+import { TRADE } from "@/lib/vexim-trade-content";
+import { ConsultationForm, ConsultationLink } from "./consultation-form";
+import { HeroReport, MarketReport, MiniChart } from "./report-graphics";
+import s from "./home.module.css";
 
-const tradeLink = { href: HOME_POSITIONING.tradeUrl, target: "_blank", rel: "noopener noreferrer" } as const
+type Props = { locale: HomeLocale };
+type Pairs = readonly (readonly [string, string])[];
+const art = "/home/export/";
+const caseLink = "/services/fda#case-libra";
+const exporterSearch =
+  "https://www.google.com/search?q=Vietnamese+food+exporters";
+const arrow = <ArrowRight size={16} strokeWidth={1.8} aria-hidden="true" />;
+const external = (
+  <ArrowUpRight size={16} strokeWidth={1.8} aria-hidden="true" />
+);
 
-/** Photographic layer: real-world production and logistics beside the worked technical SVGs. */
-const PHOTO = {
-  origin: { src: "/home/origin-ingredients.webp", srcSet: "/home/origin-ingredients-800.webp 800w, /home/origin-ingredients.webp 1200w", width: 1200, height: 654 },
-  factory: { src: "/home/factory-floor.webp", srcSet: "/home/factory-floor-800.webp 800w, /home/factory-floor.webp 1200w", width: 1200, height: 654 },
-  buyer: { src: "/home/buyer-meeting.webp", srcSet: "/home/buyer-meeting-800.webp 800w, /home/buyer-meeting.webp 1200w", width: 1200, height: 654 },
-  port: { src: "/home/port-logistics.webp", srcSet: "/home/port-logistics-800.webp 800w, /home/port-logistics.webp 1200w", width: 1200, height: 654 },
-  catalog: { src: "/home/catalog-device.webp", srcSet: "/home/catalog-device-800.webp 800w, /home/catalog-device.webp 1200w", width: 1200, height: 654 },
-  lab: { src: "/home/quality-lab.webp", srcSet: "/home/quality-lab-800.webp 800w, /home/quality-lab.webp 1200w", width: 1200, height: 654 },
-  warehouse: { src: "/home/warehouse-loading.webp", srcSet: "/home/warehouse-loading-800.webp 800w, /home/warehouse-loading.webp 1200w", width: 1200, height: 654 },
-  exterior: { src: "/home/vietnam-factory-exterior.webp", srcSet: "/home/vietnam-factory-exterior-800.webp 800w, /home/vietnam-factory-exterior.webp 1200w", width: 1200, height: 654 },
-  workspace: { src: "/home/global-buyer.webp", srcSet: "/home/global-buyer-800.webp 800w, /home/global-buyer.webp 1200w", width: 1200, height: 654 },
-  harbor: { src: "/home/hanoi-harbor.webp", srcSet: "/home/hanoi-harbor-800.webp 800w, /home/hanoi-harbor.webp 1200w", width: 1200, height: 654 },
-  documents: { src: "/home/export-documentation.webp", srcSet: "/home/export-documentation-800.webp 800w, /home/export-documentation.webp 1200w", width: 1200, height: 823 },
-  trucking: { src: "/home/trucking.webp", srcSet: "/home/trucking-800.webp 800w, /home/trucking.webp 1200w", width: 1200, height: 509 },
-  operations: { src: "/home/content-operations.webp", srcSet: "/home/content-operations-800.webp 800w, /home/content-operations.webp 1200w", width: 1200, height: 655 },
-} as const
-
-/** Bốn trụ cột xếp thành lưới bento: hai thẻ đôi ở hàng đầu, hai thẻ rộng phía dưới.
- * Thẻ cuối dùng bố cục ngang (ảnh bên phải) như trước. */
-const BENTO_TONE = [styles.bentoLead, styles.bentoPair, styles.bentoWide, styles.bentoWideAlt] as const
-
-const heroPhotos = [PHOTO.origin, PHOTO.factory, PHOTO.buyer, PHOTO.port] as const
-const solutionPhotos = [PHOTO.catalog, PHOTO.workspace, PHOTO.warehouse, PHOTO.operations] as const
-const footerPhoto = PHOTO.documents
-const gapFigurePhoto = PHOTO.trucking
-
-function Eyebrow({ step, children }: { step: string; children: React.ReactNode }) {
-  return <p className={styles.sectionEyebrow}><span>{step}</span><span className={styles.eyebrowLine} />{children}</p>
+function SectionHead({
+  label,
+  title,
+  intro,
+  children,
+}: {
+  label: string;
+  title: string;
+  intro?: string;
+  children?: ReactNode;
+}) {
+  return (
+    <div className={s.sectionHead}>
+      <div>
+        <p className={s.eyebrow}>{label}</p>
+        <h2>{title}</h2>
+      </div>
+      {intro && <p className={s.lede}>{intro}</p>}
+      {children}
+    </div>
+  );
 }
 
-/** 2×2 photo mosaic: a real Vietnamese export scene beside the illustrated route map. */
-export function HomeHero({ locale }: { locale: HomeLocale }) {
-  const text = HOME_MESSAGES[locale].hero
-  const positioning = locale === "vi" ? HOME_POSITIONING_VI : HOME_POSITIONING
-  return <section className={styles.hero} aria-labelledby="hero-title">
-    <div className={`${styles.container} ${styles.heroInner}`}>
-      <div className={styles.heroLead}>
-        <div className={styles.heroCopy}>
-          <p className={styles.heroBadge}>{text.badge}</p>
-          <h1 id="hero-title">{text.titleBefore}<span>{text.titleAccent}</span>{text.titleAfter}</h1>
-          <p className={styles.heroDescription}>{positioning.description}</p>
-          <div className={styles.heroActions}>
-            <AuditButton className={styles.heroPrimary}>{text.audit} <ArrowUpRight size={18} aria-hidden="true" /></AuditButton>
-            <a className={styles.heroSecondary} {...tradeLink}>{text.trade} <ArrowUpRight size={17} aria-hidden="true" /></a>
+function Points({
+  items,
+  numbered = false,
+}: {
+  items: Pairs;
+  numbered?: boolean;
+}) {
+  return (
+    <ul className={s.points}>
+      {items.map(([title, text], i) => (
+        <li key={title}>
+          {numbered && (
+            <span className={s.index} aria-hidden="true">
+              0{i + 1}
+            </span>
+          )}
+          <div>
+            <strong>{title}</strong>
+            <p>{text}</p>
           </div>
-          <p className={styles.heroFootnote}><span className={styles.statusDot} /> {text.footnote}</p>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function Photo({
+  name,
+  alt,
+  sizes = "(max-width: 800px) 92vw, 560px",
+}: {
+  name: string;
+  alt: string;
+  sizes?: string;
+}) {
+  return (
+    <img
+      src={`/home/${name}-800.webp`}
+      srcSet={`/home/${name}-800.webp 800w, /home/${name}.webp 1200w`}
+      sizes={sizes}
+      width={800}
+      height={436}
+      alt={alt}
+      loading="lazy"
+      decoding="async"
+    />
+  );
+}
+
+export function HomeHero({ locale }: Props) {
+  const t = HOME_HERO[locale];
+  return (
+    <section className={`${s.hero} ${s.pattern}`} aria-labelledby="hero-title">
+      <svg
+        className={s.globe}
+        viewBox="0 0 640 640"
+        aria-hidden="true"
+        fill="none"
+        stroke="currentColor"
+      >
+        <circle cx="320" cy="320" r="305" />
+        <ellipse cx="320" cy="320" rx="184" ry="305" />
+        <ellipse cx="320" cy="320" rx="65" ry="305" />
+        <ellipse cx="320" cy="320" rx="305" ry="125" />
+        <ellipse cx="320" cy="320" rx="305" ry="232" />
+        <path d="M15 320h610M320 15v610" />
+      </svg>
+      <div className={s.heroInner}>
+        <div className={s.heroCopy}>
+          <p className={s.heroBadge}>
+            <b>B2B</b>
+            {t.badge}
+          </p>
+          <h1 id="hero-title">
+            {t.lead} <em>{t.accent}</em>
+          </h1>
+          <p className={s.heroDescription}>{t.description}</p>
+          <div className={s.actions}>
+            <a
+              href={TRADE.register}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`${s.button} ${s.gold}`}
+            >
+              {t.register}
+              {arrow}
+            </a>
+            <ConsultationLink
+              service="seo"
+              className={`${s.button} ${s.outline}`}
+            >
+              {t.consult}
+            </ConsultationLink>
+          </div>
+          <ul className={s.signals}>
+            {t.signals.map((signal) => (
+              <li key={signal}>{signal}</li>
+            ))}
+          </ul>
         </div>
-        <figure className={styles.heroStage}>
-          <div className={styles.heroMosaic}>
-            <div className={`${styles.heroShot} ${styles.heroShot1}`}>
-              <img src={heroPhotos[0].src} srcSet={heroPhotos[0].srcSet} sizes="(max-width: 960px) 46vw, 250px" width={heroPhotos[0].width} height={heroPhotos[0].height} alt={text.proof[0].alt} loading="eager" fetchPriority="high" decoding="sync" />
-              <span className={styles.heroShotLabel}><strong>{text.proof[0].title}</strong><span>{text.proof[0].detail}</span></span>
+        <HeroReport locale={locale} />
+      </div>
+    </section>
+  );
+}
+
+export function Partners({ locale }: Props) {
+  const brands = [
+    ["libra", "Libra"],
+    ["green-foods", "Green Foods"],
+    ["bimifoods", "BimiFoods"],
+    ["dann-food", "Dann Food"],
+    ["pham-gia", "Pham Gia"],
+  ];
+  return (
+    <section className={s.partners} aria-label={HOME_MESSAGES[locale].partners}>
+      <div className={s.container}>
+        <p className={s.eyebrow}>{HOME_MESSAGES[locale].partners}</p>
+        <ul>
+          {brands.map(([id, name]) => (
+            <li key={id}>
+              <img
+                src={`${art}logo-${id}.webp`}
+                width={120}
+                height={42}
+                alt={name}
+                loading="lazy"
+                decoding="async"
+              />
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+export function CoreSolutions({ locale }: Props) {
+  const t = HOME_MESSAGES[locale].solutions;
+  return (
+    <section id="solutions" className={`${s.section} ${s.paper}`}>
+      <div className={s.container}>
+        <SectionHead {...t} />
+        <div className={s.solutionGrid}>
+          {HOME_SOLUTIONS[locale].map((item, i) => (
+            <article key={item.id} className={s.solution}>
+              <p className={s.eyebrow}>
+                0{i + 1} <span>/</span> {item.label}
+              </p>
+              <h3>
+                <a href={`#${item.id}`}>
+                  {item.name}
+                  <span className={s.circleLink}>{arrow}</span>
+                </a>
+              </h3>
+              <p>{item.description}</p>
+              {i === 0 ? (
+                <a
+                  className={s.tradeScreen}
+                  href="https://www.veximtrade.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <img
+                    src={`${art}veximtrade-marketplace.webp`}
+                    alt={t.screen}
+                    width={760}
+                    height={312}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </a>
+              ) : i === 1 ? (
+                <MiniChart />
+              ) : (
+                <div className={s.wireframe} aria-hidden="true">
+                  <div className={s.windowBar}>
+                    <i />
+                    <i />
+                    <i />
+                  </div>
+                  <div>
+                    <b />
+                    <span />
+                    <span />
+                    <em />
+                  </div>
+                </div>
+              )}
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export function Marketplace({ locale }: Props) {
+  const t = HOME_MESSAGES[locale].trade;
+  return (
+    <section id="trade" className={`${s.section} ${s.trade} ${s.pattern}`}>
+      <div className={s.container}>
+        <SectionHead {...t} />
+        <div className={s.tradeSteps}>
+          <figure className={s.map}>
+            <div>
+              <span className={s.eyebrow}>{t.mapTitle}</span>
+              <small>VN → GLOBAL</small>
             </div>
-            <div className={`${styles.heroShot} ${styles.heroShot2}`}>
-              <img src={heroPhotos[1].src} srcSet={heroPhotos[1].srcSet} sizes="(max-width: 960px) 44vw, 210px" width={heroPhotos[1].width} height={heroPhotos[1].height} alt={text.proof[1].alt} loading="lazy" decoding="async" />
-              <span className={styles.heroShotLabel}><strong>{text.proof[1].title}</strong><span>{text.proof[1].detail}</span></span>
-            </div>
-            <div className={`${styles.heroShot} ${styles.heroShot3}`}>
-              <img src={heroPhotos[2].src} srcSet={heroPhotos[2].srcSet} sizes="(max-width: 960px) 44vw, 210px" width={heroPhotos[2].width} height={heroPhotos[2].height} alt={text.proof[2].alt} loading="lazy" decoding="async" />
-              <span className={styles.heroShotLabel}><strong>{text.proof[2].title}</strong><span>{text.proof[2].detail}</span></span>
-            </div>
-            <div className={`${styles.heroShot} ${styles.heroShot4}`}>
-              <img src={heroPhotos[3].src} srcSet={heroPhotos[3].srcSet} sizes="(max-width: 960px) 46vw, 250px" width={heroPhotos[3].width} height={heroPhotos[3].height} alt={text.proof[3].alt} loading="lazy" decoding="async" />
-              <span className={styles.heroShotLabel}><strong>{text.proof[3].title}</strong><span>{text.proof[3].detail}</span></span>
-            </div>
-            <div className={`${styles.heroShot} ${styles.heroMap}`}>
-              <img className={styles.heroScene} src="/home/export-network.svg" width="1160" height="540" alt={text.imageAlt} loading="eager" decoding="async" />
-              <div className={styles.heroMapHead}>
-                <span>{text.from} <ArrowRight size={11} aria-hidden="true" /> {text.to}</span>
-                <ul>{text.pathway.map(step => <li key={step}>{step}</li>)}</ul>
-              </div>
+            <img
+              src={`${art}routes.svg`}
+              alt={t.mapAlt}
+              width={680}
+              height={310}
+              loading="lazy"
+            />
+            <figcaption>{t.mapNote}</figcaption>
+          </figure>
+          <div>
+            <h3 className={s.eyebrow}>{t.stepsLabel}</h3>
+            <ol className={s.steps}>
+              {t.steps.map(([title, body], i) => (
+                <li key={title}>
+                  <span aria-hidden="true">{i + 1}</span>
+                  <div>
+                    <h4>{title}</h4>
+                    <p>{body}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+        <div className={s.tradeBenefits}>
+          <figure className={s.meeting}>
+            <Photo name="buyer-meeting" alt={t.photoAlt} />
+            <figcaption>
+              <small>VEXIM TRADE / B2B</small>
+              {t.photoCaption}
+            </figcaption>
+          </figure>
+          <div>
+            <h3 className={s.subhead}>{t.benefitsTitle}</h3>
+            <Points items={t.benefits} />
+            <div className={s.actions}>
+              <a
+                className={`${s.button} ${s.gold}`}
+                href={TRADE.register}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {HOME_HERO[locale].register}
+                {arrow}
+              </a>
+              <a
+                className={`${s.button} ${s.outline}`}
+                href="https://www.veximtrade.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {t.visit}
+                {external}
+              </a>
             </div>
           </div>
-          <figcaption>{text.proofNote}</figcaption>
-        </figure>
+        </div>
       </div>
-      <div className={styles.heroPathway} aria-label={text.pathwayLabel}><span>{text.pathway[0]}</span><ArrowRight size={16} aria-hidden="true" /><span>{text.pathway[1]}</span><ArrowRight size={16} aria-hidden="true" /><span>{text.pathway[2]}</span></div>
-      <a className={styles.heroScroll} href="#solutions">{text.scroll} <ArrowDown size={16} aria-hidden="true" /></a>
-    </div>
-    <div className={styles.heroRibbon} aria-hidden="true"><div className={styles.heroRibbonTrack}>{[0, 1].map(pass => <span key={pass}>{["Cà phê", "Hạt điều", "Gia vị", "Hoa hồi", "Quế", "Tiêu đen", "Trà", "Gạo", "Thủy sản", "Đồ thủ công"].map(word => <span key={word}>{word}<Globe2 size={13} /></span>)}</span>)}</div></div>
-  </section>
+    </section>
+  );
 }
 
-export function CoreSolutions({ locale }: { locale: HomeLocale }) {
-  const text = HOME_MESSAGES[locale].solutions
-  const pillars = locale === "vi" ? EXPORT_PILLARS_VI : EXPORT_PILLARS
-  return <section id="solutions" className={styles.solutionsSection} aria-labelledby="solutions-title"><div className={styles.container}>
-    <Eyebrow step={text.eyebrow}>{text.label}</Eyebrow>
-    <div className={styles.sectionIntro}>
-      <h2 id="solutions-title">{text.titleBefore}<br />{text.titleAfter}<span>{text.titleAccent}</span></h2>
-      <p>{text.description}</p>
-    </div>
-    <div className={styles.bentoGrid}>{pillars.map((pillar, index) => <article key={pillar.id} className={`${styles.bentoCard} ${BENTO_TONE[index]}`}>
-      <div className={styles.bentoCopy}>
-        <div className={styles.cardTop}><span>{pillar.number} / 04</span><span>{pillar.label}</span></div>
-        <h3>{pillar.title}</h3>
-        <p className={styles.bentoDescription}>{pillar.description}</p>
-        <ul className={styles.bentoFeatures}>{pillar.features.map(feature => <li key={feature}><Check size={15} aria-hidden="true" />{feature}</li>)}</ul>
-        {index === 1 && <div className={styles.queryChips} aria-label={text.searches}><span>cashew supplier Vietnam</span><span>OEM coffee factory</span><span>FOB Ho Chi Minh City</span></div>}
-        {index === 3 && <a className={styles.bentoLink} {...tradeLink}>{text.trade} <ArrowUpRight size={17} aria-hidden="true" /></a>}
+export function InternationalSEO({ locale }: Props) {
+  const t = HOME_MESSAGES[locale].seo;
+  return (
+    <section id="seo" className={`${s.section} ${s.paper}`}>
+      <div className={s.container}>
+        <SectionHead {...t} />
+        <MarketReport locale={locale} />
+        <div id="the-gap" className={s.gap}>
+          <div>
+            <h3 className={s.subhead}>{t.gap}</h3>
+            <p>{t.gapIntro}</p>
+          </div>
+          <Points items={t.gaps} numbered />
+        </div>
+        <h3 className={s.subhead}>{t.work}</h3>
+        <ol className={s.work}>
+          {t.items.map(([title, text], i) => (
+            <li key={title}>
+              <b aria-hidden="true">0{i + 1}</b>
+              <h4>{title}</h4>
+              <p>{text}</p>
+            </li>
+          ))}
+        </ol>
+        <div className={`${s.geo} ${s.pattern}`}>
+          <div>
+            <p className={s.eyebrow}>{t.geo}</p>
+            <h3>{t.geoTitle}</h3>
+            <p>{t.geoText}</p>
+            <small>{t.noPromise}</small>
+            <ConsultationLink service="seo" className={`${s.button} ${s.gold}`}>
+              {t.cta}
+              {arrow}
+            </ConsultationLink>
+          </div>
+          <div className={s.searchEvidence}>
+            <p className={s.searchEyebrow}>{t.search.label}</p>
+            <h4>{t.search.query}</h4>
+            <p>{t.search.note}</p>
+            <a href={exporterSearch} target="_blank" rel="noopener noreferrer">
+              {t.search.link} {external}
+            </a>
+          </div>
+        </div>
       </div>
-      <figure className={`${styles.bentoMedia} ${index === 3 ? styles.bentoMediaWide : ""}`}>
-        <img className={styles.bentoPhoto} src={solutionPhotos[index].src} srcSet={solutionPhotos[index].srcSet} sizes="(max-width: 720px) 92vw, 560px" width={solutionPhotos[index].width} height={solutionPhotos[index].height} alt={text.photos[index].alt} loading="lazy" decoding="async" />
-        <figcaption><strong>{text.photos[index].title}</strong><span>{text.photos[index].caption}</span></figcaption>
-      </figure>
-    </article>)}</div>
-    <p className={styles.bentoNote}><CircleHelp size={15} aria-hidden="true" /> {text.disclaimer}</p>
-  </div></section>
+    </section>
+  );
 }
 
-/** A wide photographic band between the solution grid and the verification comparison. */
-export function PhotoJourney({ locale }: { locale: HomeLocale }) {
-  const text = HOME_MESSAGES[locale].solutions
-  return <section className={styles.photoBand} aria-labelledby="photo-band-title"><div className={styles.container}>
-    <div className={styles.photoBandHead}>
-      <h2 id="photo-band-title">{text.photosTitle}</h2>
-      <p>{text.journey.map(item => item.label).join(" · ")}</p>
-    </div>
-    <div className={styles.photoBandGrid}>
-      <figure className={`${styles.photoBandFigure} ${styles.photoBandTall}`}><img src={PHOTO.harbor.src} srcSet={PHOTO.harbor.srcSet} sizes="(max-width: 960px) 92vw, 700px" width={PHOTO.harbor.width} height={PHOTO.harbor.height} alt={text.journey[0].alt} loading="lazy" decoding="async" /><figcaption><span>{text.journey[0].label}</span>{text.journey[0].title}</figcaption></figure>
-      <figure className={styles.photoBandFigure}><img src={PHOTO.lab.src} srcSet={PHOTO.lab.srcSet} sizes="(max-width: 960px) 46vw, 420px" width={PHOTO.lab.width} height={PHOTO.lab.height} alt={text.journey[1].alt} loading="lazy" decoding="async" /><figcaption><span>{text.journey[1].label}</span>{text.journey[1].title}</figcaption></figure>
-      <figure className={styles.photoBandFigure}><img src={PHOTO.workspace.src} srcSet={PHOTO.workspace.srcSet} sizes="(max-width: 960px) 46vw, 420px" width={PHOTO.workspace.width} height={PHOTO.workspace.height} alt={text.journey[2].alt} loading="lazy" decoding="async" /><figcaption><span>{text.journey[2].label}</span>{text.journey[2].title}</figcaption></figure>
-      <figure className={styles.photoBandFigure}><img src={PHOTO.exterior.src} srcSet={PHOTO.exterior.srcSet} sizes="(max-width: 960px) 46vw, 420px" width={PHOTO.exterior.width} height={PHOTO.exterior.height} alt={text.journey[3].alt} loading="lazy" decoding="async" /><figcaption><span>{text.journey[3].label}</span>{text.journey[3].title}</figcaption></figure>
-    </div>
-  </div></section>
-}
-
-export function VerificationGap({ locale }: { locale: HomeLocale }) {
-  const text = HOME_MESSAGES[locale].gap
-  return <section id="the-gap" className={styles.gapSection} aria-labelledby="gap-title"><div className={styles.container}>
-    <Eyebrow step={text.eyebrow}>{text.label}</Eyebrow>
-    <div className={styles.sectionIntro}>
-      <h2 id="gap-title">{text.titleBefore}<br /><span>{text.titleAccent}</span></h2>
-      <p>{text.description}</p>
-    </div>
-    <div className={styles.gapGrid}>
-      <article className={`${styles.gapCard} ${styles.gapTraditional}`}>
-        <div className={styles.gapCardHeader}><span className={styles.gapIcon}><Search size={20} aria-hidden="true" /></span><span>{text.traditionalLabel}</span></div>
-        <h3>{text.traditionalTitle}</h3>
-        <p>{text.traditionalText}</p>
-        <ul>{text.traditionalPoints.map((point, index) => <li key={point}><span>0{index + 1}</span> {point}</li>)}</ul>
-        <div className={styles.gapCardTail}>{text.traditionalTail} <ArrowUpRight size={17} aria-hidden="true" /></div>
-      </article>
-      <article className={`${styles.gapCard} ${styles.gapVexim}`}>
-        <div className={styles.gapCardHeader}><span className={styles.gapIcon}><ShieldCheck size={20} aria-hidden="true" /></span><span>{text.standardLabel}</span></div>
-        <h3>{text.standardTitle}</h3>
-        <p>{text.standardText}</p>
-        <ul>{text.standardPoints.map(point => <li key={point}><Check size={16} aria-hidden="true" /> {point}</li>)}</ul>
-        <div className={styles.gapCardTail}>{text.standardTail} <ArrowUpRight size={17} aria-hidden="true" /></div>
-      </article>
-    </div>
-    <figure className={styles.gapFigure}>
-      <img src={gapFigurePhoto.src} srcSet={gapFigurePhoto.srcSet} sizes="(max-width: 900px) 92vw, 1120px" width={gapFigurePhoto.width} height={gapFigurePhoto.height} alt={HOME_MESSAGES[locale].hero.truckImageAlt} loading="lazy" decoding="async" />
-      <figcaption><span className={styles.gapFigureTag}><Truck size={14} aria-hidden="true" /> {text.figureCaption}</span><span>{text.standardTail}</span></figcaption>
-    </figure>
-    <p className={styles.gapDisclaimer}>{text.disclaimer}</p>
-  </div></section>
-}
-
-export function ExportTiers({ locale }: { locale: HomeLocale }) {
-  const text = HOME_MESSAGES[locale].tiers
-  const tiers = locale === "vi" ? EXPORT_TIERS_VI : EXPORT_TIERS
-  return <section id="services" className={styles.tierSection} aria-labelledby="tier-title"><div className={styles.container}>
-    <Eyebrow step={text.eyebrow}>{text.label}</Eyebrow>
-    <div className={styles.sectionIntro}>
-      <h2 id="tier-title">{text.titleBefore}<br /><span>{text.titleAccent}</span></h2>
-      <p>{text.description}</p>
-    </div>
-    <div className={styles.tierGrid}>{tiers.map((tier, index) => <article key={tier.id} className={`${styles.tierCard} ${index === 1 ? styles.featuredTier : ""}`}>
-      <div className={styles.tierTop}><span>0{index + 1} / 03</span>{index === 1 && <span className={styles.tierFeaturedTag}>{text.featured}</span>}</div>
-      <div className={styles.tierIcon} aria-hidden="true"><span>{index === 0 ? "↗" : index === 1 ? "✧" : "◎"}</span></div>
-      <p className={styles.tierLabel}>{tier.label}</p>
-      <h3>{tier.name}</h3><p className={styles.tierAudience}>{tier.audience}</p>
-      <p className={styles.tierDescription}>{tier.description}</p>
-      <div className={styles.tierIncludes}>{text.includes}</div>
-      <ul>{tier.features.map(feature => <li key={feature}><Check size={16} aria-hidden="true" />{feature}</li>)}</ul>
-      <AuditButton className={index === 1 ? styles.tierButtonFeatured : styles.tierButton} scope={tier.name}>{text.discuss} <ArrowUpRight size={17} aria-hidden="true" /></AuditButton>
-    </article>)}</div>
-    <p className={styles.tierNote}>{text.note}</p>
-  </div></section>
-}
-
-export function ComplianceUtilities({ locale }: { locale: HomeLocale }) {
-  const text = HOME_MESSAGES[locale].compliance
-  return <section className={styles.complianceSection} aria-label={text.label}><div className={`${styles.container} ${styles.complianceInner}`}>
-    <div className={styles.complianceLead}><ShieldCheck size={23} strokeWidth={1.6} aria-hidden="true" /><div><strong>{text.title}</strong><p>{text.description}</p><small>{text.languageNote}</small></div></div>
-    <div className={styles.complianceLinks}><a href="/services/fda">FDA <ArrowUpRight size={13} aria-hidden="true" /></a><a href="/services/gacc">GACC <ArrowUpRight size={13} aria-hidden="true" /></a><a href="/services/cosmetics/mocra-registration">MoCRA <ArrowUpRight size={13} aria-hidden="true" /></a><a href="/services/us-agent">US Agent <ArrowUpRight size={13} aria-hidden="true" /></a></div>
-  </div></section>
-}
-
-export function HomeFooter({ locale }: { locale: HomeLocale }) {
-  const text = HOME_MESSAGES[locale].footer
-  const base = homePath(locale)
-  return <footer id="contact" className={styles.homeFooter}><div className={styles.container}>
-    <div className={styles.footerCallout}>
-      <div className={`${styles.container} ${styles.footerCalloutInner}`}>
-      <div className={styles.footerCalloutCopy}><span className={styles.footerEyebrow}>{text.eyebrow}</span><h2>{text.titleBefore}<br /><em>{text.titleAccent}</em></h2><p>{text.description}</p><AuditButton className={styles.footerCta}>{HOME_MESSAGES[locale].hero.audit} <ArrowUpRight size={18} aria-hidden="true" /></AuditButton></div>
-      <figure className={styles.footerFigure}><img src={footerPhoto.src} srcSet={footerPhoto.srcSet} sizes="(max-width: 880px) 92vw, 470px" width={footerPhoto.width} height={footerPhoto.height} alt={HOME_MESSAGES[locale].hero.handoffImageAlt} loading="lazy" decoding="async" /></figure>
+export function ExportWebsite({ locale }: Props) {
+  const t = HOME_MESSAGES[locale].website;
+  const exampleHost = t.exampleUrl
+    .replace(/^https?:\/\//, "")
+    .replace(/\/$/, "");
+  return (
+    <section id="website" className={`${s.section} ${s.white}`}>
+      <div className={`${s.container} ${s.website}`}>
+        <div>
+          <p className={s.eyebrow}>{t.label}</p>
+          <h2>{t.title}</h2>
+          <p className={s.lede}>{t.intro}</p>
+          <Points items={t.features} />
+          <ConsultationLink service="website" className={s.button}>
+            {t.cta}
+            {arrow}
+          </ConsultationLink>
+        </div>
+        <aside className={s.websiteExample} aria-label={t.exampleName}>
+          <div className={s.exampleCard}>
+            <span className={s.exampleUrl}>{exampleHost}</span>
+            <h3>{t.exampleName}</h3>
+            <p>{t.exampleText}</p>
+            <a
+              className={s.exampleLink}
+              href={t.exampleUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {t.exampleLink} {external}
+            </a>
+          </div>
+        </aside>
       </div>
-    </div>
-    <div className={styles.footerColumns}>
-      <div className={styles.footerBrand}><img src="/trade/logo.svg" width={43} height={43} alt="" /><strong>VEXIM GLOBAL</strong><p>{text.brand}</p></div>
-      <div><p className={styles.footerColumnTitle}>{text.explore}</p><a href={`${base}#solutions`}>{text.solutions}</a><a href={`${base}#the-gap`}>{text.gap}</a><a href={`${base}#services`}>{text.tiers}</a><a {...tradeLink}>Vexim Trade ↗</a></div>
-      <div><p className={styles.footerColumnTitle}>{text.resources}</p><a href="/blog">{text.blog}</a><a href={privacyPath(locale)}>{text.privacy}</a><a href="/client-portal">{text.portal}</a><a href="/services/fda">{text.fda}</a><a href="/services/gacc">{text.gacc}</a><a href="/services/cosmetics/mocra-registration">{text.mocra}</a><a href="/services/us-agent">{text.usAgent}</a></div>
-      <div><p className={styles.footerColumnTitle}>{text.contact}</p><a href={`mailto:${PUBLIC_EMAIL}`}>{PUBLIC_EMAIL}</a><a href={VEXIM_PHONE_TEL_URL}>{PHONE_DISPLAY}</a><address>{ADDRESS.streetAddress}<br />{ADDRESS.addressLocality}, {text.country}</address></div>
-    </div>
-    <div className={styles.footerBottom}><span>© {new Date().getFullYear()} {ORGANIZATION_NAME}. {text.rights}</span><span>{text.tagline}</span><div>{SAME_AS.slice(0, 2).map((url, index) => <a href={url} key={url} target="_blank" rel="noopener noreferrer">{index === 0 ? "Facebook" : "LinkedIn"} ↗</a>)}</div></div>
-  </div></footer>
+    </section>
+  );
+}
+
+export function Delivery({ locale }: Props) {
+  const { process, audience, why } = HOME_MESSAGES[locale];
+  return (
+    <>
+      <section className={`${s.section} ${s.paper}`}>
+        <div className={s.container}>
+          <div className={s.centerHead}>
+            <p className={s.eyebrow}>{process.label}</p>
+            <h2>{process.title}</h2>
+          </div>
+          <ol className={s.timeline}>
+            {process.steps.map(([title, text], i) => (
+              <li key={title}>
+                <span>0{i + 1}</span>
+                <h3>{title}</h3>
+                <p>{text}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+      <section id="audience" className={`${s.section} ${s.white}`}>
+        <div className={`${s.container} ${s.audience}`}>
+          <figure className={s.audiencePhoto}>
+            <img
+              src={`${art}food-processing-team.webp`}
+              alt={audience.alt}
+              width={750}
+              height={499}
+              loading="lazy"
+              decoding="async"
+            />
+          </figure>
+          <div>
+            <p className={s.eyebrow}>{audience.label}</p>
+            <h2>{audience.title}</h2>
+            <Points items={audience.items} numbered />
+          </div>
+        </div>
+      </section>
+      <section className={`${s.section} ${s.why} ${s.pattern}`}>
+        <div className={s.container}>
+          <SectionHead label={why.label} title={why.title}>
+            <a href="#contact" className={`${s.button} ${s.gold}`}>
+              {locale === "vi"
+                ? "Nhận tư vấn miễn phí"
+                : "Get a free consultation"}
+              {arrow}
+            </a>
+          </SectionHead>
+          <ol>
+            {why.items.map(([title, text], i) => (
+              <li key={title}>
+                <b aria-hidden="true">0{i + 1}</b>
+                <h3>{title}</h3>
+                <p>{text}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+    </>
+  );
+}
+
+export function ProjectsAndNews({ locale }: Props) {
+  const { project, legal, news } = HOME_MESSAGES[locale];
+  const images = [
+    "/images/fda/libra-factory.webp",
+    `${art}dossier-detail.webp`,
+    `${art}registration-detail.webp`,
+  ];
+  const topics = ["Tin tức thị trường", "FDA", "GACC"];
+  const photos = ["port-logistics", "quality-lab", "warehouse-loading"];
+  return (
+    <>
+      <section className={`${s.section} ${s.paper}`}>
+        <div className={s.container}>
+          <SectionHead {...project} />
+          <div className={s.cases}>
+            {project.cards.map(([label, title, text], i) => (
+              <article key={label}>
+                <div>
+                  <img
+                    src={images[i]}
+                    width={660}
+                    height={345}
+                    alt={label + " · Libra Vietnam"}
+                    loading="lazy"
+                  />
+                  <span>{label}</span>
+                </div>
+                <h3>{title}</h3>
+                <p>{text}</p>
+              </article>
+            ))}
+          </div>
+          <a className={s.textLink} href={caseLink}>
+            {project.link}
+            {arrow}
+          </a>
+          <div className={s.legal} id="services">
+            <div>
+              <p className={s.eyebrow}>{legal.label}</p>
+              <h3>{legal.title}</h3>
+              <p>{legal.intro}</p>
+            </div>
+            <div className={s.actions}>
+              <a className={s.button} href="/services/fda">
+                {legal.fda}
+              </a>
+              <a className={`${s.button} ${s.outline}`} href="/services/gacc">
+                {legal.gacc}
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section id="news" className={`${s.section} ${s.white}`}>
+        <div className={s.container}>
+          <SectionHead label={news.label} title={news.title}>
+            <a className={s.textLink} href="/blog">
+              {news.all}
+              {arrow}
+            </a>
+          </SectionHead>
+          <div className={s.newsGrid}>
+            {news.cards.map(([tag, title], i) => (
+              <a
+                href={`/blog/category/${encodeURIComponent(topics[i])}`}
+                key={tag}
+              >
+                <Photo name={photos[i]} alt="" />
+                <div>
+                  <span className={s.eyebrow}>{tag}</span>
+                  <h3>{title}</h3>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}
+
+export function FAQAndContact({ locale }: Props) {
+  const { faq, contact } = HOME_MESSAGES[locale];
+  return (
+    <>
+      <section id="faq" className={`${s.section} ${s.paper}`}>
+        <div className={`${s.container} ${s.faq}`}>
+          <div>
+            <p className={s.eyebrow}>{faq.label}</p>
+            <h2>{faq.title}</h2>
+            <p>
+              {faq.hotline} <a href={VEXIM_PHONE_TEL_URL}>{PHONE_DISPLAY}</a>.
+            </p>
+          </div>
+          <div className={s.questions}>
+            {faq.items.map(([q, answer], i) => (
+              <details name="home-faq" key={q} open={i === 0}>
+                <summary>{q}</summary>
+                <p>{answer}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+      <section
+        id="contact"
+        className={`${s.section} ${s.contact} ${s.pattern}`}
+      >
+        <div className={`${s.container} ${s.contactInner}`}>
+          <div>
+            <p className={s.eyebrow}>{contact.label}</p>
+            <h2>{contact.title}</h2>
+            <p className={s.lede}>{contact.intro}</p>
+            <div className={s.contactLinks}>
+              <a href={VEXIM_PHONE_TEL_URL}>
+                <small>Hotline</small>
+                {PHONE_DISPLAY}
+              </a>
+              <a href={VEXIM_ZALO_URL}>
+                <small>Zalo</small>
+                {contact.zalo} ↗
+              </a>
+            </div>
+          </div>
+          <ConsultationForm locale={locale} options={HOME_SOLUTIONS[locale]} />
+        </div>
+      </section>
+    </>
+  );
+}
+
+export function HomeFooter({ locale }: Props) {
+  const t = HOME_MESSAGES[locale].footer;
+  const base = homePath(locale);
+  return (
+    <footer className={s.footer}>
+      <div className={s.container}>
+        <div className={s.footerGrid}>
+          <div>
+            <h2>{t.company}</h2>
+            <p>VEXIM GLOBAL CO., LTD.</p>
+            <address>
+              {ADDRESS.streetAddress}
+              <br />
+              {ADDRESS.addressLocality}, {t.country}
+            </address>
+          </div>
+          <div>
+            <h3>{t.solutions}</h3>
+            {HOME_SOLUTIONS[locale].map((x) => (
+              <a key={x.id} href={`${base}#${x.id}`}>
+                {x.name}
+              </a>
+            ))}
+            <a
+              href="https://www.veximtrade.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              veximtrade.com ↗
+            </a>
+          </div>
+          <div>
+            <h3>{t.resources}</h3>
+            <a href="/services/fda">FDA</a>
+            <a href="/services/gacc">GACC</a>
+            <a href="/services/us-agent">US Agent</a>
+            <a href="/services/cosmetics/mocra-registration">MoCRA</a>
+            <a href="/blog">{t.blog}</a>
+            <a href="/client-portal">{t.portal}</a>
+          </div>
+          <div>
+            <h3>{t.contact}</h3>
+            <a href={VEXIM_PHONE_TEL_URL}>{PHONE_DISPLAY}</a>
+            <a href={`mailto:${PUBLIC_EMAIL}`}>{PUBLIC_EMAIL}</a>
+            <a href={SOCIAL_PROFILES.facebook}>Facebook ↗</a>
+            <a href={SOCIAL_PROFILES.linkedin}>LinkedIn ↗</a>
+          </div>
+        </div>
+        <div className={s.footerBottom}>
+          <span>
+            © {new Date().getFullYear()} {ORGANIZATION_NAME}. {t.rights}
+          </span>
+          <a href={privacyPath(locale)}>{t.privacy}</a>
+        </div>
+      </div>
+    </footer>
+  );
 }

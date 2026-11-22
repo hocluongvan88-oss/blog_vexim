@@ -14,7 +14,7 @@ const image = `${SITE_URL}/og-image-vi.jpg`
 export const metadata: Metadata = {
   title: { absolute: VI_HOME_META.title },
   description: VI_HOME_META.description,
-  keywords: ["sàn B2B hàng Việt", "website sản phẩm xuất khẩu", "kênh bán xuất khẩu", "nhà sản xuất Việt Nam", "Vexim Trade"],
+  keywords: ["nhà nhập khẩu thực phẩm", "SEO quốc tế", "thiết kế website xuất khẩu", "sàn B2B Vexim Trade"],
   manifest: null, // The root manifest is for the separate admin dashboard.
   alternates: { canonical: SITE_URL, languages: languageUrls("home") },
   openGraph: {

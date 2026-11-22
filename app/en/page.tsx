@@ -10,9 +10,9 @@ import { languageUrls } from "@/lib/locale-routes"
 const url = `${SITE_URL}/en`
 
 export const metadata: Metadata = {
-  title: SITE_TITLE,
+  title: { absolute: SITE_TITLE },
   description: SITE_DESCRIPTION,
-  keywords: ["B2B marketplace Vietnam", "export product website", "export sales channel", "Vietnam manufacturer", "Vexim Trade"],
+  keywords: ["Vietnam food exporters", "international SEO", "export website design", "Vexim Trade B2B marketplace"],
   manifest: null, // The root manifest is for the separate admin dashboard.
   alternates: { canonical: url, languages: languageUrls("home") },
   openGraph: {

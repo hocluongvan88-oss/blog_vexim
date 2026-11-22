@@ -17,7 +17,7 @@
       "image": {
         "@id": "https://www.veximglobal.com/#logo"
       },
-      "description": "Vexim Global builds digital export foundations for Vietnamese manufacturers: B2B web infrastructure, buyer-intent SEO and connections to the Vexim Trade ecosystem. Regulatory resources remain available separately.",
+      "description": "Vexim Global builds the export sales channel for Vietnamese manufacturers: the Vexim Trade B2B marketplace, product websites buyers can check, buyer work in each target market, and monthly content that keeps it current. Regulatory resources remain available separately.",
       "telephone": "+84373685634",
       "email": "contact@veximglobal.com",
       "address": {
@@ -106,10 +106,10 @@
     },
     {
       "@type": "WebPage",
-      "@id": "https://www.veximglobal.com/vi#webpage",
-      "url": "https://www.veximglobal.com/vi",
-      "name": "Hạ tầng số B2B & Tăng tốc xuất khẩu | Vexim Global",
-      "description": "Vexim Global hỗ trợ nhà sản xuất Việt Nam xây dựng website B2B, nội dung theo nhu cầu tìm kiếm của người mua và kết nối với hệ sinh thái Vexim Trade.",
+      "@id": "https://www.veximglobal.com/#webpage",
+      "url": "https://www.veximglobal.com",
+      "name": "Tìm khách hàng nhập khẩu cho doanh nghiệp thực phẩm | Vexim Global",
+      "description": "Tiếp cận nhà nhập khẩu qua sàn B2B Vexim Trade, SEO quốc tế và website xuất khẩu. Khám phá giải pháp cho doanh nghiệp thực phẩm Việt Nam và nhận tư vấn miễn phí.",
       "inLanguage": "vi-VN",
       "isPartOf": {
         "@id": "https://www.veximglobal.com/#website"
@@ -121,15 +121,15 @@
         "@id": "https://www.veximglobal.com/#organization"
       },
       "mainEntity": {
-        "@id": "https://www.veximglobal.com/vi#service"
+        "@id": "https://www.veximglobal.com/#service"
       },
       "primaryImageOfPage": {
-        "@id": "https://www.veximglobal.com/vi#primaryimage"
+        "@id": "https://www.veximglobal.com/#primaryimage"
       }
     },
     {
       "@type": "ImageObject",
-      "@id": "https://www.veximglobal.com/vi#primaryimage",
+      "@id": "https://www.veximglobal.com/#primaryimage",
       "url": "https://www.veximglobal.com/og-image-vi.jpg",
       "contentUrl": "https://www.veximglobal.com/og-image-vi.jpg",
       "width": 1200,
@@ -165,36 +165,30 @@
     },
     {
       "@type": "Service",
-      "@id": "https://www.veximglobal.com/vi#service",
-      "name": "Hạ tầng số B2B toàn cầu & Tăng tốc xuất khẩu",
-      "serviceType": "Hạ tầng số B2B và SEO theo nhu cầu người mua",
-      "description": "Vexim Global hỗ trợ nhà sản xuất Việt Nam xây dựng website B2B, nội dung theo nhu cầu tìm kiếm của người mua và kết nối với hệ sinh thái Vexim Trade.",
-      "url": "https://www.veximglobal.com/vi",
+      "@id": "https://www.veximglobal.com/#service",
+      "name": "Tìm khách hàng nhập khẩu cho doanh nghiệp thực phẩm Việt Nam",
+      "description": "Vexim Global kết hợp sàn B2B Vexim Trade, SEO quốc tế và thiết kế website xuất khẩu để nhà nhập khẩu tìm thấy doanh nghiệp, xem hồ sơ năng lực và gửi yêu cầu báo giá trực tiếp.",
+      "url": "https://www.veximglobal.com",
       "provider": {
         "@id": "https://www.veximglobal.com/#organization"
       },
       "mainEntityOfPage": {
-        "@id": "https://www.veximglobal.com/vi#webpage"
-      },
-      "audience": {
-        "@type": "BusinessAudience",
-        "audienceType": "Nhà sản xuất Việt Nam tìm kiếm người mua quốc tế"
+        "@id": "https://www.veximglobal.com/#webpage"
       },
       "hasOfferCatalog": {
         "@type": "OfferCatalog",
-        "@id": "https://www.veximglobal.com/vi#offer-catalog",
-        "name": "Phạm vi hợp tác về hạ tầng số xuất khẩu",
+        "@id": "https://www.veximglobal.com/#offer-catalog",
+        "name": "Giải pháp cho doanh nghiệp xuất khẩu thực phẩm",
         "itemListElement": [
           {
             "@type": "Offer",
-            "url": "https://www.veximglobal.com/vi#services",
+            "url": "https://www.veximglobal.com/#trade",
             "itemOffered": {
               "@type": "Service",
-              "@id": "https://www.veximglobal.com/vi#service-core",
-              "name": "B2B Launchpad",
-              "description": "Bước khởi đầu tập trung cho một dòng sản phẩm xuất khẩu.",
-              "serviceType": "Hạ tầng số xuất khẩu",
-              "url": "https://www.veximglobal.com/vi#services",
+              "@id": "https://www.veximglobal.com/#offer-trade",
+              "name": "Vexim Trade",
+              "description": "Gian hàng B2B dành cho doanh nghiệp thực phẩm Việt Nam. Nhà nhập khẩu xem hồ sơ, đối chiếu năng lực cung ứng và gửi yêu cầu báo giá thẳng đến doanh nghiệp.",
+              "url": "https://www.veximglobal.com/#trade",
               "provider": {
                 "@id": "https://www.veximglobal.com/#organization"
               }
@@ -202,14 +196,13 @@
           },
           {
             "@type": "Offer",
-            "url": "https://www.veximglobal.com/vi#services",
+            "url": "https://www.veximglobal.com/#seo",
             "itemOffered": {
               "@type": "Service",
-              "@id": "https://www.veximglobal.com/vi#service-growth",
-              "name": "Global Growth Engine",
-              "description": "Vận hành nội dung, tìm kiếm và tiếp nhận yêu cầu cho danh mục sản phẩm rộng hơn.",
-              "serviceType": "Hạ tầng số xuất khẩu",
-              "url": "https://www.veximglobal.com/vi#services",
+              "@id": "https://www.veximglobal.com/#offer-seo",
+              "name": "SEO quốc tế",
+              "description": "Đưa thông tin nhà cung cấp đến đúng thị trường qua Google và các công cụ tìm kiếm có hỗ trợ AI.",
+              "url": "https://www.veximglobal.com/#seo",
               "provider": {
                 "@id": "https://www.veximglobal.com/#organization"
               }
@@ -217,14 +210,13 @@
           },
           {
             "@type": "Offer",
-            "url": "https://www.veximglobal.com/vi#services",
+            "url": "https://www.veximglobal.com/#website",
             "itemOffered": {
               "@type": "Service",
-              "@id": "https://www.veximglobal.com/vi#service-enterprise",
-              "name": "Enterprise Dominance",
-              "description": "Phạm vi hợp tác theo nhu cầu sản phẩm và thị trường của từng doanh nghiệp.",
-              "serviceType": "Hạ tầng số xuất khẩu",
-              "url": "https://www.veximglobal.com/vi#services",
+              "@id": "https://www.veximglobal.com/#offer-website",
+              "name": "Website xuất khẩu",
+              "description": "Hồ sơ năng lực đa ngôn ngữ, trình bày nhà máy, chứng nhận và đầu mối nhận báo giá rõ ràng.",
+              "url": "https://www.veximglobal.com/#website",
               "provider": {
                 "@id": "https://www.veximglobal.com/#organization"
               }
