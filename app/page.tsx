@@ -4,6 +4,7 @@ import { SITE_URL } from "@/lib/business-profile"
 import { languageUrls } from "@/lib/locale-routes"
 import { VI_HOME_META } from "@/lib/home-i18n"
 import VietnameseLayout from "@/components/home/vietnamese-font"
+import "./landing.css"
 
 /**
  * Trang chủ — tiếng Việt, ở URL gốc. Đây là ngôn ngữ mặc định của site, nên

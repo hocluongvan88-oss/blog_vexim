@@ -46,3 +46,17 @@ Website chỉ còn **một** kênh liên hệ nổi: nút **Zalo OA** (`componen
 - `/services/export-sales` là tài liệu HTML tự dựng (`app/services/export-sales/route.ts`) nên không nạp widget nào — giữ nguyên chủ ý cũ.
 - Nút "Quay lại đầu trang" (`components/back-to-top.tsx`) được nâng lên `bottom-24/28` để không đè lên nút Zalo ở góc phải dưới.
 - Ẩn chat AI **không** ảnh hưởng webhook `/api/webhooks/zalo`, hộp thư `/admin/conversations` hay các API `/api/chat*`.
+
+## CSS và widget theo nhóm route
+
+CSS nay chia theo nhóm route (chi tiết + số đo: `docs/homepage-performance.md`):
+
+- `app/(landing)/layout.tsx` → `app/landing.css` cho `/`, `/en`, `/privacy`, `/en/privacy`.
+- `app/(site)/layout.tsx` → `app/globals.css` cho admin, blog, dịch vụ, cổng khách hàng.
+- `app/page.tsx` (trang chủ tiếng Việt ở URL gốc) import `landing.css`.
+
+Vì vậy **không** import `globals.css` trong root layout nữa. Khi thêm component mới cho landing page,
+thêm đường dẫn vào `@source` trong `app/landing.css`, nếu không class Tailwind của nó sẽ không được sinh.
+
+`components/root-shell.tsx` thay `ClientWidgets` + `Toaster` ở root layout: sonner chỉ mount ở
+`/admin/*` và `/client-portal`, widget Zalo hiện trên trang công khai.

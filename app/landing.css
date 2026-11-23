@@ -1,0 +1,137 @@
+/*
+ * CSS riêng cho các trang landing công khai (`/`, `/en`, `/privacy`,
+ * `/en/privacy`).
+ *
+ * Lý do tách khỏi `app/globals.css`: `globals.css` phải phục vụ cả admin, blog,
+ * 23 trang dịch vụ và cổng khách hàng, nên Tailwind sinh hơn 180 KB CSS (≈29 KB
+ * gzip) và trang chủ phải tải + phân tích toàn bộ khối đó TRƯỚC khi vẽ được chữ
+ * đầu tiên. Trang chủ chỉ dùng các component trong `components/home`,
+ * `components/site-header` và `components/ui` cho hộp thoại tư vấn, nên chỉ
+ * quét đúng những tệp đó. Đo trên Chromium (4G chậm, CPU x4): CSS chặn render
+ * giảm từ ~181 KB xuống ~98 KB thô (~14 KB gzip).
+ *
+ * Khi thêm class Tailwind mới cho landing page, không cần sửa tệp này — chỉ cần
+ * class đó nằm trong các thư mục đã khai báo ở `@source` bên dưới.
+ */
+@import "tailwindcss" source(none);
+/* Chỉ đúng những tệp mà 4 trang landing thật sự render (đã dò theo cây import):
+   components/home/*, site-header và hộp thoại tư vấn + 3 component UI của nó.
+   Khai báo cả thư mục `components/ui` sẽ kéo CSS của toàn bộ 57 component
+   admin/blog vào trang chủ. */
+@source "../components/home";
+@source "../components/site-header.tsx";
+@source "../components/consultation-dialog.tsx";
+@source "../components/root-shell.tsx";
+@source "../components/zalo-chat-button.tsx";
+@source "../components/json-ld.tsx";
+@source "../components/ui/button.tsx";
+@source "../components/ui/dialog.tsx";
+@source "../components/ui/input.tsx";
+@source "../components/ui/sonner.tsx";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+  --primary: #0b2545;
+  --primary-foreground: #ffffff;
+  --secondary: #e8f1fa;
+  --secondary-foreground: #0b2545;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --accent: #0284c7;
+  --accent-foreground: #ffffff;
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.577 0.245 27.325);
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #0284c7;
+  --radius: 0.625rem;
+}
+
+@theme inline {
+  /* `inline` bắt buộc: `--font-sans` trỏ tới biến do next/font sinh ra trên
+     <body>. Xem giải thích chi tiết trong app/globals.css. */
+  --font-sans:
+    var(--font-be-vietnam-pro), "Be Vietnam Pro", system-ui, -apple-system,
+    sans-serif;
+  --color-background: #f8fafc;
+  --color-foreground: #0f172a;
+  --color-card: #ffffff;
+  --color-card-foreground: #0f172a;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #0f172a;
+  --color-primary: #0b2545;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #e8f1fa;
+  --color-secondary-foreground: #0b2545;
+  --color-muted: #f1f5f9;
+  --color-muted-foreground: #64748b;
+  --color-accent: #0284c7;
+  --color-accent-foreground: #ffffff;
+  --color-destructive: oklch(0.55 0.22 25);
+  --color-destructive-foreground: oklch(1 0 0);
+  --color-border: #e2e8f0;
+  --color-input: #e2e8f0;
+  --color-ring: #0284c7;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  *,
+  ::after,
+  ::before {
+    border-color: var(--color-border);
+  }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    max-width: 100vw;
+    width: 100%;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Giữ header dùng chung dính trên cùng: `overflow-x: hidden` khiến body thành
+   scroll container. Xem chú thích đầy đủ trong app/globals.css. */
+body:has([data-site-header]),
+body:has([data-vexim-homepage]) {
+  overflow-x: clip;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:has([data-vexim-homepage]) {
+    scroll-behavior: auto;
+  }
+}
+
+/* Nút Zalo OA: góc phải dưới. Chi tiết ở app/globals.css. */
+[class*="zalo-chat-widget"] {
+  right: 24px !important;
+  left: auto !important;
+  bottom: 24px !important;
+  z-index: 40 !important;
+}
+
+@media (max-width: 640px) {
+  [class*="zalo-chat-widget"] {
+    right: 16px !important;
+    bottom: 16px !important;
+  }
+}

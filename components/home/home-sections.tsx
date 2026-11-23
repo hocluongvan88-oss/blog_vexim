@@ -80,18 +80,24 @@ function Photo({
   name,
   alt,
   sizes = "(max-width: 800px) 92vw, 560px",
+  width = 800,
+  height = 436,
 }: {
   name: string;
   alt: string;
   sizes?: string;
+  width?: number;
+  height?: number;
 }) {
   return (
+    // srcSet có thêm bản 480w: thẻ cột hẹp trên mobile trước đây vẫn tải ảnh
+    // 800px (Lighthouse: "Ảnh chưa đúng kích thước", ~18 KB thừa mỗi ảnh).
     <img
       src={`/home/${name}-800.webp`}
-      srcSet={`/home/${name}-800.webp 800w, /home/${name}.webp 1200w`}
+      srcSet={`/home/${name}-480.webp 480w, /home/${name}-800.webp 800w, /home/${name}.webp 1200w`}
       sizes={sizes}
-      width={800}
-      height={436}
+      width={width}
+      height={height}
       alt={alt}
       loading="lazy"
       decoding="async"
@@ -540,7 +546,13 @@ export function ProjectsAndNews({ locale }: Props) {
                 href={`/blog/category/${encodeURIComponent(topics[i])}`}
                 key={tag}
               >
-                <Photo name={photos[i]} alt="" />
+                <Photo
+                  name={photos[i]}
+                  alt=""
+                  width={480}
+                  height={262}
+                  sizes="(max-width: 620px) 92vw, (max-width: 1020px) 46vw, 300px"
+                />
                 <div>
                   <span className={s.eyebrow}>{tag}</span>
                   <h3>{title}</h3>
