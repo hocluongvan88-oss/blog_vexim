@@ -10,14 +10,10 @@ import {
   Globe,
   LogOut,
   User,
-  Newspaper,
   BarChart3,
   MessageCircle,
   Brain,
-  ClipboardCheck,
   Timer,
-  Shield,
-  Users,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -109,26 +105,6 @@ export function AdminSidebar({ adminUser }: AdminSidebarProps) {
       title: "Tạo bài viết mới",
       href: "/admin/posts/new",
       icon: PlusCircle,
-    },
-    {
-      title: "Tin tức FDA/GACC",
-      href: "/admin/news-crawler",
-      icon: Newspaper,
-    },
-    {
-      title: "Hồ sơ đăng ký GACC",
-      href: "/admin/gacc-submissions",
-      icon: ClipboardCheck,
-    },
-    {
-      title: "Quản lý Khách hàng",
-      href: "/admin/clients",
-      icon: Users,
-    },
-    {
-      title: "Quản lý đăng ký FDA",
-      href: "/admin/fda-registrations",
-      icon: Shield,
     },
     {
       title: "Cron Job Monitor",

@@ -36,12 +36,6 @@ const categoryToServices: Record<string, Array<{
       href: "/services/gacc",
       icon: Globe,
     },
-    {
-      title: "Đánh giá GACC",
-      description: "Kiểm tra mức độ sẵn sàng đăng ký GACC của doanh nghiệp",
-      href: "/services/gacc/assessment",
-      icon: FileCheck,
-    },
   ],
   "MFDS": [
     {

@@ -10,7 +10,6 @@ const base = "https://www.veximglobal.com"
 const hostile = '<img src=x onerror="alert(1)"> & Nguyễn'
 const email = 'khachhang+fda@example.com'
 const consultation = { name: hostile, phone: '0373685634', email, serviceName: hostile, product: hostile, description: hostile + '\nDòng thứ hai' }
-const gacc = { companyName: hostile, productName: hostile, hsCode: '1234', submissionId: 'test-id', submittedAt: '15/10/2026', email, phone: '0373685634', taxCode: hostile }
 
 // Mock only external dependencies; exercise the actual transpiled service/route code.
 function loadModule(file, mocks) {
@@ -26,9 +25,6 @@ function loadModule(file, mocks) {
 try {
   const cases = [
     T.getConsultationCustomerHTML(consultation), T.getConsultationAdminHTML(consultation),
-    T.getGACCUserConfirmationHTML(gacc), T.getGACCAdminNotificationHTML(gacc),
-    T.getFdaRenewalReminderHTML({ companyName: hostile, contactName: hostile, registrationType: hostile, expirationDate: '31/12/2026', monthsBefore: 2 }),
-    T.getAgentRenewalReminderHTML({ companyName: hostile, contactName: hostile, contractEndDate: '31/12/2026' }),
   ]
   for (const html of cases) {
     const $ = load(html)
@@ -61,9 +57,9 @@ try {
   assert.equal(captured.to, email)
   console.log('PASS: Zoho sender reports delivery failure rather than success')
   const previews = readdirSync('public/email-preview').filter(name => name.endsWith('.html') && name !== 'index.html')
-  assert.equal(previews.length, 6)
+  assert.equal(previews.length, 2)
   for (const name of previews) assert.ok(readFileSync(`public/email-preview/${name}`, 'utf8').includes(T.BRAND_SLOGAN))
-  console.log('PASS: all 6 generated previews match the shared slogan')
+  console.log('PASS: all 2 generated previews match the shared slogan')
 } finally {
   cleanup()
 }

@@ -13,7 +13,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { 
   Building2, FileText, LogOut, Calendar, AlertCircle, CheckCircle2, 
   Clock, Shield, Mail, Phone, User, Eye, EyeOff, 
-  Download, HelpCircle, Newspaper, ExternalLink,
+  Download, HelpCircle, ExternalLink,
   CheckCircle, LayoutDashboard, FolderOpen, Headphones, ChevronRight,
   Bell, TrendingUp, ArrowRight, Home
 } from "lucide-react"
@@ -55,19 +55,6 @@ interface FDARegistration {
   us_agent_name?: string
 }
 
-interface NewsItem {
-  id: string
-  source: string
-  title: string
-  summary: string
-  articleUrl: string
-  publishedDate: string
-  relevance: string
-  categories: string[]
-  aiAnalysis?: any
-  createdAt: string
-}
-
 interface ClientDocument {
   id: string
   title: string
@@ -85,7 +72,7 @@ interface ClientDocument {
   }
 }
 
-type TabType = "overview" | "news" | "documents" | "support"
+type TabType = "overview" | "documents" | "support"
 
 export default function ClientPortal() {
   const router = useRouter()
@@ -93,11 +80,9 @@ export default function ClientPortal() {
   const [isLoading, setIsLoading] = useState(true)
   const [clientData, setClientData] = useState<ClientData | null>(null)
   const [registrations, setRegistrations] = useState<FDARegistration[]>([])
-  const [news, setNews] = useState<NewsItem[]>([])
   const [documents, setDocuments] = useState<ClientDocument[]>([])
   const [activeTab, setActiveTab] = useState<TabType>("overview")
   const [showPassword, setShowPassword] = useState(false)
-  const [unreadNewsCount, setUnreadNewsCount] = useState(0)
 
   // Login state
   const [loginEmail, setLoginEmail] = useState("")
@@ -111,7 +96,6 @@ export default function ClientPortal() {
   useEffect(() => {
     if (isLoggedIn) {
       loadClientData()
-      loadNews()
       loadDocuments()
     }
   }, [isLoggedIn])
@@ -140,18 +124,6 @@ export default function ClientPortal() {
       }
     } catch (error) {
       console.error("Error loading registrations:", error)
-    }
-  }
-
-  const loadNews = async () => {
-    try {
-      const response = await fetch("/api/client-auth/news")
-      if (response.ok) {
-        const data = await response.json()
-        setNews(data.news || [])
-      }
-    } catch (error) {
-      console.error("Error loading news:", error)
     }
   }
 
@@ -200,7 +172,6 @@ export default function ClientPortal() {
       setIsLoggedIn(false)
       setClientData(null)
       setRegistrations([])
-      setNews([])
       setDocuments([])
       toast.success("Da dang xuat")
       router.push("/")
@@ -394,7 +365,6 @@ export default function ClientPortal() {
   // Dashboard - Modern sidebar layout
   const navItems = [
     { id: "overview" as TabType, label: "Tong quan", icon: LayoutDashboard },
-    { id: "news" as TabType, label: "Tin tuc FDA", icon: Newspaper, badge: unreadNewsCount },
     { id: "documents" as TabType, label: "Tai lieu", icon: FolderOpen },
     { id: "support" as TabType, label: "Ho tro", icon: Headphones },
   ]
@@ -747,83 +717,6 @@ export default function ClientPortal() {
                   </div>
                 )}
               </div>
-            </div>
-          )}
-
-          {/* News Tab */}
-          {activeTab === "news" && (
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900 mb-1">Tin tuc & Canh bao FDA</h2>
-                <p className="text-sm text-gray-500">Cap nhat moi nhat tu FDA lien quan den san pham cua ban</p>
-              </div>
-
-              {news.length === 0 ? (
-                <Card className="border-0 shadow-sm">
-                  <CardContent className="py-16">
-                    <div className="text-center">
-                      <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
-                        <Newspaper className="w-8 h-8 text-gray-400" />
-                      </div>
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">Chua co tin tuc moi</h3>
-                      <p className="text-gray-500">Chung toi se thong bao khi co tin tuc moi lien quan</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="grid gap-4">
-                  {news.map((item) => (
-                    <Card key={item.id} className="border-0 shadow-sm hover:shadow-md transition-shadow">
-                      <CardContent className="p-6">
-                        <div className="flex items-start gap-4">
-                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                            item.relevance === "high" ? "bg-red-100" : "bg-blue-100"
-                          }`}>
-                            <Newspaper className={`w-5 h-5 ${
-                              item.relevance === "high" ? "text-red-600" : "text-blue-600"
-                            }`} />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex flex-wrap items-center gap-2 mb-2">
-                              <Badge variant="outline" className="text-xs">
-                                {item.source}
-                              </Badge>
-                              <Badge className={`text-xs border-0 ${
-                                item.relevance === "high" 
-                                  ? "bg-red-100 text-red-700" 
-                                  : "bg-orange-100 text-orange-700"
-                              }`}>
-                                {item.relevance === "high" ? "Quan trong" : "Trung binh"}
-                              </Badge>
-                              {item.categories?.slice(0, 2).map((cat) => (
-                                <Badge key={cat} variant="secondary" className="text-xs">
-                                  {cat}
-                                </Badge>
-                              ))}
-                            </div>
-                            <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">{item.title}</h3>
-                            <p className="text-sm text-gray-500 mb-3 line-clamp-2">{item.summary}</p>
-                            <div className="flex items-center gap-4 text-sm">
-                              <span className="text-gray-400">
-                                {new Date(item.publishedDate).toLocaleDateString("vi-VN")}
-                              </span>
-                              <a
-                                href={item.articleUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-1 text-emerald-600 hover:text-emerald-700 font-medium"
-                              >
-                                Xem chi tiet
-                                <ExternalLink className="w-3 h-3" />
-                              </a>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
             </div>
           )}
 
