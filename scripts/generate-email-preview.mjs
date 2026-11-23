@@ -15,17 +15,6 @@ const { templates: T, cleanup } = loadEmailTemplates()
 const EMAIL = "nguoidung@example.com"
 const BASE = "https://www.veximglobal.com"
 
-const gaccParams = {
-  companyName: "Công ty TNHH Thực phẩm An Việt",
-  productName: "Cá basa phi lê đông lạnh",
-  hsCode: "0303.54.90",
-  submissionId: "a1b2c3d4e5f6a7b8",
-  submittedAt: "19/09/2026 14:30",
-  email: "xuatkhau@example.com",
-  phone: "0912 345 678",
-  taxCode: "0101 234 567",
-}
-
 const consultationParams = {
   name: "Nguyễn Thu Hà",
   phone: "0934 567 890",
@@ -37,47 +26,13 @@ const consultationParams = {
 
 const pages = [
   {
-    file: "01-xac-nhan-ho-so-gacc",
-    title: "1. Xác nhận hồ sơ GACC (khách hàng)",
-    html: T.getGACCUserConfirmationHTML(gaccParams),
-  },
-  {
-    file: "02-thong-bao-gacc-admin",
-    title: "2. Thông báo hồ sơ GACC mới (admin)",
-    html: T.getGACCAdminNotificationHTML(gaccParams),
-  },
-  {
-    file: "03-nhac-no-gia-han-fda",
-    title: "3. Nhắc nhở gia hạn đăng ký FDA",
-    html: T.getFdaRenewalReminderHTML({
-      companyName: gaccParams.companyName,
-      contactName: "Trần Quốc Bảo",
-      registrationType: "Cơ sở sản xuất thực phẩm",
-      registrationNumber: "D-1234567",
-      expirationDate: "15/01/2027",
-      monthsBefore: 4,
-    }),
-  },
-  {
-    file: "04-nhac-no-gia-han-us-agent",
-    title: "4. Nhắc nhở gia hạn US Agent",
-    html: T.getAgentRenewalReminderHTML({
-      companyName: gaccParams.companyName,
-      contactName: "Trần Quốc Bảo",
-      agentCompanyName: "US Trade Partners LLC",
-      agentName: "Ms. Linda Parker",
-      contractEndDate: "15/01/2027",
-      contractYears: 1,
-    }),
-  },
-  {
-    file: "05-xac-nhan-tu-van-khach-hang",
-    title: "5. Xác nhận đăng ký tư vấn (khách hàng)",
+    file: "01-xac-nhan-tu-van-khach-hang",
+    title: "1. Xác nhận đăng ký tư vấn (khách hàng)",
     html: T.getConsultationCustomerHTML(consultationParams),
   },
   {
-    file: "06-thong-cao-lead-moi-admin",
-    title: "6. Lead mới từ website (admin)",
+    file: "02-thong-cao-lead-moi-admin",
+    title: "2. Lead mới từ website (admin)",
     html: T.getConsultationAdminHTML(consultationParams),
   },
 ]

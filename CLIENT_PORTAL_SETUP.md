@@ -4,10 +4,9 @@ Hệ thống quản lý khách hàng và cổng thông tin cho khách hàng xem 
 
 ## Tổng quan
 
-Hệ thống bao gồm 2 phần chính:
+Hệ thống hiện chỉ còn **Client Portal**: khách hàng đăng nhập để xem thông tin FDA registrations và tài liệu của họ.
 
-1. **Admin Client Management**: Admin tạo và quản lý tài khoản khách hàng
-2. **Client Portal**: Khách hàng đăng nhập để xem thông tin FDA registrations của họ
+> **Đã gỡ (11/2026):** các trang quản trị `/admin/clients`, `/admin/fda-registrations`, `/admin/gacc-submissions`, `/admin/news-crawler` cùng API `/api/clients*`, `/api/fda-registrations*`, `/api/gacc*`, `/api/news*` và cron gửi email nhắc hạn FDA. Tài khoản khách hàng nay tạo trực tiếp bằng SQL (xem `scripts/create_client_manual.mjs`), dữ liệu vẫn nằm trong Supabase.
 
 ## Database Schema
 
@@ -43,33 +42,17 @@ psql -h your-db-host -U your-user -d your-db -f scripts/023_create_client_accoun
 
 #### Tạo tài khoản khách hàng mới
 
-Admin có thể tạo client account thông qua trang `/admin/clients`:
+Trang quản trị đã bị gỡ, nên tài khoản khách hàng được tạo trực tiếp trong database bằng script sinh hash mật khẩu:
 
+\`\`\`bash
+node scripts/create_client_manual.mjs
 \`\`\`
-POST /api/clients
-{
-  "email": "client@example.com",
-  "password": "secure_password",
-  "company_name": "ABC Company",
-  "contact_name": "John Doe",
-  "phone": "+84123456789",
-  "address": "123 Main St, Ho Chi Minh City"
-}
-\`\`\`
+
+Script in ra câu `INSERT INTO clients (...)` với `password_hash` (scrypt) để chạy trên Supabase SQL editor.
 
 #### Liên kết FDA Registration với Client
 
-Khi tạo hoặc cập nhật FDA registration, thêm `client_id`:
-
-\`\`\`
-POST /api/fda-registrations
-{
-  "client_id": "uuid-of-client",
-  "company_name": "ABC Company",
-  "fda_registration_number": "12345678",
-  // ... other fields
-}
-\`\`\`
+Cập nhật trực tiếp cột `client_id` của bảng `fda_registrations` trong Supabase SQL editor. Không còn API quản trị nào ghi vào bảng này.
 
 ### 3. Client Portal Access
 
@@ -120,19 +103,9 @@ Sau khi đăng nhập, khách hàng có thể:
 
 ## API Endpoints
 
-### Admin APIs (Requires Admin Auth)
+### Admin APIs
 
-#### Client Management
-- `GET /api/clients` - List all clients
-- `POST /api/clients` - Create new client
-- `GET /api/clients/[id]` - Get client details
-- `PATCH /api/clients/[id]` - Update client
-- `DELETE /api/clients/[id]` - Delete client
-
-#### FDA Registration Management
-- `GET /api/fda-registrations` - List registrations (can filter by client_id)
-- `POST /api/fda-registrations` - Create registration (include client_id)
-- `PATCH /api/fda-registrations/[id]` - Update registration
+Không còn API quản trị khách hàng/đăng ký FDA (đã gỡ cùng các trang `/admin/clients` và `/admin/fda-registrations`).
 
 ### Client APIs (Requires Client Auth)
 
@@ -141,8 +114,9 @@ Sau khi đăng nhập, khách hàng có thể:
 - `POST /api/client-auth/logout` - Logout
 - `GET /api/client-auth/me` - Get current client info
 
-#### View Registrations
-- `GET /api/fda-registrations?client=me` - Get own registrations only
+#### View Registrations & Documents
+- `GET /api/client-auth/registrations` - Danh sách đăng ký FDA của chính khách hàng
+- `GET /api/client-auth/documents` - Tài liệu/chứng nhận của chính khách hàng
 
 ## Security Features
 
@@ -171,27 +145,11 @@ Sau khi đăng nhập, khách hàng có thể:
 
 ### Auto Reminders
 
-Cron job chạy hàng ngày (`/api/fda-registrations/send-reminders`):
+Cron nhắc hạn tự động (`/api/fda-registrations/send-reminders` + `vercel-cron.json`), hai email nhắc hạn FDA/US Agent (`lib/email-fda-registration.tsx`) **đã bị gỡ** (11/2026) cùng trang quản lý đăng ký FDA. Việc nhắc hạn hiện do chuyên viên thực hiện thủ công; nếu cần bật lại, phải dựng lại API + template và thêm lại cron.
 
-1. **FDA Registration Reminders**
-   - Gửi 180 ngày trước (6 tháng)
-   - Gửi 90 ngày trước (3 tháng)
-   - Gửi 30 ngày trước (1 tháng)
-   - Gửi khi hết hạn
+### Email Templates còn dùng
 
-2. **US Agent Reminders**
-   - Động theo số năm hợp đồng (1-5+ năm)
-   - Nhắc trước 90 ngày
-   - Nhắc trước 30 ngày
-   - Nhắc khi hết hạn
-
-### Email Templates
-
-Emails bao gồm:
-- Thông tin registration sắp hết hạn
-- Link đến client portal
-- Contact information
-- Call-to-action để gia hạn
+- `lib/email-consultation.tsx` — xác nhận yêu cầu tư vấn cho khách + thông báo lead mới cho admin
 
 ### Zalo Integration (Optional)
 

@@ -2,7 +2,7 @@
  * Danh sách URL công khai của site — nguồn dùng chung cho sitemap.xml.
  *
  * Lý do tồn tại: trước đây `app/sitemap.ts` chỉ liệt kê 7 trang dịch vụ, bỏ sót
- * gần 20 trang dịch vụ thật (/services/food/*, /services/cosmetics/*, /services/gacc/assessment,
+ * gần 20 trang dịch vụ thật (/services/food/*, /services/cosmetics/*,
  * /services/fsvp, /services/fda-label-check, /services/llc-ein).
  * Các trang này vẫn được Google tìm thấy qua liên kết nội bộ, nhưng thiếu trong sitemap
  * khiến tốc độ phát hiện/đánh giá lại chậm hơn và Search Console khó đối soát.
@@ -51,9 +51,6 @@ export const STATIC_ROUTES: StaticRoute[] = [
   { path: "/services/cosmetics/responsible-person", priority: 0.7, changeFrequency: "monthly" },
   { path: "/services/cosmetics/ingredient-review", priority: 0.7, changeFrequency: "monthly" },
   { path: "/services/cosmetics/label-compliance", priority: 0.7, changeFrequency: "monthly" },
-
-  // Dịch vụ GACC (Trung Quốc)
-  { path: "/services/gacc/assessment", priority: 0.7, changeFrequency: "monthly" },
 ]
 
 /**

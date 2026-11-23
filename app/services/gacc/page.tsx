@@ -49,13 +49,18 @@ export default function GACCPage() {
                 cùng bạn để lấy mã nhanh nhất, tránh mọi rủi ro bị từ chối.
               </p>
               <div className="flex flex-wrap gap-4">
-                <Link href="/services/gacc/assessment">
-                  <Button size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90">
-                    <FileCheck className="mr-2 w-5 h-5" />
-                    Đánh giá hồ sơ miễn phí
-                  </Button>
-                </Link>
+                {/* Trang đánh giá hồ sơ GACC đã bị gỡ; nút này nay mở hộp thoại tư vấn. */}
                 <ConsultationDialog
+                  defaultService="GACC"
+                  trigger={
+                    <Button size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90">
+                      <FileCheck className="mr-2 w-5 h-5" />
+                      Đánh giá hồ sơ miễn phí
+                    </Button>
+                  }
+                />
+                <ConsultationDialog
+                  defaultService="GACC"
                   trigger={
                     <Button size="lg" variant="outline">
                       Tư vấn miễn phí <ArrowRight className="ml-2 w-5 h-5" />
