@@ -10,11 +10,31 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  /*
+   * Ảnh/font trong /public được Next phục vụ với `Cache-Control: public, max-age=0`
+   * (buộc trình duyệt hỏi lại bằng ETag mỗi lần). Lighthouse xếp cả trang chủ vào
+   * nhóm "bộ nhớ đệm hiệu dụng ngắn" (~773 KiB) và khách quay lại phải chờ một
+   * vòng 304 cho từng ảnh. Các tệp dưới đây là nội dung tĩnh đã đóng băng, nên
+   * cho cache dài.
+   *
+   * Khi thay ảnh mà giữ nguyên tên tệp, phải đổi tên tệp — nếu không trình duyệt
+   * cũ sẽ tiếp tục dùng bản cũ tới 1 năm.
+   */
   async headers() {
+    const immutable = [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }]
     return [
-      { source: "/trade/images/:asset(.*[.]webp)", headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }] },
-      { source: "/trade/fonts/:asset(.*[.]woff2)", headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }] },
-      { source: "/trade/:asset(trade[.][a-f0-9]+[.]js)", headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }] },
+      { source: "/trade/images/:asset(.*[.]webp)", headers: immutable },
+      { source: "/trade/fonts/:asset(.*[.]woff2)", headers: immutable },
+      { source: "/trade/:asset(trade[.][a-f0-9]+[.]js)", headers: immutable },
+      { source: "/home/:path*", headers: immutable },
+      { source: "/images/:path*", headers: immutable },
+      { source: "/fonts/:path*", headers: immutable },
+      // `og-image.jpg`, `og-image-vi.jpg`, `og-image-en.jpg`… (route source của
+      // Next không nhận capture group).
+      { source: "/og-image.jpg", headers: immutable },
+      { source: "/og-image-vi.jpg", headers: immutable },
+      { source: "/og-image-en.jpg", headers: immutable },
+      { source: "/apple-touch-icon.png", headers: immutable },
     ]
   },
   async redirects() {

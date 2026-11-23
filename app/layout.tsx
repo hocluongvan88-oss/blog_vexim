@@ -3,9 +3,7 @@ import type { Metadata } from "next"
 import localFont from "next/font/local"
 import { headers } from "next/headers"
 import { Analytics } from "@vercel/analytics/next"
-import "./globals.css"
-import { ClientWidgets } from "@/components/client-widgets"
-import { Toaster } from "@/components/ui/sonner"
+import { RootShell } from "@/components/root-shell"
 import { JsonLd } from "@/components/json-ld"
 import { buildSiteSchema } from "@/lib/schema"
 import { SITE_ICONS } from "@/lib/site-icons"
@@ -97,6 +95,14 @@ export const metadata: Metadata = {
  *  - contactPoint chỉ có contactType, không có số điện thoại/email nào để liên hệ.
  * Cả ba nay lấy từ `lib/business-profile.ts` — cùng nguồn với footer.
  */
+/*
+ * CSS được chia theo nhóm route, không import ở đây:
+ *   - `app/(landing)/layout.tsx` → `landing.css` (chỉ quét component landing)
+ *   - `app/(site)/layout.tsx`    → `globals.css` (Tailwind toàn site)
+ *   - `app/page.tsx`             → `landing.css` (trang chủ tiếng Việt)
+ * Trước đây `globals.css` nằm ở root layout nên trang chủ phải tải ~181 KB CSS
+ * của cả admin/blog/dịch vụ trước khi vẽ chữ đầu tiên.
+ */
 const siteSchema = buildSiteSchema()
 
 export default async function RootLayout({
@@ -114,10 +120,9 @@ export default async function RootLayout({
       <body className={`${beVietnamPro.variable} ${publicLanding ? "" : "font-sans"} antialiased`}>
         {/* Một khối @graph duy nhất: Organization, Logo và WebSite tham chiếu nhau được */}
         <JsonLd id="site-schema" data={siteSchema} />
-        {children}
-        <ClientWidgets />
-        {/* Toaster của sonner: trước đây không được mount nên mọi toast() đều bị "câm" */}
-        <Toaster richColors closeButton position="top-right" />
+        {/* RootShell: Toaster (sonner) chỉ mount ở admin/cổng khách hàng, widget
+            Zalo cho trang công khai — xem components/root-shell.tsx. */}
+        <RootShell>{children}</RootShell>
         {process.env.VERCEL === "1" && <Analytics />}
       </body>
     </html>

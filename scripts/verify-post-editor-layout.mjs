@@ -72,7 +72,7 @@ try {
   // Keep the frame consistent with the production admin layout, without
   // executing its server-side authentication against a real database.
   assert.match(
-    readFileSync(path.join(root, "app/admin/(dashboard)/layout.tsx"), "utf8"),
+    readFileSync(path.join(root, "app/(site)/admin/(dashboard)/layout.tsx"), "utf8"),
     /className="min-w-0 flex-1 w-full"/,
   )
   server = createServer(async (req, res) => {

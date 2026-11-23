@@ -1,8 +1,8 @@
 // Isolated browser harness for the real client pages. No auth bypass or test
 // route is added to app/. All API responses are served by the local test runner.
 import { createRoot } from "react-dom/client"
-import NewPostPage from "@/app/admin/(dashboard)/posts/new/page"
-import EditPostPage from "@/app/admin/(dashboard)/posts/[id]/edit/page"
+import NewPostPage from "@/app/(site)/admin/(dashboard)/posts/new/page"
+import EditPostPage from "@/app/(site)/admin/(dashboard)/posts/[id]/edit/page"
 ;(window as any).__navigations = []
 const params = Promise.resolve({ id: "layout-fixture" })
 createRoot(document.getElementById("root")!).render(
